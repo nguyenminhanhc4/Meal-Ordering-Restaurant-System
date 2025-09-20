@@ -1,5 +1,6 @@
 package org.example.backend.controller;
 
+import org.example.backend.dto.Response;
 import org.example.backend.dto.UserDTO;
 import org.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,21 +53,5 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(new Response<>("success", null, "User deleted successfully"));
-    }
-
-    private static class Response<T> {
-        private final String status;
-        private final T data;
-        private final String message;
-
-        public Response(String status, T data, String message) {
-            this.status = status;
-            this.data = data;
-            this.message = message;
-        }
-
-        public String getStatus() { return status; }
-        public T getData() { return data; }
-        public String getMessage() { return message; }
     }
 }

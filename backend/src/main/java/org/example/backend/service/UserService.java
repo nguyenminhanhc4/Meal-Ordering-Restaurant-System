@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -78,6 +80,18 @@ public class UserService {
         return convertToDTO(user);
     }
 
+    public UserDTO getUserByPublicId(String publicId) {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
+        return convertToDTO(user);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return convertToDTO(user);
+    }
+
     public UserDTO updateUser(Long id, UserDTO userDTO) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -111,6 +125,95 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(user);
+    }
+
+    public UserDTO createStaff(UserDTO userDTO) {
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setPublicId(UUID.randomUUID().toString());
+        user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
+        user.setAvatarUrl(userDTO.getAvatarUrl());
+
+        Param role = paramRepository.findByTypeAndCode("ROLE", "STAFF")
+                .orElseThrow(() -> new ResourceNotFoundException("Role STAFF not found"));
+        user.setRole(role);
+
+        Param status = paramRepository.findByTypeAndCode("STATUS", "ACTIVE")
+                .orElseThrow(() -> new ResourceNotFoundException("Status ACTIVE not found"));
+        user.setStatus(status);
+
+        if (userDTO.getGenderId() != null) {
+            Param gender = paramRepository.findById(userDTO.getGenderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+            user.setGender(gender);
+        }
+
+        userRepository.save(user);
+        return convertToDTO(user);
+    }
+
+    public List<UserDTO> getAllStaff() {
+        return userRepository.findByRoleCode("STAFF")
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public UserDTO updateUserByPublicId(String publicId, UserDTO userDTO) {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
+        user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
+        user.setAvatarUrl(userDTO.getAvatarUrl());
+
+        if (userDTO.getRoleId() != null) {
+            Param role = paramRepository.findById(userDTO.getRoleId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + userDTO.getRoleId()));
+            user.setRole(role);
+        }
+
+        if (userDTO.getGenderId() != null) {
+            Param gender = paramRepository.findById(userDTO.getGenderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+            user.setGender(gender);
+        }
+
+        if (userDTO.getStatusId() != null) {
+            Param status = paramRepository.findById(userDTO.getStatusId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + userDTO.getStatusId()));
+            user.setStatus(status);
+        }
+
+        userRepository.save(user);
+        return convertToDTO(user);
+    }
+
+    public void deleteUserByPublicId(String publicId) {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
+        userRepository.delete(user);
+    }
+
+    public UserDTO updateUserByEmail(String email, UserDTO userDTO) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
+        user.setAvatarUrl(userDTO.getAvatarUrl());
+
+        if (userDTO.getGenderId() != null) {
+            Param gender = paramRepository.findById(userDTO.getGenderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+            user.setGender(gender);
+        }
+
+        userRepository.save(user);
+        return convertToDTO(user);
     }
 
     private UserDTO convertToDTO(User user) {
