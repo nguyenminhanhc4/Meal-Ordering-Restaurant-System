@@ -1,8 +1,10 @@
 package org.example.backend.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.dto.UserDTO;
 import org.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +26,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletResponse response) {
         try {
             String token = userService.login(userDTO.getEmail(), userDTO.getPassword());
+
+            // Set JWT vào HttpOnly cookie
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .httpOnly(true)
+                    .secure(false) // true nếu chạy HTTPS
+                    .path("/")
+                    .maxAge(24 * 60 * 60) // 1 ngày
+                    .sameSite("Lax")
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
             return ResponseEntity.ok(new Response<>("success", token, "Login successful"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
