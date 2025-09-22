@@ -1,5 +1,3 @@
-dbdiagram.io format this
-- Bảng tham chiếu trạng thái/role/giới tính...
   CREATE TABLE params (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   type VARCHAR(50) NOT NULL, -- Ví dụ: ROLE, ORDER_STATUS, GENDER
@@ -8,7 +6,6 @@ dbdiagram.io format this
   UNIQUE(type, code)
   );
 
-- Người dùng
 CREATE TABLE users (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        public_id CHAR(36) NOT NULL UNIQUE,
@@ -26,7 +23,6 @@ CREATE TABLE users (
                        FOREIGN KEY (status_id) REFERENCES params(id)
 );
 
-- Nhân viên (có thể join với users)
 CREATE TABLE staff (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        user_id BIGINT NOT NULL UNIQUE,
@@ -37,7 +33,6 @@ CREATE TABLE staff (
                        FOREIGN KEY (position_id) REFERENCES params(id)
 );
 
-- Danh mục món ăn
 CREATE TABLE categories (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             name VARCHAR(100) NOT NULL UNIQUE,
@@ -46,7 +41,6 @@ CREATE TABLE categories (
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-- Món ăn
 CREATE TABLE menu_items (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             name VARCHAR(150) NOT NULL,
@@ -61,7 +55,6 @@ CREATE TABLE menu_items (
                             FOREIGN KEY (status_id) REFERENCES params(id) ON DELETE RESTRICT
 );
 
-- Kho món ăn / nguyên liệu
 CREATE TABLE inventory (
                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
                            menu_item_id BIGINT NOT NULL,
@@ -70,7 +63,6 @@ CREATE TABLE inventory (
                            FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
 );
 
-- Giỏ hàng
 CREATE TABLE carts (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        user_id BIGINT NOT NULL,
@@ -81,7 +73,6 @@ CREATE TABLE carts (
                        FOREIGN KEY (status_id) REFERENCES params(id) ON DELETE RESTRICT
 );
 
-- Chi tiết giỏ hàng
 CREATE TABLE cart_items (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             cart_id BIGINT NOT NULL,
@@ -93,7 +84,6 @@ CREATE TABLE cart_items (
                             CONSTRAINT chk_cart_items_quantity CHECK (quantity > 0)
 );
 
-- Đơn hàng
 CREATE TABLE orders (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
                         public_id CHAR(36) NOT NULL UNIQUE,
@@ -106,7 +96,6 @@ CREATE TABLE orders (
                         FOREIGN KEY (status_id) REFERENCES params(id) ON DELETE RESTRICT
 );
 
-- Chi tiết đơn hàng
 CREATE TABLE order_items (
                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
                              order_id BIGINT NOT NULL,
@@ -119,7 +108,6 @@ CREATE TABLE order_items (
                              CONSTRAINT chk_order_items_quantity CHECK (quantity > 0)
 );
 
-- Thông tin thanh toán
 CREATE TABLE payments (
                           id BIGINT AUTO_INCREMENT PRIMARY KEY,
                           order_id BIGINT NOT NULL UNIQUE,
@@ -134,7 +122,6 @@ CREATE TABLE payments (
                           FOREIGN KEY (status_id) REFERENCES params(id)
 );
 
-- Bàn
 CREATE TABLE tables (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(50) NOT NULL, -- Tên bàn (VD: Bàn 1, Bàn VIP)
@@ -147,7 +134,6 @@ CREATE TABLE tables (
                         FOREIGN KEY (location_id) REFERENCES params(id)
 );
 
-- Đặt bàn
 CREATE TABLE reservations (
                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
                               public_id CHAR(36) NOT NULL UNIQUE,
@@ -162,7 +148,6 @@ CREATE TABLE reservations (
                               FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE RESTRICT
 );
 
-- Đánh giá món ăn
 CREATE TABLE reviews (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          user_id BIGINT NOT NULL,
@@ -176,7 +161,6 @@ CREATE TABLE reviews (
                          UNIQUE(user_id, menu_item_id)
 );
 
-- Báo cáo thống kê (có thể dùng để cache dữ liệu phân tích)
 CREATE TABLE reports (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          type VARCHAR(50) NOT NULL, -- SALES, INVENTORY, ...
