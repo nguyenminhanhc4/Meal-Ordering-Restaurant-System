@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Spinner, Button, Label, TextInput } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
+import { HiEye, HiEyeOff } from "react-icons/hi";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
@@ -15,6 +18,10 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid email format.";
+    }
 
     if (!email.includes("@")) {
       newErrors.email = "Please enter a valid email.";
@@ -28,6 +35,7 @@ export default function LoginForm() {
 
     if (Object.keys(newErrors).length === 0) {
       try {
+        setLoading(true);
         // Gọi API login
         const response = await api.post(
           "/auth/login",
@@ -45,6 +53,8 @@ export default function LoginForm() {
         } else {
           console.error("Unexpected error:", error);
         }
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -60,9 +70,10 @@ export default function LoginForm() {
           </Label>
           <TextInput
             id="email"
-            type="email"
+            type="text"
             placeholder="Enter your email"
             required
+            color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-stone-700 text-white border-stone-600"
@@ -73,19 +84,27 @@ export default function LoginForm() {
         </div>
 
         {/* Password */}
-        <div>
+        <div className="relative">
           <Label htmlFor="password" className="text-gray-100">
             Password
           </Label>
           <TextInput
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             required
+            maxLength={20}
+            color={errors.password ? "failure" : "gray"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="bg-stone-700 text-white border-stone-600"
           />
+          <button
+            type="button"
+            className="absolute inset-y-11 right-0 flex items-center pr-3 text-gray-300 hover:text-white"
+            onClick={() => setShowPassword((prev) => !prev)}>
+            {showPassword ? <HiEye size={20} /> : <HiEyeOff size={20} />}
+          </button>
           {errors.password && (
             <p className="text-red-400 text-sm mt-1">{errors.password}</p>
           )}
@@ -95,8 +114,10 @@ export default function LoginForm() {
         <Button
           type="submit"
           className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white hover:opacity-90"
+          disabled={loading}
           fullSized>
-          Login
+          {loading && <Spinner size="sm" light={true} />}
+          {loading ? "Login..." : "Login"}
         </Button>
       </form>
 

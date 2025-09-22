@@ -11,6 +11,6 @@ public class UserDTO {
     private String password;
     private String avatarUrl;
     private Long roleId;
-    private Long genderId;
+    private String gender;
     private Long statusId;
 }

@@ -1,6 +1,7 @@
 package org.example.backend.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.backend.dto.Response;
 import org.example.backend.dto.UserDTO;
 import org.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +45,5 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
         }
-    }
-
-    private static class Response<T> {
-        private String status;
-        private T data;
-        private String message;
-
-        public Response(String status, T data, String message) {
-            this.status = status;
-            this.data = data;
-            this.message = message;
-        }
-
-        public String getStatus() { return status; }
-        public T getData() { return data; }
-        public String getMessage() { return message; }
     }
 }
