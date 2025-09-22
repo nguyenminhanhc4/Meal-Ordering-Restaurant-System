@@ -10,6 +10,7 @@ import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -92,6 +93,7 @@ public class UserService {
         return convertToDTO(user);
     }
 
+    @Transactional
     public UserDTO updateUser(Long id, UserDTO userDTO) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -121,6 +123,7 @@ public class UserService {
         return convertToDTO(user);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -164,6 +167,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public UserDTO updateUserByPublicId(String publicId, UserDTO userDTO) {
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
@@ -193,6 +197,7 @@ public class UserService {
         return convertToDTO(user);
     }
 
+    @Transactional
     public void deleteUserByPublicId(String publicId) {
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
