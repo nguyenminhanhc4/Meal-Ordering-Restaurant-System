@@ -54,9 +54,10 @@ public class UserService {
         user.setStatus(status);
 
         // Set gender if provided
-        if (userDTO.getGenderId() != null) {
-            Param gender = paramRepository.findById(userDTO.getGenderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+            if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Gender not found with code: " + userDTO.getGender()));
             user.setGender(gender);
         }
 
@@ -107,9 +108,10 @@ public class UserService {
             user.setRole(role);
         }
 
-        if (userDTO.getGenderId() != null) {
-            Param gender = paramRepository.findById(userDTO.getGenderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+        if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Gender not found with code: " + userDTO.getGender()));
             user.setGender(gender);
         }
 
@@ -150,9 +152,10 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Status ACTIVE not found"));
         user.setStatus(status);
 
-        if (userDTO.getGenderId() != null) {
-            Param gender = paramRepository.findById(userDTO.getGenderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+        if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Gender not found with code: " + userDTO.getGender()));
             user.setGender(gender);
         }
 
@@ -181,9 +184,10 @@ public class UserService {
             user.setRole(role);
         }
 
-        if (userDTO.getGenderId() != null) {
-            Param gender = paramRepository.findById(userDTO.getGenderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+        if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Gender not found with code: " + userDTO.getGender()));
             user.setGender(gender);
         }
 
@@ -211,9 +215,10 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setAvatarUrl(userDTO.getAvatarUrl());
 
-        if (userDTO.getGenderId() != null) {
-            Param gender = paramRepository.findById(userDTO.getGenderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found with id: " + userDTO.getGenderId()));
+        if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Gender not found with code: " + userDTO.getGender()));
             user.setGender(gender);
         }
 
@@ -229,8 +234,8 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setRoleId(user.getRole() != null ? user.getRole().getId() : null);
-        dto.setGenderId(user.getGender() != null ? user.getGender().getId() : null);
         dto.setStatusId(user.getStatus() != null ? user.getStatus().getId() : null);
+        dto.setGender(user.getGender() != null ? user.getGender().getCode() : null); // <-- đổi ở đây
         return dto;
     }
 }

@@ -11,7 +11,7 @@ export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [genderId, setGender] = useState("6");
+  const [gender, setGender] = useState("6");
 
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>(
     {}
@@ -40,7 +40,7 @@ export default function RegisterForm() {
           name,
           email,
           password,
-          genderId,
+          gender,
         });
         console.log("Register success:", response.data);
         navigate("/login");
@@ -139,8 +139,8 @@ export default function RegisterForm() {
                 id="male"
                 name="gender"
                 value="male"
-                checked={genderId === "6"}
-                onChange={() => setGender("6")}
+                checked={gender === "MALE"}
+                onChange={() => setGender("MALE")}
               />
               <Label htmlFor="male" className="text-gray-200">
                 Male
@@ -151,8 +151,8 @@ export default function RegisterForm() {
                 id="female"
                 name="gender"
                 value="female"
-                checked={genderId === "7"}
-                onChange={() => setGender("7")}
+                checked={gender === "FEMALE"}
+                onChange={() => setGender("FEMALE")}
               />
               <Label htmlFor="female" className="text-gray-200">
                 Female
