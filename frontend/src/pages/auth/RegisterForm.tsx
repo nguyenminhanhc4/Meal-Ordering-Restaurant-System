@@ -4,6 +4,7 @@ import { Button, Label, TextInput, Radio } from "flowbite-react";
 import { Link } from "react-router-dom";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
+import { useNotification } from "../../components/Notification/NotificationContext";
 
 export default function RegisterForm() {
   // State cho các input
@@ -18,6 +19,7 @@ export default function RegisterForm() {
   );
 
   const navigate = useNavigate();
+  const { notify } = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,12 +45,15 @@ export default function RegisterForm() {
           gender,
         });
         console.log("Register success:", response.data);
+        notify("success", "Register successful! Please login.");
         navigate("/login");
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           console.error("Register failed:", error.response?.data);
+          notify("error", error.response?.data?.message || "Register failed.");
         } else {
           console.error("Unexpected error:", error);
+          notify("error", "Unexpected error occurred.");
         }
       }
     }
