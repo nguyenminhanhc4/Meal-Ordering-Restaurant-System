@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Label, TextInput, Radio } from "flowbite-react";
+import { Spinner, Button, Label, TextInput, Radio } from "flowbite-react";
 import { Link } from "react-router-dom";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
+import { HiEye, HiEyeOff } from "react-icons/hi";
 import { useNotification } from "../../components/Notification/NotificationContext";
 
 export default function RegisterForm() {
@@ -13,10 +14,13 @@ export default function RegisterForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [gender, setGender] = useState("6");
-
-  const [errors, setErrors] = useState<{ password?: string; confirm?: string }>(
-    {}
-  );
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirm?: string;
+  }>({});
 
   const navigate = useNavigate();
   const { notify } = useNotification();
@@ -34,10 +38,15 @@ export default function RegisterForm() {
       newErrors.confirm = "Passwords do not match.";
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid email format.";
+    }
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
       try {
+        setLoading(true);
         const response = await api.post("/auth/register", {
           name,
           email,
@@ -55,6 +64,8 @@ export default function RegisterForm() {
           console.error("Unexpected error:", error);
           notify("error", "Unexpected error occurred.");
         }
+      } finally {
+        setLoading(false); // tắt loading
       }
     }
   };
@@ -88,48 +99,68 @@ export default function RegisterForm() {
           </Label>
           <TextInput
             id="email"
-            type="email"
+            type="text"
             placeholder="Enter your email"
             required
+            color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="bg-stone-700 text-white border-stone-600"
           />
+          {errors.email && (
+            <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+          )}
         </div>
 
         {/* Password */}
-        <div>
+        <div className="relative">
           <Label htmlFor="password" className="text-gray-100">
             Password
           </Label>
           <TextInput
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             required
+            maxLength={20}
+            color={errors.password ? "failure" : "gray"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="bg-stone-700 text-white border-stone-600"
           />
+          <button
+            type="button"
+            className="absolute inset-y-11 right-0 flex items-center pr-3 text-gray-300 hover:text-white"
+            onClick={() => setShowPassword((prev) => !prev)}>
+            {showPassword ? <HiEye size={20} /> : <HiEyeOff size={20} />}
+          </button>
           {errors.password && (
             <p className="text-red-400 text-sm mt-1">{errors.password}</p>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div>
+        <div className="relative">
           <Label htmlFor="confirmPassword" className="text-gray-100">
             Confirm Password
           </Label>
           <TextInput
             id="confirmPassword"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             required
+            maxLength={20}
+            color={errors.password ? "failure" : "gray"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="bg-stone-700 text-white border-stone-600"
           />
+          <button
+            type="button"
+            className="absolute inset-y-11 right-0 flex items-center pr-3 text-gray-300 hover:text-white"
+            onClick={() => setShowPassword((prev) => !prev)}>
+            {showPassword ? <HiEye size={20} /> : <HiEyeOff size={20} />}
+          </button>
           {errors.confirm && (
             <p className="text-red-400 text-sm mt-1">{errors.confirm}</p>
           )}
@@ -170,8 +201,10 @@ export default function RegisterForm() {
         <Button
           type="submit"
           className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white hover:opacity-90"
+          disabled={loading}
           fullSized>
-          Register
+          {loading && <Spinner size="sm" light={true} />}
+          {loading ? "Registering..." : "Register"}
         </Button>
       </form>
 
