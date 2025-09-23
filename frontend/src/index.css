@@ -2,3 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 @import "tailwindcss";
+
+/* Ẩn scrollbar cho tất cả trình duyệt */
+::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+html {
+  -ms-overflow-style: none; /* IE, Edge cũ */
+  scrollbar-width: none; /* Firefox */
+}

@@ -46,7 +46,7 @@ export default function LoginForm() {
         console.log("Login success:", response.data);
 
         // Redirect sang dashboard hoặc trang chính
-        navigate("/dashboard");
+        navigate("/");
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           console.error("Login failed:", error.response?.data);
