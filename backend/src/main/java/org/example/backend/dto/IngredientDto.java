@@ -1,11 +1,13 @@
 package org.example.backend.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.backend.entity.Ingredient;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class IngredientDto {
     private Long id;
     private String name;

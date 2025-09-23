@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface TableRepository extends JpaRepository<TableEntity, Long> {
+    Optional<TableEntity> findById(Long Id);
 
     // Find table by unique name (e.g., "Table 1", "VIP Table")
     Optional<TableEntity> findByName(String name);
