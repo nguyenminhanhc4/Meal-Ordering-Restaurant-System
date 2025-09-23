@@ -54,14 +54,6 @@ public class DataInitializer implements CommandLineRunner {
 
         // ADMIN USER
         createAdminIfNotExists("admin@example.com", "Admin User", "admin123");
-
-//        {
-//            "status": "success",
-//                "data": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1ODY0NDA5NiwiZXhwIjoxNzU4NzMwNDk2fQ.zP81Wfn0T4N5WrGUh3nfZeRigMuuLqyVLG1VQTxhdf5n2tKktUeP3BSraHvS6NsBhJD-o_oqcv_WOsEH1gCOBA",
-//                "message": "Login successful"
-//        }
-        // ADMIN TOKEN
-
     }
 
     private void createParamIfNotExists(String type, String code, String name) {
