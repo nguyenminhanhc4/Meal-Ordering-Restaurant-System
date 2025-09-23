@@ -13,7 +13,9 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByPublicId(String publicId);
-
     @Query("SELECT u FROM User u WHERE u.role.code = :code")
     List<User> findByRoleCode(@Param("code") String code);
+    // Lazy load: chỉ lấy các field cơ bản, không fetch associations
+    @Query("SELECT u FROM User u")
+    List<User> findAllUsersLazy();
 }

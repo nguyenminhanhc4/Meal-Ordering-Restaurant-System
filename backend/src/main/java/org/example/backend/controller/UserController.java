@@ -10,12 +10,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @GetMapping
+    public ResponseEntity<?> getAllCustomer() {
+        List<UserDTO> customer = userService.getAllCustomer();
+        return ResponseEntity.ok(new Response<>("success", customer, "Customer list retrieved successfully"));
+    }
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")

@@ -7,6 +7,7 @@ import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.ParamRepository;
 import org.example.backend.repository.UserRepository;
 import org.example.backend.util.JwtUtil;
+import org.example.backend.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,8 @@ public class UserService {
     private JwtUtil jwtUtil;
 
     public UserDTO register(UserDTO userDTO) {
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
+        // Validate
+        UserValidator.validateRegister(userDTO, userRepository, paramRepository);
 
         User user = new User();
         user.setPublicId(UUID.randomUUID().toString());
@@ -43,21 +43,16 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
         user.setAvatarUrl(userDTO.getAvatarUrl());
 
-        // Set role (default: CUSTOMER)
-        Param role = paramRepository.findByTypeAndCode("ROLE", "CUSTOMER")
-                .orElseThrow(() -> new ResourceNotFoundException("Role CUSTOMER not found"));
+        // Role CUSTOMER
+        Param role = paramRepository.findByTypeAndCode("ROLE", "CUSTOMER").get();
         user.setRole(role);
 
-        // Set status (default: ACTIVE)
-        Param status = paramRepository.findByTypeAndCode("STATUS", "ACTIVE")
-                .orElseThrow(() -> new ResourceNotFoundException("Status ACTIVE not found"));
+        // Status ACTIVE
+        Param status = paramRepository.findByTypeAndCode("STATUS", "ACTIVE").get();
         user.setStatus(status);
 
-        // Set gender if provided
-            if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Gender not found with code: " + userDTO.getGender()));
+        if (userDTO.getGender() != null) {
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();
             user.setGender(gender);
         }
 
@@ -66,6 +61,8 @@ public class UserService {
     }
 
     public String login(String email, String password) {
+        UserValidator.validateForLogin(email, password);
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
@@ -94,48 +91,9 @@ public class UserService {
         return convertToDTO(user);
     }
 
-    @Transactional
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setAvatarUrl(userDTO.getAvatarUrl());
-
-        if (userDTO.getRoleId() != null) {
-            Param role = paramRepository.findById(userDTO.getRoleId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + userDTO.getRoleId()));
-            user.setRole(role);
-        }
-
-        if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Gender not found with code: " + userDTO.getGender()));
-            user.setGender(gender);
-        }
-
-        if (userDTO.getStatusId() != null) {
-            Param status = paramRepository.findById(userDTO.getStatusId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + userDTO.getStatusId()));
-            user.setStatus(status);
-        }
-
-        userRepository.save(user);
-        return convertToDTO(user);
-    }
-
-    @Transactional
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        userRepository.delete(user);
-    }
-
     public UserDTO createStaff(UserDTO userDTO) {
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
+        // Validate
+        UserValidator.validateCreateStaff(userDTO, userRepository, paramRepository);
 
         User user = new User();
         user.setPublicId(UUID.randomUUID().toString());
@@ -144,18 +102,14 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
         user.setAvatarUrl(userDTO.getAvatarUrl());
 
-        Param role = paramRepository.findByTypeAndCode("ROLE", "STAFF")
-                .orElseThrow(() -> new ResourceNotFoundException("Role STAFF not found"));
+        Param role = paramRepository.findByTypeAndCode("ROLE", "STAFF").get();
         user.setRole(role);
 
-        Param status = paramRepository.findByTypeAndCode("STATUS", "ACTIVE")
-                .orElseThrow(() -> new ResourceNotFoundException("Status ACTIVE not found"));
+        Param status = paramRepository.findByTypeAndCode("STATUS", "ACTIVE").get();
         user.setStatus(status);
 
         if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Gender not found with code: " + userDTO.getGender()));
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();
             user.setGender(gender);
         }
 
@@ -170,30 +124,35 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserDTO> getAllCustomer() {
+        return userRepository.findByRoleCode("CUSTOMER")
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public UserDTO updateUserByPublicId(String publicId, UserDTO userDTO) {
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
+
+        // Validate update
+        UserValidator.validateUpdate(userDTO, paramRepository);
+
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         user.setAvatarUrl(userDTO.getAvatarUrl());
 
         if (userDTO.getRoleId() != null) {
-            Param role = paramRepository.findById(userDTO.getRoleId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + userDTO.getRoleId()));
+            Param role = paramRepository.findById(userDTO.getRoleId()).get();
             user.setRole(role);
         }
-
         if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Gender not found with code: " + userDTO.getGender()));
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();
             user.setGender(gender);
         }
-
         if (userDTO.getStatusId() != null) {
-            Param status = paramRepository.findById(userDTO.getStatusId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + userDTO.getStatusId()));
+            Param status = paramRepository.findById(userDTO.getStatusId()).get();
             user.setStatus(status);
         }
 
@@ -211,14 +170,16 @@ public class UserService {
     public UserDTO updateUserByEmail(String email, UserDTO userDTO) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        // Validate update
+        UserValidator.validateUpdate(userDTO, paramRepository);
+
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         user.setAvatarUrl(userDTO.getAvatarUrl());
 
         if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Gender not found with code: " + userDTO.getGender()));
+            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();
             user.setGender(gender);
         }
 
@@ -235,7 +196,7 @@ public class UserService {
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setRoleId(user.getRole() != null ? user.getRole().getId() : null);
         dto.setStatusId(user.getStatus() != null ? user.getStatus().getId() : null);
-        dto.setGender(user.getGender() != null ? user.getGender().getCode() : null); // <-- đổi ở đây
+        dto.setGender(user.getGender() != null ? user.getGender().getCode() : null);
         return dto;
     }
 }
