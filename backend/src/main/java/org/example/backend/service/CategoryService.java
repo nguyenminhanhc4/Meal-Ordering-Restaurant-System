@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.backend.dto.CategoryDTO;
 import org.example.backend.entity.Categories;
 import org.example.backend.exception.ValidationException;
+import org.example.backend.validator.CategoryValidator;
 import org.example.backend.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class CategoryService {
 
     // Convert DTO -> Entity (dùng khi create/update)
     private void updateEntity(Categories category, CategoryDTO dto) {
+        CategoryValidator.validate(dto);
         // Validate name unique
         categoryRepository.findByName(dto.getName())
                 .filter(c -> !c.getId().equals(category.getId()))
@@ -67,9 +69,7 @@ public class CategoryService {
 
     // Create
     public CategoryDTO createCategory(CategoryDTO dto) {
-        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
-            throw new ValidationException("Category name cannot be empty");
-        }
+        CategoryValidator.validate(dto);
 
         Categories category = new Categories();
         updateEntity(category, dto);
