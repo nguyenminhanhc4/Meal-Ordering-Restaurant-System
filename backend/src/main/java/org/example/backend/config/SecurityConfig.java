@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/me").authenticated() // Require authentication for /users/me
                         .requestMatchers("/api/v1/staff/**").hasRole("ADMIN") // Require ADMIN role for /staff/**
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN") // Require ADMIN role for /users/**
+                        .requestMatchers("/api/v1/categories/**").permitAll()
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // Add JWT filter

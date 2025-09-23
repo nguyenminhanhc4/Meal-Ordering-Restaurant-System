@@ -33,13 +33,21 @@ CREATE TABLE staff (
                        FOREIGN KEY (position_id) REFERENCES params(id)
 );
 
-CREATE TABLE categories (
-                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            name VARCHAR(100) NOT NULL UNIQUE,
-                            description TEXT,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+  create table categories
+  (
+      id          bigint auto_increment
+          primary key,
+      name        varchar(100)                        not null,
+      description text                                null,
+      created_at  timestamp default CURRENT_TIMESTAMP null,
+      updated_at  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+      parent_id   bigint                              null,
+      constraint name
+          unique (name),
+      constraint fk_categories_parent
+          foreign key (parent_id) references categories (id)
+              on delete set null
+  );
 
 CREATE TABLE menu_items (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,

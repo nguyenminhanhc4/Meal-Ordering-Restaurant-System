@@ -5,7 +5,7 @@ export default function AuthLayout() {
   return (
     <div className="flex min-h-screen">
       {/* Left Side (Image) */}
-      <div className="hidden md:flex w-1/2 relative">
+      <div className="hidden md:flex w-8/12 relative">
         <img
           src={bgRestaurant}
           alt="Restaurant"
@@ -17,6 +17,7 @@ export default function AuthLayout() {
         </div>
       </div>
 
+      {/* Left Side */}
       <div
         className="flex w-full md:w-1/2 items-center justify-center
          bg-stone-800 p-6">
