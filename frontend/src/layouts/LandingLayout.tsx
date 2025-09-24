@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import NavbarLanding from "../components/landing/NavbarLanding";
+import FooterLanding from "../components/landing/FooterLanding";
 
 export default function LandingLayout() {
   return (
@@ -13,7 +14,7 @@ export default function LandingLayout() {
       </main>
 
       {/* Footer */}
-      {/* <FooterLanding /> */}
+      <FooterLanding />
     </div>
   );
 }

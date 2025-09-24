@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
+import { useAuth } from "../../store/AuthContext";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginForm() {
     {}
   );
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +49,7 @@ export default function LoginForm() {
 
         // Redirect sang dashboard hoặc trang chính
         navigate("/");
+        await refreshUser();
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           console.error("Login failed:", error.response?.data);
