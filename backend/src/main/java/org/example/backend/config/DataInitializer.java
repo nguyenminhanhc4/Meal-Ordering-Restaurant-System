@@ -1,8 +1,10 @@
 package org.example.backend.config;
 
+import org.example.backend.entity.Categories;
 import org.example.backend.entity.Param;
 import org.example.backend.entity.TableEntity;
 import org.example.backend.entity.User;
+import org.example.backend.repository.CategoryRepository;
 import org.example.backend.repository.ParamRepository;
 import org.example.backend.repository.TableRepository;
 import org.example.backend.repository.UserRepository;
@@ -27,7 +29,10 @@ public class DataInitializer implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // you must define this bean in a @Configuration class
+    private CategoryRepository categoriesRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder; // must be defined as a bean in Security config
 
     @Override
     public void run(String... args) {
@@ -51,6 +56,11 @@ public class DataInitializer implements CommandLineRunner {
         createTableIfNotExists("Table 1", 4);
         createTableIfNotExists("Table 2", 2);
         createTableIfNotExists("Table 3", 6);
+
+        // CATEGORIES
+        createCategoryIfNotExists("Noodles", "All noodle-based dishes");
+        createCategoryIfNotExists("Rice", "Rice dishes and combos");
+        createCategoryIfNotExists("Drinks", "All beverages");
 
         // ADMIN USER
         createAdminIfNotExists("admin@example.com", "Admin User", "admin123");
@@ -81,6 +91,16 @@ public class DataInitializer implements CommandLineRunner {
                 });
     }
 
+    private void createCategoryIfNotExists(String name, String description) {
+        categoriesRepository.findByName(name)
+                .orElseGet(() -> {
+                    Categories category = new Categories();
+                    category.setName(name);
+                    category.setDescription(description);
+                    return categoriesRepository.save(category);
+                });
+    }
+
     private void createAdminIfNotExists(String email, String name, String rawPassword) {
         userRepository.findByEmail(email).orElseGet(() -> {
             User user = new User();
@@ -95,7 +115,7 @@ public class DataInitializer implements CommandLineRunner {
                     .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not seeded"));
             user.setRole(adminRole);
 
-            // optional gender (set null or pick default)
+            // optional gender
             user.setGender(null);
 
             // set STATUS (active user)
