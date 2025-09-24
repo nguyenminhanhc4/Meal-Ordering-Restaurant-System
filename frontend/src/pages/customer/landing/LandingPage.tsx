@@ -13,11 +13,18 @@ export default function LandingPage() {
         Không gian ấm cúng, sang trọng – nơi trải nghiệm ẩm thực tinh tế và đẳng
         cấp.
       </p>
-      <Button
-        size="lg"
-        className="bg-gradient-to-r from-yellow-400 to-orange-500 text-stone-800 font-semibold shadow-md hover:opacity-90">
-        Đặt bàn ngay
-      </Button>
+      <div className="flex gap-4">
+        <Button
+          size="lg"
+          className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
+          Đặt bàn ngay
+        </Button>
+        <Button
+          size="lg"
+          className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
+          Đặt món ngay
+        </Button>
+      </div>
     </section>
   );
 }
