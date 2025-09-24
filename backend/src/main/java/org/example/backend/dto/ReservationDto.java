@@ -21,10 +21,10 @@ public class ReservationDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Extra formatted fields for client display
-    private String reservationTimeFormatted;
-    private String createdAtFormatted;
-    private String updatedAtFormatted;
+//    // Extra formatted fields for client display
+//    private String reservationTimeFormatted;
+//    private String createdAtFormatted;
+//    private String updatedAtFormatted;
 
     public ReservationDto(Reservation reservation) {
         if (reservation != null) {
@@ -37,10 +37,10 @@ public class ReservationDto {
             this.createdAt = reservation.getCreatedAt();
             this.updatedAt = reservation.getUpdatedAt();
 
-            // Use DataUtil for human-readable fields
-            this.reservationTimeFormatted = DataUtil.formatDate(reservationTime, DataUtil.DEFAULT_DATE_TIME_PATTERN);
-            this.createdAtFormatted = DataUtil.formatDate(createdAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
-            this.updatedAtFormatted = DataUtil.formatDate(updatedAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
+//            // Use DataUtil for human-readable fields
+//            this.reservationTimeFormatted = DataUtil.formatDate(reservationTime, DataUtil.DEFAULT_DATE_TIME_PATTERN);
+//            this.createdAtFormatted = DataUtil.formatDate(createdAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
+//            this.updatedAtFormatted = DataUtil.formatDate(updatedAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
         }
     }
 }
