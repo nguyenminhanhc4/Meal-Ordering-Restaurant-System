@@ -32,10 +32,11 @@ Table staff {
 
 Table categories {
   id bigint [pk, increment]
-  name varchar(100) [not null, unique]
+  name varchar(100) [unique, not null]
   description text
-  created_at timestamp
-  updated_at timestamp
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`, note: "ON UPDATE CURRENT_TIMESTAMP"]
+  parent_id bigint [ref: > categories.id]
 }
 
 Table menu_items {
