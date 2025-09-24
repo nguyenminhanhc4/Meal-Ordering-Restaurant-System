@@ -18,8 +18,10 @@ import {
 } from "react-icons/hi";
 import Logo from "../../assets/img/vite.svg";
 import { useAuth } from "../../store/AuthContext";
+import { useNotification } from "../../components/Notification/NotificationContext";
 export default function NavbarLanding() {
   const { isLoggedIn, user, logout } = useAuth();
+  const { notify } = useNotification();
 
   return (
     <Navbar
@@ -101,7 +103,10 @@ export default function NavbarLanding() {
               <DropdownDivider />
               <DropdownItem
                 className="flex items-center gap-3 hover:!text-yellow-400"
-                onClick={logout}>
+                onClick={async () => {
+                  await logout(); // từ AuthContext
+                  notify("success", "Đăng xuất thành công!");
+                }}>
                 <HiOutlineLogout className="text-yellow-400" />
                 Đăng xuất
               </DropdownItem>

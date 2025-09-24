@@ -46,4 +46,20 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // Xóa cookie bằng cách set maxAge = 0
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false) // true nếu chạy HTTPS
+                .path("/")
+                .maxAge(0) // xóa cookie ngay
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+        return ResponseEntity.ok(new Response<>("success", null, "Logout successful"));
+    }
+
 }

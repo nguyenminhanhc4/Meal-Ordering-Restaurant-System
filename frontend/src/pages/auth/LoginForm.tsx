@@ -5,6 +5,7 @@ import { HiEye, HiEyeOff } from "react-icons/hi";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
 import { useAuth } from "../../store/AuthContext";
+import { useNotification } from "../../components/Notification/NotificationContext";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ export default function LoginForm() {
   );
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+  const { notify } = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +51,17 @@ export default function LoginForm() {
 
         // Redirect sang dashboard hoặc trang chính
         navigate("/");
+        notify("success", "Login successful!");
         await refreshUser();
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
+          notify(
+            "error",
+            error.response?.data.message || "Login failed. Please try again."
+          );
           console.error("Login failed:", error.response?.data);
         } else {
+          notify("error", "An unexpected error occurred. Please try again.");
           console.error("Unexpected error:", error);
         }
       } finally {
