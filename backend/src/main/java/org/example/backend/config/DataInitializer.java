@@ -48,10 +48,6 @@ public class DataInitializer implements CommandLineRunner {
         createParamIfNotExists("ROLE", "STAFF", "Staff");
         createParamIfNotExists("ROLE", "ADMIN", "Admin");
 
-        // GENDER
-        createParamIfNotExists("GENDER", "MALE", "Male");
-        createParamIfNotExists("GENDER", "FEMALE", "Female");
-
         // TABLES
         createTableIfNotExists("Table 1", 4);
         createTableIfNotExists("Table 2", 2);
