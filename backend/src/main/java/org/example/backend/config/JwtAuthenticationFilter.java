@@ -32,6 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         String email = null;
         String role = null;
+        String name = null;
+        String publicId = null;
         String token = null;
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -39,6 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
                 email = jwtUtil.getEmailFromToken(token);
                 role = jwtUtil.getRoleFromToken(token);
+                name = jwtUtil.getNameFromToken(token);
+                publicId = jwtUtil.getPublicIdFromToken(token);
             }
         }
 

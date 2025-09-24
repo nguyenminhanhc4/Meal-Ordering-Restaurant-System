@@ -70,7 +70,7 @@ public class UserService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(user.getEmail(), user.getRole().getCode());
+        return jwtUtil.generateToken(user.getEmail(), user.getRole().getCode(), user.getName(), user.getPublicId());
     }
 
     public UserDTO getUserById(Long id) {
