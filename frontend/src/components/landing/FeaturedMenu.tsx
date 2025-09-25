@@ -86,8 +86,15 @@ export default function FeaturedMenu() {
                   <p className="text-amber-700 font-bold mt-2">{dish.price}</p>
                   <Button
                     size="lg"
+                    href="#"
                     className="mt-4 w-full font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-stone-800 shadow-md hover:opacity-90 transition">
                     Đặt món
+                  </Button>
+                  <Button
+                    size="sm"
+                    href="#"
+                    className="mt-2 w-full font-semibold !bg-stone-200 !text-stone-800 shadow-sm hover:bg-stone-300 transition">
+                    Xem chi tiết
                   </Button>
                 </div>
               </Card>
@@ -95,6 +102,12 @@ export default function FeaturedMenu() {
           </div>
         ))}
       </Carousel>
+      <a
+        href="#"
+        className="mt-6 inline-flex items-center gap-2 text-yellow-500 font-semibold underline hover:text-orange-500 hover:decoration-2 transition-colors duration-200">
+        Xem thêm
+        <ChevronRightIcon className="w-5 h-5" />
+      </a>
     </section>
   );
 }

@@ -20,18 +20,20 @@ export default function LandingPage() {
         <div className="flex gap-4">
           <Button
             size="lg"
+            href="#"
             className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
             Đặt bàn ngay
           </Button>
           <Button
             size="lg"
+            href="#"
             className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
             Đặt món ngay
           </Button>
         </div>
       </section>
 
-      <HRTrimmed />
+      <HRTrimmed className="!bg-amber-900" />
 
       {/* Featured Menu Section */}
       <FeaturedMenu />
