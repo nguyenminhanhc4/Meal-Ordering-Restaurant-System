@@ -54,7 +54,7 @@ export default function FeaturedMenu() {
     <section id="menu" className="pt-5 h-screen bg-amber-50 text-center px-4">
       <h2 className="text-4xl font-bold text-amber-900">Món nổi bật</h2>
       <Carousel
-        slideInterval={5000}
+        slideInterval={3000}
         className="max-w-8xl mx-auto h-[85%] px-2 sm:px-4"
         leftControl={
           <button className="w-10 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full">

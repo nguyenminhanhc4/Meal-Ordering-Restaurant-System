@@ -79,16 +79,16 @@ export default function NavbarLanding() {
             Thực đơn
           </NavbarLink>
           <NavbarLink
-            href="#booking"
-            active={activeSection === "booking"}
-            className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-            Đặt bàn
-          </NavbarLink>
-          <NavbarLink
             href="#about"
             active={activeSection === "about"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Giới thiệu
+          </NavbarLink>
+          <NavbarLink
+            href="#booking"
+            active={activeSection === "booking"}
+            className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
+            Đặt bàn
           </NavbarLink>
         </NavbarCollapse>
 
