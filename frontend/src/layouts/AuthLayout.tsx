@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import bgRestaurant from "../../assets/img/bg_restaurant.png";
+import bgRestaurant from "../assets/img/bg_restaurant.png";
 
 export default function AuthLayout() {
   return (

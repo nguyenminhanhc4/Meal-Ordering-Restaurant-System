@@ -49,7 +49,7 @@ export default function AboutSection() {
                 style={{ backgroundImage: `url(${feature.imageUrl})` }}></div>
 
               {/* Icon nổi lên */}
-              <div className="absolute top-20    left-10 transform -translate-x-1/2 w-16 h-16 flex items-center justify-center bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full shadow-lg">
+              <div className="absolute top-20 left-10 transform -translate-x-1/2 w-16 h-16 flex items-center justify-center bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full shadow-lg">
                 {feature.icon}
               </div>
 
