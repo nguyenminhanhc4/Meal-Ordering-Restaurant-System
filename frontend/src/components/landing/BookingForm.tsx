@@ -16,7 +16,9 @@ export default function BookingSection() {
           <form className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Họ tên */}
             <div>
-              <Label htmlFor="name" className="sr-only">
+              <Label
+                htmlFor="name"
+                className="block mb-2 text-sm font-medium !text-amber-900">
                 Họ tên
               </Label>
               <TextInput
@@ -37,7 +39,9 @@ export default function BookingSection() {
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="sr-only">
+              <Label
+                htmlFor="email"
+                className="block mb-2 text-sm font-medium !text-amber-900">
                 Email
               </Label>
               <TextInput
@@ -59,7 +63,9 @@ export default function BookingSection() {
 
             {/* Ngày đặt */}
             <div>
-              <Label htmlFor="date" className="sr-only">
+              <Label
+                htmlFor="date"
+                className="block mb-2 text-sm font-medium !text-amber-900">
                 Ngày đặt
               </Label>
               <Datepicker
@@ -83,7 +89,9 @@ export default function BookingSection() {
 
             {/* Số khách */}
             <div>
-              <Label htmlFor="guests" className="sr-only">
+              <Label
+                htmlFor="guests"
+                className="block mb-2 text-sm font-medium !text-amber-900">
                 Số khách
               </Label>
               <Select
@@ -107,7 +115,9 @@ export default function BookingSection() {
 
             {/* Ghi chú */}
             <div className="md:col-span-2">
-              <Label htmlFor="note" className="sr-only">
+              <Label
+                htmlFor="note"
+                className="block mb-2 text-sm font-medium !text-amber-900">
                 Ghi chú
               </Label>
               <TextInput

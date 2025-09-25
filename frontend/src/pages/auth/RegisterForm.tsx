@@ -73,7 +73,7 @@ export default function RegisterForm() {
   return (
     <div className="w-full h-full flex flex-col justify-center px-8">
       <h2 className="text-3xl font-bold text-white text-center mb-8">
-        Register
+        Đăng ký
       </h2>
       <form className="flex flex-col gap-6 w-full" onSubmit={handleSubmit}>
         {/* Full Name */}
@@ -88,13 +88,19 @@ export default function RegisterForm() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
         </div>
 
         {/* Email */}
         <div>
-          <Label htmlFor="email" className="text-gray-100">
+          <Label htmlFor="email" className="!text-gray-100">
             Email
           </Label>
           <TextInput
@@ -105,7 +111,13 @@ export default function RegisterForm() {
             color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
           {errors.email && (
             <p className="text-red-400 text-sm mt-1">{errors.email}</p>
@@ -114,7 +126,7 @@ export default function RegisterForm() {
 
         {/* Password */}
         <div className="relative">
-          <Label htmlFor="password" className="text-gray-100">
+          <Label htmlFor="password" className="!text-gray-100">
             Password
           </Label>
           <TextInput
@@ -126,7 +138,13 @@ export default function RegisterForm() {
             color={errors.password ? "failure" : "gray"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
           <button
             type="button"
@@ -141,7 +159,7 @@ export default function RegisterForm() {
 
         {/* Confirm Password */}
         <div className="relative">
-          <Label htmlFor="confirmPassword" className="text-gray-100">
+          <Label htmlFor="confirmPassword" className="!text-gray-100">
             Confirm Password
           </Label>
           <TextInput
@@ -153,7 +171,13 @@ export default function RegisterForm() {
             color={errors.password ? "failure" : "gray"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
           <button
             type="button"
@@ -168,7 +192,7 @@ export default function RegisterForm() {
 
         {/* Gender */}
         <div>
-          <Label className="text-gray-100 mb-2">Gender</Label>
+          <Label className="!text-gray-100 mb-2">Gender</Label>
           <div className="flex gap-6 mt-2">
             <div className="flex items-center gap-2">
               <Radio
@@ -177,8 +201,9 @@ export default function RegisterForm() {
                 value="male"
                 checked={gender === "MALE"}
                 onChange={() => setGender("MALE")}
+                className="!bg-stone-700 !border-stone-600"
               />
-              <Label htmlFor="male" className="text-gray-200">
+              <Label htmlFor="male" className="!text-gray-200">
                 Male
               </Label>
             </div>
@@ -189,8 +214,9 @@ export default function RegisterForm() {
                 value="female"
                 checked={gender === "FEMALE"}
                 onChange={() => setGender("FEMALE")}
+                className="!bg-stone-700 !border-stone-600"
               />
-              <Label htmlFor="female" className="text-gray-200">
+              <Label htmlFor="female" className="!text-gray-200">
                 Female
               </Label>
             </div>

@@ -72,11 +72,13 @@ export default function LoginForm() {
 
   return (
     <div className="w-full h-full flex flex-col justify-center px-8">
-      <h2 className="text-3xl font-bold text-white text-center mb-8">Login</h2>
+      <h2 className="text-3xl font-bold text-white text-center mb-8">
+        Đăng nhập
+      </h2>
       <form className="flex flex-col gap-6 w-full" onSubmit={handleSubmit}>
         {/* Email */}
         <div>
-          <Label htmlFor="email" className="text-gray-100">
+          <Label htmlFor="email" className="!text-gray-100">
             Email
           </Label>
           <TextInput
@@ -87,7 +89,13 @@ export default function LoginForm() {
             color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
           {errors.email && (
             <p className="text-red-400 text-sm mt-1">{errors.email}</p>
@@ -96,7 +104,7 @@ export default function LoginForm() {
 
         {/* Password */}
         <div className="relative">
-          <Label htmlFor="password" className="text-gray-100">
+          <Label htmlFor="password" className="!text-gray-100">
             Password
           </Label>
           <TextInput
@@ -108,11 +116,17 @@ export default function LoginForm() {
             color={errors.password ? "failure" : "gray"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-stone-700 text-white border-stone-600"
+            theme={{
+              field: {
+                input: {
+                  base: "!bg-stone-700 !text-white !border-stone-600",
+                },
+              },
+            }}
           />
           <button
             type="button"
-            className="absolute inset-y-11 right-0 flex items-center pr-3 text-gray-300 hover:text-white"
+            className="absolute inset-y-11 right-0 flex items-center pr-3 !text-gray-300 hover:!text-white"
             onClick={() => setShowPassword((prev) => !prev)}>
             {showPassword ? <HiEye size={20} /> : <HiEyeOff size={20} />}
           </button>
