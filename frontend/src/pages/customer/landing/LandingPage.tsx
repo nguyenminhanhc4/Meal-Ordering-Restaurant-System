@@ -1,5 +1,6 @@
 import { Button, HRTrimmed } from "flowbite-react";
 import FeaturedMenu from "../../../components/landing/FeaturedMenu";
+import AboutSection from "../../../components/landing/AboutSection";
 
 export default function LandingPage() {
   return (
@@ -37,6 +38,11 @@ export default function LandingPage() {
 
       {/* Featured Menu Section */}
       <FeaturedMenu />
+
+      <HRTrimmed className="!bg-amber-900" />
+
+      {/* About Section */}
+      <AboutSection />
     </>
   );
 }

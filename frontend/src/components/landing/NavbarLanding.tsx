@@ -53,12 +53,12 @@ export default function NavbarLanding() {
             Thực đơn
           </NavbarLink>
           <NavbarLink
-            href="/booking"
+            href="#booking"
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Đặt bàn
           </NavbarLink>
           <NavbarLink
-            href="/about"
+            href="#about"
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Giới thiệu
           </NavbarLink>
