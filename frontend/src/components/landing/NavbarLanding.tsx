@@ -42,13 +42,13 @@ export default function NavbarLanding() {
         {/* Menu items */}
         <NavbarCollapse className="flex-1.5 justify-center">
           <NavbarLink
-            href="/"
+            href="#hero"
             active
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Trang chủ
           </NavbarLink>
           <NavbarLink
-            href="/menu"
+            href="#menu"
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Thực đơn
           </NavbarLink>

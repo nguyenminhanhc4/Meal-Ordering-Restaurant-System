@@ -4,7 +4,9 @@ import FeaturedMenu from "../../../components/landing/FeaturedMenu";
 export default function LandingPage() {
   return (
     <>
-      <section className="h-screen flex flex-col items-center justify-center bg-amber-50 text-center px-4">
+      <section
+        id="hero"
+        className="h-screen flex flex-col items-center justify-center bg-amber-50 text-center px-4">
         <h1 className="text-5xl font-extrabold text-amber-900 mb-6">
           Chào mừng đến với{" "}
           <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
