@@ -19,10 +19,35 @@ import {
 import Logo from "../../assets/img/vite.svg";
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../../components/Notification/NotificationContext";
+import { useEffect, useState } from "react";
+
 export default function NavbarLanding() {
   const { isLoggedIn, user, logout } = useAuth();
   const { notify } = useNotification();
+  const [activeSection, setActiveSection] = useState("hero");
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["hero", "menu", "booking", "about"];
+      let current = "hero";
+
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            current = id;
+            break;
+          }
+        }
+      }
+
+      setActiveSection(current);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
     <Navbar
       fluid
@@ -43,22 +68,25 @@ export default function NavbarLanding() {
         <NavbarCollapse className="flex-1.5 justify-center">
           <NavbarLink
             href="#hero"
-            active
+            active={activeSection === "hero"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Trang chủ
           </NavbarLink>
           <NavbarLink
             href="#menu"
+            active={activeSection === "menu"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Thực đơn
           </NavbarLink>
           <NavbarLink
             href="#booking"
+            active={activeSection === "booking"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Đặt bàn
           </NavbarLink>
           <NavbarLink
             href="#about"
+            active={activeSection === "about"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             Giới thiệu
           </NavbarLink>
