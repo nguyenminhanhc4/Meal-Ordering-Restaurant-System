@@ -16,6 +16,7 @@ import {
   HiOutlineUser,
   HiOutlineLogout,
   HiOutlineShoppingCart,
+  HiChevronRight,
 } from "react-icons/hi";
 import Logo from "../../assets/img/vite.svg"; // Replace with your restaurant logo path
 import { useAuth } from "../../store/AuthContext";
@@ -27,7 +28,6 @@ import { AxiosError } from "axios";
 const MegaMenuComponent: React.FC = () => {
   const { isLoggedIn, user, logout } = useAuth();
   const { notify } = useNotification();
-  const [, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -39,9 +39,10 @@ const MegaMenuComponent: React.FC = () => {
         if (err instanceof AxiosError) {
           notify(
             "error",
-            err.response?.data.message || "Login failed. Please try again."
+            err.response?.data.message ||
+              "Categories retrive. Please try again."
           );
-          console.error("Login failed:", err.response?.data);
+          console.error("Categories retrive failed:", err.response?.data);
         } else {
           notify("error", "An unexpected error occurred. Please try again.");
           console.error("Unexpected error:", err);
@@ -128,41 +129,48 @@ const MegaMenuComponent: React.FC = () => {
         </NavbarLink>
         <Dropdown
           label={
-            <span className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
+            <span className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors duration-200">
               Menu
             </span>
           }
           inline
-          className="w-screen dropdown-fullwidth !left-0 ml-0 mt-2 !bg-stone-800 text-white border-none shadow-lg"
-          onMouseEnter={() => setIsMenuOpen(true)}
-          onMouseLeave={() => setIsMenuOpen(false)}>
-          <div className="py-6 grid grid-cols-4  gap-8 w-full max-w-screen-xl mx-0 pl-4">
+          className="w-screen !bg-stone-800 text-white border-none shadow-lg !left-0 !right-0 !ml-0 !pl-0 dropdown-fullwidth">
+          <div className="py-8 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full !ml-0 !pl-0">
             {categories.length > 0 ? (
               categories.map((category) => (
-                <div key={category.id}>
-                  <h3 className="text-lg font-semibold mb-4 text-white">
+                <div
+                  key={category.id}
+                  className="p-4 ml-5 rounded-lg bg-stone-900/50 hover:bg-stone-900/80 transition-colors duration-200">
+                  <h3 className="text-xl font-bold mb-4 text-yellow-400 border-b border-yellow-400/30 pb-2 flex items-center">
+                    <HiChevronRight className="mr-2 text-yellow-400" />
                     {category.name}
                   </h3>
                   <ul className="space-y-2">
                     {category.children.length > 0 ? (
                       category.children.map((child) => (
-                        <li key={child.id}>
+                        <li
+                          key={child.id}
+                          className="group relative py-1 px-2 rounded-md hover:bg-yellow-400/10 transition-colors duration-200">
                           <a
                             href={`/menu/${child.name
                               .toLowerCase()
                               .replace(" ", "-")}`}
-                            className="text-gray-300 hover:text-white">
+                            className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-200 font-medium flex items-center">
+                            <span className="w-1 h-1 bg-yellow-400 rounded-full mr-2 group-hover:scale-150 transition-transform duration-200"></span>
                             {child.name}
                           </a>
                           {child.children.length > 0 && (
-                            <ul className="ml-4 mt-2 space-y-2">
+                            <ul className="ml-6 mt-2 space-y-1.5 border-l border-gray-600/30 pl-2">
                               {child.children.map((subChild) => (
-                                <li key={subChild.id}>
+                                <li
+                                  key={subChild.id}
+                                  className="py-1 px-2 rounded-md hover:bg-yellow-400/10 transition-colors duration-200">
                                   <a
                                     href={`/menu/${subChild.name
                                       .toLowerCase()
                                       .replace(" ", "-")}`}
-                                    className="text-gray-400 hover:text-white text-sm">
+                                    className="text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm flex items-center">
+                                    <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
                                     {subChild.name}
                                   </a>
                                 </li>
@@ -172,12 +180,13 @@ const MegaMenuComponent: React.FC = () => {
                         </li>
                       ))
                     ) : (
-                      <li>
+                      <li className="py-1 px-2 rounded-md hover:bg-yellow-400/10 transition-colors duration-200">
                         <a
                           href={`/menu/${category.name
                             .toLowerCase()
                             .replace(" ", "-")}`}
-                          className="text-gray-300 hover:text-white">
+                          className="text-gray-200 hover:text-yellow-400 transition-colors duration-200 font-medium flex items-center">
+                          <span className="w-1 h-1 bg-yellow-400 rounded-full mr-2"></span>
                           {category.name}
                         </a>
                       </li>
@@ -186,7 +195,9 @@ const MegaMenuComponent: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="text-gray-400">Không có danh mục</div>
+              <div className="text-gray-400 text-center col-span-full">
+                Không có danh mục
+              </div>
             )}
           </div>
         </Dropdown>
