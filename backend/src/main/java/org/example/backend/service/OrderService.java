@@ -3,6 +3,7 @@ package org.example.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.OrderDto;
 import org.example.backend.entity.Order;
+import org.example.backend.entity.User;
 import org.example.backend.repository.OrderRepository;
 import org.example.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -58,5 +59,23 @@ public class OrderService {
         entity.setTotalAmount(dto.getTotalAmount());
         entity.setUser(userRepository.getById(dto.getUserId()));
         return entity;
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public List<OrderDto> findAllOrderByUserId(Long id) {
+        return orderRepository.getOrderByUser(getUserById(id))
+                .stream().map(OrderDto::new).collect(Collectors.toList());
+
+    }
+
+    public OrderDto addOrderByUserId(Long id, OrderDto dto) {
+        User user = getUserById(id);
+        Order entity = toEntity(dto);
+        entity.setUser(user);
+        orderRepository.save(entity);
+        return new OrderDto(entity);
     }
 }

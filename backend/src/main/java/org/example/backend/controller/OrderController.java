@@ -2,10 +2,14 @@ package org.example.backend.controller;
 
 import org.example.backend.dto.OrderDto;
 import org.example.backend.dto.Response;
+import org.example.backend.dto.UserDTO;
 import org.example.backend.service.OrderService;
+import org.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +21,31 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private static UserService userService;
+
+    private static UserDTO getCurrentUser(){
+        return userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAll() {
         List<OrderDto> orders = orderService.findAll();
+        return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
+    }
+
+//    @GetMapping("/me")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> addCurrentUserOrder(@RequestBody OrderDto dto) {
+//        OrderDto orders = orderService.addOrderByUserId(getCurrentUser().getId() , dto);
+//        return ResponseEntity.ok(new Response<>("success", orders, "Orders created successfully"));
+//    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getCurrentUserOrder() {
+        List<OrderDto> orders = orderService.findAllOrderByUserId(getCurrentUser().getId());
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 
