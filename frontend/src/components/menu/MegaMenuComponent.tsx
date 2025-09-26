@@ -125,12 +125,12 @@ const MegaMenuComponent: React.FC = () => {
         <NavbarLink
           href="/"
           className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-          Home
+          Trang chủ
         </NavbarLink>
         <Dropdown
           label={
             <span className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors duration-200">
-              Menu
+              Thực đơn
             </span>
           }
           inline
@@ -204,7 +204,7 @@ const MegaMenuComponent: React.FC = () => {
         <NavbarLink
           href="/book-table"
           className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-          Book Table
+          Đặt bàn
         </NavbarLink>
       </NavbarCollapse>
     </Navbar>

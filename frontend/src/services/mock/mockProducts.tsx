@@ -1,0 +1,55 @@
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string | null;
+  categorySlug: string; // Tạm thời dùng slug thay category_id
+  status: "available" | "out-of-stock" | "coming-soon"; // Ánh xạ status_id
+  image: string | null; // avatar_url
+  createdAt: string; // created_at
+  rating?: number; // Bổ sung tạm thời
+  sold?: number; // Bổ sung tạm thời
+  tags?: string[]; // Bổ sung tạm thời
+}
+
+export const mockProducts: Product[] = [
+  {
+    id: 1,
+    name: "Sushi",
+    price: 120000,
+    description: "Sushi tươi ngon với cá hồi và bơ",
+    categorySlug: "mon-a",
+    status: "available",
+    image: "/assets/sushi.jpg",
+    createdAt: "2025-09-20T10:00:00Z",
+    rating: 4.5,
+    sold: 120,
+    tags: ["Cay", "Bán chạy"],
+  },
+  {
+    id: 2,
+    name: "Phở",
+    price: 80000,
+    description: null,
+    categorySlug: "mon-a",
+    status: "out-of-stock",
+    image: "/assets/pho.jpg",
+    createdAt: "2025-09-15T10:00:00Z",
+    rating: 4.8,
+    sold: 200,
+    tags: ["Truyền thống"],
+  },
+  {
+    id: 3,
+    name: "Cà phê",
+    price: 35000,
+    description: "Cà phê phin nguyên chất, thơm lừng",
+    categorySlug: "drinks",
+    status: "coming-soon",
+    image: null,
+    createdAt: "2025-09-25T10:00:00Z",
+    rating: 4.2,
+    sold: 80,
+    tags: ["Đồ uống"],
+  },
+];

@@ -9,7 +9,7 @@ export default function MealLayout() {
       <MegaMenu />
 
       {/* Nội dung page */}
-      <main className="flex-1 pt-10">
+      <main className="flex-grow">
         <Outlet /> {/* chỉ cần 1 outlet */}
       </main>
 
