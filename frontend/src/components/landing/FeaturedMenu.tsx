@@ -103,7 +103,7 @@ export default function FeaturedMenu() {
         ))}
       </Carousel>
       <a
-        href="#"
+        href="/menu"
         className="mt-6 inline-flex items-center gap-2 text-yellow-500 font-semibold underline hover:text-orange-500 hover:decoration-2 transition-colors duration-200">
         Xem thêm
         <ChevronRightIcon className="w-5 h-5" />

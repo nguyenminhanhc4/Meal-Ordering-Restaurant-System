@@ -13,3 +13,12 @@ html {
   scrollbar-width: none; /* Firefox */
   scroll-behavior: smooth;
 }
+
+.dropdown-fullwidth {
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  top: 90% !important;
+  transform: none !important;
+}

@@ -61,9 +61,6 @@ export default function NavbarLanding() {
           </span>
         </NavbarBrand>
 
-        {/* Toggle button cho mobile */}
-        <NavbarToggle className="text-yellow-500 hover:text-yellow-400" />
-
         {/* Menu items */}
         <NavbarCollapse className="flex-1.5 justify-center">
           <NavbarLink
@@ -146,6 +143,9 @@ export default function NavbarLanding() {
               Đăng nhập
             </Button>
           )}
+
+          {/* Toggle button cho mobile */}
+          <NavbarToggle className="text-yellow-500 hover:text-yellow-400" />
         </div>
       </div>
     </Navbar>
