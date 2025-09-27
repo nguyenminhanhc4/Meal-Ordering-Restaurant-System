@@ -1,6 +1,6 @@
 package org.example.backend.validator;
 
-import org.example.backend.dto.CategoryDTO;
+import org.example.backend.dto.category.CategoryDTO;
 import org.example.backend.exception.ValidationException;
 import org.springframework.stereotype.Component;
 

@@ -1,13 +1,13 @@
 package org.example.backend.config;
 
-import org.example.backend.entity.Categories;
-import org.example.backend.entity.Param;
-import org.example.backend.entity.TableEntity;
-import org.example.backend.entity.User;
-import org.example.backend.repository.CategoryRepository;
-import org.example.backend.repository.ParamRepository;
-import org.example.backend.repository.TableRepository;
-import org.example.backend.repository.UserRepository;
+import org.example.backend.entity.category.Categories;
+import org.example.backend.entity.param.Param;
+import org.example.backend.entity.table.TableEntity;
+import org.example.backend.entity.user.User;
+import org.example.backend.repository.category.CategoryRepository;
+import org.example.backend.repository.param.ParamRepository;
+import org.example.backend.repository.table.TableRepository;
+import org.example.backend.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,12 +1,10 @@
 package org.example.backend.validator;
 
-import org.example.backend.dto.UserDTO;
-import org.example.backend.entity.Param;
+import org.example.backend.dto.user.UserDTO;
 import org.example.backend.exception.ResourceNotFoundException;
-import org.example.backend.repository.ParamRepository;
-import org.example.backend.repository.UserRepository;
+import org.example.backend.repository.param.ParamRepository;
+import org.example.backend.repository.user.UserRepository;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class UserValidator {
