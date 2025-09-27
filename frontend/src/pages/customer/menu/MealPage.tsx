@@ -23,6 +23,7 @@ const MealPage: React.FC = () => {
           ? allProducts.filter((p: Product) => p.categorySlug === categorySlug)
           : allProducts;
         setProducts(filteredProducts);
+        console.log("Fetched products:", filteredProducts);
       } catch {
         notify("error", "Không thể tải danh sách món ăn");
       }

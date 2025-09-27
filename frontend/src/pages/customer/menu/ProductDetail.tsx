@@ -16,13 +16,16 @@ const ProductDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      debugger;
       try {
-        const foundProduct = await getMenuItemById(id!);
-        if (!foundProduct) {
+        const response = await getMenuItemById(id!);
+        const res = response?.data;
+        if (!response) {
           notify("error", "Không tìm thấy món ăn");
+          setIsLoading(false);
+          return;
         }
-        setProduct(foundProduct);
+        setProduct(res);
+        console.log("Fetched product:", res);
       } catch (err: unknown) {
         if (err instanceof AxiosError) {
           notify("error", "Không thể tải thông tin món ăn");
@@ -168,6 +171,16 @@ const ProductDetail: React.FC = () => {
                     setQuantity(Math.max(1, Number(e.target.value)))
                   }
                   className="w-16 text-center"
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!bg-white !border-stone-300",
+                        colors: {
+                          gray: "!bg-white !border-stone-300 !text-gray-900 !placeholder-stone-500",
+                        },
+                      },
+                    },
+                  }}
                 />
                 <Button
                   size="sm"
