@@ -200,9 +200,14 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div className="flex gap-2 mb-4">
-              <Badge color="info" size="sm">
+              <Badge color="warning" size="sm">
                 {product.categoryName}
               </Badge>
+              {product.tags?.map((tag) => (
+                <Badge key={tag} color="info" size="sm">
+                  {tag}
+                </Badge>
+              ))}
             </div>
 
             <p className="text-base text-gray-600">
