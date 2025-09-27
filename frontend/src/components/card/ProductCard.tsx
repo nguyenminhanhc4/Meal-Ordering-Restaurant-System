@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Badge } from "flowbite-react";
 import { HiStar, HiEye, HiShoppingCart } from "react-icons/hi";
-import type { Product } from "../../services/mock/mockProducts";
+import type { Product } from "../../services/fetchProduct";
 import { useNotification } from "../Notification/NotificationContext";
 
 interface ProductCardProps {
@@ -12,7 +12,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { notify } = useNotification();
 
   const handleAddToCart = () => {
-    if (product.status !== "available") {
+    if (product.status !== "AVAILABLE") {
       notify("error", `${product.name} hiện không có sẵn`);
       return;
     }
@@ -24,20 +24,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const statusColors = {
-    available: "bg-green-500",
-    "out-of-stock": "bg-red-500",
-    "coming-soon": "bg-blue-500",
+    AVAILABLE: "bg-green-500",
+    OUT_OF_STOCK: "bg-red-500",
+    COMING_SOON: "bg-blue-500",
   };
 
   return (
     <div
       className={`p-4 bg-white rounded-lg shadow-md hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 group border border-stone-200 hover:border-yellow-400 animate-fadeIn ${
-        product.status !== "available" ? "opacity-70" : ""
+        product.status !== "AVAILABLE" ? "opacity-70" : ""
       }`}>
       <div className="relative">
-        {product.image ? (
+        {product.avatarUrl ? (
           <img
-            src={product.image}
+            src={product.avatarUrl}
             alt={product.name}
             className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-115 transition-transform duration-400 group-hover:bg-black/10 border border-stone-200"
           />
@@ -50,9 +50,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className={`absolute top-2 left-2 ${
             statusColors[product.status]
           } text-white text-sm px-2 py-1 rounded animate-pulse`}>
-          {product.status === "available"
+          {product.status === "AVAILABLE"
             ? "Có sẵn"
-            : product.status === "out-of-stock"
+            : product.status === "OUT_OF_STOCK"
             ? "Hết hàng"
             : "Sắp ra mắt"}
         </span>
@@ -114,9 +114,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           color="success"
           size="lg"
           onClick={handleAddToCart}
-          disabled={product.status !== "available"}
-          className={`bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200 flex-1 ${
-            product.status !== "available"
+          disabled={product.status !== "AVAILABLE"}
+          className={`text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200 flex-1 ${
+            product.status !== "AVAILABLE"
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}>

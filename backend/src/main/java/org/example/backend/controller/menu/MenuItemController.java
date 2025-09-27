@@ -1,6 +1,7 @@
 package org.example.backend.controller.menu;
 
 import org.example.backend.dto.Response;
+import org.example.backend.dto.menu.MenuItemDetailDto;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.service.menu.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ public class MenuItemController {
     private MenuItemService menuItemService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllMenuItems() {
         List<MenuItemDto> menuItems = menuItemService.findAll();
         return ResponseEntity.ok(
@@ -27,7 +27,6 @@ public class MenuItemController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getMenuItemById(@PathVariable Long id) {
         MenuItemDto menuItem = menuItemService.getById(id);
         return ResponseEntity.ok(

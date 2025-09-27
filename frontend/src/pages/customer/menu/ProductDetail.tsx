@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button, Badge, Card, TextInput } from "flowbite-react";
 import { HiShoppingCart, HiStar } from "react-icons/hi";
-import { mockProducts } from "../../../services/mock/mockProducts2";
-import type { Product } from "../../../services/mock/mockProducts2";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { AxiosError } from "axios";
+import { getMenuItemById } from "../../../services/fetchProduct";
+import type { Product } from "../../../services/fetchProduct";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,13 +15,14 @@ const ProductDetail: React.FC = () => {
   const { notify } = useNotification();
 
   useEffect(() => {
-    setTimeout(() => {
+    const fetchData = async () => {
+      debugger;
       try {
-        const foundProduct = mockProducts.find((p) => p.id === Number(id));
+        const foundProduct = await getMenuItemById(id!);
         if (!foundProduct) {
           notify("error", "Không tìm thấy món ăn");
         }
-        setProduct(foundProduct || null);
+        setProduct(foundProduct);
       } catch (err: unknown) {
         if (err instanceof AxiosError) {
           notify("error", "Không thể tải thông tin món ăn");
@@ -29,27 +30,41 @@ const ProductDetail: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    }, 500);
+    };
+    fetchData();
   }, [id, notify]);
 
   const handleAddToCart = () => {
-    if (!product || product.status !== "AVAILABLE" || product.quantity === 0) {
+    if (!product || product.status !== "AVAILABLE") {
       notify("error", `${product?.name || "Món ăn"} hiện không có sẵn`);
       return;
     }
     notify("success", `Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
   };
 
+  // tạm tính: sản phẩm mới trong 7 ngày
   const isNew =
     product &&
     new Date(product.createdAt) >
       new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
+  // mock tạm reviews
+  const reviews =
+    product?.id === 1
+      ? [
+          {
+            userName: "Nguyễn Văn A",
+            rating: 5,
+            comment: "Ngon tuyệt vời!",
+            createdAt: "2025-09-25T10:00:00",
+          },
+        ]
+      : [];
+
   const averageRating =
-    product && product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
-        product.reviews.length
-      : 0;
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : product?.rating || 0;
 
   if (isLoading) {
     return (
@@ -84,9 +99,9 @@ const ProductDetail: React.FC = () => {
       <div className="max-w-screen-xl mx-auto animate-fadeIn py-12 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="group">
-            {product.image ? (
+            {product.avatarUrl ? (
               <img
-                src={product.image}
+                src={product.avatarUrl}
                 alt={product.name}
                 className="w-full h-64 md:h-96 object-cover rounded-lg border border-stone-200 group-hover:scale-105 transition-transform duration-400"
               />
@@ -113,41 +128,37 @@ const ProductDetail: React.FC = () => {
                 {product.status === "AVAILABLE" ? "Có sẵn" : "Hết hàng"}
               </span>
             </div>
-            {product.reviews.length > 0 && (
-              <div className="flex items-center mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <HiStar
-                    key={i}
-                    className={`h-5 w-5 ${
-                      i < Math.round(averageRating)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-gray-600">
-                  ({averageRating.toFixed(1)}/5, {product.reviews.length} đánh
-                  giá)
-                </span>
-              </div>
-            )}
+
+            <div className="flex items-center mb-4">
+              {[...Array(5)].map((_, i) => (
+                <HiStar
+                  key={i}
+                  className={`h-5 w-5 ${
+                    i < Math.round(averageRating)
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+              <span className="ml-2 text-gray-600">
+                ({averageRating.toFixed(1)}/5, {reviews.length} đánh giá)
+              </span>
+            </div>
+
             <p className="text-2xl text-yellow-600 font-medium mb-4">
-              {product.price.toLocaleString("vi-VN")} VNĐ
+              {product?.price?.toLocaleString("vi-VN") ?? "0"} VNĐ
             </p>
             <p className="text-gray-600 mb-4">
-              {product.quantity > 0
-                ? `Còn ${product.quantity} phần`
-                : "Hết hàng"}
+              {/* quantity tạm mock 10 nếu chưa có trong DB */}
+              Còn {product.sold ? 10 - product.sold : 10} phần
             </p>
+
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   color="gray"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={
-                    product.status !== "AVAILABLE" || product.quantity === 0
-                  }>
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                   -
                 </Button>
                 <TextInput
@@ -157,29 +168,11 @@ const ProductDetail: React.FC = () => {
                     setQuantity(Math.max(1, Number(e.target.value)))
                   }
                   className="w-16 text-center"
-                  disabled={
-                    product.status !== "AVAILABLE" || product.quantity === 0
-                  }
-                  theme={{
-                    field: {
-                      input: {
-                        base: "!bg-white !border-stone-300",
-                        colors: {
-                          gray: "!bg-white !border-stone-300 !text-gray-900 !placeholder-stone-500",
-                        },
-                      },
-                    },
-                  }}
                 />
                 <Button
                   size="sm"
                   color="gray"
-                  onClick={() =>
-                    setQuantity((q) => Math.min(product.quantity, q + 1))
-                  }
-                  disabled={
-                    product.status !== "AVAILABLE" || product.quantity === 0
-                  }>
+                  onClick={() => setQuantity((q) => q + 1)}>
                   +
                 </Button>
               </div>
@@ -187,31 +180,29 @@ const ProductDetail: React.FC = () => {
                 color="success"
                 size="lg"
                 onClick={handleAddToCart}
-                disabled={
-                  product.status !== "AVAILABLE" || product.quantity === 0
-                }
                 className="text-white !bg-gradient-to-r !from-green-600 !to-green-700 hover:!from-green-700 hover:!to-green-800 hover:scale-105 transition-transform duration-200 flex-1">
                 <HiShoppingCart className="mr-2 h-5 w-5" />
                 Thêm vào giỏ hàng
               </Button>
             </div>
+
             <div className="flex gap-2 mb-4">
               <Badge color="info" size="sm">
-                {product.categorySlug
-                  .replace("-", " ")
-                  .replace(/\b\w/g, (c) => c.toUpperCase())}
+                {product.categoryName}
               </Badge>
             </div>
+
             <p className="text-base text-gray-600">
               {product.description || "Món ăn ngon, đang chờ bạn khám phá!"}
             </p>
           </div>
         </div>
-        {product.reviews.length > 0 && (
+
+        {reviews.length > 0 && (
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Đánh giá</h2>
             <div className="space-y-4">
-              {product.reviews.map((review, index) => (
+              {reviews.map((review, index) => (
                 <Card key={index} className="!bg-white shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-semibold text-gray-800">

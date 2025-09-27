@@ -1,21 +1,3 @@
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  description: string | null;
-  categorySlug: string; // Tạm thời thay category_id
-  status: "AVAILABLE" | "OUT_OF_STOCK"; // Ánh xạ status_id
-  image: string | null; // avatar_url
-  createdAt: string; // created_at
-  quantity: number; // Từ inventory
-  reviews: {
-    rating: number;
-    comment: string | null;
-    userName: string;
-    createdAt: string;
-  }[]; // Từ reviews
-}
-
 export const mockProducts: Product[] = [
   {
     id: 1,

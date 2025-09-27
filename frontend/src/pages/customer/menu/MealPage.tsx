@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { mockProducts } from "../../../services/mock/mockProducts";
-import type { Product } from "../../../services/mock/mockProducts";
+import { getAllMenuItems } from "../../../services/fetchProduct";
+import type { Product } from "../../../services/fetchProduct";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import ProductCard from "../../../components/card/ProductCard";
 import SearchBar from "../../../components/search_filter/SearchBar";
 import SortFilter from "../../../components/search_filter/SortFilter";
-import { AxiosError } from "axios";
 import { Card } from "flowbite-react";
 
 const MealPage: React.FC = () => {
@@ -17,16 +16,19 @@ const MealPage: React.FC = () => {
   const { notify } = useNotification();
 
   useEffect(() => {
-    try {
-      const filteredProducts = categorySlug
-        ? mockProducts.filter((p) => p.categorySlug === categorySlug)
-        : mockProducts;
-      setProducts(filteredProducts);
-    } catch (err: unknown) {
-      if (err instanceof AxiosError) {
+    const fetchProducts = async () => {
+      try {
+        const allProducts = await getAllMenuItems();
+        const filteredProducts = categorySlug
+          ? allProducts.filter((p: Product) => p.categorySlug === categorySlug)
+          : allProducts;
+        setProducts(filteredProducts);
+      } catch {
         notify("error", "Không thể tải danh sách món ăn");
       }
-    }
+    };
+
+    fetchProducts();
   }, [categorySlug, notify]);
 
   const displayedProducts = products
@@ -39,7 +41,7 @@ const MealPage: React.FC = () => {
 
   return (
     <section className="min-h-screen bg-gradient-to-b bg-amber-50 to-stone-100 py-12 px-4 sm:px-6 md:px-8">
-      <div className="max-w-screen-xl mx-aut py-12 px-4 md:px-6">
+      <div className="max-w-screen-xl mx-auto py-12 px-4 md:px-6">
         <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-4 border-b-2 border-stone-800 pb-2">
           {categorySlug
             ? categorySlug

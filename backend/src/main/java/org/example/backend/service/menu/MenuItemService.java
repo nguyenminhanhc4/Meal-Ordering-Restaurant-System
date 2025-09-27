@@ -1,12 +1,14 @@
 package org.example.backend.service.menu;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.menu.MenuItemDetailDto;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.repository.category.CategoryRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +22,30 @@ public class MenuItemService {
     private final CategoryRepository categoriesRepository;
 
     // --- BASIC CRUD ---
+    @Transactional(readOnly = true)
     public List<MenuItemDto> findAll() {
-        return menuItemRepository.findAll()
-                .stream()
-                .map(MenuItemDto::new)
+        List<Object[]> results = menuItemRepository.findAllWithDetails();
+        System.out.println("Number of results: " + results.size()); // Debug
+        for (Object[] result : results) {
+            MenuItem entity = (MenuItem) result[0];
+            System.out.println("MenuItem: " + entity.getName());
+        }
+        return results.stream()
+                .map(this::toMenuItemDto)
                 .collect(Collectors.toList());
+    }
+
+    private MenuItemDto toMenuItemDto(Object[] result) {
+        MenuItem entity = (MenuItem) result[0];
+        MenuItemDto dto = new MenuItemDto(entity);
+        dto.setCategoryName((String) result[1]);
+        dto.setCategorySlug((String) result[2]);
+        dto.setStatus((String) result[3]);
+        dto.setRating((Double) result[4]);
+        dto.setSold(((Number) result[5]).longValue());
+        // Nếu có tags, thêm logic ở đây (ví dụ: parse từ cột tags trong menu_items)
+        // dto.setTags(Arrays.asList("traditional", "spicy")); // Ví dụ
+        return dto;
     }
 
     public Optional<MenuItemDto> findById(Long id) {

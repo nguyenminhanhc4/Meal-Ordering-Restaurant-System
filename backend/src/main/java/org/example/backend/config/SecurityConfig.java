@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll() // Allow public access to auth endpoints
                         .requestMatchers("/api/v1/users/me").authenticated() // Require authentication for /users/me
+                        .requestMatchers("/api/v1/menu-items/**").permitAll()
                         .requestMatchers("/api/v1/staff/**").hasRole("ADMIN") // Require ADMIN role for /staff/**
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN") // Require ADMIN role for /users/**
                         .requestMatchers("/api/v1/categories/**").permitAll()

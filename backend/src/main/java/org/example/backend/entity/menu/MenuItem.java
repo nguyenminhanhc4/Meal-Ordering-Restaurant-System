@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.category.Categories;
+import org.example.backend.entity.review.Review;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "menu_items")
@@ -44,4 +46,9 @@ public class MenuItem {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
+    private List<MenuItemIngredient> menuItemIngredients;
 }
