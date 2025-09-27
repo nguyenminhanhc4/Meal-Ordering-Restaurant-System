@@ -1,7 +1,6 @@
 package org.example.backend.service.menu;
 
 import lombok.RequiredArgsConstructor;
-import org.example.backend.dto.menu.MenuItemDetailDto;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.entity.category.Categories;

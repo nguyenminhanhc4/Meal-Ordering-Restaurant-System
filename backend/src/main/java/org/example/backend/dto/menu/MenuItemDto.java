@@ -37,6 +37,7 @@ public class MenuItemDto {
         this.categoryName = entity.getCategory() != null ? entity.getCategory().getName() : null;
         this.categorySlug = entity.getCategory() != null ?
                 entity.getCategory().getName().toLowerCase().replace(" ", "-") : null;
+        this.status = entity.getStatus().getCode();
         this.tags = entity.getMenuItemIngredients() != null ?
                 entity.getMenuItemIngredients().stream()
                         .map(menuItemIngredient -> menuItemIngredient.getIngredient().getName())
