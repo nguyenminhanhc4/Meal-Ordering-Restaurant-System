@@ -9,7 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -62,5 +64,15 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable String publicId) {
         userService.deleteUserByPublicId(publicId);
         return ResponseEntity.ok(new Response<>("success", null, "User deleted successfully"));
+    }
+
+    // Upload avatar
+    @PostMapping("/{publicId}/avatar")
+    public ResponseEntity<UserDTO> uploadAvatar(
+            @PathVariable String publicId,
+            @RequestParam("avatar") MultipartFile avatar) throws IOException {
+
+        UserDTO updatedUser = userService.updateUserAvatar(publicId, avatar);
+        return ResponseEntity.ok(updatedUser);
     }
 }

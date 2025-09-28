@@ -1,5 +1,7 @@
 package org.example.backend.service.user;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.user.User;
@@ -12,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +36,40 @@ public class UserService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private Cloudinary cloudinary;
+
+    public String uploadAvatar(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+
+        // Tạo tên file duy nhất
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+
+        // Upload lên Cloudinary, đặt folder "users"
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "users",
+                        "public_id", fileName,
+                        "overwrite", true
+                ));
+
+        return uploadResult.get("secure_url").toString(); // URL HTTPS trả về FE
+    }
+
+    // Cập nhật avatar cho user
+    @Transactional
+    public UserDTO updateUserAvatar(String publicId, MultipartFile file) throws IOException {
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String url = uploadAvatar(file);
+        user.setAvatarUrl(url);
+
+        userRepository.save(user);
+
+        return convertToDTO(user);
+    }
 
     public UserDTO register(UserDTO userDTO) {
         // Validate
