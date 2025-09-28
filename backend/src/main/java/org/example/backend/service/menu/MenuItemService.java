@@ -1,5 +1,7 @@
 package org.example.backend.service.menu;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
@@ -8,9 +10,13 @@ import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.repository.category.CategoryRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +25,7 @@ public class MenuItemService {
 
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoriesRepository;
+    private final Cloudinary cloudinary;
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
@@ -110,5 +117,31 @@ public class MenuItemService {
         }
 
         return entity;
+    }
+
+    @Transactional
+    public MenuItemDto uploadMenuItemAvatar(Long menuItemId, MultipartFile file) throws IOException {
+        MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
+
+        String url = uploadAvatarToCloudinary(file, "menu");
+        menuItem.setAvatarUrl(url);
+
+        menuItemRepository.save(menuItem);
+        return new MenuItemDto(menuItem);
+    }
+
+    private String uploadAvatarToCloudinary(MultipartFile file, String folder) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", folder,
+                        "public_id", fileName,
+                        "overwrite", true
+                ));
+
+        return uploadResult.get("secure_url").toString();
     }
 }

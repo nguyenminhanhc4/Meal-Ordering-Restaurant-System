@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -58,5 +60,15 @@ public class MenuItemController {
         return ResponseEntity.ok(
                 new Response<>("success", null, "Menu item deleted successfully")
         );
+    }
+
+    // --- Upload ảnh riêng ---
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<MenuItemDto> uploadAvatar(
+            @PathVariable Long id,
+            @RequestParam("avatar") MultipartFile avatar) throws IOException {
+
+        MenuItemDto updated = menuItemService.uploadMenuItemAvatar(id, avatar);
+        return ResponseEntity.ok(updated);
     }
 }
