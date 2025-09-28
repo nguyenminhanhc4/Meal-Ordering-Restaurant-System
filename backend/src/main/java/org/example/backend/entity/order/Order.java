@@ -7,6 +7,11 @@ import org.example.backend.entity.user.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+<<<<<<< HEAD:backend/src/main/java/org/example/backend/entity/order/Order.java
+=======
+import java.util.ArrayList;
+import java.util.List;
+>>>>>>> long:backend/src/main/java/org/example/backend/entity/Order.java
 
 @Entity
 @Table(name = "orders")
@@ -40,4 +45,7 @@ public class Order {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
 }
