@@ -1,18 +1,14 @@
 package org.example.backend.service.order;
 
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD:backend/src/main/java/org/example/backend/service/order/OrderService.java
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.entity.order.Order;
 import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.user.UserRepository;
-=======
-import org.example.backend.dto.OrderDto;
-import org.example.backend.entity.Order;
-import org.example.backend.entity.User;
-import org.example.backend.repository.OrderRepository;
-import org.example.backend.repository.UserRepository;
->>>>>>> long:backend/src/main/java/org/example/backend/service/OrderService.java
+import org.example.backend.dto.order.*;
+import org.example.backend.entity.user.User;
+import org.example.backend.repository.order.OrderRepository;
+import org.example.backend.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
