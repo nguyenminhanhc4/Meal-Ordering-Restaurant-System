@@ -1,8 +1,11 @@
 package org.example.backend.controller.cart;
 
+import com.cloudinary.api.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.cart.CartService;
+import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,11 +20,25 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAll() {
         List<CartDto> carts = cartService.findAll();
         return ResponseEntity.ok(new Response<>("success", carts, "Carts retrieved successfully"));
+    }
+
+    @GetMapping("/current")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getCurrentCart(@RequestHeader("Authorization") String authHeader) {
+        // Token: "Bearer <token>"
+        String token = authHeader.replace("Bearer ", "");
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+
+        CartDto currentCart = cartService.getCurrentCart(publicId);
+        return ResponseEntity.ok(new Response<>("success", currentCart, "Current cart fetched successfully"));
     }
 
     @GetMapping("/{id}")

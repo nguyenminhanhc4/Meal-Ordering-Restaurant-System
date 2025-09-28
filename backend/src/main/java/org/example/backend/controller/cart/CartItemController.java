@@ -31,10 +31,10 @@ public class CartItemController {
         return ResponseEntity.ok(new Response<>("success", item, "Cart item retrieved successfully"));
     }
 
-    @PostMapping
+    @PostMapping("/{cartId}/items")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> create(@RequestBody CartItemDto dto) {
-        CartItemDto saved = cartItemService.save(dto);
+    public ResponseEntity<?> create(@PathVariable Long cartId, @RequestBody CartItemDto dto) {
+        CartItemDto saved = cartItemService.save(cartId,dto);
         return ResponseEntity.ok(new Response<>("success", saved, "Cart item created successfully"));
     }
 
