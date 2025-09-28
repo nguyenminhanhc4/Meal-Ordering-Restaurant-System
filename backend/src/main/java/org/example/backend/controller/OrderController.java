@@ -2,14 +2,10 @@ package org.example.backend.controller;
 
 import org.example.backend.dto.OrderDto;
 import org.example.backend.dto.Response;
-import org.example.backend.dto.UserDTO;
 import org.example.backend.service.OrderService;
-import org.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +17,6 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private static UserService userService;
-
-    private static UserDTO getCurrentUser(){
-        return userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-    }
-
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAll() {
@@ -35,24 +24,18 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 
-//    @GetMapping("/me")
-//    @PreAuthorize("isAuthenticated()")
-//    public ResponseEntity<?> addCurrentUserOrder(@RequestBody OrderDto dto) {
-//        OrderDto orders = orderService.addOrderByUserId(getCurrentUser().getId() , dto);
-//        return ResponseEntity.ok(new Response<>("success", orders, "Orders created successfully"));
-//    }
-
-    @GetMapping("/me")
+    @GetMapping("/me/{userPublicId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrder() {
-        List<OrderDto> orders = orderService.findAllOrderByUserId(getCurrentUser().getId());
+    public ResponseEntity<?> getCurrentUserOrders(@PathVariable String userPublicId) {
+        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(userPublicId);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{publicId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
-        OrderDto order = orderService.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+    public ResponseEntity<?> getByPublicId(@PathVariable String publicId) {
+        OrderDto order = orderService.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
         return ResponseEntity.ok(new Response<>("success", order, "Order retrieved successfully"));
     }
 
@@ -63,17 +46,17 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", saved, "Order created successfully"));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{publicId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody OrderDto dto) {
-        OrderDto updated = orderService.updateById(id, dto);
+    public ResponseEntity<?> update(@PathVariable String publicId, @RequestBody OrderDto dto) {
+        OrderDto updated = orderService.updateByPublicId(publicId, dto);
         return ResponseEntity.ok(new Response<>("success", updated, "Order updated successfully"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{publicId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        orderService.deleteById(id);
+    public ResponseEntity<?> delete(@PathVariable String publicId) {
+        orderService.deleteByPublicId(publicId);
         return ResponseEntity.ok(new Response<>("success", null, "Order deleted successfully"));
     }
 }

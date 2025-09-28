@@ -23,6 +23,7 @@ public class OrderDto {
     private BigDecimal totalAmount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<OrderItemDto> orderItems;
 
     public OrderDto(Order entity) {
         if (entity != null) {
@@ -34,6 +35,9 @@ public class OrderDto {
             this.totalAmount = entity.getTotalAmount();
             this.createdAt = entity.getCreatedAt();
             this.updatedAt = entity.getUpdatedAt();
+            this.orderItems = entity.getOrderItems() != null
+                    ? entity.getOrderItems().stream().map(OrderItemDto::new).collect(Collectors.toList())
+                    : null;
         }
     }
 }
