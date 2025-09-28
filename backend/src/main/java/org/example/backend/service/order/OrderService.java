@@ -5,10 +5,7 @@ import org.example.backend.dto.order.OrderDto;
 import org.example.backend.entity.order.Order;
 import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.user.UserRepository;
-import org.example.backend.dto.order.*;
 import org.example.backend.entity.user.User;
-import org.example.backend.repository.order.OrderRepository;
-import org.example.backend.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
