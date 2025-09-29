@@ -172,12 +172,9 @@ const CartPage: React.FC = () => {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center gap-3 justify-center">
-                        <Button
-                          size="sm"
-                          color="light"
-                          className="!bg-gray-600 hover:!bg-gray-800"
+                    <TableCell className="flex justify-center items-center translate-y-1/4 gap-2">
+                      <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-full overflow-hidden w-max">
+                        <button
                           onClick={() =>
                             handleUpdateQuantity(
                               item.id,
@@ -187,16 +184,16 @@ const CartPage: React.FC = () => {
                           }
                           disabled={
                             item.quantity <= 1 || item.status === "OUT_OF_STOCK"
-                          }>
-                          <HiMinus className="h-2 w-2" />
-                        </Button>
-                        <span className="text-lg font-semibold">
+                          }
+                          className="flex items-center justify-center w-8 h-8 bg-gray-300 hover:bg-gray-400 transition-colors duration-150 disabled:opacity-50">
+                          <HiMinus className="h-4 w-4 text-stone-800" />
+                        </button>
+
+                        <span className="w-10 text-center font-medium text-gray-700">
                           {item.quantity}
                         </span>
-                        <Button
-                          size="sm"
-                          color="light"
-                          className="!bg-gray-600 hover:!bg-gray-800"
+
+                        <button
                           onClick={() =>
                             handleUpdateQuantity(
                               item.id,
@@ -204,10 +201,12 @@ const CartPage: React.FC = () => {
                               item.availableQuantity
                             )
                           }
-                          disabled={item.status === "OUT_OF_STOCK"}>
-                          <HiPlus className="h-2 w-2" />
-                        </Button>
+                          disabled={item.status === "OUT_OF_STOCK"}
+                          className="flex items-center justify-center w-8 h-8 bg-gray-300 hover:bg-gray-400 transition-colors duration-150 disabled:opacity-50">
+                          <HiPlus className="h-4 w-4 text-stone-800" />
+                        </button>
                       </div>
+
                       {item.availableQuantity &&
                         item.quantity > item.availableQuantity && (
                           <p className="text-red-500 text-sm mt-2">
@@ -224,7 +223,7 @@ const CartPage: React.FC = () => {
                         }
                       )}
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="flex justify-center translate-y-1/4">
                       <Button
                         color="failure"
                         size="sm"
@@ -253,13 +252,23 @@ const CartPage: React.FC = () => {
                   </span>
                 </p>
               </div>
-              <Button
-                color="success"
-                size="lg"
-                className="!text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200"
-                disabled={!isCartValid(cart.items)}>
-                Thanh toán ngay
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  color="gray"
+                  size="lg"
+                  className="!text-white bg-gray-500 hover:bg-gray-600 transition-colors duration-200"
+                  href="/menu">
+                  Quay lại menu
+                </Button>
+
+                <Button
+                  color="success"
+                  size="lg"
+                  className="!text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200"
+                  disabled={!isCartValid(cart.items)}>
+                  Thanh toán ngay
+                </Button>
+              </div>
             </div>
           </Card>
         ) : (
