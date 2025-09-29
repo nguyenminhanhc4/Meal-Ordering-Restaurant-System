@@ -116,7 +116,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {product.description || "Món ăn ngon, đang chờ bạn khám phá!"}
       </p>
       <div className="flex gap-2 mb-2">
-        <Badge color="info" size="sm">
+        <Badge color="warning" size="sm">
           {product.categorySlug
             .replace("-", " ")
             .replace(/\b\w/g, (c) => c.toUpperCase())}
