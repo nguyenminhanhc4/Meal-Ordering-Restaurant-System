@@ -1,3 +1,4 @@
+import type { ApiResponse } from "../services/types/ApiType";
 import api from "../api/axios";
 
 export interface Product {
@@ -14,11 +15,12 @@ export interface Product {
   rating: number;
   sold: number;
   tags: string[];
+  reviews: string[];
 }
 
 export const getAllMenuItems = async (): Promise<Product[]> => {
   try {
-    const response = await api.get("/menu-items");
+    const response = await api.get<ApiResponse<Product[]>>("/menu-items");
     return response.data.data;
   } catch (error) {
     console.error("Error fetching menu items:", error);
@@ -30,8 +32,8 @@ export const getMenuItemById = async (
   id: string | number
 ): Promise<Product | null> => {
   try {
-    const response = await api.get(`/menu-items/${id}`);
-    return response.data; // giả sử backend trả trực tiếp product
+    const response = await api.get<ApiResponse<Product>>(`/menu-items/${id}`);
+    return response.data.data; // giả sử backend trả trực tiếp product
   } catch (error) {
     console.error(`Error fetching menu item ${id}:`, error);
     return null;

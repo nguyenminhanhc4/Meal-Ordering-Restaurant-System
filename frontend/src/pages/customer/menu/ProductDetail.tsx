@@ -23,7 +23,7 @@ const ProductDetail: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await getMenuItemById(id!);
-        const res = response?.data;
+        const res = response;
         if (!response) {
           notify("error", "Không tìm thấy món ăn");
           setIsLoading(false);
@@ -265,8 +265,8 @@ const ProductDetail: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  {review.comment && (
-                    <p className="text-gray-600">{review.comment}</p>
+                  {product.reviews && (
+                    <p className="text-gray-600">{product.reviews}</p>
                   )}
                   <p className="text-sm text-gray-500">
                     {new Date(review.createdAt).toLocaleDateString("vi-VN")}

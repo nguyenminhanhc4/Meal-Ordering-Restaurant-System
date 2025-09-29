@@ -1,145 +1,283 @@
 import React, { useEffect, useState } from "react";
-import { getCurrentCart } from "../../../services/cart/cartService";
+import {
+  Button,
+  Table,
+  Spinner,
+  TableHead,
+  TableCell,
+  TableHeadCell,
+  TableBody,
+  TableRow,
+  Card,
+  Tooltip,
+  Badge,
+} from "flowbite-react";
+import { HiTrash, HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
+import {
+  getCurrentCart,
+  updateCartItem,
+} from "../../../services/cart/cartService";
+import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 
-interface CartItem {
-  id: number;
-  menuItemId: number;
-  name: string;
-  avatarUrl?: string;
-  price: number;
-  quantity: number;
-  status: "AVAILABLE" | "OUT_OF_STOCK" | "COMING_SOON";
-}
-
-interface Cart {
-  id: number;
-  items: CartItem[];
-  total: number;
-}
-
 const CartPage: React.FC = () => {
-  const { notify } = useNotification();
   const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cartUpdated, setCartUpdated] = useState<number>(0);
+  const { notify } = useNotification();
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const response = await getCurrentCart();
-        setCart(response.data);
-      } catch (error) {
-        notify("error", "Không thể tải giỏ hàng");
-      } finally {
+        const data = await getCurrentCart();
+        setCart(data);
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+        setError("Không thể tải giỏ hàng. Vui lòng thử lại.");
         setLoading(false);
       }
     };
     fetchCart();
-  }, [notify]);
+  }, [cartUpdated]);
 
-  const handleQuantityChange = async (itemId: number, newQty: number) => {
-    if (!cart) return;
+  const handleUpdateQuantity = async (
+    itemId: number,
+    newQuantity: number,
+    availableQuantity: number | undefined
+  ) => {
+    if (newQuantity < 1) {
+      notify("error", "Số lượng phải lớn hơn 0.");
+      return;
+    }
+    if (availableQuantity !== undefined && newQuantity > availableQuantity) {
+      notify("error", `Số lượng tối đa cho món này là ${availableQuantity}.`);
+      return;
+    }
+
     try {
-      const updatedCart = await updateCartItem(cart.id, itemId, newQty);
-      setCart(updatedCart.data);
-    } catch (error) {
-      notify("error", "Không thể cập nhật số lượng");
+      await updateCartItem(itemId, newQuantity);
+      setCartUpdated((prev) => prev + 1);
+      notify("success", "Cập nhật số lượng thành công!");
+    } catch (err) {
+      notify("error", "Cập nhật số lượng thất bại. Vui lòng thử lại.");
+      console.error(`Error updating quantity for item ${itemId}`, err);
     }
   };
 
-  const handleRemoveItem = async (itemId: number) => {
-    if (!cart) return;
-    try {
-      const updatedCart = await removeCartItem(cart.id, itemId);
-      setCart(updatedCart.data);
-      notify("success", "Đã xóa món khỏi giỏ hàng");
-    } catch (error) {
-      notify("error", "Không thể xóa món");
-    }
+  const handleRemoveItem = (itemId: number) => {
+    console.log(`Xóa item ${itemId}`);
+    // TODO: Gọi API xóa món nếu cần
   };
 
-  if (loading) return <div>Đang tải giỏ hàng...</div>;
+  const calculateTotal = (items: CartItem[] | undefined): string => {
+    if (!items) return "0.00";
+    const total = items.reduce((sum, item) => {
+      return item.status === "AVAILABLE"
+        ? sum + item.quantity * (item.price || 0)
+        : sum;
+    }, 0);
+    return total.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  };
 
-  if (!cart || cart.items.length === 0)
+  const calculateTotalItems = (items: CartItem[] | undefined): number => {
+    if (!items) return 0;
+    return items.reduce(
+      (sum, item) => (item.status === "AVAILABLE" ? sum + item.quantity : sum),
+      0
+    );
+  };
+
+  const isCartValid = (items: CartItem[] | undefined): boolean => {
+    if (!items) return false;
+    return items.every(
+      (item) =>
+        item.status === "AVAILABLE" &&
+        item.quantity <= (item.availableQuantity || Infinity)
+    );
+  };
+
+  if (loading) {
     return (
-      <div>
-        Giỏ hàng trống. Quay lại <a href="/menu">Menu</a>
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <Spinner size="xl" className="text-amber-500" />
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
-      <h1 className="text-2xl font-bold mb-6">Giỏ hàng của bạn</h1>
-      <div className="space-y-4">
-        {cart.items.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center justify-between p-4 bg-white shadow rounded-lg">
-            <div className="flex items-center gap-4">
-              {item.avatarUrl ? (
-                <img
-                  src={item.avatarUrl}
-                  alt={item.name}
-                  className="w-16 h-16 object-cover rounded"
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-500">
-                  No image
-                </div>
-              )}
-              <div>
-                <div className="font-semibold">{item.name}</div>
-                <div className="text-gray-600">
-                  {item.price.toLocaleString("vi-VN")} VNĐ
-                </div>
+    <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
+      <div className="container mx-auto max-w-8xl py-12 px-4 md:px-6">
+        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
+          Giỏ hàng của bạn
+        </h1>
+        {cart && cart.items && cart.items.length > 0 ? (
+          <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm">
+            <Table hoverable striped className="rounded-lg">
+              <TableHead>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  Hình ảnh
+                </TableHeadCell>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  Tên món
+                </TableHeadCell>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  Số lượng
+                </TableHeadCell>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  Giá
+                </TableHeadCell>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  Hành động
+                </TableHeadCell>
+              </TableHead>
+              <TableBody className="divide-y">
+                {cart.items.map((item) => (
+                  <TableRow
+                    key={item.id}
+                    className={`!bg-white hover:!bg-amber-50 transition-colors duration-200 ${
+                      item.status === "OUT_OF_STOCK" ? "opacity-50" : ""
+                    }`}>
+                    <TableCell className="text-center py-4">
+                      <img
+                        src={item.avatarUrl}
+                        alt={item.menuItemName}
+                        className="w-20 h-20 object-cover rounded-lg shadow-sm mx-auto"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium text-center !text-gray-800">
+                      <Tooltip
+                        content={item.description || "Không có mô tả"}
+                        placement="top">
+                        <span>
+                          {item.menuItemName} (
+                          {item.categoryName || "Không xác định"})
+                        </span>
+                      </Tooltip>
+                      {item.status === "OUT_OF_STOCK" && (
+                        <Badge color="failure" className="mt-2">
+                          Hết hàng
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center gap-3 justify-center">
+                        <Button
+                          size="sm"
+                          color="light"
+                          className="!bg-gray-600 hover:!bg-gray-800"
+                          onClick={() =>
+                            handleUpdateQuantity(
+                              item.id,
+                              item.quantity - 1,
+                              item.availableQuantity
+                            )
+                          }
+                          disabled={
+                            item.quantity <= 1 || item.status === "OUT_OF_STOCK"
+                          }>
+                          <HiMinus className="h-2 w-2" />
+                        </Button>
+                        <span className="text-lg font-semibold">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          size="sm"
+                          color="light"
+                          className="!bg-gray-600 hover:!bg-gray-800"
+                          onClick={() =>
+                            handleUpdateQuantity(
+                              item.id,
+                              item.quantity + 1,
+                              item.availableQuantity
+                            )
+                          }
+                          disabled={item.status === "OUT_OF_STOCK"}>
+                          <HiPlus className="h-2 w-2" />
+                        </Button>
+                      </div>
+                      {item.availableQuantity &&
+                        item.quantity > item.availableQuantity && (
+                          <p className="text-red-500 text-sm mt-2">
+                            Chỉ còn {item.availableQuantity} món
+                          </p>
+                        )}
+                    </TableCell>
+                    <TableCell className="text-center !text-gray-800">
+                      {(item.quantity * (item.price || 0)).toLocaleString(
+                        "vi-VN",
+                        {
+                          style: "currency",
+                          currency: "VND",
+                        }
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        color="failure"
+                        size="sm"
+                        className="!text-white !bg-red-500 hover:!bg-red-600"
+                        onClick={() => handleRemoveItem(item.id)}
+                        disabled={item.status === "OUT_OF_STOCK"}>
+                        <HiTrash className="h-5 w-5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="mt-6 flex justify-between items-center">
+              <div className="text-gray-600">
+                <p className="text-lg">
+                  Tổng số món:{" "}
+                  <span className="font-semibold">
+                    {calculateTotalItems(cart.items)}
+                  </span>
+                </p>
+                <p className="text-lg">
+                  Tổng cộng:{" "}
+                  <span className="font-semibold text-amber-600">
+                    {calculateTotal(cart.items)}
+                  </span>
+                </p>
               </div>
+              <Button
+                color="success"
+                size="lg"
+                className="!text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200"
+                disabled={!isCartValid(cart.items)}>
+                Thanh toán ngay
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() =>
-                  handleQuantityChange(item.id, Math.max(1, item.quantity - 1))
-                }>
-                -
-              </button>
-              <input
-                type="number"
-                value={item.quantity}
-                onChange={(e) =>
-                  handleQuantityChange(
-                    item.id,
-                    Math.max(1, Number(e.target.value))
-                  )
-                }
-                className="w-12 text-center border rounded"
-              />
-              <button
-                onClick={() =>
-                  handleQuantityChange(item.id, item.quantity + 1)
-                }>
-                +
-              </button>
-              <button
-                onClick={() => handleRemoveItem(item.id)}
-                className="text-red-500">
-                Xóa
-              </button>
-            </div>
-          </div>
-        ))}
+          </Card>
+        ) : (
+          <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm text-center py-12">
+            <HiShoppingCart className="mx-auto h-16 w-16 !text-gray-400" />
+            <p className="text-xl text-gray-500 mt-4">
+              Giỏ hàng của bạn đang trống
+            </p>
+            <Button
+              color="primary"
+              className="mt-6 mx-auto !bg-amber-500 hover:!bg-amber-600"
+              onClick={() => (window.location.href = "/menu")}>
+              Xem thực đơn
+            </Button>
+          </Card>
+        )}
       </div>
-      <div className="mt-6 flex justify-end text-xl font-bold">
-        Tổng tiền:{" "}
-        {cart.items
-          .reduce((sum, i) => sum + i.price * i.quantity, 0)
-          .toLocaleString("vi-VN")}{" "}
-        VNĐ
-      </div>
-      <div className="mt-4 flex justify-end">
-        <button className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-          Thanh toán
-        </button>
-      </div>
-    </div>
+    </section>
   );
 };
 
