@@ -76,11 +76,11 @@ const MegaMenuComponent: React.FC = () => {
                 </div>
                 <Avatar
                   alt="User avatar"
-                  img={
-                    user.avatarUrl ||
-                    "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                  }
+                  img={user.avatarUrl || undefined} // null/undefined thì sẽ fallback
                   rounded
+                  placeholderInitials={
+                    user.name ? user.name.charAt(0).toUpperCase() : "?"
+                  }
                 />
               </div>
             }

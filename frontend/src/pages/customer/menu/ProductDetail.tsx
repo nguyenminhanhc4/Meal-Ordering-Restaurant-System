@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Badge, Card, TextInput } from "flowbite-react";
-import { HiShoppingCart, HiStar } from "react-icons/hi";
+import { Button, Badge, Card, TextInput, HRTrimmed } from "flowbite-react";
+import { HiShoppingCart, HiArrowLeft } from "react-icons/hi";
+import { FaStarHalf, FaStar } from "react-icons/fa";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { AxiosError } from "axios";
 import { getMenuItemById } from "../../../services/fetchProduct";
@@ -72,23 +73,11 @@ const ProductDetail: React.FC = () => {
     new Date(product.createdAt) >
       new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  // mock tạm reviews
-  const reviews =
-    product?.id === 1
-      ? [
-          {
-            userName: "Nguyễn Văn A",
-            rating: 5,
-            comment: "Ngon tuyệt vời!",
-            createdAt: "2025-09-25T10:00:00",
-          },
-        ]
-      : [];
-
   const averageRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : product?.rating || 0;
+    product?.reviews && product.reviews.length > 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : product?.rating ?? 0;
 
   if (isLoading) {
     return (
@@ -154,18 +143,23 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <HiStar
-                  key={i}
-                  className={`h-5 w-5 ${
-                    i < Math.round(averageRating)
-                      ? "text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
+              {[...Array(5)].map((_, i) => {
+                const starNumber = i + 1;
+                return (
+                  <span key={i}>
+                    {averageRating >= starNumber ? (
+                      <FaStar className="h-5 w-5 text-yellow-400" />
+                    ) : averageRating >= starNumber - 0.5 ? (
+                      <FaStarHalf className="h-5 w-5 text-yellow-400" />
+                    ) : (
+                      <FaStar className="h-5 w-5 text-gray-300" />
+                    )}
+                  </span>
+                );
+              })}
               <span className="ml-2 text-gray-600">
-                ({averageRating.toFixed(1)}/5, {reviews.length} đánh giá)
+                ({averageRating.toFixed(1)}/5, {product.reviews.length} đánh
+                giá)
               </span>
             </div>
 
@@ -173,29 +167,42 @@ const ProductDetail: React.FC = () => {
               {product?.price?.toLocaleString("vi-VN") ?? "0"} VNĐ
             </p>
             <p className="text-gray-600 mb-4">
-              {/* quantity tạm mock 10 nếu chưa có trong DB */}
-              Còn {product.sold ? 10 - product.sold : 10} phần
+              Còn{" "}
+              {product.sold
+                ? product.availableQuantity - product.sold
+                : product.availableQuantity}{" "}
+              phần
             </p>
 
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center gap-2">
+                {/* Nút trừ */}
                 <Button
                   size="sm"
                   color="gray"
+                  disabled={quantity <= 1}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                   -
                 </Button>
+
+                {/* Input số lượng */}
                 <TextInput
                   type="number"
                   value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, Number(e.target.value)))
-                  }
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setQuantity(
+                      Math.min(
+                        product.availableQuantity,
+                        Math.max(1, isNaN(val) ? 1 : val)
+                      )
+                    );
+                  }}
                   className="w-16 text-center"
                   theme={{
                     field: {
                       input: {
-                        base: "!bg-white !border-stone-300",
+                        base: "!bg-white !border-stone-300 text-center",
                         colors: {
                           gray: "!bg-white !border-stone-300 !text-gray-900 !placeholder-stone-500",
                         },
@@ -203,10 +210,17 @@ const ProductDetail: React.FC = () => {
                     },
                   }}
                 />
+
+                {/* Nút cộng */}
                 <Button
                   size="sm"
                   color="gray"
-                  onClick={() => setQuantity((q) => q + 1)}>
+                  disabled={quantity >= product.availableQuantity}
+                  onClick={() =>
+                    setQuantity((q) =>
+                      Math.min(product.availableQuantity, q + 1)
+                    )
+                  }>
                   +
                 </Button>
               </div>
@@ -240,37 +254,85 @@ const ProductDetail: React.FC = () => {
               {product.description || "Món ăn ngon, đang chờ bạn khám phá!"}
             </p>
           </div>
+          <Button
+            href="/menu"
+            size="sm"
+            className="!bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 
+             text-white shadow-md flex items-center gap-2">
+            <HiArrowLeft className="h-4 w-4" />
+            Quay lại menu
+          </Button>
         </div>
 
-        {reviews.length > 0 && (
+        <HRTrimmed className="!bg-amber-900 w-3/4" />
+
+        {product.reviews && product.reviews.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Đánh giá</h2>
-            <div className="space-y-4">
-              {reviews.map((review, index) => (
-                <Card key={index} className="!bg-white shadow-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-gray-800">
-                      {review.userName}
-                    </span>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <HiStar
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < review.rating
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Đánh giá</h2>
+              <span className="text-gray-600 text-sm">
+                Trung bình:{" "}
+                <span className="text-yellow-500 font-semibold">
+                  {averageRating.toFixed(1)}/5
+                </span>{" "}
+                ({product.reviews.length} đánh giá)
+              </span>
+            </div>
+
+            {/* Reviews list */}
+            <div className="space-y-6">
+              {product.reviews.map((review) => (
+                <Card
+                  key={review.id}
+                  className="!bg-white border !border-stone-200 shadow-sm rounded-xl p-5">
+                  <div className="flex items-start gap-4">
+                    {/* Avatar */}
+                    {review.userAvatar ? (
+                      <img
+                        src={review.userAvatar}
+                        alt={review.userName}
+                        className="w-12 h-12 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                        {review.userName.charAt(0)}
+                      </div>
+                    )}
+
+                    {/* Review content */}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-semibold text-gray-900">
+                            {review.userName}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < review.rating
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </p>
+                      </div>
+
+                      {/* Comment */}
+                      <p className="mt-3 text-gray-700 bg-stone-50 p-3 rounded-lg">
+                        {review.comment}
+                      </p>
                     </div>
                   </div>
-                  {product.reviews && (
-                    <p className="text-gray-600">{product.reviews}</p>
-                  )}
-                  <p className="text-sm text-gray-500">
-                    {new Date(review.createdAt).toLocaleDateString("vi-VN")}
-                  </p>
                 </Card>
               ))}
             </div>

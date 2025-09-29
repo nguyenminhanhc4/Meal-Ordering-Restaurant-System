@@ -1,6 +1,15 @@
 import type { ApiResponse } from "../services/types/ApiType";
 import api from "../api/axios";
 
+export interface Review {
+  id: number;
+  userName: string;
+  userAvatar: string | null; // có thể null
+  rating: number; // 1-5
+  comment: string;
+  createdAt: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -15,7 +24,8 @@ export interface Product {
   rating: number;
   sold: number;
   tags: string[];
-  reviews: string[];
+  reviews: Review[];
+  availableQuantity: number; // Số lượng hiện có
 }
 
 export const getAllMenuItems = async (): Promise<Product[]> => {

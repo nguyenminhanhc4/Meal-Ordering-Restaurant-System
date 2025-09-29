@@ -53,6 +53,7 @@ public class MenuItem {
     @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
     private List<MenuItemIngredient> menuItemIngredients;
 
-    @OneToOne(mappedBy = "menuItem")
+    @OneToOne(mappedBy = "menuItem" ,fetch = FetchType.LAZY)
+    @JoinColumn(name = "quantity", nullable = false)
     private Inventory inventory;
 }
