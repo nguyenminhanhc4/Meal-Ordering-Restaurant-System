@@ -38,7 +38,6 @@ public class CartController {
         return ResponseEntity.ok(new Response<>("success", currentCart, "Current cart fetched successfully"));
     }
 
-
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getById(@PathVariable Long id) {

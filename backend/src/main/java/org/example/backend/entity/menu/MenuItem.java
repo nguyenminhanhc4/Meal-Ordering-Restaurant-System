@@ -2,6 +2,7 @@ package org.example.backend.entity.menu;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.inventory.Inventory;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.review.Review;
@@ -51,4 +52,7 @@ public class MenuItem {
 
     @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
     private List<MenuItemIngredient> menuItemIngredients;
+
+    @OneToOne(mappedBy = "menuItem")
+    private Inventory inventory;
 }

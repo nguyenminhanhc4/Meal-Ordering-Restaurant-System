@@ -3,7 +3,9 @@ package org.example.backend.service.cart;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
+import org.example.backend.dto.cart.CartItemDto;
 import org.example.backend.entity.cart.Cart;
+import org.example.backend.entity.cart.CartItem;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.user.User;
 import org.example.backend.exception.ResourceNotFoundException;
@@ -73,6 +75,18 @@ public class CartService {
         if (dto.getStatus() != null) {
             cart.setStatus(paramRepository.findByTypeAndCode("CART_STATUS", dto.getStatus())
                     .orElseThrow(() -> new RuntimeException("Invalid status")));
+        }
+
+        if (dto.getItems() != null) {
+            for (CartItemDto itemDto : dto.getItems()) {
+                CartItem item = cart.getItems().stream()
+                        .filter(i -> i.getId().equals(itemDto.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Item not found"));
+
+                item.setQuantity(itemDto.getQuantity());
+                // Có thể update các field khác nếu muốn
+            }
         }
         cart = cartRepository.save(cart);
         return new CartDto(cart);
