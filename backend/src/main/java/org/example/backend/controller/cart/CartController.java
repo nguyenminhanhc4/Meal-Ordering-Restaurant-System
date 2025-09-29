@@ -32,14 +32,12 @@ public class CartController {
 
     @GetMapping("/current")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentCart(@RequestHeader("Authorization") String authHeader) {
-        // Token: "Bearer <token>"
-        String token = authHeader.replace("Bearer ", "");
+    public ResponseEntity<?> getCurrentCart(@CookieValue("token") String token) {
         String publicId = jwtUtil.getPublicIdFromToken(token);
-
         CartDto currentCart = cartService.getCurrentCart(publicId);
         return ResponseEntity.ok(new Response<>("success", currentCart, "Current cart fetched successfully"));
     }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")

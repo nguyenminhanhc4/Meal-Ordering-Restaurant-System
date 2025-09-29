@@ -6,6 +6,11 @@ import { useNotification } from "../../../components/Notification/NotificationCo
 import { AxiosError } from "axios";
 import { getMenuItemById } from "../../../services/fetchProduct";
 import type { Product } from "../../../services/fetchProduct";
+import {
+  getCurrentCart,
+  createCart,
+  addItemToCart,
+} from "../../../services/cart/cartService";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,12 +42,28 @@ const ProductDetail: React.FC = () => {
     fetchData();
   }, [id, notify]);
 
-  const handleAddToCart = () => {
-    if (!product || product.status !== "AVAILABLE") {
-      notify("error", `${product?.name || "Món ăn"} hiện không có sẵn`);
+  const handleAddToCart = async () => {
+    if (product?.status !== "AVAILABLE") {
+      notify("error", `${product?.name} hiện không có sẵn`);
       return;
     }
-    notify("success", `Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
+
+    try {
+      // Lấy cart hiện tại, nếu chưa có thì tạo mới
+      const cart = await getCurrentCart().catch(() => createCart());
+
+      // Thêm item vào cart với quantity từ input
+      const updatedCart = await addItemToCart(cart.id, {
+        menuItemId: product.id,
+        quantity: quantity, // lấy từ state input
+      });
+
+      notify("success", `Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
+      console.log("Updated cart:", updatedCart);
+    } catch (error) {
+      notify("error", "Lỗi khi thêm vào giỏ hàng");
+      console.error(error);
+    }
   };
 
   // tạm tính: sản phẩm mới trong 7 ngày
@@ -193,7 +214,12 @@ const ProductDetail: React.FC = () => {
                 color="success"
                 size="lg"
                 onClick={handleAddToCart}
-                className="text-white !bg-gradient-to-r !from-green-600 !to-green-700 hover:!from-green-700 hover:!to-green-800 hover:scale-105 transition-transform duration-200 flex-1">
+                disabled={product.status !== "AVAILABLE"}
+                className={`text-white !bg-gradient-to-r !from-green-600 !to-green-700 hover:!from-green-700 hover:!to-green-800 hover:scale-105 transition-transform duration-200 flex-1 ${
+                  product.status !== "AVAILABLE"
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}>
                 <HiShoppingCart className="mr-2 h-5 w-5" />
                 Thêm vào giỏ hàng
               </Button>

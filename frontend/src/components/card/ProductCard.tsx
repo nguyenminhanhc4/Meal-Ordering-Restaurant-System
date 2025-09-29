@@ -3,6 +3,11 @@ import { Button, Badge } from "flowbite-react";
 import { HiStar, HiEye, HiShoppingCart } from "react-icons/hi";
 import type { Product } from "../../services/fetchProduct";
 import { useNotification } from "../Notification/NotificationContext";
+import {
+  getCurrentCart,
+  createCart,
+  addItemToCart,
+} from "../../services/cart/cartService";
 
 interface ProductCardProps {
   product: Product;
@@ -11,12 +16,28 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { notify } = useNotification();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (product.status !== "AVAILABLE") {
       notify("error", `${product.name} hiện không có sẵn`);
       return;
     }
-    notify("success", `Đã thêm ${product.name} vào giỏ hàng`);
+
+    try {
+      // Lấy cart hiện tại
+      const cart = await getCurrentCart().catch(() => createCart());
+
+      // Thêm item vào cart
+      const updatedCart = await addItemToCart(cart.id, {
+        menuItemId: product.id,
+        quantity: 1,
+      });
+
+      notify("success", `Đã thêm ${product.name} vào giỏ hàng`);
+      console.log("Updated cart:", updatedCart);
+    } catch (error) {
+      notify("error", "Lỗi khi thêm vào giỏ hàng");
+      console.error(error);
+    }
   };
 
   const isNew =
