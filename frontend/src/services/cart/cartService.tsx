@@ -28,6 +28,11 @@ export interface Cart {
   items?: CartItem[];
 }
 
+export interface CartDeleteRequest {
+  cartId?: number;
+  itemIds?: number[];
+}
+
 export const getCurrentCart = async (): Promise<Cart> => {
   try {
     const res = await api.get<ApiResponse<Cart>>("/carts/current", {
@@ -88,6 +93,20 @@ export const updateCartItem = async (
     return res.data.data;
   } catch (error) {
     console.error(`Error updating cart item ${itemId}`, error);
+    throw error;
+  }
+};
+
+export const deleteCartItems = async (
+  payload: CartDeleteRequest
+): Promise<void> => {
+  try {
+    await api.delete<ApiResponse<void>>("/cart-items", {
+      data: payload,
+      withCredentials: true,
+    });
+  } catch (error) {
+    console.error("Error deleting cart items", error);
     throw error;
   }
 };

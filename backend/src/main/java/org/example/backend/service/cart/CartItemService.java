@@ -74,6 +74,24 @@ public class CartItemService {
         cartItemRepository.delete(entity);
     }
 
+    public void deleteByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách id không được rỗng");
+        }
+        cartItemRepository.deleteAllById(ids);
+    }
+
+    public void clearCart(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+        if (items.isEmpty()) {
+            return; // không có gì để xóa
+        }
+        cartItemRepository.deleteAll(items);
+    }
+
     private CartItem toEntity(CartItemDto dto) {
         CartItem entity = new CartItem();
         entity.setId(dto.getId());

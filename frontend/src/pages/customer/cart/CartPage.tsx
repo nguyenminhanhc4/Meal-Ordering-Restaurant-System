@@ -11,21 +11,31 @@ import {
   Card,
   Tooltip,
   Badge,
+  Checkbox,
 } from "flowbite-react";
 import { HiTrash, HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
 import {
   getCurrentCart,
   updateCartItem,
+  deleteCartItems, // <-- thêm service API
 } from "../../../services/cart/cartService";
 import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
 
 const CartPage: React.FC = () => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [cartUpdated, setCartUpdated] = useState<number>(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
+  const [confirmMessage, setConfirmMessage] = useState<string>("");
+
   const { notify } = useNotification();
+
+  // lưu các item đã chọn
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -66,9 +76,38 @@ const CartPage: React.FC = () => {
     }
   };
 
-  const handleRemoveItem = (itemId: number) => {
-    console.log(`Xóa item ${itemId}`);
-    // TODO: Gọi API xóa món nếu cần
+  // Xóa item (1 hoặc nhiều)
+  const handleRemoveItem = async (itemIds: number[]) => {
+    try {
+      await deleteCartItems({ itemIds });
+      setCartUpdated((prev) => prev + 1);
+      notify("success", "Đã xóa khỏi giỏ hàng");
+      setSelectedItems([]); // reset chọn
+    } catch (err) {
+      console.error("Error deleting cart items:", err);
+      notify("error", "Xóa món thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const handleClearCart = async () => {
+    if (!cart) return;
+    try {
+      await deleteCartItems({ cartId: cart.id });
+      setCartUpdated((prev) => prev + 1);
+      notify("success", "Đã xóa toàn bộ giỏ hàng");
+      setSelectedItems([]);
+    } catch (err) {
+      console.error("Error clearing cart:", err);
+      notify("error", "Xóa toàn bộ thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const toggleSelectItem = (itemId: number) => {
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
   const calculateTotal = (items: CartItem[] | undefined): string => {
@@ -101,6 +140,12 @@ const CartPage: React.FC = () => {
     );
   };
 
+  const openConfirm = (message: string, action: () => void) => {
+    setConfirmMessage(message);
+    setConfirmAction(() => action); // gán action cần thực hiện
+    setConfirmOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -120,13 +165,16 @@ const CartPage: React.FC = () => {
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-8xl py-12 px-4 md:px-6">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
+        <h1 className="text-4xl font-bold mb-8 text-center text-amber-800">
           Giỏ hàng của bạn
         </h1>
         {cart && cart.items && cart.items.length > 0 ? (
           <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm">
             <Table hoverable striped className="rounded-lg">
               <TableHead>
+                <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
+                  <Checkbox className="!bg-white" disabled /> {/* cột chọn */}
+                </TableHeadCell>
                 <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
                   Hình ảnh
                 </TableHeadCell>
@@ -150,6 +198,13 @@ const CartPage: React.FC = () => {
                     className={`!bg-white hover:!bg-amber-50 transition-colors duration-200 ${
                       item.status === "OUT_OF_STOCK" ? "opacity-50" : ""
                     }`}>
+                    <TableCell className="text-center">
+                      <Checkbox
+                        className="mx-auto !bg-white"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() => toggleSelectItem(item.id)}
+                      />
+                    </TableCell>
                     <TableCell className="text-center py-4">
                       <img
                         src={item.avatarUrl}
@@ -228,7 +283,12 @@ const CartPage: React.FC = () => {
                         color="failure"
                         size="sm"
                         className="!text-white !bg-red-500 hover:!bg-red-600"
-                        onClick={() => handleRemoveItem(item.id)}
+                        onClick={() =>
+                          openConfirm(
+                            `Bạn có chắc muốn xóa "${item.menuItemName}" khỏi giỏ hàng?`,
+                            () => handleRemoveItem([item.id])
+                          )
+                        }
                         disabled={item.status === "OUT_OF_STOCK"}>
                         <HiTrash className="h-5 w-5" />
                       </Button>
@@ -237,6 +297,37 @@ const CartPage: React.FC = () => {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Nút xóa */}
+            <div className="mt-4 flex justify-between">
+              <div className="flex gap-2">
+                <Button
+                  color="red"
+                  size="sm"
+                  onClick={() =>
+                    openConfirm(
+                      `Bạn có chắc muốn xóa ${selectedItems.length} món đã chọn?`,
+                      () => handleRemoveItem(selectedItems)
+                    )
+                  }
+                  disabled={selectedItems.length === 0}>
+                  Xóa đã chọn
+                </Button>
+                <Button
+                  color="red"
+                  size="sm"
+                  onClick={() =>
+                    openConfirm(
+                      "Bạn có chắc muốn xóa toàn bộ giỏ hàng?",
+                      handleClearCart
+                    )
+                  }
+                  disabled={!cart.items || cart.items.length === 0}>
+                  Xóa tất cả
+                </Button>
+              </div>
+            </div>
+
             <div className="mt-6 flex justify-between items-center">
               <div className="text-gray-600">
                 <p className="text-lg">
@@ -266,7 +357,7 @@ const CartPage: React.FC = () => {
                   size="lg"
                   className="!text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200"
                   disabled={!isCartValid(cart.items)}>
-                  Thanh toán ngay
+                  Đặt hàng
                 </Button>
               </div>
             </div>
@@ -280,12 +371,24 @@ const CartPage: React.FC = () => {
             <Button
               color="primary"
               className="mt-6 mx-auto !bg-amber-500 hover:!bg-amber-600"
-              onClick={() => (window.location.href = "/menu")}>
+              href="/menu">
               Xem thực đơn
             </Button>
           </Card>
         )}
       </div>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Xác nhận xóa"
+        message={confirmMessage}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        onConfirm={() => {
+          confirmAction();
+          setConfirmOpen(false);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </section>
   );
 };
