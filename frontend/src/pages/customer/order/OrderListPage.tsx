@@ -104,7 +104,7 @@ const OrderListPage: React.FC = () => {
                       color={
                         order.status === "PENDING"
                           ? "yellow"
-                          : order.status === "COMPLETED"
+                          : order.status === "PAID"
                           ? "green"
                           : "red"
                       }>

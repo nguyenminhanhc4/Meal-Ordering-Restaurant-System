@@ -112,7 +112,7 @@ const CartPage: React.FC = () => {
       const order: OrderDto = await checkoutCart(cart);
       notify("success", `Đặt hàng thành công! Mã đơn: ${order.publicId}`);
       // Chuyển sang trang payment nếu có
-      navigate(`/payment/${order.publicId}`);
+      navigate(`/order`);
     } catch (error) {
       console.error("Checkout failed", error);
       notify("error", "Đặt hàng thất bại. Vui lòng thử lại.");

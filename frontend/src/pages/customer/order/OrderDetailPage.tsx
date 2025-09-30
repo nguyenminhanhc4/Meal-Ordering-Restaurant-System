@@ -138,13 +138,25 @@ const OrderDetailPage: React.FC = () => {
           </Table>
 
           {/* Back Button */}
-          <div className="mt-6 flex justify-end">
+          {/* Action Buttons */}
+          <div className="mt-6 flex justify-between items-center">
+            {/* Quay lại */}
             <Button
               color="purple"
               href="/order"
               className="flex items-center gap-2">
               <HiArrowLeft className="text-lg" /> Quay lại
             </Button>
+
+            {/* Thanh toán (chỉ khi PENDING) */}
+            {order.status === "PENDING" && (
+              <Button
+                color="green"
+                href={`/orders/${order.publicId}/payment`}
+                className="flex items-center gap-2">
+                <HiCurrencyDollar className="text-lg" /> Thanh toán
+              </Button>
+            )}
           </div>
         </Card>
       </div>
