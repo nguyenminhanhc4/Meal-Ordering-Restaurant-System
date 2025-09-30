@@ -5,6 +5,8 @@ import org.example.backend.entity.order.Order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -21,6 +23,7 @@ public class OrderDto {
     private BigDecimal totalAmount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<OrderItemDto> orderItems;
 
     public OrderDto(Order entity) {
         if (entity != null) {
@@ -32,6 +35,9 @@ public class OrderDto {
             this.totalAmount = entity.getTotalAmount();
             this.createdAt = entity.getCreatedAt();
             this.updatedAt = entity.getUpdatedAt();
+            this.orderItems = entity.getOrderItems() != null
+                    ? entity.getOrderItems().stream().map(OrderItemDto::new).collect(Collectors.toList())
+                    : null;
         }
     }
 }

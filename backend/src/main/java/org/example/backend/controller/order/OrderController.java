@@ -24,10 +24,18 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/me/{userPublicId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
-        OrderDto order = orderService.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+    public ResponseEntity<?> getCurrentUserOrders(@PathVariable String userPublicId) {
+        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(userPublicId);
+        return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
+    }
+
+    @GetMapping("/{publicId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getByPublicId(@PathVariable String publicId) {
+        OrderDto order = orderService.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
         return ResponseEntity.ok(new Response<>("success", order, "Order retrieved successfully"));
     }
 
@@ -38,17 +46,17 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", saved, "Order created successfully"));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{publicId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody OrderDto dto) {
-        OrderDto updated = orderService.updateById(id, dto);
+    public ResponseEntity<?> update(@PathVariable String publicId, @RequestBody OrderDto dto) {
+        OrderDto updated = orderService.updateByPublicId(publicId, dto);
         return ResponseEntity.ok(new Response<>("success", updated, "Order updated successfully"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{publicId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        orderService.deleteById(id);
+    public ResponseEntity<?> delete(@PathVariable String publicId) {
+        orderService.deleteByPublicId(publicId);
         return ResponseEntity.ok(new Response<>("success", null, "Order deleted successfully"));
     }
 }
