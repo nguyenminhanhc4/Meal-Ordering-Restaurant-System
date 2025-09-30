@@ -62,30 +62,45 @@ const MegaMenuComponent: React.FC = () => {
           XYZ Restaurant
         </span>
       </NavbarBrand>
-      <div className="flex md:order-2 space-x-4">
+      <div className="flex items-center gap-6 md:order-2">
+        {/* Cart */}
+        <a
+          href="/cart"
+          className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 transition text-white shadow">
+          <HiOutlineShoppingCart className="h-5 w-5 text-yellow-400" />
+          <span className="hidden sm:inline font-medium">Giỏ hàng</span>
+          {/* Badge số lượng (nếu có) */}
+          {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">3</span> */}
+        </a>
+
+        {/* User dropdown */}
         {isLoggedIn && user ? (
           <Dropdown
             arrowIcon={false}
             inline
             label={
-              <div className="flex items-center gap-2 min-w-[100px] max-w-[300px]">
-                <div className="hidden sm:flex flex-col">
-                  <span className="text-lg font-semibold text-yellow-400">
-                    {user.name}
-                  </span>
-                </div>
+              <div className="flex items-center gap-4">
                 <Avatar
                   alt="User avatar"
-                  img={user.avatarUrl || undefined} // null/undefined thì sẽ fallback
+                  img={user.avatarUrl || undefined}
                   rounded
+                  size="md" // tăng kích thước avatar
                   placeholderInitials={
                     user.name ? user.name.charAt(0).toUpperCase() : "?"
                   }
                 />
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-base font-semibold text-yellow-400 truncate max-w-[180px]">
+                    {user.name}
+                  </span>
+                  <span className="text-xs text-gray-300 truncate max-w-[180px]">
+                    {user.email}
+                  </span>
+                </div>
               </div>
             }
             className="!bg-stone-800 shadow-lg rounded-lg">
-            <DropdownHeader className="bg-stone-700 !text-yellow-400">
+            <DropdownHeader className="bg-stone-700 !text-yellow-400 flex flex-col items-start">
               <span className="block text-sm font-semibold">{user.name}</span>
               <span className="block truncate text-xs">{user.email}</span>
             </DropdownHeader>
@@ -103,7 +118,7 @@ const MegaMenuComponent: React.FC = () => {
             <DropdownItem
               className="flex items-center gap-3 hover:!text-yellow-400"
               onClick={async () => {
-                await logout(); // từ AuthContext
+                await logout();
                 notify("success", "Đăng xuất thành công!");
               }}>
               <HiOutlineLogout className="text-yellow-400" />
@@ -117,10 +132,8 @@ const MegaMenuComponent: React.FC = () => {
             Đăng nhập
           </Button>
         )}
-        <a href="/cart" className="flex items-center text-white">
-          <HiOutlineShoppingCart className="h-6 w-6" />
-          <span className="ml-2">Cart</span>
-        </a>
+
+        {/* Navbar toggle */}
         <NavbarToggle />
       </div>
       <NavbarCollapse>

@@ -4,7 +4,7 @@ export interface OrderItemDto {
   menuItemId: number;
   menuItemName?: string;
   quantity: number;
-  price?: number;
+  price: number;
 }
 
 export interface OrderDto {

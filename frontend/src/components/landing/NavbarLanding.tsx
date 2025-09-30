@@ -96,20 +96,25 @@ export default function NavbarLanding() {
               arrowIcon={false}
               inline
               label={
-                <div className="flex items-center gap-2 min-w-[100px] max-w-[300px]">
-                  <div className="hidden sm:flex flex-col">
-                    <span className="text-lg font-semibold text-yellow-400">
-                      {user.name}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-3">
                   <Avatar
                     alt="User avatar"
-                    img={user.avatarUrl || undefined} // null/undefined thì sẽ fallback
+                    img={user.avatarUrl || undefined}
                     rounded
+                    size="md" // tăng size avatar (flowbite hỗ trợ sm, md, lg)
+                    className="w-10 h-10" // fallback đảm bảo to hơn mặc định
                     placeholderInitials={
                       user.name ? user.name.charAt(0).toUpperCase() : "?"
                     }
                   />
+                  <div className="hidden sm:flex flex-col text-left">
+                    <span className="text-base font-semibold text-yellow-400 truncate max-w-[160px]">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-gray-400 truncate max-w-[160px]">
+                      {user.email}
+                    </span>
+                  </div>
                 </div>
               }
               className="!bg-stone-800 shadow-lg rounded-lg">
@@ -121,7 +126,9 @@ export default function NavbarLanding() {
                 <HiOutlineUser className="text-yellow-400" />
                 Hồ sơ
               </DropdownItem>
-              <DropdownItem className="flex items-center gap-3 hover:!text-yellow-400">
+              <DropdownItem
+                className="flex items-center gap-3 hover:!text-yellow-400"
+                href="/order">
                 <HiOutlineShoppingCart className="text-yellow-400" />
                 Đơn hàng
               </DropdownItem>
