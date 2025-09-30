@@ -1,6 +1,7 @@
 package org.example.backend.entity.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.backend.entity.param.Param;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,6 +31,14 @@ public class User {
 
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
+
+    @Column(name = "phone")
+    @Size(max = 20, message = "Phone cannot be longer than 20 characters")
+    private String phone;
+
+    @Column(name = "address")
+    @Size(max = 255, message = "Address cannot be longer than 255 characters")
+    private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
