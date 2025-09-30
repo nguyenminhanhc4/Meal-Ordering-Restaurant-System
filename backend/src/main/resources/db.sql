@@ -6,29 +6,54 @@
   UNIQUE(type, code)
   );
 
-CREATE TABLE users (
-                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                       public_id CHAR(36) NOT NULL UNIQUE,
-                       name VARCHAR(100) NOT NULL,
-                       email VARCHAR(100) NOT NULL UNIQUE,
-                       password_hash VARCHAR(255) NOT NULL,
-                       avatar_url VARCHAR(255),
-                       role_id BIGINT NOT NULL,
-                       gender_id BIGINT,
-                       status_id BIGINT, -- ACTIVE / INACTIVE
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                       FOREIGN KEY (role_id) REFERENCES params(id),
-                       FOREIGN KEY (gender_id) REFERENCES params(id),
-                       FOREIGN KEY (status_id) REFERENCES params(id)
-);
+-- auto-generated definition
+  create table users
+  (
+      id            bigint auto_increment
+          primary key,
+      public_id     varchar(36)                         not null,
+      name          varchar(100)                        not null,
+      email         varchar(100)                        not null,
+      phone         varchar(20)                         null,
+      address       varchar(255)                        null,
+      password_hash varchar(255)                        not null,
+      avatar_url    varchar(255)                        null,
+      role_id       bigint                              not null,
+      gender_id     bigint                              null,
+      status_id     bigint                              null,
+      created_at    timestamp default CURRENT_TIMESTAMP null,
+      updated_at    timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+      constraint email
+          unique (email),
+      constraint public_id
+          unique (public_id),
+      constraint users_ibfk_1
+          foreign key (role_id) references params (id),
+      constraint users_ibfk_2
+          foreign key (gender_id) references params (id),
+      constraint users_ibfk_3
+          foreign key (status_id) references params (id)
+  );
 
-CREATE TABLE staff (
+  create index gender_id
+      on users (gender_id);
+
+  create index idx_users_public_id
+      on users (public_id);
+
+  create index role_id
+      on users (role_id);
+
+  create index status_id
+      on users (status_id);
+
+
+
+  CREATE TABLE staff (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        user_id BIGINT NOT NULL UNIQUE,
                        position_id BIGINT, -- tham chiếu params
                        salary DECIMAL(12,2) CHECK (salary >= 0),
-                       avatar_url VARCHAR(255),
                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                        FOREIGN KEY (position_id) REFERENCES params(id)
 );
