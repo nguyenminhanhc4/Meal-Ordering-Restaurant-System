@@ -108,7 +108,7 @@ const ProductDetail: React.FC = () => {
   }
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100 py-12 px-4 sm:px-6 md:px-8">
+    <section className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="max-w-screen-xl mx-auto animate-fadeIn py-12 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="group">

@@ -4,6 +4,7 @@ import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.order.OrderService;
+import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -33,10 +37,11 @@ public class OrderController {
     }
 
 
-    @GetMapping("/me/{userPublicId}")
+    @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrders(@PathVariable String userPublicId) {
-        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(userPublicId);
+    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token) {
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(publicId);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 

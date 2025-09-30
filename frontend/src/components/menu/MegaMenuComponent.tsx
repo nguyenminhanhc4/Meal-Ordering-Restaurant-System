@@ -93,7 +93,9 @@ const MegaMenuComponent: React.FC = () => {
               <HiOutlineUser className="text-yellow-400" />
               Hồ sơ
             </DropdownItem>
-            <DropdownItem className="flex items-center gap-3 hover:!text-yellow-400">
+            <DropdownItem
+              className="flex items-center gap-3 hover:!text-yellow-400"
+              href="/order">
               <HiOutlineShoppingCart className="text-yellow-400" />
               Đơn hàng
             </DropdownItem>
