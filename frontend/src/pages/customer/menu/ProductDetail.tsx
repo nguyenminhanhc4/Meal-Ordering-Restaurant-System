@@ -5,8 +5,8 @@ import { HiShoppingCart, HiArrowLeft } from "react-icons/hi";
 import { FaStarHalf, FaStar } from "react-icons/fa";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { AxiosError } from "axios";
-import { getMenuItemById } from "../../../services/fetchProduct";
-import type { Product } from "../../../services/fetchProduct";
+import { getMenuItemById } from "../../../services/product/fetchProduct";
+import type { Product } from "../../../services/product/fetchProduct";
 import {
   getCurrentCart,
   createCart,

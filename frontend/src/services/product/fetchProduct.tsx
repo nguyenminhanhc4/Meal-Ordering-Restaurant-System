@@ -1,5 +1,5 @@
-import type { ApiResponse } from "../services/types/ApiType";
-import api from "../api/axios";
+import type { ApiResponse } from "../../services/types/ApiType";
+import api from "../../api/axios";
 
 export interface Review {
   id: number;

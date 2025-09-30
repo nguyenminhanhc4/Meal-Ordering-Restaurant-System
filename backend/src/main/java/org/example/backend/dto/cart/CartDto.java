@@ -3,6 +3,7 @@ package org.example.backend.dto.cart;
 import lombok.*;
 import org.example.backend.entity.cart.Cart;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,5 +33,12 @@ public class CartDto {
                         .toList();
             }
         }
+    }
+
+    public BigDecimal getTotalAmount() {
+        if (items == null || items.isEmpty()) return BigDecimal.ZERO;
+        return items.stream()
+                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

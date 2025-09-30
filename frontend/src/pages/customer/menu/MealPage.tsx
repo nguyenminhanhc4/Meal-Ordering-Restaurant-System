@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getAllMenuItems } from "../../../services/fetchProduct";
-import type { Product } from "../../../services/fetchProduct";
+import { getAllMenuItems } from "../../../services/product/fetchProduct";
+import type { Product } from "../../../services/product/fetchProduct";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import ProductCard from "../../../components/card/ProductCard";
 import SearchBar from "../../../components/search_filter/SearchBar";

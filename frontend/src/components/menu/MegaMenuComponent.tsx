@@ -21,8 +21,8 @@ import {
 import Logo from "../../assets/img/vite.svg"; // Replace with your restaurant logo path
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../Notification/NotificationContext";
-import { fetchCategories } from "../../services/fetchCategories";
-import type { Category } from "../../services/fetchCategories";
+import { fetchCategories } from "../../services/category/fetchCategories";
+import type { Category } from "../../services/category/fetchCategories";
 import { AxiosError } from "axios";
 
 const MegaMenuComponent: React.FC = () => {

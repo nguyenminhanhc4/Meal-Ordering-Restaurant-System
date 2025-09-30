@@ -1,5 +1,6 @@
 package org.example.backend.controller.order;
 
+import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.order.OrderService;
@@ -23,6 +24,14 @@ public class OrderController {
         List<OrderDto> orders = orderService.findAll();
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
+
+    @PostMapping("/checkout")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> checkout(@RequestBody CartDto cart) {
+        OrderDto order = orderService.checkoutCart(cart);
+        return ResponseEntity.ok(new Response<>("success", order, "Order created successfully"));
+    }
+
 
     @GetMapping("/me/{userPublicId}")
     @PreAuthorize("isAuthenticated()")

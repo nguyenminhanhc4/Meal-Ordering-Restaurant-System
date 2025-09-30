@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Badge } from "flowbite-react";
 import { HiEye, HiShoppingCart } from "react-icons/hi";
 import { FaStar, FaStarHalf } from "react-icons/fa";
-import type { Product } from "../../services/fetchProduct";
+import type { Product } from "../../services/product/fetchProduct";
 import { useNotification } from "../Notification/NotificationContext";
 import {
   getCurrentCart,

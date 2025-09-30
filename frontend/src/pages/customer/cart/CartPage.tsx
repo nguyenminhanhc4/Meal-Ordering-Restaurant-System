@@ -22,6 +22,9 @@ import {
 import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import { checkoutCart } from "../../../services/order/checkoutService";
+import type { OrderDto } from "../../../services/types/OrderType";
+import { useNavigate } from "react-router-dom";
 
 const CartPage: React.FC = () => {
   const [cart, setCart] = useState<Cart | null>(null);
@@ -33,6 +36,7 @@ const CartPage: React.FC = () => {
   const [confirmMessage, setConfirmMessage] = useState<string>("");
 
   const { notify } = useNotification();
+  const navigate = useNavigate();
 
   // lưu các item đã chọn
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
@@ -99,6 +103,19 @@ const CartPage: React.FC = () => {
     } catch (err) {
       console.error("Error clearing cart:", err);
       notify("error", "Xóa toàn bộ thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!cart) return;
+    try {
+      const order: OrderDto = await checkoutCart(cart);
+      notify("success", `Đặt hàng thành công! Mã đơn: ${order.publicId}`);
+      // Chuyển sang trang payment nếu có
+      navigate(`/payment/${order.publicId}`);
+    } catch (error) {
+      console.error("Checkout failed", error);
+      notify("error", "Đặt hàng thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -356,7 +373,8 @@ const CartPage: React.FC = () => {
                   color="success"
                   size="lg"
                   className="!text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105 transition-transform duration-200"
-                  disabled={!isCartValid(cart.items)}>
+                  disabled={!isCartValid(cart.items)}
+                  onClick={handleCheckout}>
                   Đặt hàng
                 </Button>
               </div>
