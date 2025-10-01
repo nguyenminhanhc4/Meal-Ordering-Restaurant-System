@@ -2,20 +2,25 @@ package org.example.backend.entity.menu;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.inventory.Inventory;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.review.Review;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "menu_items")
 @Data
 @NoArgsConstructor
-public class MenuItem {
+public class MenuItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,12 +45,6 @@ public class MenuItem {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
     private List<Review> reviews;

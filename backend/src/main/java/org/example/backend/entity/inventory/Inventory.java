@@ -2,7 +2,10 @@ package org.example.backend.entity.inventory;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.menu.MenuItem;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Inventory {
+public class Inventory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +28,4 @@ public class Inventory {
 
     @Column(nullable = false)
     private Integer quantity;
-
-    @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
 }

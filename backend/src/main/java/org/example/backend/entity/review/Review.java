@@ -2,8 +2,12 @@ package org.example.backend.entity.review;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.user.User;
 import org.example.backend.entity.menu.MenuItem;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review {
+public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +38,4 @@ public class Review {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

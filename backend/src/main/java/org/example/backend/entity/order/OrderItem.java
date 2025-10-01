@@ -3,6 +3,7 @@ package org.example.backend.entity.order;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.backend.entity.menu.MenuItem;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 

@@ -2,6 +2,7 @@ package org.example.backend.entity.cart;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.user.User;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,8 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Cart {
+public class Cart extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,14 +33,6 @@ public class Cart {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private Param status; // ACTIVE / CHECKED_OUT
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
