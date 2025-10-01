@@ -63,7 +63,7 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setStatus(paramRepository.findByTypeAndCode("STATUS_CART", "AVAILABLE")
+        cart.setStatus(paramRepository.findByTypeAndCode("STATUS_CART", "OPEN")
                 .orElseThrow(() -> new RuntimeException("Default status not found")));
         return cartRepository.save(cart);
     }

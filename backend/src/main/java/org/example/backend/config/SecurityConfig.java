@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/carts/**").authenticated()
                         .requestMatchers("/api/v1/cart-items/**").authenticated()
                         .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/payments/**").authenticated()
                         .requestMatchers("/api/v1/menu-items/**").permitAll()
                         .requestMatchers("/api/v1/staff/**").hasRole("ADMIN") // Require ADMIN role for /staff/**
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN") // Require ADMIN role for /users/**

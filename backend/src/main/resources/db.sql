@@ -238,6 +238,20 @@ CREATE TABLE notifications (
                                FOREIGN KEY (type_id) REFERENCES params(id)
 );
 
+  CREATE TABLE shipping_info (
+                                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                 payment_id BIGINT NOT NULL,
+                                 full_name VARCHAR(255) NOT NULL,
+                                 email VARCHAR(255) NOT NULL,
+                                 phone VARCHAR(50) NOT NULL,
+                                 address TEXT NOT NULL,
+                                 note TEXT,
+                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                 CONSTRAINT fk_shipping_payment FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
+  );
+
+
 CREATE INDEX idx_users_public_id ON users(public_id);
 CREATE INDEX idx_orders_public_id ON orders(public_id);
 CREATE INDEX idx_reservations_public_id ON reservations(public_id);

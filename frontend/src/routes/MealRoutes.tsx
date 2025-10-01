@@ -5,6 +5,7 @@ import ProductDetail from "../pages/customer/menu/ProductDetail";
 import CartPage from "../pages/customer/cart/CartPage";
 import OrderListPage from "../pages/customer/order/OrderListPage";
 import OrderDetailPage from "../pages/customer/order/OrderDetailPage";
+import PaymentPage from "../pages/customer/order/PaymentPage";
 
 export default (
   <Route element={<MealLayout />}>
@@ -14,5 +15,6 @@ export default (
     <Route path="/cart" element={<CartPage />} />
     <Route path="/order" element={<OrderListPage />} />
     <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+    <Route path="/orders/:orderId/payment" element={<PaymentPage />} />
   </Route>
 );

@@ -3,10 +3,12 @@ package org.example.backend.service.order;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
+import org.example.backend.entity.cart.Cart;
 import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.param.Param;
+import org.example.backend.repository.cart.CartRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.order.OrderRepository;
@@ -30,6 +32,7 @@ public class OrderService {
     private final ParamRepository paramRepository;
     private final MenuItemRepository menuItemRepository;
     private final OrderItemRepository orderItemRepository;
+    private final CartRepository cartRepository;
 
     @Transactional
     public OrderDto checkoutCart(CartDto cart) {
@@ -57,7 +60,14 @@ public class OrderService {
 
         order.setOrderItems(orderItems);
 
-        // 3. Trả OrderDto về FE
+        // 3. Đổi trạng thái Cart
+        Cart cartEntity = cartRepository.findById(cart.getId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        Param cartStatus = paramRepository.findByTypeAndCode("STATUS_CART","CANCELLED").get();
+        cartEntity.setStatus(cartStatus);
+        cartRepository.save(cartEntity);
+
+        // 4. Trả OrderDto về FE
         return new OrderDto(order);
     }
 

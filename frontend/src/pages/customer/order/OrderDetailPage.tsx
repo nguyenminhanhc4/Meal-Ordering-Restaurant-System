@@ -1,6 +1,6 @@
 // src/pages/customer/orders/OrderDetailPage.tsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, Badge, Spinner, Table, Button } from "flowbite-react";
 import {
   HiArrowLeft,
@@ -16,6 +16,7 @@ const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams(); // lấy orderId từ URL
   const [order, setOrder] = useState<OrderDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -63,7 +64,7 @@ const OrderDetailPage: React.FC = () => {
               color={
                 order.status === "PENDING"
                   ? "yellow"
-                  : order.status === "COMPLETED"
+                  : order.status === "PAID"
                   ? "green"
                   : "red"
               }
@@ -152,7 +153,11 @@ const OrderDetailPage: React.FC = () => {
             {order.status === "PENDING" && (
               <Button
                 color="green"
-                href={`/orders/${order.publicId}/payment`}
+                onClick={() =>
+                  navigate(`/orders/${order.publicId}/payment`, {
+                    state: { order },
+                  })
+                }
                 className="flex items-center gap-2">
                 <HiCurrencyDollar className="text-lg" /> Thanh toán
               </Button>
