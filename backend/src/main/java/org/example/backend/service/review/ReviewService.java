@@ -66,15 +66,6 @@ public class ReviewService {
         entity.setComment(dto.getComment());
         entity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
-
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        entity.setUser(user);
-
-        MenuItem menuItem = menuItemRepository.findById(dto.getMenuItemId())
-                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
-        entity.setMenuItem(menuItem);
-
         return entity;
     }
 }

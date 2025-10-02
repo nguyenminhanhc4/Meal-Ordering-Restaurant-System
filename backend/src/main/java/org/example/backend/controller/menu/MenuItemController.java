@@ -27,6 +27,15 @@ public class MenuItemController {
         );
     }
 
+    @GetMapping("/top-popular")
+    public ResponseEntity<?> getTopPopularMenuItems() {
+        int limit = 6; // top 6
+        List<MenuItemDto> topPopular = menuItemService.findTopPopular(limit);
+        return ResponseEntity.ok(
+                new Response<>("success", topPopular, "Top popular menu items retrieved successfully")
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getMenuItemById(@PathVariable Long id) {
         MenuItemDto menuItem = menuItemService.getById(id);

@@ -1,5 +1,6 @@
 package org.example.backend.controller.cart;
 
+import org.example.backend.dto.cart.CartDeleteDTO;
 import org.example.backend.dto.cart.CartItemDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.cart.CartItemService;
@@ -31,10 +32,10 @@ public class CartItemController {
         return ResponseEntity.ok(new Response<>("success", item, "Cart item retrieved successfully"));
     }
 
-    @PostMapping
+    @PostMapping("/{cartId}/items")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> create(@RequestBody CartItemDto dto) {
-        CartItemDto saved = cartItemService.save(dto);
+    public ResponseEntity<?> create(@PathVariable Long cartId, @RequestBody CartItemDto dto) {
+        CartItemDto saved = cartItemService.save(cartId,dto);
         return ResponseEntity.ok(new Response<>("success", saved, "Cart item created successfully"));
     }
 
@@ -50,5 +51,21 @@ public class CartItemController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
         cartItemService.deleteById(id);
         return ResponseEntity.ok(new Response<>("success", null, "Cart item deleted successfully"));
+    }
+
+    @DeleteMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteItems(@RequestBody CartDeleteDTO request) {
+        if (request.getItemIds() != null && !request.getItemIds().isEmpty()) {
+            // xóa nhiều item
+            cartItemService.deleteByIds(request.getItemIds());
+            return ResponseEntity.ok(new Response<>("success", null, "Xóa nhiều item thành công"));
+        } else if (request.getCartId() != null) {
+            // xóa toàn bộ cart
+            cartItemService.clearCart(request.getCartId());
+            return ResponseEntity.ok(new Response<>("success", null, "Đã xóa toàn bộ giỏ hàng"));
+        }
+        return ResponseEntity.badRequest()
+                .body(new Response<>("error", null, "Thiếu thông tin để xóa"));
     }
 }

@@ -1,8 +1,10 @@
 package org.example.backend.dto.menu;
 
 import lombok.Data;
+import org.example.backend.dto.review.ReviewDto;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.menu.MenuItem;
+import org.example.backend.entity.review.Review;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +26,8 @@ public class MenuItemDto {
     private Double rating; // Trung bình từ reviews
     private Long sold; // Tổng quantity từ order_items
     private List<String> tags; // Nếu có
+    private List<ReviewDto> reviews;
+    private Integer availableQuantity;
 
     // Constructor từ entity
     public MenuItemDto(MenuItem entity) {
@@ -42,5 +46,10 @@ public class MenuItemDto {
                 entity.getMenuItemIngredients().stream()
                         .map(menuItemIngredient -> menuItemIngredient.getIngredient().getName())
                         .collect(Collectors.toList()) : null;
+        this.reviews = entity.getReviews() != null ?
+                entity.getReviews().stream()
+                        .map(ReviewDto::new)
+                        .collect(Collectors.toList()) : null;
+        this.availableQuantity = entity.getInventory().getQuantity();
     }
 }

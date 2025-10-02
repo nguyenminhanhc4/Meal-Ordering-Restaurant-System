@@ -2,8 +2,12 @@ package org.example.backend.entity.order;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.user.User;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,8 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
-
+public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,12 +39,6 @@ public class Order {
 
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
