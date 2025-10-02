@@ -41,4 +41,12 @@ public class Payment extends BaseEntity {
     private Param status;
 
     private String transactionId;
+
+    // ----------------- Thêm cho Mock Gateway -----------------
+    @Column(nullable = false, unique = true)
+    private String publicId; // UUID nhận diện payment
+
+    private String returnUrl; // FE redirect URL
+
+    private String providerSignature; // mock signature nếu muốn
 }

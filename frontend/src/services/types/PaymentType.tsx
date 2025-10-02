@@ -8,6 +8,10 @@ export interface PaymentDto {
   amount: number;
   status: PaymentStatus;
   transactionId?: string | null;
+  publicId: string;
+  returnUrl?: string | null;
+  redirectUrl?: string | null; // for ONLINE method
+  note?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../../store/AuthContext";
-import { createPayment } from "../../../services/payment/paymentService";
-import { getOrderById } from "../../../services/order/checkoutService";
-import type { PaymentRequestDto } from "../../../services/types/PaymentType";
-import type { OrderDto } from "../../../services/types/OrderType";
+import { useAuth } from "../../store/AuthContext";
+import { createPayment } from "../../services/payment/paymentService";
+import { initiatePayment } from "../../services/payment/mockPaymentService";
+import { getOrderById } from "../../services/order/checkoutService";
+import type { PaymentRequestDto } from "../../services/types/PaymentType";
+import type { OrderDto } from "../../services/types/OrderType";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { useNotification } from "../../../components/Notification/NotificationContext";
+import { useNotification } from "../../components/Notification/NotificationContext";
 import { AxiosError } from "axios";
 
 // Định nghĩa lại một chút interface cho rõ ràng
@@ -138,12 +139,19 @@ export default function PaymentPage() {
         ...shippingInfo,
       };
 
-      const payment = await createPayment(paymentDataToSend);
-      notify("success", "Thanh toán thành công!");
-      console.log("Payment created:", payment);
+      if (method === "COD") {
+        // COD: tạo payment bình thường
+        const payment = await createPayment(paymentDataToSend);
+        notify("success", "Thanh toán thành công!");
+        console.log("Created payment:", payment);
+        navigate(`/orders/${order.publicId}`, { state: { order } });
+      } else if (method === "ONLINE") {
+        // ONLINE: gọi initiatePayment -> trả về redirectUrl
+        const payment = await initiatePayment(paymentDataToSend); // gọi /mock-payments/initiate
+        console.log("Initiated payment:", payment.redirectUrl);
 
-      // Chuyển hướng tới trang chi tiết đơn hàng (có thể dùng publicId)
-      navigate(`/orders/${order.publicId}`, { state: { order } });
+        window.location.href = `http://localhost:5173${payment.redirectUrl}`;
+      }
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         console.error(

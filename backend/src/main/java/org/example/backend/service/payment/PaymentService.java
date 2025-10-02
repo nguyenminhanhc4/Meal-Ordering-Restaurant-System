@@ -15,6 +15,7 @@ import org.example.backend.dto.payment.PaymentDto;
 import org.example.backend.repository.payment.PaymentRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +51,7 @@ public class PaymentService {
         payment.setPaymentMethod(method);
         payment.setAmount(order.getTotalAmount());
         payment.setStatus(pendingStatus);
+        payment.setPublicId(UUID.randomUUID().toString());
 
         Payment savedPayment = paymentRepository.save(payment);
 

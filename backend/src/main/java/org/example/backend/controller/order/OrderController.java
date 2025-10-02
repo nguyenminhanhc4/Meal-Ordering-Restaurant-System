@@ -6,6 +6,7 @@ import org.example.backend.dto.Response;
 import org.example.backend.service.order.OrderService;
 import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -39,9 +40,10 @@ public class OrderController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token) {
+    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token,
+                                                  @RequestParam(defaultValue = "0") int page) {
         String publicId = jwtUtil.getPublicIdFromToken(token);
-        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(publicId);
+        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Badge, Button, Spinner } from "flowbite-react";
+import { Card, Badge, Button } from "flowbite-react";
 import {
   HiExternalLink,
   HiUser,
@@ -16,41 +16,36 @@ import type { OrderDto } from "../../../services/types/OrderType";
 const OrderListPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loadingNext, setLoadingNext] = useState(false); // Loading khi đổi trang
   const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(6);
 
   const { notify } = useNotification();
 
+  // Giữ dữ liệu cũ khi đổi trang, chỉ update khi data về
   useEffect(() => {
     const fetchOrders = async () => {
+      if (currentPage === 0) setLoading(true);
+      else setLoadingNext(true);
+
       try {
-        const data = await getOrdersByUser();
-        setOrders(data);
+        const data = await getOrdersByUser(currentPage, pageSize);
+        setOrders(data.content);
+        setTotalPages(data.totalPages);
       } catch (err) {
         console.error(err);
         setError("Không thể tải danh sách order. Vui lòng thử lại.");
         notify("error", "Tải order thất bại");
       } finally {
         setLoading(false);
+        setLoadingNext(false);
       }
     };
     fetchOrders();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <Spinner size="xl" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 p-4">
-        <p>{error}</p>
-      </div>
-    );
-  }
+  }, [currentPage]);
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
@@ -68,9 +63,19 @@ const OrderListPage: React.FC = () => {
           </Button>
         </div>
 
-        {orders.length > 0 ? (
-          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {orders.map((order) => {
+        {error && (
+          <div className="text-center text-red-500 p-4">
+            <p>{error}</p>
+          </div>
+        )}
+
+        <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {orders.length === 0 && !loading ? (
+            <Card className="text-center py-12 col-span-full">
+              <p className="text-gray-500 text-lg">Bạn chưa có đơn hàng nào.</p>
+            </Card>
+          ) : (
+            orders.map((order) => {
               const shortId = order.publicId.slice(0, 8);
               const totalItems = order.orderItems?.reduce(
                 (sum, item) => sum + item.quantity,
@@ -83,7 +88,6 @@ const OrderListPage: React.FC = () => {
               const hasMoreItems =
                 order.orderItems && order.orderItems.length > 2;
 
-              // màu card theo status
               const borderColor =
                 order.status === "PENDING"
                   ? "!border-yellow-300"
@@ -95,7 +99,6 @@ const OrderListPage: React.FC = () => {
                 <Card
                   key={order.publicId}
                   className={`relative shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 rounded-2xl border-t-4 ${borderColor} !bg-white`}>
-                  {/* Header */}
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-gray-800">
                       Order #{shortId}
@@ -112,7 +115,6 @@ const OrderListPage: React.FC = () => {
                     </Badge>
                   </div>
 
-                  {/* Info */}
                   <div className="space-y-2 text-sm text-gray-700">
                     <p className="flex items-center gap-2">
                       <HiUser className="text-blue-500" /> {order.userName}
@@ -140,7 +142,6 @@ const OrderListPage: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Action */}
                   <Button
                     size="sm"
                     className="flex text-white items-center gap-1 mt-4 !bg-blue-600 hover:!bg-blue-700 transition-colors duration-200 w-full justify-center"
@@ -149,12 +150,90 @@ const OrderListPage: React.FC = () => {
                   </Button>
                 </Card>
               );
-            })}
+            })
+          )}
+
+          {loading &&
+            Array.from({ length: pageSize }).map((_, idx) => (
+              <div
+                key={idx}
+                className="h-64 bg-gray-200 animate-pulse rounded-2xl"></div>
+            ))}
+        </div>
+
+        {/* Pagination */}
+        {orders.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <div className="flex gap-2 items-center">
+              {/* Nút First */}
+              <button
+                onClick={() => setCurrentPage(0)}
+                disabled={currentPage === 0}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-amber-200"
+                }`}>
+                « First
+              </button>
+
+              {/* Nút Previous */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                disabled={currentPage === 0}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-amber-200"
+                }`}>
+                ‹ Prev
+              </button>
+
+              {/* Nút số trang */}
+              {Array.from({ length: totalPages }, (_, idx) => {
+                const pageNum = idx + 1;
+                const isActive = currentPage + 1 === pageNum;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(idx)}
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg"
+                        : "bg-white text-gray-700 hover:bg-amber-200"
+                    }`}>
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {/* Nút Next */}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))
+                }
+                disabled={currentPage === totalPages - 1}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === totalPages - 1
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-amber-200"
+                }`}>
+                Next ›
+              </button>
+
+              {/* Nút Last */}
+              <button
+                onClick={() => setCurrentPage(totalPages - 1)}
+                disabled={currentPage === totalPages - 1}
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  currentPage === totalPages - 1
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-amber-200"
+                }`}>
+                Last »
+              </button>
+            </div>
           </div>
-        ) : (
-          <Card className="text-center py-12">
-            <p className="text-gray-500 text-lg">Bạn chưa có đơn hàng nào.</p>
-          </Card>
         )}
       </div>
     </section>

@@ -15,6 +15,8 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,13 +89,15 @@ public class OrderService {
         return orderRepository.findByPublicId(publicId).map(OrderDto::new);
     }
 
-    public List<OrderDto> findAllOrderByUserPublicId(String userPublicId) {
+    @Transactional(readOnly = true)
+    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size) {
         User user = userRepository.findByPublicId(userPublicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return orderRepository.getOrderByUser(user)
-                .stream()
-                .map(OrderDto::new)
-                .collect(Collectors.toList());
+
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Order> orderPage = orderRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+
+        return orderPage.map(OrderDto::new);
     }
 
     public OrderDto save(OrderDto dto) {
