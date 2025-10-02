@@ -49,3 +49,15 @@ export const getMenuItemById = async (
     return null;
   }
 };
+
+export const getTopPopularMenuItems = async (): Promise<Product[]> => {
+  try {
+    const response = await api.get<ApiResponse<Product[]>>(
+      "/menu-items/top-popular"
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching top popular menu items:", error);
+    return []; // Trả về mảng rỗng nếu có lỗi
+  }
+};

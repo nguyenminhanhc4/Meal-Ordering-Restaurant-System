@@ -65,7 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative">
         {product.avatarUrl ? (
           <img
-            src={product.avatarUrl}
+            src={`${product.avatarUrl}?w=400&h=300&c=fill`}
             alt={product.name}
             className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-115 transition-transform duration-400 group-hover:bg-black/10 border border-stone-200"
           />
