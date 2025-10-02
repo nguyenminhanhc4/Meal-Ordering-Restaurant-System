@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Toast } from "flowbite-react";
+import { Toast, Button } from "flowbite-react";
 import { HiCheck, HiExclamation, HiInformationCircle } from "react-icons/hi";
 import type { Notification, NotificationType } from "./NotificationContext";
 import { NotificationContext } from "./NotificationContext";
@@ -22,6 +22,10 @@ export default function NotificationProvider({
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 3000);
+  };
+
+  const removeNotification = (id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   const getIcon = (type: NotificationType) => {
@@ -47,13 +51,27 @@ export default function NotificationProvider({
           <Toast
             key={n.id}
             className={`
-              ${n.type === "success" && "!bg-green-400 !text-green-900"}
-              ${n.type === "error" && "!bg-red-400 !text-red-900"}
-              ${n.type === "warning" && "!bg-yellow-400 !text-yellow-900"}
-              ${n.type === "info" && "!bg-blue-400 !text-blue-900"}
-            `}>
-            {getIcon(n.type)}
-            <div className="ml-3 text-sm font-normal">{n.message}</div>
+        flex items-center p-4 rounded-lg shadow-md border
+        ${n.type === "success" && "!border-green-400 !bg-white !text-green-700"}
+        ${n.type === "error" && "!border-red-400 !bg-white !text-red-700"}
+        ${
+          n.type === "warning" &&
+          "!border-yellow-400 !bg-white !text-yellow-700"
+        }
+        ${n.type === "info" && "!border-blue-400 !bg-white text-1blue-700"}
+      `}>
+            {/* Icon theo loại */}
+            <div className="flex-shrink-0">{getIcon(n.type)}</div>
+
+            {/* Nội dung */}
+            <div className="ml-3 text-sm font-medium flex-1">{n.message}</div>
+
+            {/* Nút đóng */}
+            <Button
+              onClick={() => removeNotification(n.id)}
+              className="ml-2 text-gray-400 hover:text-gray-600">
+              ✕
+            </Button>
           </Toast>
         ))}
       </div>

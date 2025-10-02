@@ -1,14 +1,21 @@
 package org.example.backend.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.payment.PaymentRequestDto;
+import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.payment.Payment;
+import org.example.backend.entity.user.ShippingInfo;
+import org.example.backend.repository.order.OrderRepository;
+import org.example.backend.repository.param.ParamRepository;
+import org.example.backend.repository.user.ShippingInfoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.backend.dto.payment.PaymentDto;
 import org.example.backend.repository.payment.PaymentRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,14 +23,53 @@ import java.util.Optional;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
+    private final ParamRepository paramRepository;
+    private final ShippingInfoRepository shippingInfoRepository;
 
-    public PaymentDto createPayment(Payment payment) {
-        return new PaymentDto(paymentRepository.save(payment));
-    }
+    @Transactional
+    public PaymentDto createPayment(PaymentRequestDto request, String publicId) {
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-    public Optional<PaymentDto> getPaymentByOrderId(Long orderId) {
-        Payment payment = paymentRepository.findByOrderId(orderId);
-        return payment != null ? Optional.of(new PaymentDto(payment)) : Optional.empty();
+        if (!order.getUser().getPublicId().equals(publicId)) {
+            throw new RuntimeException("Not allowed to pay for this order");
+        }
+
+        if (paymentRepository.findByOrderId(order.getId()).isPresent()) {
+            throw new RuntimeException("Payment already exists for this order");
+        }
+
+        Param method = paramRepository.findByTypeAndCode("PAYMENT_METHOD", request.getPaymentMethodCode())
+                .orElseThrow(() -> new RuntimeException("Invalid payment method"));
+
+        Param pendingStatus = paramRepository.findByTypeAndCode("PAYMENT_STATUS","PENDING")
+                .orElseThrow(() -> new RuntimeException("Missing PENDING status"));
+
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setPaymentMethod(method);
+        payment.setAmount(order.getTotalAmount());
+        payment.setStatus(pendingStatus);
+        payment.setPublicId(UUID.randomUUID().toString());
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // --- Tạo shipping info ---
+        ShippingInfo shippingInfo = new ShippingInfo();
+        shippingInfo.setPayment(savedPayment);
+        shippingInfo.setFullName(request.getFullName());
+        shippingInfo.setEmail(request.getEmail());
+        shippingInfo.setPhone(request.getPhone());
+        shippingInfo.setAddress(request.getAddress());
+        shippingInfo.setNote(request.getNote());
+        shippingInfoRepository.save(shippingInfo); // cần inject repository
+
+        Param statusOrder = paramRepository.findByTypeAndCode("ORDER_STATUS","PAID").get();
+        order.setStatus(statusOrder);
+        orderRepository.save(order);
+
+        return new PaymentDto(savedPayment);
     }
 
     public PaymentDto updatePaymentStatus(Long id, Param status, String transactionId) {

@@ -3,6 +3,8 @@ package org.example.backend.service.menu;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.menu.MenuItemMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.entity.category.Categories;
@@ -26,6 +28,7 @@ public class MenuItemService {
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoriesRepository;
     private final Cloudinary cloudinary;
+    private final MenuItemMapper menuItemMapper;
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
@@ -39,6 +42,13 @@ public class MenuItemService {
         return results.stream()
                 .map(this::toMenuItemDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<MenuItemDto> findTopPopular(int limit) {
+        List<Object[]> results = menuItemRepository.findTopPopular(PageRequest.of(0, limit));
+        return results.stream()
+                .map(menuItemMapper::toDto)
+                .toList();
     }
 
     private MenuItemDto toMenuItemDto(Object[] result) {

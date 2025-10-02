@@ -2,8 +2,12 @@ package org.example.backend.entity.payment;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.order.Order;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment {
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,18 +42,11 @@ public class Payment {
 
     private String transactionId;
 
-    private LocalDateTime createdAt;
+    // ----------------- Thêm cho Mock Gateway -----------------
+    @Column(nullable = false, unique = true)
+    private String publicId; // UUID nhận diện payment
 
-    private LocalDateTime updatedAt;
+    private String returnUrl; // FE redirect URL
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+    private String providerSignature; // mock signature nếu muốn
 }

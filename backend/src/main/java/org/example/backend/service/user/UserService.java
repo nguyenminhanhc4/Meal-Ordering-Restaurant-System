@@ -232,10 +232,12 @@ public class UserService {
         dto.setPublicId(user.getPublicId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setRoleId(user.getRole() != null ? user.getRole().getId() : null);
         dto.setStatusId(user.getStatus() != null ? user.getStatus().getId() : null);
-        dto.setGender(user.getGender() != null ? user.getGender().getCode() : null);
+        dto.setGender(user.getGender() != null ? user.getGender().getName() : null);
         return dto;
     }
 }

@@ -1,9 +1,12 @@
 package org.example.backend.controller.order;
 
+import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.order.OrderService;
+import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,9 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAll() {
@@ -24,10 +30,20 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 
-    @GetMapping("/me/{userPublicId}")
+    @PostMapping("/checkout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrders(@PathVariable String userPublicId) {
-        List<OrderDto> orders = orderService.findAllOrderByUserPublicId(userPublicId);
+    public ResponseEntity<?> checkout(@RequestBody CartDto cart) {
+        OrderDto order = orderService.checkoutCart(cart);
+        return ResponseEntity.ok(new Response<>("success", order, "Order created successfully"));
+    }
+
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token,
+                                                  @RequestParam(defaultValue = "0") int page) {
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
 

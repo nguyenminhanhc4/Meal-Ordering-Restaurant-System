@@ -2,13 +2,19 @@ package org.example.backend.entity.ingredient;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.example.backend.entity.BaseEntity;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "ingredients")
 @Data
-public class Ingredient {
+@EntityListeners(AuditingEntityListener.class)
+public class Ingredient extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +30,4 @@ public class Ingredient {
 
     @Column(name = "minimum_stock")
     private Integer minimumStock;
-
-    @Column(name = "last_updated", insertable = false, updatable = false)
-    private LocalDateTime lastUpdated;
 }

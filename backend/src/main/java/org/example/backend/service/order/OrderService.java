@@ -1,12 +1,24 @@
 package org.example.backend.service.order;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
+import org.example.backend.entity.cart.Cart;
+import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
+import org.example.backend.entity.order.OrderItem;
+import org.example.backend.entity.param.Param;
+import org.example.backend.repository.cart.CartRepository;
+import org.example.backend.repository.menu.MenuItemRepository;
+import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.order.OrderRepository;
+import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +31,48 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final ParamRepository paramRepository;
+    private final MenuItemRepository menuItemRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final CartRepository cartRepository;
+
+    @Transactional
+    public OrderDto checkoutCart(CartDto cart) {
+        // 1. Tạo Order entity
+        Order order = new Order();
+        order.setUser(userRepository.findById(cart.getUserId()).orElseThrow());
+        Param status = paramRepository
+                .findByTypeAndCode("ORDER_STATUS", "PENDING")
+                .orElseThrow(() -> new RuntimeException("Order status not found"));
+
+        order.setStatus(status);
+        order.setTotalAmount(cart.getTotalAmount());
+        order.setPublicId(UUID.randomUUID().toString());
+        orderRepository.save(order);
+
+        // 2. Tạo OrderItems từ CartItem
+        List<OrderItem> orderItems = cart.getItems().stream().map(item -> {
+            OrderItem oi = new OrderItem();
+            oi.setOrder(order);
+            oi.setMenuItem(menuItemRepository.findById(item.getMenuItemId()).orElseThrow());
+            oi.setQuantity(item.getQuantity());
+            oi.setPrice(item.getPrice()); // giá snapshot
+            return orderItemRepository.save(oi);
+        }).toList();
+
+        order.setOrderItems(orderItems);
+
+        // 3. Đổi trạng thái Cart
+        Cart cartEntity = cartRepository.findById(cart.getId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        Param cartStatus = paramRepository.findByTypeAndCode("STATUS_CART","CANCELLED").get();
+        cartEntity.setStatus(cartStatus);
+        cartRepository.save(cartEntity);
+
+        // 4. Trả OrderDto về FE
+        return new OrderDto(order);
+    }
+
 
     public List<OrderDto> findAll() {
         return orderRepository.findAll()
@@ -35,13 +89,15 @@ public class OrderService {
         return orderRepository.findByPublicId(publicId).map(OrderDto::new);
     }
 
-    public List<OrderDto> findAllOrderByUserPublicId(String userPublicId) {
+    @Transactional(readOnly = true)
+    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size) {
         User user = userRepository.findByPublicId(userPublicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return orderRepository.getOrderByUser(user)
-                .stream()
-                .map(OrderDto::new)
-                .collect(Collectors.toList());
+
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Order> orderPage = orderRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+
+        return orderPage.map(OrderDto::new);
     }
 
     public OrderDto save(OrderDto dto) {

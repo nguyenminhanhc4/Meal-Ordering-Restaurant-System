@@ -37,13 +37,6 @@ export default function FooterLanding() {
                 Đặt bàn
               </a>
             </li>
-            <li>
-              <a
-                href="/about"
-                className="hover:text-yellow-400 transition-colors">
-                Giới thiệu
-              </a>
-            </li>
           </ul>
         </div>
 
@@ -57,16 +50,32 @@ export default function FooterLanding() {
         <div>
           <h3 className="text-lg font-semibold mb-4">Kết nối với chúng tôi</h3>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-yellow-400 transition-colors">
+            <a
+              href="https://www.facebook.com/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-yellow-400 transition-colors">
               <FaFacebookF size={20} />
             </a>
-            <a href="#" className="hover:text-yellow-400 transition-colors">
+            <a
+              href="https://www.instagram.com/accounts/login/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-yellow-400 transition-colors">
               <FaInstagram size={20} />
             </a>
-            <a href="#" className="hover:text-yellow-400 transition-colors">
+            <a
+              href="https://www.youtube.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-yellow-400 transition-colors">
               <FaYoutube size={20} />
             </a>
-            <a href="#" className="hover:text-yellow-400 transition-colors">
+            <a
+              href="https://www.tiktok.com/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-yellow-400 transition-colors">
               <FaTiktok size={20} />
             </a>
           </div>

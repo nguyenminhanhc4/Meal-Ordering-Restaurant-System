@@ -1,4 +1,4 @@
-import api from "../api/axios"; // Import instance axios
+import api from "../../api/axios"; // Import instance axios
 
 // Định nghĩa interface cho danh mục
 export interface Category {
