@@ -22,6 +22,7 @@ import {
   HiLogout,
 } from "react-icons/hi";
 import logo from "../assets/img/vite.svg";
+import "./AdminLayout.css";
 
 function AdminLayout() {
   const { user, logout, isChecking, isLoggedIn } = useAuth();
@@ -46,31 +47,39 @@ function AdminLayout() {
   }
 
   return (
-    <section>
-      <div className="min-h-screen flex bg-gray-50">
+    <section className="admin-layout">
+      <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar
           aria-label="Sidebar"
-          className="w-80 h-screen border-r shadow-lg">
+          className="w-80 admin-sidebar border-r shadow-lg">
           <SidebarLogo href="/admin/dashboard" img={`${logo}`} imgAlt="Logo">
             Admin Panel
           </SidebarLogo>
           <SidebarItems>
             <SidebarItemGroup>
               <SidebarItem
-                as={Link}
-                href="/admin/dashboard"
-                className="hover:bg-gray-800 text-gray-200 hover:text-white"
+                onClick={() => navigate('/admin/dashboard')}
+                className="hover:bg-gray-800 text-gray-200 hover:text-white cursor-pointer"
                 icon={HiChartPie}>
                 Dashboard
               </SidebarItem>
-              <SidebarItem as={Link} href="/admin/users" icon={HiUser}>
+              <SidebarItem
+                onClick={() => navigate('/admin/users')}
+                className="cursor-pointer"
+                icon={HiUser}>
                 Users
               </SidebarItem>
-              <SidebarItem as={Link} href="/admin/orders" icon={HiShoppingBag}>
+              <SidebarItem
+                onClick={() => navigate('/admin/orders')}
+                className="cursor-pointer"
+                icon={HiShoppingBag}>
                 Orders
               </SidebarItem>
-              <SidebarItem as={Link} href="/admin/settings" icon={HiCog}>
+              <SidebarItem
+                onClick={() => navigate('/admin/settings')}
+                className="cursor-pointer"
+                icon={HiCog}>
                 Settings
               </SidebarItem>
             </SidebarItemGroup>
@@ -121,7 +130,7 @@ function AdminLayout() {
           </Navbar>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
+          <main className="admin-content">
             <Outlet />
           </main>
         </div>
