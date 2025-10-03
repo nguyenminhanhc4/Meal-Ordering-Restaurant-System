@@ -129,6 +129,8 @@ public class MenuItemService {
         return entity;
     }
 
+    
+
     @Transactional
     public MenuItemDto uploadMenuItemAvatar(Long menuItemId, MultipartFile file) throws IOException {
         MenuItem menuItem = menuItemRepository.findById(menuItemId)

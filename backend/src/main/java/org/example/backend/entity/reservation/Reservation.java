@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.example.backend.entity.BaseEntity;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.example.backend.entity.table.TableEntity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -31,6 +31,17 @@ public class Reservation extends BaseEntity {
     @Column(name = "status_id")
     private Long statusId;
 
-    @Column(name = "table_id")
-    private Long tableId;
+    @Column(name = "note")
+    private String note;
+
+    @Column(name = "number_of_people")
+    private int numberOfPeople;
+
+    @ManyToMany
+    @JoinTable(
+            name = "reservation_tables",
+            joinColumns = @JoinColumn(name = "reservation_id"),
+            inverseJoinColumns = @JoinColumn(name = "table_id")
+    )
+    private Set<TableEntity> tables = new HashSet<>();
 }
