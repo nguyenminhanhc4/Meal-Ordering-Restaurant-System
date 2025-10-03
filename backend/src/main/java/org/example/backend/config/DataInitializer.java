@@ -42,6 +42,9 @@ public class DataInitializer implements CommandLineRunner {
         createParamIfNotExists("STATUS", "PENDING", "Pending Reservation");
         createParamIfNotExists("STATUS", "AVAILABLE", "Available Table");
         createParamIfNotExists("STATUS", "OCCUPIED", "Occupied Table");
+        createParamIfNotExists("POSITION","VIP","VIP Table");
+        createParamIfNotExists("POSITION","GOOD_VIEW","GOOD_VIEW Table");
+        createParamIfNotExists("POSITION","PERSONAL","PERSONAL Table");
 
         // ROLE
         createParamIfNotExists("ROLE", "CUSTOMER", "Customer");
