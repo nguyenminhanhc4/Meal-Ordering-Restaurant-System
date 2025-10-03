@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Badge, Card, TextInput, HRTrimmed } from "flowbite-react";
+import { Button, Badge, TextInput, HRTrimmed } from "flowbite-react";
 import { HiShoppingCart, HiArrowLeft } from "react-icons/hi";
 import { FaStarHalf, FaStar, FaRegStar } from "react-icons/fa"; // Thêm FaRegStar cho ngôi sao rỗng
 import { useNotification } from "../../../components/Notification/NotificationContext";
