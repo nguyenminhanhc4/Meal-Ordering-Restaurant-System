@@ -5,20 +5,18 @@ import lombok.*;
 import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.param.Param;
-import org.example.backend.entity.review.Review;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "menu_item_ingredients")
+@Table(name = "combos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Combo extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,19 +31,21 @@ public class Combo extends BaseEntity {
     private BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_combo_category"))
+    @JoinColumn(name = "category_id")
     private Categories category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id", foreignKey = @ForeignKey(name = "fk_combo_status"))
+    @JoinColumn(name = "status_id")
     private Param status; // AVAILABLE / OUT_OF_STOCK
 
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @OneToMany(mappedBy = "combo", fetch = FetchType.LAZY)
-    private List<Review> reviews;
-
-    @OneToMany(mappedBy = "combo", fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+            name = "combo_items",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "menu_item_id")
+    )
     private List<MenuItem> items;
 }

@@ -25,8 +25,7 @@ public class ComboDto {
 
     private String avatarUrl;
 
-    private List<Long> reviewIds;
-    private List<Long> itemIds;
+    private List<Long> itemIds; // only menu items
 
     // Constructor to map from entity
     public ComboDto(Combo combo) {
@@ -48,12 +47,6 @@ public class ComboDto {
         }
 
         this.avatarUrl = combo.getAvatarUrl();
-
-        if (combo.getReviews() != null) {
-            this.reviewIds = combo.getReviews().stream()
-                    .map(r -> r.getId())
-                    .toList();
-        }
 
         if (combo.getItems() != null) {
             this.itemIds = combo.getItems().stream()

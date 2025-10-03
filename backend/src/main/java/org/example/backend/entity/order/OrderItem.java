@@ -32,7 +32,7 @@ public class OrderItem {
     private MenuItem menuItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "combo_id", nullable = false)
+    @JoinColumn(name = "combo_id")
     private Combo combo;
 
     @Column(nullable = false)
