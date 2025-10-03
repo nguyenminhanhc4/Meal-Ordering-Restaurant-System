@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isChecking, setIsChecking] = useState<boolean>(true);
 
   const roleMap: Record<number, string> = {
-    1: "USER",
+    1: "CUSTOMER",
     2: "ADMIN",
     3: "STAFF",
   };
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         address: userData.address || undefined,
         gender: userData.gender || undefined,
         avatarUrl: userData.avatarUrl || undefined,
-        role: roleMap[userData.roleId] || "USER",
+        role: roleMap[userData.roleId] || "CUSTOMER",
       };
 
       console.log("Mapped user:", mappedUser);
