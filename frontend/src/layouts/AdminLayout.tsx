@@ -59,25 +59,25 @@ function AdminLayout() {
           <SidebarItems>
             <SidebarItemGroup>
               <SidebarItem
-                onClick={() => navigate('/admin/dashboard')}
+                onClick={() => navigate("/admin/dashboard")}
                 className="hover:bg-gray-800 text-gray-200 hover:text-white cursor-pointer"
                 icon={HiChartPie}>
                 Dashboard
               </SidebarItem>
               <SidebarItem
-                onClick={() => navigate('/admin/users')}
+                onClick={() => navigate("/admin/users")}
                 className="cursor-pointer"
                 icon={HiUser}>
                 Users
               </SidebarItem>
               <SidebarItem
-                onClick={() => navigate('/admin/orders')}
+                onClick={() => navigate("/admin/orders")}
                 className="cursor-pointer"
                 icon={HiShoppingBag}>
                 Orders
               </SidebarItem>
               <SidebarItem
-                onClick={() => navigate('/admin/settings')}
+                onClick={() => navigate("/admin/settings")}
                 className="cursor-pointer"
                 icon={HiCog}>
                 Settings
