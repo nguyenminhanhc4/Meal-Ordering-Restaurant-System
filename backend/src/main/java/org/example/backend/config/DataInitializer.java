@@ -37,11 +37,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // STATUS
-        createParamIfNotExists("STATUS", "CONFIRMED", "Confirmed Reservation");
-        createParamIfNotExists("STATUS", "CANCELLED", "Cancelled Reservation");
-        createParamIfNotExists("STATUS", "PENDING", "Pending Reservation");
-        createParamIfNotExists("STATUS", "AVAILABLE", "Available Table");
-        createParamIfNotExists("STATUS", "OCCUPIED", "Occupied Table");
+        createParamIfNotExists("STATUS_RESERVATION", "CONFIRMED", "Confirmed Reservation");
+        createParamIfNotExists("STATUS_RESERVATION", "CANCELLED", "Cancelled Reservation");
+        createParamIfNotExists("STATUS_RESERVATION", "PENDING", "Pending Reservation");
+        createParamIfNotExists("STATUS_TABLE", "AVAILABLE", "Available Table");
+        createParamIfNotExists("STATUS_TABLE", "OCCUPIED", "Occupied Table");
         createParamIfNotExists("POSITION","VIP","VIP Table");
         createParamIfNotExists("POSITION","GOOD_VIEW","GOOD_VIEW Table");
         createParamIfNotExists("POSITION","PERSONAL","PERSONAL Table");
@@ -57,9 +57,9 @@ public class DataInitializer implements CommandLineRunner {
         createTableIfNotExists("Table 3", 6);
 
         // CATEGORIES
-        createCategoryIfNotExists("Noodles", "All noodle-based dishes");
-        createCategoryIfNotExists("Rice", "Rice dishes and combos");
-        createCategoryIfNotExists("Drinks", "All beverages");
+//        createCategoryIfNotExists("Noodles", "All noodle-based dishes");
+//        createCategoryIfNotExists("Rice", "Rice dishes and combos");
+//        createCategoryIfNotExists("Drinks", "All beverages");
 
         // ADMIN USER
         createAdminIfNotExists("admin@example.com", "Admin User", "admin123");
