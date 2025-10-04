@@ -14,6 +14,8 @@ const SortFilter: React.FC<SortFilterProps> = ({ sort, setSort }) => {
           ? "Giá thấp đến cao"
           : sort === "price-desc"
           ? "Giá cao đến thấp"
+          : sort === "newest"
+          ? "Mới nhất"
           : "Phổ biến"
       }`}
       size="sm"
@@ -31,6 +33,7 @@ const SortFilter: React.FC<SortFilterProps> = ({ sort, setSort }) => {
       <DropdownItem onClick={() => setSort("price-desc")}>
         Giá cao đến thấp
       </DropdownItem>
+      <DropdownItem onClick={() => setSort("newest")}>Mới nhất</DropdownItem>
     </Dropdown>
   );
 };

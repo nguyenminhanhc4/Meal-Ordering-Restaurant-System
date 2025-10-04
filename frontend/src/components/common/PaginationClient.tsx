@@ -26,7 +26,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-amber-200"
           }`}>
-          « First
+          « Đầu
         </Button>
 
         {/* Prev */}
@@ -38,7 +38,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-amber-200"
           }`}>
-          ‹ Prev
+          ‹
         </Button>
 
         {/* Numbered pages */}
@@ -70,7 +70,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-amber-200"
           }`}>
-          Next ›
+          ›
         </Button>
 
         {/* Last */}
@@ -82,7 +82,7 @@ const Pagination: React.FC<PaginationProps> = ({
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-amber-200"
           }`}>
-          Last »
+          Cuối »
         </Button>
       </div>
     </div>

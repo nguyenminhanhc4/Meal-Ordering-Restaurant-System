@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../../services/types/ApiType";
 import api from "../../api/axios";
+import type { Page } from "../types/PageType";
 
 export interface Review {
   id: number;
@@ -28,13 +29,37 @@ export interface Product {
   availableQuantity: number; // Số lượng hiện có
 }
 
-export const getAllMenuItems = async (): Promise<Product[]> => {
+export const getAllMenuItems = async (
+  page: number = 0,
+  size: number = 10,
+  search = "",
+  sort = "popular",
+  categorySlug?: string
+): Promise<Page<Product>> => {
   try {
-    const response = await api.get<ApiResponse<Product[]>>("/menu-items");
+    const params: Record<string, unknown> = { page, size, search, sort };
+    if (categorySlug) params.categorySlug = categorySlug; // 👈 thêm vào nếu có
+
+    const response = await api.get<ApiResponse<Page<Product>>>(`/menu-items`, {
+      params,
+    });
+
     return response.data.data;
   } catch (error) {
     console.error("Error fetching menu items:", error);
-    return []; // Trả về mảng rỗng nếu có lỗi
+
+    // Trả về trang rỗng để tránh crash
+    return {
+      content: [],
+      pageable: { pageNumber: page, pageSize: size },
+      totalPages: 0,
+      totalElements: 0,
+      first: true,
+      last: true,
+      number: page,
+      size: size,
+      numberOfElements: 0,
+    };
   }
 };
 
