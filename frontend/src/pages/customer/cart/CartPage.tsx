@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Button,
   Table,
@@ -17,7 +18,7 @@ import { HiTrash, HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
 import {
   getCurrentCart,
   updateCartItem,
-  deleteCartItems, // <-- thêm service API
+  deleteCartItems,
 } from "../../../services/cart/cartService";
 import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
@@ -27,39 +28,45 @@ import type { OrderDto } from "../../../services/types/OrderType";
 import { useNavigate } from "react-router-dom";
 
 const CartPage: React.FC = () => {
+  /** State quản lý giỏ hàng */
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [cartUpdated, setCartUpdated] = useState<number>(0);
+
+  /** State xác nhận xóa */
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
   const [confirmMessage, setConfirmMessage] = useState<string>("");
 
+  /** State lưu các item đã chọn */
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
   const { notify } = useNotification();
   const navigate = useNavigate();
 
-  // lưu các item đã chọn
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-
+  /** Fetch giỏ hàng mỗi khi cartUpdated thay đổi */
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const data = await getCurrentCart();
         setCart(data);
-        setLoading(false);
       } catch (err) {
-        console.log(err);
         setError("Không thể tải giỏ hàng. Vui lòng thử lại.");
+      } finally {
         setLoading(false);
       }
     };
     fetchCart();
   }, [cartUpdated]);
 
+  /**
+   * Cập nhật số lượng món
+   */
   const handleUpdateQuantity = async (
     itemId: number,
     newQuantity: number,
-    availableQuantity: number | undefined
+    availableQuantity?: number
   ) => {
     if (newQuantity < 1) {
       notify("error", "Số lượng phải lớn hơn 0.");
@@ -69,78 +76,81 @@ const CartPage: React.FC = () => {
       notify("error", `Số lượng tối đa cho món này là ${availableQuantity}.`);
       return;
     }
-
     try {
       await updateCartItem(itemId, newQuantity);
       setCartUpdated((prev) => prev + 1);
       notify("success", "Cập nhật số lượng thành công!");
     } catch (err) {
       notify("error", "Cập nhật số lượng thất bại. Vui lòng thử lại.");
-      console.error(`Error updating quantity for item ${itemId}`, err);
     }
   };
 
-  // Xóa item (1 hoặc nhiều)
+  /**
+   * Xóa một hoặc nhiều món
+   */
   const handleRemoveItem = async (itemIds: number[]) => {
     try {
       await deleteCartItems({ itemIds });
       setCartUpdated((prev) => prev + 1);
+      setSelectedItems([]);
       notify("success", "Đã xóa khỏi giỏ hàng");
-      setSelectedItems([]); // reset chọn
     } catch (err) {
-      console.error("Error deleting cart items:", err);
       notify("error", "Xóa món thất bại. Vui lòng thử lại.");
     }
   };
 
+  /** Xóa toàn bộ giỏ hàng */
   const handleClearCart = async () => {
     if (!cart) return;
     try {
       await deleteCartItems({ cartId: cart.id });
       setCartUpdated((prev) => prev + 1);
-      notify("success", "Đã xóa toàn bộ giỏ hàng");
       setSelectedItems([]);
+      notify("success", "Đã xóa toàn bộ giỏ hàng");
     } catch (err) {
-      console.error("Error clearing cart:", err);
       notify("error", "Xóa toàn bộ thất bại. Vui lòng thử lại.");
     }
   };
 
-  const handleCheckout = async () => {
+  /** Thanh toán giỏ hàng */
+  const handleCheckout = useCallback(async () => {
     if (!cart) return;
     try {
       const order: OrderDto = await checkoutCart(cart);
       notify("success", `Đặt hàng thành công! Mã đơn: ${order.publicId}`);
-      // Chuyển sang trang payment nếu có
       navigate(`/order`);
-    } catch (error) {
-      console.error("Checkout failed", error);
+    } catch (err) {
       notify("error", "Đặt hàng thất bại. Vui lòng thử lại.");
     }
-  };
+  }, [cart, navigate, notify]);
 
-  const toggleSelectItem = (itemId: number) => {
+  /** Chọn / bỏ chọn item */
+  const toggleSelectItem = useCallback((itemId: number) => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
         : [...prev, itemId]
     );
-  };
+  }, []);
 
-  const calculateTotal = (items: CartItem[] | undefined): string => {
+  /** Tính tổng tiền giỏ hàng */
+  const calculateTotal = (items?: CartItem[]): string => {
     if (!items) return "0.00";
-    const total = items.reduce((sum, item) => {
-      return item.status === "AVAILABLE"
-        ? sum + item.quantity * (item.price || 0)
-        : sum;
-    }, 0);
+    const total = items.reduce(
+      (sum, item) =>
+        item.status === "AVAILABLE"
+          ? sum + item.quantity * (item.price || 0)
+          : sum,
+      0
+    );
     return total.toLocaleString("vi-VN", {
       style: "currency",
       currency: "VND",
     });
   };
 
-  const calculateTotalItems = (items: CartItem[] | undefined): number => {
+  /** Tính tổng số món */
+  const calculateTotalItems = (items?: CartItem[]): number => {
     if (!items) return 0;
     return items.reduce(
       (sum, item) => (item.status === "AVAILABLE" ? sum + item.quantity : sum),
@@ -148,7 +158,8 @@ const CartPage: React.FC = () => {
     );
   };
 
-  const isCartValid = (items: CartItem[] | undefined): boolean => {
+  /** Kiểm tra giỏ hàng hợp lệ trước khi thanh toán */
+  const isCartValid = (items?: CartItem[]): boolean => {
     if (!items) return false;
     return items.every(
       (item) =>
@@ -157,40 +168,44 @@ const CartPage: React.FC = () => {
     );
   };
 
+  /** Mở dialog xác nhận xóa */
   const openConfirm = (message: string, action: () => void) => {
     setConfirmMessage(message);
-    setConfirmAction(() => action); // gán action cần thực hiện
+    setConfirmAction(() => action);
     setConfirmOpen(true);
   };
 
-  if (loading) {
+  /** Loading */
+  if (loading)
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
         <Spinner size="xl" className="text-amber-500" />
       </div>
     );
-  }
 
-  if (error) {
+  /** Error */
+  if (error)
     return (
       <div className="text-center text-red-500 p-4">
         <p>{error}</p>
       </div>
     );
-  }
 
+  /** Render giao diện giỏ hàng */
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-8xl py-12 px-4 md:px-6">
         <h1 className="text-4xl font-bold mb-8 text-center text-amber-800">
           Giỏ hàng của bạn
         </h1>
+
         {cart && cart.items && cart.items.length > 0 ? (
           <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm">
+            {/* Bảng danh sách món */}
             <Table hoverable striped className="rounded-lg">
               <TableHead>
                 <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
-                  <Checkbox className="!bg-white" disabled /> {/* cột chọn */}
+                  <Checkbox disabled />
                 </TableHeadCell>
                 <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
                   Hình ảnh
@@ -208,6 +223,7 @@ const CartPage: React.FC = () => {
                   Hành động
                 </TableHeadCell>
               </TableHead>
+
               <TableBody className="divide-y">
                 {cart.items.map((item) => (
                   <TableRow
@@ -217,11 +233,12 @@ const CartPage: React.FC = () => {
                     }`}>
                     <TableCell className="text-center">
                       <Checkbox
-                        className="mx-auto !bg-white"
                         checked={selectedItems.includes(item.id)}
                         onChange={() => toggleSelectItem(item.id)}
+                        className="mx-auto !bg-white"
                       />
                     </TableCell>
+
                     <TableCell className="text-center py-4">
                       <img
                         src={item.avatarUrl}
@@ -229,6 +246,7 @@ const CartPage: React.FC = () => {
                         className="w-20 h-20 object-cover rounded-lg shadow-sm mx-auto"
                       />
                     </TableCell>
+
                     <TableCell className="font-medium text-center !text-gray-800">
                       <Tooltip
                         content={item.description || "Không có mô tả"}
@@ -244,8 +262,10 @@ const CartPage: React.FC = () => {
                         </Badge>
                       )}
                     </TableCell>
+
                     <TableCell className="flex justify-center items-center translate-y-1/4 gap-2">
                       <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-full overflow-hidden w-max">
+                        {/* Nút giảm */}
                         <button
                           onClick={() =>
                             handleUpdateQuantity(
@@ -265,6 +285,7 @@ const CartPage: React.FC = () => {
                           {item.quantity}
                         </span>
 
+                        {/* Nút tăng */}
                         <button
                           onClick={() =>
                             handleUpdateQuantity(
@@ -279,6 +300,7 @@ const CartPage: React.FC = () => {
                         </button>
                       </div>
 
+                      {/* Thông báo còn ít hàng */}
                       {item.availableQuantity &&
                         item.quantity > item.availableQuantity && (
                           <p className="text-red-500 text-sm mt-2">
@@ -286,6 +308,7 @@ const CartPage: React.FC = () => {
                           </p>
                         )}
                     </TableCell>
+
                     <TableCell className="text-center !text-gray-800">
                       {(item.quantity * (item.price || 0)).toLocaleString(
                         "vi-VN",
@@ -295,6 +318,7 @@ const CartPage: React.FC = () => {
                         }
                       )}
                     </TableCell>
+
                     <TableCell className="flex justify-center translate-y-1/4">
                       <Button
                         color="failure"
@@ -315,7 +339,7 @@ const CartPage: React.FC = () => {
               </TableBody>
             </Table>
 
-            {/* Nút xóa */}
+            {/* Nút xóa món */}
             <div className="mt-4 flex justify-between">
               <div className="flex gap-2">
                 <Button
@@ -330,6 +354,7 @@ const CartPage: React.FC = () => {
                   disabled={selectedItems.length === 0}>
                   Xóa đã chọn
                 </Button>
+
                 <Button
                   color="red"
                   size="sm"
@@ -345,6 +370,7 @@ const CartPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Tổng số lượng và tổng tiền */}
             <div className="mt-6 flex justify-between items-center">
               <div className="text-gray-600">
                 <p className="text-lg">
@@ -360,6 +386,8 @@ const CartPage: React.FC = () => {
                   </span>
                 </p>
               </div>
+
+              {/* Nút quay lại menu và thanh toán */}
               <div className="flex gap-3">
                 <Button
                   color="gray"
@@ -381,6 +409,7 @@ const CartPage: React.FC = () => {
             </div>
           </Card>
         ) : (
+          // Giỏ hàng trống
           <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm text-center py-12">
             <HiShoppingCart className="mx-auto h-16 w-16 !text-gray-400" />
             <p className="text-xl text-gray-500 mt-4">
@@ -395,6 +424,8 @@ const CartPage: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Dialog xác nhận xóa */}
       <ConfirmDialog
         open={confirmOpen}
         title="Xác nhận xóa"
