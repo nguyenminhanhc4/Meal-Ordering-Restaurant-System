@@ -5,11 +5,14 @@ import api from "../../api/axios";
 export interface Table {
   id: number;
   name: string;
+  shortName: string;
   capacity: number;
   statusId: number | null;
   statusName: string | null;
   locationId: number | null;
   locationName: string | null;
+  positionId: number | null;
+  positionName: string | null;
   createdAt: string;
   updatedAt: string;
 }

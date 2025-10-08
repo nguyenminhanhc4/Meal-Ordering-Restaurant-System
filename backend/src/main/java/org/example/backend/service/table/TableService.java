@@ -17,8 +17,7 @@ import java.util.stream.Collectors;
 public class TableService {
 
     private final TableRepository tableRepository;
-    private final ParamRepository tableStatusRepository;
-    private final ParamRepository tableLocationRepository;
+    private final ParamRepository paramRepository;
 
     public List<TableDto> findAll() {
         return tableRepository.findAll()
@@ -57,18 +56,23 @@ public class TableService {
         table.setCapacity(dto.getCapacity());
         // --- Update status ---
         if (dto.getStatusId() != null) {
-            Param status = tableStatusRepository.findById(dto.getStatusId())
+            Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new RuntimeException("Status not found"));
             table.setStatus(status);
         }
 
         // --- Update location ---
         if (dto.getLocationId() != null) {
-            Param location = tableLocationRepository.findById(dto.getLocationId())
+            Param location = paramRepository.findById(dto.getLocationId())
                     .orElseThrow(() -> new RuntimeException("Location not found"));
             table.setLocation(location);
         }
 
+        if (dto.getPositionId() != null) {
+            Param position = paramRepository.findById(dto.getPositionId())
+                    .orElseThrow(() -> new RuntimeException("Position not found"));
+            table.setPosition(position);
+        }
         table = tableRepository.save(table);
         return new TableDto(table);
     }
@@ -86,15 +90,18 @@ public class TableService {
         entity.setName(dto.getName());
         entity.setCapacity(dto.getCapacity());
         if (dto.getStatusId() != null) {
-            Param status = tableStatusRepository.findById(dto.getStatusId())
+            Param status = paramRepository.findById(dto.getStatusId())
                     .orElse(null);
             entity.setStatus(status);
         }
-
         if (dto.getLocationId() != null) {
-            Param location = tableLocationRepository.findById(dto.getLocationId())
+            Param location = paramRepository.findById(dto.getLocationId())
                     .orElse(null);
             entity.setLocation(location);
+        }
+        if (dto.getPositionId() != null){
+            Param position = paramRepository.findById(dto.getPositionId()).orElse(null);
+            entity.setPosition(position);
         }
         return entity;
     }
