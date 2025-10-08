@@ -85,7 +85,6 @@ public class DataInitializer implements CommandLineRunner {
                     TableEntity table = new TableEntity();
                     table.setName(name);
                     table.setCapacity(capacity);
-                    table.setStatusId(availableStatus.getId());
                     return tableRepository.save(table);
                 });
     }

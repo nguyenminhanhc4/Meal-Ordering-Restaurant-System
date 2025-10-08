@@ -63,11 +63,11 @@ public class ReservationService {
                     .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
 
             for (TableEntity table : result.getAllocatedTables()) {
-                table.setStatusId(occupiedStatus.getId());
+                table.setStatus(occupiedStatus); // ✅ thay vì setStatusId()
                 tableRepository.save(table);
 
                 messagingTemplate.convertAndSend("/topic/tables",
-                        new TableStatusUpdate(table.getId(), table.getStatusId()));
+                        new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
             }
 
             reservation.setTables(new HashSet<>(result.getAllocatedTables()));
@@ -76,14 +76,11 @@ public class ReservationService {
             return new ReservationDto(reservation);
 
         } catch (IllegalStateException e) {
-            // Bắt lỗi bàn đã bị occupied hoặc không đủ chỗ
             throw new RuntimeException(e.getMessage());
         } catch (ResourceNotFoundException e) {
-            // Bắt lỗi nếu status hoặc table không tồn tại
             throw new RuntimeException(e.getMessage());
         }
     }
-
 
     // ========================= READ =========================
     @Transactional(readOnly = true)
@@ -121,7 +118,6 @@ public class ReservationService {
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
             reservation.setStatusId(status.getId());
 
-            // If cancelled -> free tables
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
                 releaseTables(reservation);
             }
@@ -177,7 +173,9 @@ public class ReservationService {
         Param availableStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "AVAILABLE")
                 .orElseThrow(() -> new ResourceNotFoundException("Status AVAILABLE not found"));
 
-        return tableRepository.findByStatusId(availableStatus.getId()).stream()
+        // ✅ sửa để dùng table.getStatus().getId()
+        return tableRepository.findAll().stream()
+                .filter(t -> t.getStatus() != null && Objects.equals(t.getStatus().getId(), availableStatus.getId()))
                 .map(TableDto::new)
                 .collect(Collectors.toList());
     }
@@ -187,11 +185,11 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Status AVAILABLE not found"));
 
         for (TableEntity table : reservation.getTables()) {
-            table.setStatusId(availableStatus.getId());
+            table.setStatus(availableStatus); // ✅ thay vì setStatusId()
             tableRepository.save(table);
 
             messagingTemplate.convertAndSend("/topic/tables",
-                    new TableStatusUpdate(table.getId(), table.getStatusId()));
+                    new TableStatusUpdate(table.getId(), availableStatus.getId()));
         }
 
         reservation.getTables().clear();
@@ -207,7 +205,6 @@ public class ReservationService {
             this.allocatedTables = allocatedTables;
             this.enough = enough;
         }
-
     }
 
     public MergeTableResult mergeTables(List<Long> tableIds, int numberOfPeople) {
@@ -221,8 +218,7 @@ public class ReservationService {
             Param occupiedStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "OCCUPIED")
                     .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
 
-            if (Objects.equals(table.getStatusId(), occupiedStatus.getId())) {
-                // ✅ Trả lỗi riêng nếu bàn đã bị occupied
+            if (table.getStatus() != null && Objects.equals(table.getStatus().getId(), occupiedStatus.getId())) {
                 throw new IllegalStateException("Table with id " + tableId + " is already occupied");
             }
 
@@ -231,11 +227,9 @@ public class ReservationService {
         }
 
         if (totalSeats < numberOfPeople) {
-            // ✅ Trả lỗi riêng nếu không đủ chỗ
             throw new IllegalStateException("Not enough seats for " + numberOfPeople + " people");
         }
 
         return new MergeTableResult(allocatedTables, true);
     }
-
 }

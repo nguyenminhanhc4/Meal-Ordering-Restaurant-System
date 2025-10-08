@@ -1,12 +1,15 @@
+// src/services/table/tableService.ts
 import type { ApiResponse } from "../types/ApiType";
 import api from "../../api/axios";
 
 export interface Table {
   id: number;
-  tableNumber: string;
+  name: string;
   capacity: number;
-  statusId: number;
-  statusName: string;
+  statusId: number | null;
+  statusName: string | null;
+  locationId: number | null;
+  locationName: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -16,7 +19,9 @@ export interface Table {
  */
 export const getAllTables = async (): Promise<Table[]> => {
   try {
-    const response = await api.get<ApiResponse<Table[]>>("/tables");
+    const response = await api.get<ApiResponse<Table[]>>("/tables", {
+      withCredentials: true, // 👈 gửi cookie / token
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error fetching tables:", error);
@@ -29,7 +34,9 @@ export const getAllTables = async (): Promise<Table[]> => {
  */
 export const getTableById = async (id: number): Promise<Table | null> => {
   try {
-    const response = await api.get<ApiResponse<Table>>(`/tables/${id}`);
+    const response = await api.get<ApiResponse<Table>>(`/tables/${id}`, {
+      withCredentials: true,
+    });
     return response.data.data;
   } catch (error) {
     console.error(`Error fetching table with id ${id}:`, error);
@@ -43,7 +50,8 @@ export const getTableById = async (id: number): Promise<Table | null> => {
 export const getAvailableTables = async (): Promise<Table[]> => {
   try {
     const response = await api.get<ApiResponse<Table[]>>(
-      "/reservations/tables/available"
+      "/reservations/tables/available",
+      { withCredentials: true }
     );
     return response.data.data;
   } catch (error) {
@@ -59,7 +67,9 @@ export const createTable = async (
   table: Partial<Table>
 ): Promise<Table | null> => {
   try {
-    const response = await api.post<ApiResponse<Table>>("/tables", table);
+    const response = await api.post<ApiResponse<Table>>("/tables", table, {
+      withCredentials: true,
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error creating table:", error);
@@ -75,7 +85,9 @@ export const updateTable = async (
   table: Partial<Table>
 ): Promise<Table | null> => {
   try {
-    const response = await api.put<ApiResponse<Table>>(`/tables/${id}`, table);
+    const response = await api.put<ApiResponse<Table>>(`/tables/${id}`, table, {
+      withCredentials: true,
+    });
     return response.data.data;
   } catch (error) {
     console.error(`Error updating table with id ${id}:`, error);
@@ -88,7 +100,9 @@ export const updateTable = async (
  */
 export const deleteTable = async (id: number): Promise<boolean> => {
   try {
-    await api.delete<ApiResponse<null>>(`/tables/${id}`);
+    await api.delete<ApiResponse<null>>(`/tables/${id}`, {
+      withCredentials: true,
+    });
     return true;
   } catch (error) {
     console.error(`Error deleting table with id ${id}:`, error);

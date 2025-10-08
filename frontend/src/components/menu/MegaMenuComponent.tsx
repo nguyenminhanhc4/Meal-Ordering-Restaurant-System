@@ -50,6 +50,7 @@ const MegaMenuComponent: React.FC = () => {
       }
     };
     loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -214,7 +215,7 @@ const MegaMenuComponent: React.FC = () => {
           </div>
         </Dropdown>
         <NavbarLink
-          href="/book-table"
+          href="/table"
           className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
           Đặt bàn
         </NavbarLink>

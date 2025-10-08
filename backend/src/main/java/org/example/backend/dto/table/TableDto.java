@@ -13,7 +13,9 @@ public class TableDto {
     private String name;
     private Integer capacity;
     private Long statusId;
+    private String statusName;
     private Long locationId;
+    private String locationName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -22,8 +24,14 @@ public class TableDto {
             this.id = table.getId();
             this.name = table.getName();
             this.capacity = table.getCapacity();
-            this.statusId = table.getStatusId();
-            this.locationId = table.getLocationId();
+            if (table.getStatus() != null) {
+                this.statusId = table.getStatus().getId();
+                this.statusName = table.getStatus().getName();
+            }
+            if (table.getLocation() != null) {
+                this.locationId = table.getLocation().getId();
+                this.locationName = table.getLocation().getName();
+            }
             this.createdAt = table.getCreatedAt();
             this.updatedAt = table.getUpdatedAt();
         }
