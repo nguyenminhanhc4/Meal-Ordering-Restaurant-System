@@ -65,6 +65,28 @@ export default function TableSeatMap() {
     });
   };
 
+  const LOCATION_NAME_MAP: Record<string, string> = {
+    MAIN_HALL: "Sảnh chính",
+    OUTDOOR: "Sân vườn",
+    VIP_ROOM: "Phòng VIP",
+    PRIVATE_ROOM: "Phòng riêng",
+    BAR_AREA: "Khu quầy bar",
+  };
+
+  const POSITION_NAME_MAP: Record<string, string> = {
+    VIP: "Bàn VIP",
+    GOOD_VIEW: "Bàn view đẹp",
+    PERSONAL: "Bàn riêng tư",
+    FAMILY: "Bàn gia đình",
+    BAR: "Bàn quầy bar",
+    CENTER: "Bàn trung tâm",
+  };
+
+  const STATUS_NAME_MAP: Record<string, string> = {
+    AVAILABLE: "Còn trống",
+    OCCUPIED: "Đang có khách",
+  };
+
   const handleCancelBooking = (tableId: number) => {
     setBookedTableIds((prev) => prev.filter((id) => id !== tableId));
     alert(
@@ -111,9 +133,9 @@ export default function TableSeatMap() {
 
           // Lấy mô tả khu vực từ bàn đầu tiên (hoặc tùy chỉnh riêng)
           const locationDesc =
-            tablesInArea[0]?.locationName &&
-            tablesInArea[0]?.locationName !== location
-              ? tablesInArea[0].locationName
+            tablesInArea[0]?.locationDescription &&
+            tablesInArea[0]?.locationDescription !== location
+              ? tablesInArea[0].locationDescription
               : "Không có mô tả";
 
           return (
@@ -125,7 +147,7 @@ export default function TableSeatMap() {
               {/* Header khu vực */}
               <div className="mb-4">
                 <h2 className="text-2xl font-semibold text-gray-700 flex items-center justify-between">
-                  <span>{location}</span>
+                  <span>{LOCATION_NAME_MAP[location] || location}</span>
                   <span className="text-sm text-gray-500">{locationDesc}</span>
                 </h2>
                 <div className="border-b border-gray-200 mt-2"></div>
@@ -137,7 +159,9 @@ export default function TableSeatMap() {
                   <Tooltip
                     key={table.id}
                     content={`${table.name} • ${table.capacity} người • ${
-                      table.positionName || "Không xác định vị trí"
+                      POSITION_NAME_MAP[table.positionName] ||
+                      table.positionName ||
+                      "Không xác định vị trí"
                     }`}
                     placement="top">
                     <button
@@ -163,11 +187,13 @@ export default function TableSeatMap() {
                       <span className="font-medium text-gray-800">
                         Khu vực:
                       </span>{" "}
-                      {selectedTable.locationName || "Không xác định"}
+                      {LOCATION_NAME_MAP[selectedTable.locationName] ||
+                        selectedTable.locationName}
                     </li>
                     <li>
                       <span className="font-medium text-gray-800">Vị trí:</span>{" "}
-                      {selectedTable.positionName || "Không xác định"}
+                      {POSITION_NAME_MAP[selectedTable.positionName] ||
+                        selectedTable.positionName}
                     </li>
                     <li>
                       <span className="font-medium text-gray-800">
@@ -181,9 +207,8 @@ export default function TableSeatMap() {
                       </span>{" "}
                       {bookedTableIds.includes(selectedTable.id)
                         ? "Đã đặt"
-                        : selectedTable.statusName === "OCCUPIED"
-                        ? "Đang có khách"
-                        : "Còn trống"}
+                        : STATUS_NAME_MAP[selectedTable.statusName] ||
+                          selectedTable.statusName}
                     </li>
                   </ul>
 
@@ -333,7 +358,7 @@ export default function TableSeatMap() {
       </Modal>
 
       {/* ---------- Floating Legend (Bảng chú thích) ---------- */}
-      <div className="fixed top-24 right-6 bg-white shadow-lg rounded-xl p-4 text-sm border border-gray-200 z-50">
+      <div className="fixed top-24 right-6 bg-white shadow-lg rounded-xl p-4 text-sm border border-gray-200">
         <p className="font-semibold text-gray-700 mb-2">Trạng thái bàn</p>
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">

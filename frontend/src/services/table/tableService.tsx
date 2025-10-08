@@ -7,12 +7,13 @@ export interface Table {
   name: string;
   shortName: string;
   capacity: number;
-  statusId: number | null;
-  statusName: string | null;
-  locationId: number | null;
-  locationName: string | null;
-  positionId: number | null;
-  positionName: string | null;
+  statusId: number;
+  statusName: string;
+  locationId: number;
+  locationName: string;
+  positionId: number;
+  positionName: string;
+  locationDescription: string;
   createdAt: string;
   updatedAt: string;
 }

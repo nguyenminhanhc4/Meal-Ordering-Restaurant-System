@@ -9,6 +9,7 @@ public class ParamDTO {
     private String type;
     private String code;
     private String name;
+    private String description;
 
     public ParamDTO() {}
 
@@ -18,6 +19,7 @@ public class ParamDTO {
             this.type = entity.getType();
             this.code = entity.getCode();
             this.name = entity.getName();
+            this.description = entity.getDescription();
         }
     }
 
@@ -28,6 +30,7 @@ public class ParamDTO {
         param.setType(this.type);
         param.setCode(this.code);
         param.setName(this.name);
+        param.setDescription(this.description);
         return param;
     }
 }

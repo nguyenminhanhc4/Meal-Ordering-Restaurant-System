@@ -32,7 +32,7 @@ export default function FooterLanding() {
             </li>
             <li>
               <a
-                href="/booking"
+                href="/table"
                 className="hover:text-yellow-400 transition-colors">
                 Đặt bàn
               </a>

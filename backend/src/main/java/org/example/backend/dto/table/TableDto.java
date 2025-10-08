@@ -40,7 +40,7 @@ public class TableDto {
             }
             if (table.getPosition() != null){
                 this.positionId = table.getPosition().getId();
-                this.positionName = table.getPosition().getName();
+                this.positionName = table.getPosition().getCode();
             }
             this.createdAt = table.getCreatedAt();
             this.updatedAt = table.getUpdatedAt();
