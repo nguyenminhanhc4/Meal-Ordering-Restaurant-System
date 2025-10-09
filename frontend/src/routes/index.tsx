@@ -2,6 +2,7 @@ import { Routes } from "react-router-dom";
 import AuthRoutes from "./AuthRoutes";
 import LandingRoutes from "./LandingRoutes";
 import MealRoutes from "./MealRoutes";
+import AdminRoutes from "./AdminRoutes";
 
 export default function AppRoutes() {
   return (
@@ -9,6 +10,7 @@ export default function AppRoutes() {
       {LandingRoutes}
       {AuthRoutes}
       {MealRoutes}
+      {AdminRoutes}
     </Routes>
   );
 }

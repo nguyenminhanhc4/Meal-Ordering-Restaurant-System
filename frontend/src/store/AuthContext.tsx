@@ -16,7 +16,8 @@ export interface User {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  refreshUser: () => Promise<void>;
+  isChecking: boolean;
+  refreshUser: () => Promise<User | null>;
   logout: () => Promise<void>;
 }
 
@@ -24,20 +25,46 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isChecking, setIsChecking] = useState<boolean>(true);
+
+  const roleMap: Record<number, string> = {
+    1: "CUSTOMER",
+    2: "ADMIN",
+    3: "STAFF",
+  };
 
   // Gọi /me để lấy thông tin user
   const refreshUser = async () => {
+    setIsChecking(true);
     try {
       const response = await api.get("/users/me", { withCredentials: true });
-      // response.data.data chứa UserDTO từ backend
-      setUser(response.data.data as User);
+      const userData = response.data.data;
+
+      const mappedUser: User = {
+        name: userData.name,
+        email: userData.email,
+        publicId: userData.publicId,
+        phone: userData.phone || undefined,
+        address: userData.address || undefined,
+        gender: userData.gender || undefined,
+        avatarUrl: userData.avatarUrl || undefined,
+        role: roleMap[userData.roleId] || "CUSTOMER",
+      };
+
+      console.log("Mapped user:", mappedUser);
+      setUser(mappedUser);
+      return mappedUser;
     } catch {
       setUser(null);
+      return null;
+    } finally {
+      setIsChecking(false);
     }
   };
 
   useEffect(() => {
-    refreshUser(); // Chỉ gọi 1 lần khi app mount
+    void refreshUser(); // Chỉ gọi 1 lần khi app mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Logout: gọi API backend xóa cookie và reset state
@@ -51,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn: !!user, user, refreshUser, logout }}>
+      value={{ isLoggedIn: !!user, isChecking, user, refreshUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

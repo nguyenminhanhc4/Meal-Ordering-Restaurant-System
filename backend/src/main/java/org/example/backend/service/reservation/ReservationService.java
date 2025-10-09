@@ -1,7 +1,9 @@
 package org.example.backend.service.reservation;
 
+import lombok.Getter;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.table.TableDto;
+import org.example.backend.dto.table.TableStatusUpdate;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.entity.table.TableEntity;
@@ -10,6 +12,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.reservation.ReservationRepository;
 import org.example.backend.repository.table.TableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,41 +31,55 @@ public class ReservationService {
     @Autowired
     private ParamRepository paramRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     // ========================= CREATE =========================
     @Transactional
     public ReservationDto createMyReservation(Long userId, ReservationDto dto) {
-        Reservation reservation = new Reservation();
-        reservation.setPublicId(UUID.randomUUID().toString());
-        reservation.setUserId(userId);
-        reservation.setReservationTime(dto.getReservationTime());
-        reservation.setNumberOfPeople(dto.getNumberOfPeople());
-        reservation.setNote(dto.getNote());
+        try {
+            Reservation reservation = new Reservation();
+            reservation.setPublicId(UUID.randomUUID().toString());
+            reservation.setUserId(userId);
+            reservation.setReservationTime(dto.getReservationTime());
+            reservation.setNumberOfPeople(dto.getNumberOfPeople());
+            reservation.setNote(dto.getNote());
 
-        // Default status = CONFIRMED
-        Param status = paramRepository.findByTypeAndCode("STATUS", "CONFIRMED")
-                .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
-        reservation.setStatusId(status.getId());
-        reservationRepository.save(reservation);
+            // Default status = CONFIRMED
+            Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "CONFIRMED")
+                    .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
+            reservation.setStatus(status);
+            reservationRepository.save(reservation);
 
-        // Merge tables logic
-        MergeTableResult result = mergeTables(dto.getTableIds(), dto.getNumberOfPeople());
-        if (!result.isEnough()) {
-            throw new IllegalStateException("Not enough seats for " + dto.getNumberOfPeople() + " people");
+            // Merge tables logic
+            MergeTableResult result = mergeTables(dto.getTableIds(), dto.getNumberOfPeople());
+            if (!result.isEnough()) {
+                throw new IllegalStateException(
+                        "Not enough seats for " + dto.getNumberOfPeople() + " people");
+            }
+
+            // Mark tables occupied and link them
+            Param occupiedStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "OCCUPIED")
+                    .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
+
+            for (TableEntity table : result.getAllocatedTables()) {
+                table.setStatus(occupiedStatus); // ✅ thay vì setStatusId()
+                tableRepository.save(table);
+
+                messagingTemplate.convertAndSend("/topic/tables",
+                        new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
+            }
+
+            reservation.setTables(new HashSet<>(result.getAllocatedTables()));
+            reservationRepository.save(reservation);
+
+            return new ReservationDto(reservation);
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        // Mark tables occupied and link them
-        Param occupiedStatus = paramRepository.findByTypeAndCode("STATUS", "OCCUPIED")
-                .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
-
-        for (TableEntity table : result.getAllocatedTables()) {
-            table.setStatusId(occupiedStatus.getId());
-            tableRepository.save(table);
-        }
-
-        reservation.setTables(new HashSet<>(result.getAllocatedTables()));
-        reservationRepository.save(reservation);
-
-        return new ReservationDto(reservation);
     }
 
     // ========================= READ =========================
@@ -99,9 +116,8 @@ public class ReservationService {
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
-            reservation.setStatusId(status.getId());
+            reservation.setStatus(status);
 
-            // If cancelled -> free tables
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
                 releaseTables(reservation);
             }
@@ -121,7 +137,7 @@ public class ReservationService {
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
-            reservation.setStatusId(status.getId());
+            reservation.setStatus(status);
 
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
                 releaseTables(reservation);
@@ -154,28 +170,34 @@ public class ReservationService {
     // ========================= UTILS =========================
     @Transactional(readOnly = true)
     public List<TableDto> getAvailableTables() {
-        Param availableStatus = paramRepository.findByTypeAndCode("STATUS", "AVAILABLE")
+        Param availableStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "AVAILABLE")
                 .orElseThrow(() -> new ResourceNotFoundException("Status AVAILABLE not found"));
 
-        return tableRepository.findByStatusId(availableStatus.getId()).stream()
+        // ✅ sửa để dùng table.getStatus().getId()
+        return tableRepository.findAll().stream()
+                .filter(t -> t.getStatus() != null && Objects.equals(t.getStatus().getId(), availableStatus.getId()))
                 .map(TableDto::new)
                 .collect(Collectors.toList());
     }
 
     private void releaseTables(Reservation reservation) {
-        Param availableStatus = paramRepository.findByTypeAndCode("STATUS", "AVAILABLE")
+        Param availableStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "AVAILABLE")
                 .orElseThrow(() -> new ResourceNotFoundException("Status AVAILABLE not found"));
 
         for (TableEntity table : reservation.getTables()) {
-            table.setStatusId(availableStatus.getId());
+            table.setStatus(availableStatus); // ✅ thay vì setStatusId()
             tableRepository.save(table);
+
+            messagingTemplate.convertAndSend("/topic/tables",
+                    new TableStatusUpdate(table.getId(), availableStatus.getId()));
         }
 
         reservation.getTables().clear();
         reservationRepository.save(reservation);
     }
 
-    private class MergeTableResult {
+    @Getter
+    private static class MergeTableResult {
         private final List<TableEntity> allocatedTables;
         private final boolean enough;
 
@@ -183,28 +205,31 @@ public class ReservationService {
             this.allocatedTables = allocatedTables;
             this.enough = enough;
         }
-
-        public List<TableEntity> getAllocatedTables() { return allocatedTables; }
-        public boolean isEnough() { return enough; }
     }
 
-    private MergeTableResult mergeTables(List<Long> tableIds, int requiredSeats) {
-        List<TableEntity> allocated = new ArrayList<>();
-        int totalCapacity = 0;
+    public MergeTableResult mergeTables(List<Long> tableIds, int numberOfPeople) {
+        List<TableEntity> allocatedTables = new ArrayList<>();
+        int totalSeats = 0;
 
-        if (tableIds != null) {
-            for (Long tableId : tableIds) {
-                TableEntity table = tableRepository.findById(tableId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Table not found with id: " + tableId));
+        for (Long tableId : tableIds) {
+            TableEntity table = tableRepository.findById(tableId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Table with id " + tableId + " not found"));
 
-                allocated.add(table);
-                totalCapacity += table.getCapacity();
+            Param occupiedStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "OCCUPIED")
+                    .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
 
-                if (totalCapacity >= requiredSeats) {
-                    return new MergeTableResult(allocated, true);
-                }
+            if (table.getStatus() != null && Objects.equals(table.getStatus().getId(), occupiedStatus.getId())) {
+                throw new IllegalStateException("Table with id " + tableId + " is already occupied");
             }
+
+            totalSeats += table.getCapacity();
+            allocatedTables.add(table);
         }
-        return new MergeTableResult(allocated, false);
+
+        if (totalSeats < numberOfPeople) {
+            throw new IllegalStateException("Not enough seats for " + numberOfPeople + " people");
+        }
+
+        return new MergeTableResult(allocatedTables, true);
     }
 }

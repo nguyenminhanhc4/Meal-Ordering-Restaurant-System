@@ -27,6 +27,9 @@ public class Param extends BaseEntity {
     @Column(unique = true)
     private String typeCode;
 
+    @Column(length = 500)
+    private String description;
+
     @PrePersist
     public void prePersist() {
         this.typeCode = type + "_" + code;

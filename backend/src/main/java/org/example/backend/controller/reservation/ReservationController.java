@@ -28,13 +28,14 @@ public class ReservationController {
     // CUSTOMER creates reservation for themselves
     @PostMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> createMyReservation(@RequestBody ReservationDto dto, Long userId) {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        String email = auth.getName();
-//        Long userId = userService.getUserByEmail(email).getId();
+    public ResponseEntity<?> createMyReservation(@RequestBody ReservationDto dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long userId = userService.getUserByEmail(email).getId();
         ReservationDto created = reservationService.createMyReservation(userId, dto);
         return ResponseEntity.ok(new Response<>("success", created, "Reservation created successfully"));
     }
+
 
     // CUSTOMER gets all their reservations
     @GetMapping("/me")

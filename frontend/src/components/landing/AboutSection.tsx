@@ -68,7 +68,7 @@ export default function AboutSection() {
       <div className="flex justify-center gap-4">
         <Button
           size="lg"
-          href="#"
+          href="/table"
           className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
           Đặt bàn ngay
         </Button>

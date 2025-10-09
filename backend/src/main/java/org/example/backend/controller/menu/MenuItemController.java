@@ -4,6 +4,7 @@ import org.example.backend.dto.Response;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.service.menu.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +21,19 @@ public class MenuItemController {
     private MenuItemService menuItemService;
 
     @GetMapping
-    public ResponseEntity<?> getAllMenuItems() {
-        List<MenuItemDto> menuItems = menuItemService.findAll();
+    public ResponseEntity<?> getAllMenuItems(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "popular") String sort,
+            @RequestParam(required = false) String categorySlug
+    ) {
+        Page<MenuItemDto> menuItems = menuItemService.findAll(page, size,search, sort, categorySlug);
         return ResponseEntity.ok(
                 new Response<>("success", menuItems, "Menu items retrieved successfully")
         );
     }
+
 
     @GetMapping("/top-popular")
     public ResponseEntity<?> getTopPopularMenuItems() {
