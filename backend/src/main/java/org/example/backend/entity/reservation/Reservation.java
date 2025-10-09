@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.example.backend.entity.BaseEntity;
+import org.example.backend.entity.param.Param;
 import org.example.backend.entity.table.TableEntity;
 
 import java.time.LocalDateTime;
@@ -28,8 +29,9 @@ public class Reservation extends BaseEntity {
     @Column(name = "reservation_time", nullable = false)
     private LocalDateTime reservationTime;
 
-    @Column(name = "status_id")
-    private Long statusId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", referencedColumnName = "id")
+    private Param status;
 
     @Column(name = "note")
     private String note;

@@ -1,7 +1,5 @@
 import type { ApiResponse } from "../types/ApiType";
 import api from "../../api/axios";
-import type { Table } from "../table/tableService";
-
 export interface Reservation {
   id: number;
   publicId: string;
@@ -10,17 +8,24 @@ export interface Reservation {
   numberOfPeople: number;
   note?: string;
   statusId: number;
-  statusName?: string;
-  tables: Table[];
+  statusName: string;
+  tableIds: number[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateReservationRequest {
+  reservationTime: string;
+  numberOfPeople: number;
+  note?: string;
+  tableIds: number[];
 }
 
 /**
  * CUSTOMER: tạo đặt bàn cho chính mình
  */
 export const createMyReservation = async (
-  reservation: Partial<Reservation>
+  reservation: CreateReservationRequest
 ): Promise<Reservation | null> => {
   try {
     const response = await api.post<ApiResponse<Reservation>>(
@@ -40,7 +45,10 @@ export const createMyReservation = async (
 export const getMyReservations = async (): Promise<Reservation[]> => {
   try {
     const response = await api.get<ApiResponse<Reservation[]>>(
-      "/reservations/me"
+      "/reservations/me",
+      {
+        withCredentials: true,
+      }
     );
     return response.data.data;
   } catch (error) {

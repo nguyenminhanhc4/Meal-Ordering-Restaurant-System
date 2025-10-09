@@ -2,7 +2,7 @@
 import type { ApiResponse } from "../types/ApiType";
 import api from "../../api/axios";
 
-export interface Table {
+export interface TableEntity {
   id: number;
   name: string;
   shortName: string;
@@ -21,9 +21,9 @@ export interface Table {
 /**
  * Lấy tất cả bàn (cần login)
  */
-export const getAllTables = async (): Promise<Table[]> => {
+export const getAllTables = async (): Promise<TableEntity[]> => {
   try {
-    const response = await api.get<ApiResponse<Table[]>>("/tables", {
+    const response = await api.get<ApiResponse<TableEntity[]>>("/tables", {
       withCredentials: true, // 👈 gửi cookie / token
     });
     return response.data.data;
@@ -36,9 +36,9 @@ export const getAllTables = async (): Promise<Table[]> => {
 /**
  * Lấy bàn theo ID (Admin)
  */
-export const getTableById = async (id: number): Promise<Table | null> => {
+export const getTableById = async (id: number): Promise<TableEntity | null> => {
   try {
-    const response = await api.get<ApiResponse<Table>>(`/tables/${id}`, {
+    const response = await api.get<ApiResponse<TableEntity>>(`/tables/${id}`, {
       withCredentials: true,
     });
     return response.data.data;
@@ -51,9 +51,9 @@ export const getTableById = async (id: number): Promise<Table | null> => {
 /**
  * Lấy danh sách bàn còn trống (Customer hoặc Staff)
  */
-export const getAvailableTables = async (): Promise<Table[]> => {
+export const getAvailableTables = async (): Promise<TableEntity[]> => {
   try {
-    const response = await api.get<ApiResponse<Table[]>>(
+    const response = await api.get<ApiResponse<TableEntity[]>>(
       "/reservations/tables/available",
       { withCredentials: true }
     );
@@ -68,12 +68,16 @@ export const getAvailableTables = async (): Promise<Table[]> => {
  * Tạo bàn (Admin)
  */
 export const createTable = async (
-  table: Partial<Table>
-): Promise<Table | null> => {
+  table: Partial<TableEntity>
+): Promise<TableEntity | null> => {
   try {
-    const response = await api.post<ApiResponse<Table>>("/tables", table, {
-      withCredentials: true,
-    });
+    const response = await api.post<ApiResponse<TableEntity>>(
+      "/tables",
+      table,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.data;
   } catch (error) {
     console.error("Error creating table:", error);
@@ -86,12 +90,16 @@ export const createTable = async (
  */
 export const updateTable = async (
   id: number,
-  table: Partial<Table>
-): Promise<Table | null> => {
+  table: Partial<TableEntity>
+): Promise<TableEntity | null> => {
   try {
-    const response = await api.put<ApiResponse<Table>>(`/tables/${id}`, table, {
-      withCredentials: true,
-    });
+    const response = await api.put<ApiResponse<TableEntity>>(
+      `/tables/${id}`,
+      table,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.data;
   } catch (error) {
     console.error(`Error updating table with id ${id}:`, error);

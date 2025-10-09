@@ -19,6 +19,7 @@ public class ReservationDto {
     private List<Long> tableIds; // 🔹 multiple tables now
     private LocalDateTime reservationTime;
     private Long statusId;
+    private String statusName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String note;
@@ -30,7 +31,8 @@ public class ReservationDto {
             this.publicId = reservation.getPublicId();
             this.userId = reservation.getUserId();
             this.reservationTime = reservation.getReservationTime();
-            this.statusId = reservation.getStatusId();
+            this.statusId = reservation.getStatus().getId();
+            this.statusName = reservation.getStatus().getCode();
             this.createdAt = reservation.getCreatedAt();
             this.updatedAt = reservation.getUpdatedAt();
             this.note = reservation.getNote();

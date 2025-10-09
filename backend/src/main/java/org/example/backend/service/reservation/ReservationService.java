@@ -48,7 +48,7 @@ public class ReservationService {
             // Default status = CONFIRMED
             Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "CONFIRMED")
                     .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
-            reservation.setStatusId(status.getId());
+            reservation.setStatus(status);
             reservationRepository.save(reservation);
 
             // Merge tables logic
@@ -116,7 +116,7 @@ public class ReservationService {
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
-            reservation.setStatusId(status.getId());
+            reservation.setStatus(status);
 
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
                 releaseTables(reservation);
@@ -137,7 +137,7 @@ public class ReservationService {
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
-            reservation.setStatusId(status.getId());
+            reservation.setStatus(status);
 
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
                 releaseTables(reservation);

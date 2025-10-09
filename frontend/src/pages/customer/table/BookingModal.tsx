@@ -7,19 +7,24 @@ import {
   TextInput,
   Button,
 } from "flowbite-react";
-import React, { useState } from "react";
-import type { Table } from "../../../services/table/tableService";
+import React, { useState, useEffect } from "react";
+import type { TableEntity } from "../../../services/table/tableService";
+import type { Reservation } from "../../../services/reservation/reservationService";
+import { useAuth } from "../../../store/AuthContext";
 
 // ✅ Khai báo Giờ mở cửa/đóng cửa (Tùy chỉnh theo nhu cầu)
-const MIN_HOUR = 10; // 10:00 sáng
+const MIN_HOUR = 9; // 9:00 sáng
 const MAX_HOUR = 22; // 22:00 tối
 
 interface BookingModalProps {
-  table: Table | null; // Bàn được chọn
+  table?: TableEntity | null;
   open: boolean;
-  minDateTime: string; // Thời gian tối thiểu hiện tại (từ component cha)
+  minDateTime: string;
   onClose: () => void;
-  onConfirm: (data: BookingData) => void;
+  onConfirm: (data: BookingData) => Promise<void>;
+  onConfirmEdit?: (data: BookingData) => Promise<void>;
+  existingReservation?: Reservation | null;
+  mode?: "create" | "edit";
 }
 
 // ✅ Định nghĩa kiểu dữ liệu form mới (giúp TypeScript an toàn hơn)
@@ -28,6 +33,7 @@ export interface BookingData {
   phone: string;
   reservationTime: string;
   numberOfPeople: string;
+  note?: string;
 }
 
 const initialFormData: BookingData = {
@@ -43,26 +49,45 @@ export default function BookingModal({
   minDateTime,
   onClose,
   onConfirm,
+  onConfirmEdit,
+  existingReservation = null,
+  mode = "create",
 }: BookingModalProps) {
   const [formData, setFormData] = useState<BookingData>(initialFormData);
   const [formError, setFormError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (mode === "edit" && existingReservation) {
+      // Đổ dữ liệu từ reservation API vào form
+      setFormData({
+        name: user?.name || "",
+        phone: user?.phone || "",
+        reservationTime:
+          existingReservation.reservationTime?.slice(0, 16) || "",
+        numberOfPeople: existingReservation.numberOfPeople.toString(),
+        note: existingReservation.note || "",
+      });
+    } else if (mode === "create" && user) {
+      // Reset form khi tạo mới
+      setFormData({
+        ...initialFormData,
+        name: user.name || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [open, mode, existingReservation, user]);
 
   if (!table) return null; // Không hiển thị nếu không có bàn
 
-  const handleConfirm = () => {
-    if (
-      formError ||
-      !formData.name ||
-      !formData.phone ||
-      !formData.reservationTime ||
-      !formData.numberOfPeople
-    ) {
-      return; // Chặn nếu có lỗi hoặc thiếu dữ liệu bắt buộc
+  const handleConfirm = async () => {
+    if (mode === "edit" && onConfirmEdit) {
+      await onConfirmEdit(formData);
+    } else {
+      await onConfirm(formData);
     }
-    onConfirm(formData);
-    // ✅ Reset form sau khi xác nhận
-    setFormData(initialFormData);
-    setFormError(null);
   };
 
   const handleReservationTimeChange = (
@@ -94,14 +119,20 @@ export default function BookingModal({
       {/* ✅ ĐIỀU CHỈNH 1: Header (Màu sắc thương hiệu) */}
       <ModalHeader className="border-b-8 !border-yellow-800 !bg-stone-800 text-xl font-bol">
         <div className="text-xl font-normal text-yellow-500 mt-1">
-          Đặt bàn {table.name}
+          {mode === "edit"
+            ? `Cập nhật đặt bàn #${
+                existingReservation?.publicId?.slice(0, 8) || ""
+              }`
+            : `Đặt bàn ${table?.name || ""}`}
         </div>
-        <div className="text-base font-normal text-yellow-500 mt-1">
-          Sức chứa tối đa:{" "}
-          <span className="font-semibold text-yellow-300">
-            {table.capacity} chỗ
-          </span>
-        </div>
+        {table && (
+          <div className="text-base font-normal text-yellow-500 mt-1">
+            Sức chứa tối đa:{" "}
+            <span className="font-semibold text-yellow-300">
+              {table.capacity} chỗ
+            </span>
+          </div>
+        )}
       </ModalHeader>
 
       <ModalBody className="space-y-5 py-4 bg-white">
@@ -122,7 +153,13 @@ export default function BookingModal({
               }
               required
               sizing="lg"
-              color="white"
+              theme={{
+                field: {
+                  input: {
+                    base: "!bg-amber-50 !border-amber-300 !text-amber-900 placeholder-amber-400 focus:!ring-amber-500 focus:!border-amber-500",
+                  },
+                },
+              }}
             />
           </div>
           {/* 2. Số điện thoại */}
@@ -141,8 +178,14 @@ export default function BookingModal({
               }
               required
               sizing="lg"
-              type="tel" // ✅ Cải tiến: Dùng type tel cho di động
-              color="white"
+              type="tel"
+              theme={{
+                field: {
+                  input: {
+                    base: "!bg-amber-50 !border-amber-300 !text-amber-900 placeholder-amber-400 focus:!ring-amber-500 focus:!border-amber-500",
+                  },
+                },
+              }}
             />
           </div>
 
@@ -162,8 +205,13 @@ export default function BookingModal({
               required
               sizing="lg"
               min={minDateTime}
-              // ✅ Cải tiến: Thêm màu viền lỗi khi có formError
-              color={formError ? "red" : "white"}
+              theme={{
+                field: {
+                  input: {
+                    base: "!bg-amber-50 !border-amber-300 !text-amber-900 placeholder-amber-400 focus:!ring-amber-500 focus:!border-amber-500",
+                  },
+                },
+              }}
             />
             {formError && (
               <p className="mt-2 text-sm font-medium text-red-600 flex items-center">
@@ -209,12 +257,42 @@ export default function BookingModal({
               }
               required
               sizing="lg"
-              color="white"
+              theme={{
+                field: {
+                  input: {
+                    base: "!bg-amber-50 !border-amber-300 !text-amber-900 placeholder-amber-400 focus:!ring-amber-500 focus:!border-amber-500",
+                  },
+                },
+              }}
             />
             {/* ✅ Cải tiến: Thêm chú thích sức chứa */}
             <p className="mt-2 text-xs text-gray-500">
               *Bàn này có sức chứa tối đa là {table.capacity} người.
             </p>
+          </div>
+
+          <div>
+            <Label
+              htmlFor="note"
+              className="mb-1 block text-base font-medium !text-gray-700">
+              Ghi chú thêm (nếu có)
+            </Label>
+            <TextInput
+              id="note"
+              placeholder="Sinh nhật, họp mặt, ..."
+              value={formData.note || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, note: e.target.value })
+              }
+              sizing="lg"
+              theme={{
+                field: {
+                  input: {
+                    base: "!bg-amber-50 !border-amber-300 !text-amber-900 placeholder-amber-400 focus:!ring-amber-500 focus:!border-amber-500",
+                  },
+                },
+              }}
+            />
           </div>
         </div>
       </ModalBody>
@@ -232,7 +310,7 @@ export default function BookingModal({
             !!formError
           }
           size="lg">
-          Xác nhận đặt bàn
+          {mode === "edit" ? "Cập nhật thông tin" : "Xác nhận đặt bàn"}
         </Button>
         <Button color="red" onClick={handleClose} size="lg">
           Hủy
