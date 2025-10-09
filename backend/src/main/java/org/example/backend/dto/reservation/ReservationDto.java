@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.backend.entity.reservation.Reservation;
+import org.example.backend.entity.table.TableEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,32 +16,33 @@ public class ReservationDto {
     private Long id;
     private String publicId;
     private Long userId;
-    private Long tableId;
+    private List<Long> tableIds; // 🔹 multiple tables now
     private LocalDateTime reservationTime;
     private Long statusId;
+    private String statusName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-//    // Extra formatted fields for client display
-//    private String reservationTimeFormatted;
-//    private String createdAtFormatted;
-//    private String updatedAtFormatted;
+    private String note;
+    private int numberOfPeople;
 
     public ReservationDto(Reservation reservation) {
         if (reservation != null) {
             this.id = reservation.getId();
             this.publicId = reservation.getPublicId();
             this.userId = reservation.getUserId();
-            this.tableId = reservation.getTableId();
             this.reservationTime = reservation.getReservationTime();
-            this.statusId = reservation.getStatusId();
+            this.statusId = reservation.getStatus().getId();
+            this.statusName = reservation.getStatus().getCode();
             this.createdAt = reservation.getCreatedAt();
             this.updatedAt = reservation.getUpdatedAt();
+            this.note = reservation.getNote();
+            this.numberOfPeople = reservation.getNumberOfPeople();
 
-//            // Use DataUtil for human-readable fields
-//            this.reservationTimeFormatted = DataUtil.formatDate(reservationTime, DataUtil.DEFAULT_DATE_TIME_PATTERN);
-//            this.createdAtFormatted = DataUtil.formatDate(createdAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
-//            this.updatedAtFormatted = DataUtil.formatDate(updatedAt, DataUtil.DEFAULT_DATE_TIME_PATTERN);
+            // map tables -> ids
+            this.tableIds = reservation.getTables()
+                    .stream()
+                    .map(TableEntity::getId)
+                    .toList();
         }
     }
 }

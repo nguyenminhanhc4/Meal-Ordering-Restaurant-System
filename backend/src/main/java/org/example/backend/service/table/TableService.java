@@ -1,6 +1,8 @@
 package org.example.backend.service.table;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.entity.param.Param;
+import org.example.backend.repository.param.ParamRepository;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.table.TableDto;
 import org.example.backend.entity.table.TableEntity;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 public class TableService {
 
     private final TableRepository tableRepository;
+    private final ParamRepository paramRepository;
 
     public List<TableDto> findAll() {
         return tableRepository.findAll()
@@ -51,8 +54,25 @@ public class TableService {
 
         table.setName(dto.getName());
         table.setCapacity(dto.getCapacity());
-        table.setStatusId(dto.getStatusId());
+        // --- Update status ---
+        if (dto.getStatusId() != null) {
+            Param status = paramRepository.findById(dto.getStatusId())
+                    .orElseThrow(() -> new RuntimeException("Status not found"));
+            table.setStatus(status);
+        }
 
+        // --- Update location ---
+        if (dto.getLocationId() != null) {
+            Param location = paramRepository.findById(dto.getLocationId())
+                    .orElseThrow(() -> new RuntimeException("Location not found"));
+            table.setLocation(location);
+        }
+
+        if (dto.getPositionId() != null) {
+            Param position = paramRepository.findById(dto.getPositionId())
+                    .orElseThrow(() -> new RuntimeException("Position not found"));
+            table.setPosition(position);
+        }
         table = tableRepository.save(table);
         return new TableDto(table);
     }
@@ -67,10 +87,22 @@ public class TableService {
     private TableEntity toEntity(TableDto dto) {
         TableEntity entity = new TableEntity();
         entity.setId(dto.getId());
-        entity.setLocationId(dto.getLocationId());
         entity.setName(dto.getName());
         entity.setCapacity(dto.getCapacity());
-        entity.setStatusId(dto.getStatusId());
+        if (dto.getStatusId() != null) {
+            Param status = paramRepository.findById(dto.getStatusId())
+                    .orElse(null);
+            entity.setStatus(status);
+        }
+        if (dto.getLocationId() != null) {
+            Param location = paramRepository.findById(dto.getLocationId())
+                    .orElse(null);
+            entity.setLocation(location);
+        }
+        if (dto.getPositionId() != null){
+            Param position = paramRepository.findById(dto.getPositionId()).orElse(null);
+            entity.setPosition(position);
+        }
         return entity;
     }
 }

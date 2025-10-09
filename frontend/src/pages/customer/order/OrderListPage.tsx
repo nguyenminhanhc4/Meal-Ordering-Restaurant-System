@@ -12,6 +12,7 @@ import { FaUtensils } from "react-icons/fa";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { getOrdersByUser } from "../../../services/order/checkoutService";
 import type { OrderDto } from "../../../services/types/OrderType";
+import Pagination from "../../../components/common/PaginationClient";
 
 const OrderListPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
@@ -163,77 +164,11 @@ const OrderListPage: React.FC = () => {
 
         {/* Pagination */}
         {orders.length > 0 && (
-          <div className="flex justify-center mt-8">
-            <div className="flex gap-2 items-center">
-              {/* Nút First */}
-              <button
-                onClick={() => setCurrentPage(0)}
-                disabled={currentPage === 0}
-                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                  currentPage === 0
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-amber-200"
-                }`}>
-                « First
-              </button>
-
-              {/* Nút Previous */}
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-                disabled={currentPage === 0}
-                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                  currentPage === 0
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-amber-200"
-                }`}>
-                ‹ Prev
-              </button>
-
-              {/* Nút số trang */}
-              {Array.from({ length: totalPages }, (_, idx) => {
-                const pageNum = idx + 1;
-                const isActive = currentPage + 1 === pageNum;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(idx)}
-                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      isActive
-                        ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg"
-                        : "bg-white text-gray-700 hover:bg-amber-200"
-                    }`}>
-                    {pageNum}
-                  </button>
-                );
-              })}
-
-              {/* Nút Next */}
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))
-                }
-                disabled={currentPage === totalPages - 1}
-                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                  currentPage === totalPages - 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-amber-200"
-                }`}>
-                Next ›
-              </button>
-
-              {/* Nút Last */}
-              <button
-                onClick={() => setCurrentPage(totalPages - 1)}
-                disabled={currentPage === totalPages - 1}
-                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                  currentPage === totalPages - 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-amber-200"
-                }`}>
-                Last »
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
         )}
       </div>
     </section>

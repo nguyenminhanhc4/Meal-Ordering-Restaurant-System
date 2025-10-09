@@ -4,7 +4,10 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.MenuItemMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.entity.category.Categories;
@@ -32,16 +35,34 @@ public class MenuItemService {
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
-    public List<MenuItemDto> findAll() {
-        List<Object[]> results = menuItemRepository.findAllWithDetails();
-        System.out.println("Number of results: " + results.size()); // Debug
-        for (Object[] result : results) {
-            MenuItem entity = (MenuItem) result[0];
-            System.out.println("MenuItem: " + entity.getName());
+    public Page<MenuItemDto> findAll(int page, int size, String search, String sort, String categorySlug) {
+        // 1️⃣ Xác định kiểu sắp xếp
+        Sort sortOption = switch (sort.toLowerCase()) {
+            case "price-asc" -> Sort.by(Sort.Direction.ASC, "m.price");
+            case "price-desc" -> Sort.by(Sort.Direction.DESC, "m.price");
+            case "newest" -> Sort.by(Sort.Direction.DESC, "m.createdAt");
+            default -> Sort.unsorted(); // "popular" sẽ xử lý logic trong query
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+
+        // 2️⃣ Gọi repository phù hợp với bộ lọc
+        Page<Object[]> results;
+
+        boolean hasSearch = search != null && !search.trim().isEmpty();
+        boolean hasCategory = categorySlug != null && !categorySlug.trim().isEmpty();
+
+        if (hasSearch && hasCategory) {
+            results = menuItemRepository.findAllWithDetailsByCategoryAndName(categorySlug, "%" + search.trim() + "%", pageable);
+        } else if (hasCategory) {
+            results = menuItemRepository.findAllWithDetailsByCategory(categorySlug, pageable);
+        } else if (hasSearch) {
+            results = menuItemRepository.findAllWithDetailsByNameContainingIgnoreCase("%" + search.trim() + "%", pageable);
+        } else {
+            results = menuItemRepository.findAllWithDetails(pageable);
         }
-        return results.stream()
-                .map(this::toMenuItemDto)
-                .collect(Collectors.toList());
+
+        return results.map(this::toMenuItemDto);
     }
 
     public List<MenuItemDto> findTopPopular(int limit) {
@@ -128,6 +149,8 @@ public class MenuItemService {
 
         return entity;
     }
+
+    
 
     @Transactional
     public MenuItemDto uploadMenuItemAvatar(Long menuItemId, MultipartFile file) throws IOException {

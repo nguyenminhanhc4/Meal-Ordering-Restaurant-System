@@ -8,4 +8,7 @@ export interface Page<T> {
   totalElements: number;
   last: boolean;
   first: boolean;
+  number: number;
+  size: number;
+  numberOfElements: number;
 }

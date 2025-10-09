@@ -10,6 +10,8 @@ import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.util.JwtUtil;
 import org.example.backend.validator.UserValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,13 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
+        "image/jpeg", "image/png", "image/gif"
+    );
 
     @Autowired
     private UserRepository userRepository;
@@ -40,35 +48,220 @@ public class UserService {
     @Autowired
     private Cloudinary cloudinary;
 
-    public String uploadAvatar(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) return null;
-
-        // Tạo tên file duy nhất
-        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-
-        // Upload lên Cloudinary, đặt folder "users"
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap(
-                        "folder", "users",
-                        "public_id", fileName,
-                        "overwrite", true
-                ));
-
-        return uploadResult.get("secure_url").toString(); // URL HTTPS trả về FE
+    private boolean isValidImageType(String contentType) {
+        return contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase());
     }
 
-    // Cập nhật avatar cho user
+    private String sanitizeFileName(String fileName) {
+        if (fileName == null) {
+            return UUID.randomUUID().toString();
+        }
+        // Remove any path components and special characters
+        fileName = fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+        return fileName.length() > 50 ? fileName.substring(0, 50) : fileName;
+    }
+
+    private void validateUserDTO(UserDTO userDTO, boolean isNewUser) {
+        if (userDTO == null) {
+            throw new IllegalArgumentException("User data cannot be null");
+        }
+
+        // Validate required fields
+        if (userDTO.getName() == null || userDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        if (userDTO.getEmail() == null || userDTO.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
+        if (!isValidEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if (isNewUser && (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty())) {
+            throw new IllegalArgumentException("Password is required for new users");
+        }
+
+        if (userDTO.getRoleId() == null) {
+            throw new IllegalArgumentException("Role is required");
+        }
+
+        if (userDTO.getStatusId() == null) {
+            throw new IllegalArgumentException("Status is required");
+        }
+
+        // Validate phone if provided
+        if (userDTO.getPhone() != null && !userDTO.getPhone().trim().isEmpty() 
+            && !isValidPhone(userDTO.getPhone())) {
+            throw new IllegalArgumentException("Invalid phone number format");
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(emailRegex);
+    }
+
+    private boolean isValidPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return false;
+        }
+        String phoneRegex = "^[0-9]{10,11}$";
+        return phone.matches(phoneRegex);
+    }
+
+    private Param validateAndGetParam(Long id, String type, String errorPrefix) {
+        if (id == null) {
+            throw new IllegalArgumentException(errorPrefix + " ID cannot be null");
+        }
+        Param param = paramRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(errorPrefix + " not found with ID: " + id));
+        if (!type.equals(param.getType())) {
+            throw new IllegalArgumentException("Invalid " + errorPrefix.toLowerCase() + " parameter: " + id);
+        }
+        return param;
+    }
+
+    public String uploadAvatar(MultipartFile file) throws IOException {
+        // Validate file
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File cannot be empty");
+        }
+        if (!isValidImageType(file.getContentType())) {
+            throw new IllegalArgumentException("Invalid file type. Only JPG, PNG and GIF are allowed");
+        }
+        if (file.getSize() > 5 * 1024 * 1024) { // 5MB limit
+            throw new IllegalArgumentException("File size cannot exceed 5MB");
+        }
+
+        try {
+            // Log file info
+            System.out.printf("Processing file upload: name=%s, size=%d, type=%s%n", 
+                file.getOriginalFilename(), file.getSize(), file.getContentType());
+
+            // Generate unique filename
+            String fileName = UUID.randomUUID().toString() + "-" + 
+                sanitizeFileName(file.getOriginalFilename());
+            
+            // Prepare Cloudinary parameters
+            Map<String, Object> params = ObjectUtils.asMap(
+                "folder", "users",
+                "public_id", fileName,
+                "overwrite", true,
+                "resource_type", "image"
+            );
+            
+            System.out.println("Initiating Cloudinary upload with params: " + params);
+            
+            // Upload to Cloudinary
+            Map<String, String> uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+            
+            // Validate and extract URL
+            if (!uploadResult.containsKey("secure_url")) {
+                throw new RuntimeException("Upload failed: No URL in response");
+            }
+            
+            String url = uploadResult.get("secure_url");
+            System.out.println("Upload successful: " + url);
+            
+            return url;
+            
+        } catch (Exception e) {
+            System.err.println("Upload failed: " + e.getMessage());
+            throw new RuntimeException("Failed to upload file: " + e.getMessage(), e);
+        }
+    }
+
+    // Update user avatar
     @Transactional
     public UserDTO updateUserAvatar(String publicId, MultipartFile file) throws IOException {
+        if (publicId == null || publicId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Public ID cannot be null or empty");
+        }
+
         User user = userRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
 
+        // Delete old avatar if exists (TODO: implement Cloudinary deletion)
+        String oldAvatarUrl = user.getAvatarUrl();
+        if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+            System.out.println("Previous avatar URL: " + oldAvatarUrl);
+        }
+
+        // Upload new avatar
         String url = uploadAvatar(file);
-        user.setAvatarUrl(url);
+        if (url == null || url.trim().isEmpty()) {
+            throw new RuntimeException("Failed to get URL for uploaded avatar");
+        }
 
+        user.setAvatarUrl(url);
         userRepository.save(user);
 
+        System.out.println("Avatar updated successfully for user: " + publicId);
         return convertToDTO(user);
+    }
+
+    @Transactional
+    public UserDTO createUser(UserDTO userDTO) {
+        // Validate basic fields
+        validateUserDTO(userDTO, true);
+
+        // Check if email already exists
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new IllegalStateException("Email already exists: " + userDTO.getEmail());
+        }
+
+        try {
+            User user = new User();
+            user.setPublicId(UUID.randomUUID().toString());
+            user.setName(userDTO.getName().trim());
+            user.setEmail(userDTO.getEmail().trim().toLowerCase());
+            user.setPasswordHash(passwordEncoder.encode(userDTO.getPassword()));
+            
+            // Set phone if provided
+            if (userDTO.getPhone() != null && !userDTO.getPhone().trim().isEmpty()) {
+                user.setPhone(userDTO.getPhone().trim());
+            }
+            
+            // Handle avatar URL
+            if (userDTO.getAvatarUrl() != null && !userDTO.getAvatarUrl().trim().isEmpty()) {
+                logger.info("Setting avatar URL for new user: {}", userDTO.getAvatarUrl());
+                user.setAvatarUrl(userDTO.getAvatarUrl().trim());
+            } else {
+                logger.debug("No avatar URL provided for new user");
+            }
+
+            // Set Role
+            Param role = validateAndGetParam(userDTO.getRoleId(), "ROLE", "Role");
+            user.setRole(role);
+
+            // Set Status
+            Param status = validateAndGetParam(userDTO.getStatusId(), "STATUS", "Status");
+            user.setStatus(status);
+
+            // Set Gender if provided
+            if (userDTO.getGender() != null && !userDTO.getGender().trim().isEmpty()) {
+                Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                    .orElseThrow(() -> new ResourceNotFoundException("Gender not found: " + userDTO.getGender()));
+                user.setGender(gender);
+            }
+
+            // Save user
+            userRepository.save(user);
+            logger.info("Created new user with email: {}", user.getEmail());
+
+            return convertToDTO(user);
+        } catch (Exception e) {
+            logger.error("Error creating user: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create user: " + e.getMessage(), e);
+        }
     }
 
     public UserDTO register(UserDTO userDTO) {
@@ -163,6 +356,42 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public Page<UserDTO> getAllUsers(String keyword, String roleIdStr, PageRequest pageRequest) {
+        logger.info("Getting users with pageRequest: {}, keyword: {}, roleId: {}", pageRequest, keyword, roleIdStr);
+
+        Page<User> userPage;
+        Long roleId = null;
+
+        // Xử lý roleId từ String
+        if (roleIdStr != null && !roleIdStr.trim().isEmpty()) {
+            try {
+                roleId = Long.parseLong(roleIdStr.trim());
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid roleId format: {}", roleIdStr);
+            }
+        }
+
+        // Nếu có keyword HOẶC có roleId, ta sử dụng phương thức tìm kiếm mới
+        if ((keyword != null && !keyword.trim().isEmpty()) || roleId != null) {
+            String finalKeyword = keyword != null ? keyword.trim() : ""; // Đảm bảo keyword không null khi truyền vào
+            Long finalRoleId = roleId != null ? roleId : 0L; // Truyền 0 hoặc null, tùy thuộc vào truy vấn
+
+            // Gọi phương thức repository mới
+            userPage = userRepository.findByKeywordAndRole(finalKeyword, finalRoleId, pageRequest);
+
+            logger.info("Found {} users matching filter, total {} users",
+                    userPage.getNumberOfElements(), userPage.getTotalElements());
+
+        } else {
+            // Use the default findAll method if no filter/search is provided
+            userPage = userRepository.findAll(pageRequest);
+            logger.info("Found {} users (no filter), total {} users",
+                    userPage.getNumberOfElements(), userPage.getTotalElements());
+        }
+
+        return userPage.map(this::convertToDTO);
+    }
+
     public List<UserDTO> getAllCustomer() {
         return userRepository.findByRoleCode("CUSTOMER")
                 .stream()
@@ -172,31 +401,74 @@ public class UserService {
 
     @Transactional
     public UserDTO updateUserByPublicId(String publicId, UserDTO userDTO) {
-        User user = userRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
-
-        // Validate update
-        UserValidator.validateUpdate(userDTO, paramRepository);
-
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setAvatarUrl(userDTO.getAvatarUrl());
-
-        if (userDTO.getRoleId() != null) {
-            Param role = paramRepository.findById(userDTO.getRoleId()).get();
-            user.setRole(role);
-        }
-        if (userDTO.getGender() != null) {
-            Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();
-            user.setGender(gender);
-        }
-        if (userDTO.getStatusId() != null) {
-            Param status = paramRepository.findById(userDTO.getStatusId()).get();
-            user.setStatus(status);
+        if (publicId == null || publicId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Public ID cannot be null or empty");
         }
 
-        userRepository.save(user);
-        return convertToDTO(user);
+        try {
+            // Validate update data
+            validateUserDTO(userDTO, false);
+
+            User user = userRepository.findByPublicId(publicId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with publicId: " + publicId));
+
+            // Check if email is being changed and if it's already taken
+            if (!user.getEmail().equals(userDTO.getEmail())) {
+                if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+                    throw new IllegalStateException("Email already exists: " + userDTO.getEmail());
+                }
+            }
+
+            // Update basic info
+            user.setName(userDTO.getName().trim());
+            user.setEmail(userDTO.getEmail().trim().toLowerCase());
+            
+            // Update phone if provided
+            if (userDTO.getPhone() != null) {
+                if (!userDTO.getPhone().trim().isEmpty() && !isValidPhone(userDTO.getPhone())) {
+                    throw new IllegalArgumentException("Invalid phone number format");
+                }
+                user.setPhone(userDTO.getPhone().trim());
+            }
+
+            // Update avatar URL if provided
+            if (userDTO.getAvatarUrl() != null) {
+                logger.info("Updating avatar URL for user {}: {}", publicId, userDTO.getAvatarUrl());
+                user.setAvatarUrl(userDTO.getAvatarUrl().trim());
+            }
+
+            // Update role if provided
+            if (userDTO.getRoleId() != null) {
+                Param role = validateAndGetParam(userDTO.getRoleId(), "ROLE", "Role");
+                user.setRole(role);
+            }
+
+            // Update status if provided
+            if (userDTO.getStatusId() != null) {
+                Param status = validateAndGetParam(userDTO.getStatusId(), "STATUS", "Status");
+                user.setStatus(status);
+            }
+
+            // Update gender if provided
+            if (userDTO.getGender() != null) {
+                if (!userDTO.getGender().trim().isEmpty()) {
+                    Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender())
+                        .orElseThrow(() -> new ResourceNotFoundException("Gender not found: " + userDTO.getGender()));
+                    user.setGender(gender);
+                } else {
+                    user.setGender(null);
+                }
+            }
+
+            // Save and return
+            userRepository.save(user);
+            logger.info("Updated user: {}", publicId);
+            
+            return convertToDTO(user);
+        } catch (Exception e) {
+            logger.error("Error updating user {}: {}", publicId, e.getMessage(), e);
+            throw new RuntimeException("Failed to update user: " + e.getMessage(), e);
+        }
     }
 
     @Transactional
@@ -227,17 +499,34 @@ public class UserService {
     }
 
     private UserDTO convertToDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
         UserDTO dto = new UserDTO();
+        
+        // Set basic info
         dto.setId(user.getId());
         dto.setPublicId(user.getPublicId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setAddress(user.getAddress());
-        dto.setAvatarUrl(user.getAvatarUrl());
-        dto.setRoleId(user.getRole() != null ? user.getRole().getId() : null);
-        dto.setStatusId(user.getStatus() != null ? user.getStatus().getId() : null);
-        dto.setGender(user.getGender() != null ? user.getGender().getName() : null);
+        
+        // Set optional fields only if they exist
+        Optional.ofNullable(user.getPhone()).ifPresent(dto::setPhone);
+        Optional.ofNullable(user.getAddress()).ifPresent(dto::setAddress);
+        Optional.ofNullable(user.getAvatarUrl()).ifPresent(dto::setAvatarUrl);
+        
+        // Set role and status IDs
+        Optional.ofNullable(user.getRole())
+            .ifPresent(role -> dto.setRoleId(role.getId()));
+            
+        Optional.ofNullable(user.getStatus())
+            .ifPresent(status -> dto.setStatusId(status.getId()));
+            
+        // Set gender if exists
+        Optional.ofNullable(user.getGender())
+            .ifPresent(gender -> dto.setGender(gender.getName()));
+        
         return dto;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/reservations")
@@ -31,10 +32,10 @@ public class ReservationController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         Long userId = userService.getUserByEmail(email).getId();
-
         ReservationDto created = reservationService.createMyReservation(userId, dto);
         return ResponseEntity.ok(new Response<>("success", created, "Reservation created successfully"));
     }
+
 
     // CUSTOMER gets all their reservations
     @GetMapping("/me")
@@ -61,7 +62,6 @@ public class ReservationController {
             return ResponseEntity.status(403)
                     .body(new Response<>("error", null, "You are not allowed to view this reservation"));
         }
-
         return ResponseEntity.ok(new Response<>("success", reservation, "Reservation retrieved successfully"));
     }
 
