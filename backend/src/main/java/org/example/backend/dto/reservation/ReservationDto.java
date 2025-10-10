@@ -23,7 +23,7 @@ public class ReservationDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String note;
-    private int numberOfPeople;
+    private Integer numberOfPeople;
 
     public ReservationDto(Reservation reservation) {
         if (reservation != null) {
