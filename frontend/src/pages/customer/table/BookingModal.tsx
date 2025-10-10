@@ -18,7 +18,7 @@ const MAX_HOUR = 22; // 22:00 tối
 
 interface BookingModalProps {
   table?: TableEntity | null;
-  open: boolean;
+  show: boolean;
   minDateTime: string;
   onClose: () => void;
   onConfirm: (data: BookingData) => Promise<void>;
@@ -45,20 +45,20 @@ const initialFormData: BookingData = {
 
 export default function BookingModal({
   table,
-  open,
+  show,
   minDateTime,
   onClose,
   onConfirm,
   onConfirmEdit,
-  existingReservation = null,
-  mode = "create",
+  existingReservation,
+  mode,
 }: BookingModalProps) {
   const [formData, setFormData] = useState<BookingData>(initialFormData);
   const [formError, setFormError] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!open) return;
+    if (!show) return;
 
     if (mode === "edit" && existingReservation) {
       // Đổ dữ liệu từ reservation API vào form
@@ -78,9 +78,7 @@ export default function BookingModal({
         phone: user.phone || "",
       });
     }
-  }, [open, mode, existingReservation, user]);
-
-  if (!table) return null; // Không hiển thị nếu không có bàn
+  }, [show, mode, existingReservation, user]);
 
   const handleConfirm = async () => {
     if (mode === "edit" && onConfirmEdit) {
@@ -115,14 +113,12 @@ export default function BookingModal({
   };
 
   return (
-    <Modal show={open} onClose={handleClose} popup>
+    <Modal show={show} onClose={handleClose} popup>
       {/* ✅ ĐIỀU CHỈNH 1: Header (Màu sắc thương hiệu) */}
       <ModalHeader className="border-b-8 !border-yellow-800 !bg-stone-800 text-xl font-bol">
         <div className="text-xl font-normal text-yellow-500 mt-1">
           {mode === "edit"
-            ? `Cập nhật đặt bàn #${
-                existingReservation?.publicId?.slice(0, 8) || ""
-              }`
+            ? `Cập nhật đặt bàn   ${table?.name || ""}`
             : `Đặt bàn ${table?.name || ""}`}
         </div>
         {table && (
@@ -232,7 +228,7 @@ export default function BookingModal({
             {/* ✅ Chú thích giờ làm việc */}
             {!formError && (
               <p className="mt-2 text-xs !text-gray-500">
-                *Giờ làm việc: 10:00 sáng - 10:00 tối
+                *Giờ làm việc: 9:00 sáng - 22:00 tối
               </p>
             )}
           </div>
@@ -249,7 +245,7 @@ export default function BookingModal({
               type="number"
               min="1"
               // ✅ Cải tiến: Thêm thuộc tính max dựa trên sức chứa bàn
-              max={table.capacity.toString()}
+              max={table?.capacity.toString()}
               placeholder="1"
               value={formData.numberOfPeople}
               onChange={(e) =>
@@ -267,7 +263,7 @@ export default function BookingModal({
             />
             {/* ✅ Cải tiến: Thêm chú thích sức chứa */}
             <p className="mt-2 text-xs text-gray-500">
-              *Bàn này có sức chứa tối đa là {table.capacity} người.
+              *Bàn này có sức chứa tối đa là {table?.capacity} người.
             </p>
           </div>
 

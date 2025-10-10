@@ -1,5 +1,6 @@
 package org.example.backend.service.reservation;
 
+import jakarta.persistence.Table;
 import lombok.Getter;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.table.TableDto;
@@ -111,8 +112,22 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with publicId: " + publicId));
 
-        reservation.setReservationTime(dto.getReservationTime());
+        // ✅ Cập nhật thời gian nếu có
+        if (dto.getReservationTime() != null) {
+            reservation.setReservationTime(dto.getReservationTime());
+        }
 
+        // ✅ Cập nhật số lượng người
+        if (dto.getNumberOfPeople() != null) {
+            reservation.setNumberOfPeople(dto.getNumberOfPeople());
+        }
+
+        // ✅ Cập nhật ghi chú nếu có
+        if (dto.getNote() != null) {
+            reservation.setNote(dto.getNote());
+        }
+
+        // ✅ Cập nhật status nếu có
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
@@ -123,20 +138,44 @@ public class ReservationService {
             }
         }
 
-        reservationRepository.save(reservation);
-        return new ReservationDto(reservation);
+        // ✅ Cập nhật danh sách bàn nếu có
+        if (dto.getTableIds() != null && !dto.getTableIds().isEmpty()) {
+            List<TableEntity> tables = tableRepository.findAllById(dto.getTableIds());
+            reservation.setTables(new HashSet<>(tables));
+        }
+
+        Reservation updated = reservationRepository.save(reservation);
+        return new ReservationDto(updated);
     }
+
 
     @Transactional
     public ReservationDto updateReservation(Long id, ReservationDto dto) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with id: " + id));
 
+        // Cập nhật giờ
         reservation.setReservationTime(dto.getReservationTime());
 
+        // Cập nhật số người
+        reservation.setNumberOfPeople(dto.getNumberOfPeople());
+
+        // Cập nhật ghi chú
+        if (dto.getNote() != null) {
+            reservation.setNote(dto.getNote());
+        }
+
+        // Cập nhật bàn
+        if (dto.getTableIds() != null && !dto.getTableIds().isEmpty()) {
+            List<TableEntity> tables = tableRepository.findAllById(dto.getTableIds());
+            reservation.setTables((Set<TableEntity>) tables);
+        }
+
+        // Cập nhật trạng thái
         if (dto.getStatusId() != null) {
             Param status = paramRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Status not found with id: " + dto.getStatusId()));
             reservation.setStatus(status);
 
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {

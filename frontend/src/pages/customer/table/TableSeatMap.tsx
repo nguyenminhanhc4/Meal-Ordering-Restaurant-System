@@ -88,12 +88,22 @@ export default function TableBooking() {
 
   const handleEditReservation = async (res: Reservation) => {
     const fullReservation = await getMyReservationByPublicId(res.publicId);
-    console.log(fullReservation);
     if (fullReservation) {
       setEditingReservation(fullReservation);
+      // ✅ Nếu reservation có tableIds (hoặc tables)
+      if (fullReservation.tableIds && fullReservation.tableIds.length > 0) {
+        const firstTableId = fullReservation.tableIds[0]; // hoặc chọn nhiều bàn nếu hỗ trợ multi
+        // Nếu bạn có danh sách tất cả bàn (tables) ở state, có thể tìm ra đối tượng
+        const table = tables.find((t) => t.id === firstTableId);
+        setSelectedTable(table || null);
+      }
       setShowBookingModal(true);
     }
   };
+
+  useEffect(() => {
+    console.log("BookingModal open prop:", openModal || showBookingModal);
+  }, [showBookingModal]);
 
   const handleUpdateReservation = async (data: BookingData) => {
     if (!editingReservation) return;
@@ -111,6 +121,9 @@ export default function TableBooking() {
         editingReservation.publicId,
         payload
       );
+
+      console.log("Update payload:", payload);
+
       if (updated) {
         notify("success", "✅ Cập nhật đặt bàn thành công!");
         await fetchMyReservations();
@@ -141,7 +154,7 @@ export default function TableBooking() {
       const success = await deleteMyReservation(targetPublicId);
       if (success) {
         notify("success", "Đã hủy đặt bàn thành công!");
-        await fetchMyReservations(); // refresh danh sách
+        await Promise.all([fetchTables(), fetchMyReservations()]);
       } else {
         notify("error", "Hủy đặt bàn thất bại!");
       }
@@ -217,7 +230,7 @@ export default function TableBooking() {
           `Đã đặt bàn ${selectedTable.name} thành công vào lúc ${data.reservationTime}!`
         );
         setOpenModal(false);
-        await fetchMyReservations(); // cập nhật danh sách sau khi đặt
+        await Promise.all([fetchTables(), fetchMyReservations()]);
       } else {
         notify("error", "Không thể đặt bàn, vui lòng thử lại!");
       }
@@ -380,7 +393,7 @@ export default function TableBooking() {
         {/* === MODAL ĐẶT BÀN / CẬP NHẬT === */}
         <BookingModal
           table={selectedTable}
-          open={openModal || showBookingModal}
+          show={openModal || showBookingModal}
           minDateTime={minDateTime}
           onClose={() => {
             setOpenModal(false);

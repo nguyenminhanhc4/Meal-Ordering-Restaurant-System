@@ -52,33 +52,49 @@ function AdminLayout() {
         {/* Sidebar */}
         <Sidebar
           aria-label="Sidebar"
-          className="w-80 admin-sidebar border-r shadow-lg">
-          <SidebarLogo href="/admin/dashboard" img={`${logo}`} imgAlt="Logo">
+          className="w-80 admin-sidebar border-r shadow-lg !bg-gray-900 !text-gray-100"
+          theme={{
+            root: {
+              inner: "!bg-gray-900 !text-gray-100",
+            },
+            item: {
+              base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
+            },
+          }}>
+          <SidebarLogo
+            href="/admin/dashboard"
+            img={`${logo}`}
+            imgAlt="Logo"
+            className="!text-white">
             Admin Panel
           </SidebarLogo>
+
           <SidebarItems>
             <SidebarItemGroup>
               <SidebarItem
                 onClick={() => navigate("/admin/dashboard")}
-                className="hover:bg-gray-800 text-gray-200 hover:text-white cursor-pointer"
+                className="hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200"
                 icon={HiChartPie}>
                 Dashboard
               </SidebarItem>
+
               <SidebarItem
                 onClick={() => navigate("/admin/users")}
-                className="cursor-pointer"
+                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiUser}>
                 Users
               </SidebarItem>
+
               <SidebarItem
                 onClick={() => navigate("/admin/orders")}
-                className="cursor-pointer"
+                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiShoppingBag}>
                 Orders
               </SidebarItem>
+
               <SidebarItem
                 onClick={() => navigate("/admin/settings")}
-                className="cursor-pointer"
+                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiCog}>
                 Settings
               </SidebarItem>
