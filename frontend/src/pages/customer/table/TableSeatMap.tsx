@@ -154,7 +154,7 @@ export default function TableBooking() {
       const success = await deleteMyReservation(targetPublicId);
       if (success) {
         notify("success", "Đã hủy đặt bàn thành công!");
-        await fetchMyReservations(); // refresh danh sách
+        await Promise.all([fetchTables(), fetchMyReservations()]);
       } else {
         notify("error", "Hủy đặt bàn thất bại!");
       }
@@ -230,7 +230,7 @@ export default function TableBooking() {
           `Đã đặt bàn ${selectedTable.name} thành công vào lúc ${data.reservationTime}!`
         );
         setOpenModal(false);
-        await fetchMyReservations(); // cập nhật danh sách sau khi đặt
+        await Promise.all([fetchTables(), fetchMyReservations()]);
       } else {
         notify("error", "Không thể đặt bàn, vui lòng thử lại!");
       }
