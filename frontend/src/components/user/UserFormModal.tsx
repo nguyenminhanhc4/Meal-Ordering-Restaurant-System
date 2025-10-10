@@ -393,23 +393,26 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   return (
-    // 1. Dùng size lớn hơn một chút nếu muốn thêm không gian (optional: size="lg")
-    <Modal show={show} onClose={onClose} size="lg">
+    <Modal show={show} onClose={onClose} size="4xl" className="shadow-lg">
       {/* 2. Dùng Modal.Header */}
-      <ModalHeader>
-        <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          {userData ? "Edit User" : "Add New User"}
+      <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
+        <h3 className="text-xl font-bold text-gray-800">
+          {userData ? "Edit User Information" : "Create New User"}
         </h3>
       </ModalHeader>
 
       <form onSubmit={handleSubmit} className="flex flex-col">
         {/* 3. Dùng Modal.Body và tối ưu layout input */}
-        <ModalBody className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <ModalBody className="p-6 space-y-6 bg-gray-50">
+          {/* Thay gap-y-4 bằng gap-y-6 để có nhiều không gian hơn giữa các nhóm input */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             {/* Cột 1: Name, Email, Phone, Password */}
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Tăng space-y để các input giãn ra */}
               <div>
-                <Label htmlFor="name" className="mb-1 block font-medium">
+                <Label
+                  htmlFor="name"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Name
                 </Label>
                 <TextInput
@@ -419,11 +422,20 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   onChange={handleChange}
                   placeholder="John Doe"
                   required
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
                 />
               </div>
 
               <div>
-                <Label htmlFor="email" className="mb-1 block font-medium">
+                <Label
+                  htmlFor="email"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Email
                 </Label>
                 <TextInput
@@ -434,11 +446,20 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   onChange={handleChange}
                   placeholder="john.doe@example.com"
                   required
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
                 />
               </div>
 
               <div>
-                <Label htmlFor="phone" className="mb-1 block font-medium">
+                <Label
+                  htmlFor="phone"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Phone
                 </Label>
                 <TextInput
@@ -448,12 +469,21 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+84 901 234 567"
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
                 />
               </div>
 
               {!userData && (
                 <div>
-                  <Label htmlFor="password" className="mb-1 block font-medium">
+                  <Label
+                    htmlFor="password"
+                    className="mb-2 block text-sm font-medium !text-gray-700">
                     Password
                   </Label>
                   <TextInput
@@ -464,15 +494,25 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     onChange={handleChange}
                     required={!userData}
                     placeholder="Enter a secure password"
+                    theme={{
+                      field: {
+                        input: {
+                          base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                        },
+                      },
+                    }}
                   />
                 </div>
               )}
             </div>
 
             {/* Cột 2: Role, Status, Avatar */}
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Tăng space-y để các input giãn ra */}
               <div>
-                <Label htmlFor="roleId" className="mb-1 block font-medium">
+                <Label
+                  htmlFor="roleId"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Role
                 </Label>
                 <Select
@@ -480,18 +520,28 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   name="roleId"
                   value={formData.roleId}
                   onChange={handleChange}
-                  required>
+                  required
+                  theme={{
+                    field: {
+                      select: {
+                        base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}>
                   <option value="">Select role</option>
+                  {/* ... map roles ... */}
                   {roles.map((role) => (
                     <option key={role.id} value={role.id}>
-                      {role.name}
+                      {role.code}
                     </option>
                   ))}
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="statusId" className="mb-1 block font-medium">
+                <Label
+                  htmlFor="statusId"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Status
                 </Label>
                 <Select
@@ -499,32 +549,43 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   name="statusId"
                   value={formData.statusId}
                   onChange={handleChange}
-                  required>
+                  required
+                  theme={{
+                    field: {
+                      select: {
+                        base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}>
                   <option value="">Select status</option>
+                  {/* ... map statuses ... */}
                   {statuses.map((status) => (
                     <option key={status.id} value={status.id}>
-                      {status.name}
+                      {status.code}
                     </option>
                   ))}
                 </Select>
               </div>
 
               {/* Avatar Section Optimization */}
-              <div>
-                <Label htmlFor="avatar" className="mb-1 block font-medium">
+              <div className="md:col-span-1">
+                <Label
+                  htmlFor="avatar"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Avatar Image
                 </Label>
                 <div className="flex items-start gap-4">
                   {/* Avatar Preview */}
-                  <div className="w-14 h-14 flex-shrink-0">
+                  <div className="w-16 h-16 flex-shrink-0">
+                    {/* Tăng kích thước w-16 h-16 và thêm border-cyan-400 */}
                     <img
                       src={
                         previewUrl ||
                         userData?.avatarUrl ||
                         "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                      } // Thêm ảnh placeholder mặc định
+                      }
                       alt="Avatar preview"
-                      className="w-full h-full rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                      className="w-full h-full rounded-full object-cover border-2 !text-gray-700 !bg-gray-50 border-cyan-400 dark:border-cyan-500"
                     />
                   </div>
 
@@ -536,13 +597,19 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                       type="file"
                       onChange={handleChange}
                       accept="image/jpeg,image/png,image/gif"
-                      // Tùy chỉnh className cho input file (Tailwind)
-                      className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                      className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"
                       disabled={uploadLoading}
+                      theme={{
+                        field: {
+                          input: {
+                            base: "!text-gray-700 !bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                          },
+                        },
+                      }}
                     />
 
                     {uploadLoading && (
-                      <p className="flex items-center gap-2 mt-1 text-sm text-blue-500 dark:text-blue-400">
+                      <p className="flex items-center gap-2 mt-1 text-sm text-cyan-600 dark:text-cyan-400">
                         <Spinner size="sm" /> Uploading avatar...
                       </p>
                     )}
@@ -557,17 +624,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         </ModalBody>
 
         {/* 4. Dùng Modal.Footer */}
-        <ModalFooter className="flex justify-end space-x-2">
-          <Button
-            color="gray"
-            onClick={onClose}
-            className="border border-gray-300">
+        <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
+          <Button color="red" onClick={onClose} className="text-gray-50">
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={loading || uploadLoading} // Vô hiệu hóa khi đang tải file
-            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-500 dark:bg-cyan-500 dark:hover:bg-cyan-600">
+            // *** THAY ĐỔI: Tăng độ đậm màu Cyan cho nút chính ***
+            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400">
             {loading ? (
               <div className="flex items-center gap-2">
                 <Spinner size="sm" light={true} />

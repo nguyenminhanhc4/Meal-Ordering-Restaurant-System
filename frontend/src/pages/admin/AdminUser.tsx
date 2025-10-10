@@ -4,7 +4,6 @@ import {
   TextInput,
   Card,
   Avatar,
-  Badge,
   Select,
   Table,
   TableCell,
@@ -206,20 +205,7 @@ export const AdminUser = () => {
 
   const getRoleName = (roleId: number) => {
     const role = roles.find((r) => r.id === roleId);
-    return role ? role.name : "N/A";
-  };
-
-  const getStatusInfo = (statusId: number) => {
-    switch (statusId) {
-      case 3:
-        return { color: "success" as const, text: "Active" };
-      case 2:
-        return { color: "warning" as const, text: "Pending" };
-      case 4:
-        return { color: "failure" as const, text: "Inactive" };
-      default:
-        return { color: "info" as const, text: "N/A" };
-    }
+    return role ? role.code : "N/A";
   };
 
   // BỎ HOÀN TOÀN logic lọc client-side:
@@ -227,10 +213,11 @@ export const AdminUser = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Users Management</h1>
+      <div className="flex justify-between items-center border-none">
+        <h1 className="text-2xl font-bold text-gray-800">Users Management</h1>
         <Button
-          color="green"
+          // Màu xanh dương nhạt hơn (Cyan) để hài hòa
+          color="cyan"
           size="md"
           onClick={() => {
             setSelectedUser(undefined);
@@ -241,7 +228,9 @@ export const AdminUser = () => {
         </Button>
       </div>
 
-      <Card>
+      <Card
+        // Thay đổi nền Card thành màu trắng (hoặc xám nhạt hơn)
+        className="!bg-white shadow-lg border-none">
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-4">
             <div className="relative w-64">
@@ -249,20 +238,34 @@ export const AdminUser = () => {
                 type="text"
                 placeholder="Search by name or email..."
                 value={searchTerm}
-                // Dùng handler đã sửa
                 onChange={handleSearchChange}
                 icon={HiSearch}
+                className="focus:ring-cyan-500 focus:border-cyan-500"
+                theme={{
+                  field: {
+                    input: {
+                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}
               />
             </div>
             <div className="w-48">
               <Select
                 value={selectedRole}
-                // Dùng handler đã sửa
-                onChange={handleRoleChange}>
+                onChange={handleRoleChange}
+                className="focus:ring-cyan-500 focus:border-cyan-500"
+                theme={{
+                  field: {
+                    select: {
+                      base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}>
                 <option value="">All Roles</option>
                 {roles.map((role) => (
                   <option key={role.id} value={role.id}>
-                    {role.name}
+                    {role.code}
                   </option>
                 ))}
               </Select>
@@ -272,102 +275,99 @@ export const AdminUser = () => {
 
         <div className="overflow-x-auto">
           <Table hoverable>
-            {/* Cập nhật className cho thead để căn chỉnh text */}
-            <TableHead className="text-xs uppercase text-gray-700 dark:text-gray-400">
+            {/* Header: Nền xám nhạt, text đậm, màu xám đậm */}
+            <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-400">
               <TableRow>
-                <TableHeadCell className="w-20 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
                   Avatar
-                </TableHeadCell>{" "}
-                {/* Căn giữa */}
-                <TableHeadCell className="p-3">User Info</TableHeadCell>
-                <TableHeadCell className="p-3">Email</TableHeadCell>
-                <TableHeadCell className="p-3">Role</TableHeadCell>
-                <TableHeadCell className="p-3 text-center">
-                  Status
-                </TableHeadCell>{" "}
-                {/* Căn giữa */}
-                <TableHeadCell className="p-3 text-center">
+                </TableHeadCell>
+                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
+                  User Info
+                </TableHeadCell>
+                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
+                  Email
+                </TableHeadCell>
+                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
+                  Role
+                </TableHeadCell>
+                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700 text-center">
                   Actions
-                </TableHeadCell>{" "}
-                {/* Căn giữa */}
+                </TableHeadCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody className="divide-y">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    {/* Tăng py */}
+                  <TableCell
+                    colSpan={6}
+                    className="text-center bg-white text-gray-700 py-4">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    {" "}
-                    {/* Tăng py */}
+                  <TableCell
+                    colSpan={6}
+                    className="text-center bg-white text-gray-700 py-4">
                     No users found
                   </TableCell>
                 </TableRow>
               ) : (
                 // Map qua users
                 users.map((user) => {
-                  const statusInfo = getStatusInfo(user.statusId);
                   return (
                     <TableRow
                       key={user.publicId}
-                      className="!bg-white dark:!border-gray-700 dark:!bg-gray-800">
-                      {/* Sử dụng Table.Cell và thêm className để tăng padding */}
-                      <TableCell className="p-3 text-center">
+                      // Dùng nền trắng, hover xám nhẹ
+                      className="bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+                      {/* Cell: Dùng nền trắng (hoặc kế thừa) */}
+                      <TableCell className="p-3 bg-white text-gray-700 text-center">
                         <div className="flex justify-center">
                           <Avatar
                             img={user.avatarUrl}
                             rounded
                             size="md"
+                            className="file:!bg-cyan-50"
                             placeholderInitials={user.name.charAt(0)}
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="p-3">
+                      <TableCell className="p-3 bg-white text-gray-700">
                         <div className="flex flex-col">
-                          <span className="font-medium text-gray-900 dark:text-white">
+                          <span className="font-semibold text-gray-900 ">
                             {user.name}
                           </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="text-sm text-gray-500">
                             {user.phone || "N/A"}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="p-3">{user.email}</TableCell>
-                      <TableCell className="p-3">
-                        <Badge color="info" size="sm">
-                          {getRoleName(user.roleId)}
-                        </Badge>
+                      <TableCell className="p-3 bg-white text-gray-700">
+                        {user.email}
                       </TableCell>
-                      <TableCell className="p-3 text-center">
-                        <Badge color={statusInfo.color} size="sm">
-                          {statusInfo.text}
-                        </Badge>
+                      <TableCell className="p-3 bg-white text-gray-700">
+                        {getRoleName(user.roleId)}
                       </TableCell>
-                      <TableCell className="p-3 text-center">
+                      <TableCell className="p-3 bg-white text-gray-700 text-center">
                         <div className="flex gap-2 justify-center">
-                          {" "}
-                          {/* Căn giữa actions */}
+                          {/* Edit Button: Màu xanh (cyan) */}
                           <Button
                             size="xs"
-                            color="info" // Giữ màu info
+                            color="blue" // Thay info bằng blue hoặc cyan
+                            className="bg-cyan-500 hover:bg-cyan-600 focus:ring-cyan-300"
                             onClick={() => {
                               setSelectedUser(user);
                               setShowModal(true);
                             }}>
-                            {/* Đổi màu icon thành màu xám nhẹ, khi hover thành màu info/yellow */}
-                            <HiPencil className="h-4 w-4 text-gray-500 hover:text-cyan-600" />
+                            <HiPencil className="h-4 w-4 text-white" />
                           </Button>
+                          {/* Delete Button: Màu đỏ (failure) */}
                           <Button
                             size="xs"
-                            color="failure" // Giữ màu failure
+                            color="failure"
+                            className="bg-red-500 hover:bg-red-600 focus:ring-red-300"
                             onClick={() => handleDeleteUser(user.publicId)}>
-                            {/* Đổi màu icon thành màu xám nhẹ, khi hover thành màu red */}
-                            <HiTrash className="h-4 w-4 text-gray-500 hover:text-red-700" />
+                            <HiTrash className="h-4 w-4 text-white" />
                           </Button>
                         </div>
                       </TableCell>
@@ -387,6 +387,7 @@ export const AdminUser = () => {
             onPageChange={handlePageChange}
             totalItems={totalItems}
             pageSize={pageSize}
+            // Có thể thêm className để tùy chỉnh giao diện Pagination
           />
         </div>
       </Card>
