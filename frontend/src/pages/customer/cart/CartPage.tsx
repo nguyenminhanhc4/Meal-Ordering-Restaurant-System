@@ -26,6 +26,7 @@ import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
 import { checkoutCart } from "../../../services/order/checkoutService";
 import type { OrderDto } from "../../../services/types/OrderType";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../../../store/CartContext";
 
 const CartPage: React.FC = () => {
   /** State quản lý giỏ hàng */
@@ -41,7 +42,7 @@ const CartPage: React.FC = () => {
 
   /** State lưu các item đã chọn */
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-
+  const { fetchCart } = useCart();
   const { notify } = useNotification();
   const navigate = useNavigate();
 
@@ -80,6 +81,7 @@ const CartPage: React.FC = () => {
       await updateCartItem(itemId, newQuantity);
       setCartUpdated((prev) => prev + 1);
       notify("success", "Cập nhật số lượng thành công!");
+      await fetchCart();
     } catch (err) {
       notify("error", "Cập nhật số lượng thất bại. Vui lòng thử lại.");
     }
@@ -94,6 +96,7 @@ const CartPage: React.FC = () => {
       setCartUpdated((prev) => prev + 1);
       setSelectedItems([]);
       notify("success", "Đã xóa khỏi giỏ hàng");
+      await fetchCart();
     } catch (err) {
       notify("error", "Xóa món thất bại. Vui lòng thử lại.");
     }
@@ -107,6 +110,7 @@ const CartPage: React.FC = () => {
       setCartUpdated((prev) => prev + 1);
       setSelectedItems([]);
       notify("success", "Đã xóa toàn bộ giỏ hàng");
+      await fetchCart();
     } catch (err) {
       notify("error", "Xóa toàn bộ thất bại. Vui lòng thử lại.");
     }

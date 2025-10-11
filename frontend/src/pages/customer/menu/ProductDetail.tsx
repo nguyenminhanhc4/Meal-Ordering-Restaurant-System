@@ -7,6 +7,7 @@ import { useNotification } from "../../../components/Notification/NotificationCo
 import { AxiosError } from "axios";
 import { getMenuItemById } from "../../../services/product/fetchProduct";
 import type { Product } from "../../../services/product/fetchProduct";
+import { useCart } from "../../../store/CartContext";
 import {
   getCurrentCart,
   createCart,
@@ -26,6 +27,7 @@ const ProductDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [addingToCart, setAddingToCart] = useState<boolean>(false);
   const [imgError, setImgError] = useState<boolean>(false);
+  const { fetchCart } = useCart();
 
   const { notify } = useNotification();
 
@@ -117,6 +119,7 @@ const ProductDetail: React.FC = () => {
       }
 
       await addItemToCart(cart.id, { menuItemId: product.id, quantity });
+      await fetchCart();
       notify("success", `Đã thêm ${quantity} × ${product.name} vào giỏ hàng`);
     } catch (err) {
       notify("error", "Lỗi khi thêm vào giỏ hàng");

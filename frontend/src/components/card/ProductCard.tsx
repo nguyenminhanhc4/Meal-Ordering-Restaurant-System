@@ -4,6 +4,7 @@ import { HiEye, HiShoppingCart } from "react-icons/hi";
 import { FaStar, FaStarHalf } from "react-icons/fa";
 import type { Product } from "../../services/product/fetchProduct";
 import { useNotification } from "../Notification/NotificationContext";
+import { useCart } from "../../store/CartContext";
 import {
   getCurrentCart,
   createCart,
@@ -16,6 +17,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { notify } = useNotification();
+  const { fetchCart } = useCart();
 
   const handleAddToCart = async () => {
     if (product.status !== "AVAILABLE") {
@@ -35,6 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       notify("success", `Đã thêm ${product.name} vào giỏ hàng`);
       console.log("Updated cart:", updatedCart);
+      await fetchCart();
     } catch (error) {
       notify("error", "Lỗi khi thêm vào giỏ hàng");
       console.error(error);
