@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll() // Allow public access to auth endpoints
                         .requestMatchers("/api/v1/users/me").authenticated() // Require authentication for /users/me
+                        .requestMatchers("/api/v1/users/**").authenticated()
                         .requestMatchers("/api/v1/carts/**").authenticated()
                         .requestMatchers("/api/v1/cart-items/**").authenticated()
                         .requestMatchers("/api/v1/orders/**").authenticated()

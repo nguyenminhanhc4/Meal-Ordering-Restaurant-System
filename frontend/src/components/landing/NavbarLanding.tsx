@@ -122,7 +122,9 @@ export default function NavbarLanding() {
                 <span className="block text-sm font-semibold">{user.name}</span>
                 <span className="block truncate text-xs">{user.email}</span>
               </DropdownHeader>
-              <DropdownItem className="flex items-center gap-3 hover:!text-yellow-400">
+              <DropdownItem
+                className="flex items-center gap-3 hover:!text-yellow-400"
+                href="/profile">
                 <HiOutlineUser className="text-yellow-400" />
                 Hồ sơ
               </DropdownItem>

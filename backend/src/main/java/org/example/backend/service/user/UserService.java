@@ -487,7 +487,8 @@ public class UserService {
 
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
-        user.setAvatarUrl(userDTO.getAvatarUrl());
+        user.setPhone(userDTO.getPhone());
+        user.setAddress(userDTO.getAddress());
 
         if (userDTO.getGender() != null) {
             Param gender = paramRepository.findByTypeAndCode("GENDER", userDTO.getGender()).get();

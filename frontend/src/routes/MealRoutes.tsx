@@ -10,6 +10,7 @@ import MockPaymentPage from "../pages/payment/MockPaymentPage";
 import PaymentSuccessPage from "../pages/payment/PaymentSuccessPage";
 import PaymentFailedPage from "../pages/payment/PaymentFailedPage";
 import TableSeatMap from "../pages/customer/table/TableSeatMap";
+import ProfilePage from "../pages/customer/profile/ProfilePage";
 
 export default (
   <Route element={<MealLayout />}>
@@ -27,5 +28,6 @@ export default (
     <Route path="/payments/success" element={<PaymentSuccessPage />} />
     <Route path="/payments/failed" element={<PaymentFailedPage />} />
     <Route path="/table" element={<TableSeatMap />}></Route>
+    <Route path="/profile" element={<ProfilePage />}></Route>
   </Route>
 );
