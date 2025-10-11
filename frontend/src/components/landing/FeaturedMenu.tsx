@@ -139,17 +139,9 @@ export default function FeaturedMenu() {
                   {/* Nút hành động - Đặt món ưu tiên hàng đầu, màu gradient mạnh mẽ hơn */}
                   <Button
                     size="lg"
-                    href="#"
+                    href={`/menu/product/${dish.id}`}
                     className="mt-4 w-full font-extrabold text-lg bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-orange-300/50 hover:from-red-600 hover:to-orange-600 transition-all rounded-xl">
                     <FaShoppingCart className="inline mr-2" /> Đặt món ngay
-                  </Button>
-
-                  {/* Nút xem chi tiết - Thiết kế tối giản, làm nút phụ */}
-                  <Button
-                    size="sm"
-                    href={`/menu/product/${dish.id}`}
-                    className="mt-2 w-full font-semibold !bg-transparent !text-stone-600 hover:!bg-stone-100 transition rounded-xl border border-stone-200">
-                    Xem chi tiết
                   </Button>
                 </div>
               </Card>

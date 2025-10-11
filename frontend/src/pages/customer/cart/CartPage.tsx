@@ -209,7 +209,7 @@ const CartPage: React.FC = () => {
             <Table hoverable striped className="rounded-lg">
               <TableHead>
                 <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
-                  <Checkbox disabled />
+                  <Checkbox className="mx-auto !bg-white" disabled />
                 </TableHeadCell>
                 <TableHeadCell className="text-center !bg-amber-100 !text-gray-700">
                   Hình ảnh
