@@ -24,6 +24,8 @@ import {
   HiOutlineClipboardDocumentList,
   HiOutlinePencilSquare,
   HiOutlineXMark,
+  HiOutlineArrowsUpDown,
+  HiOutlineDocument,
 } from "react-icons/hi2";
 import { FaChair } from "react-icons/fa";
 import Pagination from "../../components/common/PaginationClient";
@@ -51,6 +53,9 @@ export default function UserReservationHistory() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
+  const [filterStatus, setFilterStatus] = useState("");
+  const [sort, setSort] = useState("createdAt,desc");
+
   const { notify } = useNotification();
 
   // ✅ Fetch dữ liệu
@@ -59,7 +64,7 @@ export default function UserReservationHistory() {
       setLoading(true);
       try {
         const [reservationPage, tableData] = await Promise.all([
-          getMyReservations(currentPage, pageSize),
+          getMyReservations(currentPage, pageSize, sort, filterStatus),
           getAllTables(),
         ]);
         if (reservationPage) {
@@ -75,7 +80,17 @@ export default function UserReservationHistory() {
       }
     };
     fetchData();
-  }, [currentPage]);
+  }, [currentPage, sort, filterStatus]);
+
+  const handleFilterChange = (status: string) => {
+    setFilterStatus(status);
+    setCurrentPage(0); // reset page
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+    setCurrentPage(0); // reset page
+  };
 
   // ✅ Mở modal chỉnh sửa
   const handleEdit = (reservation: Reservation) => {
@@ -147,6 +162,44 @@ export default function UserReservationHistory() {
         <FaChair className="mr-2 text-yellow-600" /> Lịch sử đặt bàn
       </h2>
 
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        {/* Bộ lọc trạng thái */}
+        <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
+          <span className="font-medium text-blue-800 flex items-center gap-1">
+            <HiOutlineDocument className="w-4 h-4 text-blue-600" /> Lọc:
+          </span>
+          <select
+            className="border border-blue-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
+            value={filterStatus}
+            onChange={(e) => handleFilterChange(e.target.value)}>
+            <option value="">Tất cả</option>
+            <option value="PENDING">Chờ xác nhận</option>
+            <option value="CONFIRMED">Đã xác nhận</option>
+            <option value="CANCELLED">Đã hủy</option>
+          </select>
+        </div>
+
+        {/* Bộ sắp xếp */}
+        <div className="flex items-center gap-3 bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-200 shadow-sm">
+          <span className="font-medium text-yellow-800 flex items-center gap-1">
+            <HiOutlineArrowsUpDown className="w-4 h-4 text-yellow-600" /> Sắp
+            xếp:
+          </span>
+          <select
+            className="border border-yellow-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-yellow-400"
+            value={sort}
+            onChange={(e) => handleSortChange(e.target.value)}>
+            <option value="createdAt,desc">Mới nhất</option>
+            <option value="createdAt,asc">Cũ nhất</option>
+            <option value="reservationTime,asc">
+              Thời gian đặt (sớm nhất)
+            </option>
+            <option value="reservationTime,desc">
+              Thời gian đặt (muộn nhất)
+            </option>
+          </select>
+        </div>
+      </div>
       {loading ? (
         <div className="flex justify-center py-12">
           <Spinner size="xl" color="warning" />

@@ -44,17 +44,28 @@ export const createMyReservation = async (
  * CUSTOMER: lấy danh sách đặt bàn của mình
  */
 export const getMyReservations = async (
-  page: number = 0,
-  size: number = 10
+  page = 0,
+  size = 10,
+  sort: string = "createdAt,desc",
+  status?: string
 ): Promise<Page<Reservation> | null> => {
   try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort,
+    });
+    if (status && status.trim() !== "") {
+      params.set("status", status); // chỉ set 1 lần
+    }
+    console.log(params.toString());
+
     const response = await api.get<ApiResponse<Page<Reservation>>>(
-      `/reservations/me?page=${page}&size=${size}`,
-      { withCredentials: true }
+      `/reservations/me?${params.toString()}`
     );
     return response.data.data;
   } catch (error) {
-    console.error("❌ Error fetching my reservations:", error);
+    console.error("Error fetching my reservations:", error);
     return null;
   }
 };

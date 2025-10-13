@@ -47,22 +47,24 @@ public class ReservationController {
     public ResponseEntity<?> getMyReservations(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
-
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @RequestParam(required = false) String status
+    ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         Long userId = userService.getUserByEmail(email).getId();
 
-        // ✅ Xử lý sort
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+        String[] sortParts = sort.split(",");
+        Sort.Direction direction = sortParts.length > 1
+                ? Sort.Direction.fromString(sortParts[1])
+                : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
-        Page<ReservationDto> reservations = reservationService.getMyReservations(userId, pageable);
+        Page<ReservationDto> reservations = reservationService.findMyReservations(userId, status, pageable);
 
-        return ResponseEntity.ok(
-                new Response<>("success", reservations, "Reservations retrieved successfully")
-        );
+        return ResponseEntity.ok(new Response<>("success", reservations, "Reservations retrieved successfully"));
     }
+
 
 
     // CUSTOMER gets their reservation by publicId

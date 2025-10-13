@@ -86,11 +86,18 @@ public class ReservationService {
     }
 
     // ========================= READ =========================
-    @Transactional(readOnly = true)
-    public Page<ReservationDto> getMyReservations(Long userId, Pageable pageable) {
-        return reservationRepository.findByUserId(userId, pageable)
-                .map(ReservationDto::new);
+    public Page<ReservationDto> findMyReservations(Long userId, String status, Pageable pageable) {
+        Page<Reservation> page;
+
+        if (status != null && !status.isBlank()) {
+            page = reservationRepository.findByUserIdAndStatusCode(userId, status, pageable);
+        } else {
+            page = reservationRepository.findByUserId(userId, pageable);
+        }
+
+        return page.map(ReservationDto::new);
     }
+
 
     @Transactional(readOnly = true)
     public ReservationDto getReservationByPublicId(String publicId) {
@@ -105,6 +112,7 @@ public class ReservationService {
                 .map(ReservationDto::new)
                 .collect(Collectors.toList());
     }
+
 
     // ========================= UPDATE =========================
     @Transactional
