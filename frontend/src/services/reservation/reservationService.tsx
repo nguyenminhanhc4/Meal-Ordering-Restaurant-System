@@ -1,4 +1,5 @@
 import type { ApiResponse } from "../types/ApiType";
+import type { Page } from "../types/PageType";
 import api from "../../api/axios";
 export interface Reservation {
   id: number;
@@ -42,18 +43,19 @@ export const createMyReservation = async (
 /**
  * CUSTOMER: lấy danh sách đặt bàn của mình
  */
-export const getMyReservations = async (): Promise<Reservation[]> => {
+export const getMyReservations = async (
+  page: number = 0,
+  size: number = 10
+): Promise<Page<Reservation> | null> => {
   try {
-    const response = await api.get<ApiResponse<Reservation[]>>(
-      "/reservations/me",
-      {
-        withCredentials: true,
-      }
+    const response = await api.get<ApiResponse<Page<Reservation>>>(
+      `/reservations/me?page=${page}&size=${size}`,
+      { withCredentials: true }
     );
     return response.data.data;
   } catch (error) {
-    console.error("Error fetching my reservations:", error);
-    return [];
+    console.error("❌ Error fetching my reservations:", error);
+    return null;
   }
 };
 

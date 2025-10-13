@@ -6,6 +6,10 @@ import org.example.backend.dto.table.TableDto;
 import org.example.backend.service.reservation.ReservationService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -40,14 +44,26 @@ public class ReservationController {
     // CUSTOMER gets all their reservations
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> getMyReservations() {
+    public ResponseEntity<?> getMyReservations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         Long userId = userService.getUserByEmail(email).getId();
 
-        List<ReservationDto> list = reservationService.getMyReservations(userId);
-        return ResponseEntity.ok(new Response<>("success", list, "Reservations retrieved successfully"));
+        // ✅ Xử lý sort
+        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+
+        Page<ReservationDto> reservations = reservationService.getMyReservations(userId, pageable);
+
+        return ResponseEntity.ok(
+                new Response<>("success", reservations, "Reservations retrieved successfully")
+        );
     }
+
 
     // CUSTOMER gets their reservation by publicId
     @GetMapping("/me/{publicId}")

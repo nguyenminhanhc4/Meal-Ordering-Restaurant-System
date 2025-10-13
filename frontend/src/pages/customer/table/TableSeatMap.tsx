@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button, Spinner, Tooltip } from "flowbite-react";
 import { getAllTables } from "../../../services/table/tableService";
 import type { TableEntity } from "../../../services/table/tableService";
@@ -7,7 +7,6 @@ import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
 import {
   createMyReservation,
   getMyReservations,
-  deleteMyReservation,
   getMyReservationByPublicId,
   updateMyReservation,
 } from "../../../services/reservation/reservationService";
@@ -24,24 +23,38 @@ export default function TableBooking() {
    *  STATE MANAGEMENT
    *  ------------------------------- */
   const [tables, setTables] = useState<TableEntity[]>([]);
+  const [page] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [totalPages, setTotalPages] = useState(0);
   const [selectedTable, setSelectedTable] = useState<TableEntity | null>(null);
   const [loading, setLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
   const [showBookedList, setShowBookedList] = useState(false);
   const [selectedArea, setSelectedArea] = useState<string>("ALL");
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [editingReservation, setEditingReservation] =
     useState<Reservation | null>(null);
 
+  type BookingMode = "create" | "edit" | null;
+  const [bookingModalState, setBookingModalState] = useState<BookingMode>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [targetPublicId, setTargetPublicId] = useState<string | null>(null);
 
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
+  const activeReservations = useMemo(
+    () => myReservations.filter((res) => res.statusName !== "CANCELLED"),
+    [myReservations]
+  );
+
   const [loadingReservations, setLoadingReservations] = useState(false);
   const { notify } = useNotification();
 
   /** Danh sách ID bàn mà user đã đặt */
-  const myBookedTableIds = myReservations.flatMap((res) => res.tableIds || []);
+  const myBookedTableIds = useMemo(
+    () =>
+      myReservations
+        .filter((res) => res.statusName !== "CANCELLED")
+        .flatMap((res) => res.tableIds || []),
+    [myReservations]
+  );
 
   /** -------------------------------
    *  DATE TIME LIMIT (chỉ cho phép đặt từ thời điểm hiện tại)
@@ -76,8 +89,9 @@ export default function TableBooking() {
   const fetchMyReservations = async () => {
     setLoadingReservations(true);
     try {
-      const data = await getMyReservations();
-      setMyReservations(data || []);
+      const data = await getMyReservations(page, 10);
+      setMyReservations(data?.content || []);
+      setTotalPages(data?.totalPages ?? 0);
     } catch (error) {
       console.error("❌ Lỗi khi tải danh sách đặt bàn:", error);
       notify("error", "Không thể tải danh sách đặt bàn!");
@@ -97,13 +111,9 @@ export default function TableBooking() {
         const table = tables.find((t) => t.id === firstTableId);
         setSelectedTable(table || null);
       }
-      setShowBookingModal(true);
+      setBookingModalState("edit");
     }
   };
-
-  useEffect(() => {
-    console.log("BookingModal open prop:", openModal || showBookingModal);
-  }, [showBookingModal]);
 
   const handleUpdateReservation = async (data: BookingData) => {
     if (!editingReservation) return;
@@ -127,7 +137,7 @@ export default function TableBooking() {
       if (updated) {
         notify("success", "✅ Cập nhật đặt bàn thành công!");
         await fetchMyReservations();
-        setShowBookingModal(false);
+        setBookingModalState(null);
         setEditingReservation(null);
       } else {
         notify("error", "Không thể cập nhật đặt bàn!");
@@ -151,13 +161,12 @@ export default function TableBooking() {
     setShowConfirm(false);
     setLoading(true);
     try {
-      const success = await deleteMyReservation(targetPublicId);
-      if (success) {
-        notify("success", "Đã hủy đặt bàn thành công!");
-        await Promise.all([fetchTables(), fetchMyReservations()]);
-      } else {
-        notify("error", "Hủy đặt bàn thất bại!");
-      }
+      // 🔁 Cập nhật trạng thái thành CANCELLED
+      await updateMyReservation(targetPublicId, { statusName: "CANCELLED" });
+
+      notify("success", "Đã hủy đặt bàn thành công!");
+      // 🔁 Làm mới dữ liệu
+      await Promise.all([fetchTables(), fetchMyReservations()]);
     } catch (error) {
       console.error("❌ Lỗi khi hủy đặt bàn:", error);
       notify("error", "Có lỗi xảy ra khi hủy đặt bàn!");
@@ -206,7 +215,7 @@ export default function TableBooking() {
   /** Mở modal đặt bàn */
   const handleBookTable = (table: TableEntity) => {
     setSelectedTable(table);
-    setOpenModal(true);
+    setBookingModalState("create");
   };
 
   /** Xác nhận đặt bàn */
@@ -229,7 +238,7 @@ export default function TableBooking() {
           "success",
           `Đã đặt bàn ${selectedTable.name} thành công vào lúc ${data.reservationTime}!`
         );
-        setOpenModal(false);
+        setBookingModalState(null);
         await Promise.all([fetchTables(), fetchMyReservations()]);
       } else {
         notify("error", "Không thể đặt bàn, vui lòng thử lại!");
@@ -393,24 +402,23 @@ export default function TableBooking() {
         {/* === MODAL ĐẶT BÀN / CẬP NHẬT === */}
         <BookingModal
           table={selectedTable}
-          show={openModal || showBookingModal}
+          show={bookingModalState !== null}
           minDateTime={minDateTime}
           onClose={() => {
-            setOpenModal(false);
-            setShowBookingModal(false);
+            setBookingModalState(null);
             setEditingReservation(null);
           }}
           onConfirm={handleConfirmBooking}
           onConfirmEdit={handleUpdateReservation}
           existingReservation={editingReservation}
-          mode={editingReservation ? "edit" : "create"}
+          mode={bookingModalState === "edit" ? "edit" : "create"}
         />
 
         {/* === MODAL DANH SÁCH BÀN ĐÃ ĐẶT === */}
         <BookedListModal
           show={showBookedList}
           onClose={() => setShowBookedList(false)}
-          reservations={myReservations}
+          reservations={activeReservations}
           tables={tables}
           loading={loadingReservations}
           onEdit={handleEditReservation}

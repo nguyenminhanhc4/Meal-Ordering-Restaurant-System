@@ -147,6 +147,7 @@ export default function BookingModal({
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              disabled
               required
               sizing="lg"
               theme={{
@@ -173,6 +174,7 @@ export default function BookingModal({
                 setFormData({ ...formData, phone: e.target.value })
               }
               required
+              disabled
               sizing="lg"
               type="tel"
               theme={{

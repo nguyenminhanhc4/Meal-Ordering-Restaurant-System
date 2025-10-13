@@ -18,12 +18,12 @@ function InputField({ label, ...props }: InputFieldProps) {
       <input
         {...props}
         // Áp dụng phong cách hiện đại (từ gợi ý trước) cho InputField
-        className={`w-full border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm transition duration-150
-        ${
-          props.disabled
-            ? "bg-gray-50 text-gray-700 cursor-not-allowed"
-            : "bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        }`}
+        className={`w-full rounded-xl px-4 py-2.5 shadow-sm transition-all duration-200 outline-none
+  border ${
+    props.disabled
+      ? "bg-gray-50 text-gray-700 border-gray-200 cursor-not-allowed"
+      : "bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+  }`}
       />
     </div>
   );

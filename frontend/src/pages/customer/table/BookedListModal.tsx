@@ -170,23 +170,31 @@ export default function BookedListModal({
                       {/* Cột Hành động */}
                       <TableCell className="min-w-[150px]">
                         <div className="flex gap-2 justify-center">
-                          <Button
-                            size="sm"
-                            color="yellow"
-                            onClick={() => onEdit(res)}
-                            className="p-0 h-8 w-8 justify-center items-center"
-                            title="Chỉnh sửa">
-                            <HiOutlinePencil className="w-4 h-4" />
-                          </Button>
+                          {res.statusName !== "CANCELLED" ? (
+                            <>
+                              <Button
+                                size="sm"
+                                color="yellow"
+                                onClick={() => onEdit(res)}
+                                className="p-0 h-8 w-8 justify-center items-center"
+                                title="Chỉnh sửa">
+                                <HiOutlinePencil className="w-4 h-4" />
+                              </Button>
 
-                          <Button
-                            size="sm"
-                            color="red"
-                            onClick={() => onCancel(res.publicId)}
-                            className="p-0 h-8 w-8 justify-center items-center"
-                            title="Hủy đặt bàn">
-                            <HiOutlineXMark className="w-4 h-4" />
-                          </Button>
+                              <Button
+                                size="sm"
+                                color="red"
+                                onClick={() => onCancel(res.publicId)}
+                                className="p-0 h-8 w-8 justify-center items-center"
+                                title="Hủy đặt bàn">
+                                <HiOutlineXMark className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <span className="text-gray-400 italic text-sm">
+                              Đã hủy
+                            </span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
