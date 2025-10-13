@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UserProfileContent from "../../../components/profile/UserProfileContent";
 import UserReservationHistory from "../../../components/profile/UserReservationHistory";
+import UserSecuritySettings from "../../../components/profile/UserSecuritySettings";
 import { useNavigate } from "react-router-dom";
 import {
   HiOutlineUser,
@@ -64,11 +65,7 @@ export default function ProfilePage() {
       id: "security",
       label: "Bảo mật & Mật khẩu",
       icon: HiOutlineLockClosed,
-      component: () => (
-        <div className="p-8 bg-white rounded-3xl shadow-lg border border-gray-100">
-          Nội dung Bảo mật (Chưa làm)
-        </div>
-      ),
+      component: UserSecuritySettings,
     },
   ];
 

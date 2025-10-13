@@ -305,6 +305,47 @@ public class UserService {
         return jwtUtil.generateToken(user.getEmail(), user.getRole().getCode(), user.getName(), user.getPublicId());
     }
 
+    @Transactional
+    public void changePassword(String email, String currentPassword, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        // ✅ 1. Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+        }
+
+        // ✅ 2. Không cho phép trùng mật khẩu cũ
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng mật khẩu cũ");
+        }
+
+        // ✅ 3. Kiểm tra độ mạnh mật khẩu
+        validatePasswordStrength(newPassword);
+
+        // ✅ 4. Cập nhật mật khẩu mới (hash)
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private void validatePasswordStrength(String password) {
+        if (password.length() < 8) {
+            throw new RuntimeException("Mật khẩu phải có ít nhất 8 ký tự");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ hoa");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ thường");
+        }
+        if (!password.matches(".*\\d.*")) {
+            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ số");
+        }
+        if (!password.matches(".*[!@#$%^&*()_+\\-={}\\[\\]|;:'\",.<>/?].*")) {
+            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
+        }
+    }
+
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));

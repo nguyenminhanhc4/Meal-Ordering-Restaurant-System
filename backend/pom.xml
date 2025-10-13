@@ -109,8 +109,13 @@
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.32.0</version>
 		</dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>8.0.1</version>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
