@@ -77,7 +77,7 @@ const MegaMenuComponent: React.FC = () => {
   const menuLinkClasses = `text-lg transition-colors duration-200 ${
     isMenuDropdownActive
       ? "!text-yellow-400 font-bold" // Active/Open state
-      : "text-gray-200 hover:!text-yellow-400"
+      : "!text-gray-400 hover:!text-yellow-400"
   }`;
 
   // Style chung cho trạng thái active (để tránh lặp code)
