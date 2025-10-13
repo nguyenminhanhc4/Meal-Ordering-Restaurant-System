@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,8 @@ public class UserService {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    private final Map<String, ResetToken> resetTokens = new HashMap<>();
 
     private boolean isValidImageType(String contentType) {
         return contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase());
@@ -538,6 +541,40 @@ public class UserService {
 
         userRepository.save(user);
         return convertToDTO(user);
+    }
+
+    public String generateResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        String token = UUID.randomUUID().toString();
+        resetTokens.put(token, new ResetToken(email, LocalDateTime.now().plusMinutes(10)));
+        return token;
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        ResetToken resetToken = resetTokens.get(token);
+        if (resetToken == null || resetToken.getExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token không hợp lệ hoặc đã hết hạn");
+        }
+
+        User user = userRepository.findByEmail(resetToken.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        resetTokens.remove(token); // Xóa token sau khi dùng
+    }
+
+    private static class ResetToken {
+        private String email;
+        private LocalDateTime expiry;
+        public ResetToken(String email, LocalDateTime expiry) {
+            this.email = email;
+            this.expiry = expiry;
+        }
+        public String getEmail() { return email; }
+        public LocalDateTime getExpiry() { return expiry; }
     }
 
     private UserDTO convertToDTO(User user) {
