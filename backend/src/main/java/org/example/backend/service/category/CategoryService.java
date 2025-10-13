@@ -2,11 +2,16 @@ package org.example.backend.service.category;
 
 import jakarta.transaction.Transactional;
 import org.example.backend.dto.category.CategoryDTO;
+import org.example.backend.dto.category.CategorySearchRequest;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.exception.ValidationException;
 import org.example.backend.validator.CategoryValidator;
 import org.example.backend.repository.category.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -110,5 +115,31 @@ public class CategoryService {
         return categoryRepository.findByParentId(parentId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Phân trang cơ bản
+    public Page<CategoryDTO> getAllCategoriesWithPagination(int page, int size, String sortBy, String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        return categoryRepository.findAll(pageable)
+                .map(this::toDTO);
+    }
+
+    // Tìm kiếm và filter với phân trang
+    public Page<CategoryDTO> searchCategoriesWithPagination(CategorySearchRequest searchRequest, int page, int size) {
+        String sortBy = searchRequest.getSortBy() != null ? searchRequest.getSortBy() : "id";
+        String sortDirection = searchRequest.getSortDirection() != null ? searchRequest.getSortDirection() : "asc";
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        return categoryRepository.findCategoriesWithFilters(
+                searchRequest.getName(),
+                searchRequest.getDescription(),
+                searchRequest.getParentId(),
+                searchRequest.getHasParent(),
+                pageable
+        ).map(this::toDTO);
     }
 }
