@@ -15,19 +15,19 @@ public class MenuItemDto {
     private String name;
     private String description;
     private BigDecimal price;
-    private String avatarUrl; // Ánh xạ sang image
+    private String avatarUrl;
     private Long categoryId;
-    private String categoryName; // Thêm từ Categories
-    private String categorySlug; // Tạo từ categoryName
-    private String status; // Từ params (AVAILABLE, OUT_OF_STOCK)
-    private Long statusId; // Add statusId for edit mode
-    private LocalDateTime createdAt; // Từ menu_items
-    private Double rating; // Trung bình từ reviews
-    private Long sold; // Tổng quantity từ order_items
-    private List<String> tags; // Nếu có
+    private String categoryName;
+    private String categorySlug;
+    private String status;
+    private Long statusId;
+    private LocalDateTime createdAt;
+    private Double rating;
+    private Long sold;
+    private List<String> tags;
     private List<ReviewDto> reviews;
     private Integer availableQuantity;
-    private List<MenuItemIngredientDto> ingredients; // Add ingredients list for edit mode
+    private List<MenuItemIngredientDto> ingredients;
 
     // 🆕 Thêm các trường phân trang review
     private Long totalReviews;          // tổng số review

@@ -2,8 +2,12 @@ package org.example.backend.service.menu;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.MenuItemMapper;
+import org.example.backend.dto.review.ReviewDto;
+import org.example.backend.entity.review.Review;
+import org.example.backend.repository.review.ReviewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +49,7 @@ public class MenuItemService {
     private final IngredientRepository ingredientRepository;
     private final MenuItemIngredientRepository menuItemIngredientRepository;
     private final InventoryRepository inventoryRepository;
+    private final ReviewRepository reviewRepository;
     private final Cloudinary cloudinary;
     private final MenuItemMapper menuItemMapper;
 
@@ -105,9 +110,30 @@ public class MenuItemService {
         return dto;
     }
 
-    public Optional<MenuItemDto> findById(Long id) {
-        return menuItemRepository.findById(id)
-                .map(MenuItemDto::new);
+    public MenuItemDto getById(Long id, Integer reviewPage, Integer reviewSize) {
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Menu item not found"));
+
+        MenuItemDto dto = new MenuItemDto(menuItem);
+
+        // Nếu người dùng truyền vào param phân trang review
+        if (reviewPage != null && reviewSize != null) {
+            Pageable pageable = PageRequest.of(reviewPage, reviewSize, Sort.by("createdAt").descending());
+            Page<Review> reviewPageResult = reviewRepository.findByMenuItemId(id, pageable);
+
+            List<ReviewDto> reviewDtos = reviewPageResult.getContent()
+                    .stream()
+                    .map(ReviewDto::new) // convert từng Review -> ReviewDto
+                    .collect(Collectors.toList());
+
+            dto.setReviews(reviewDtos);
+            dto.setTotalReviews(reviewPageResult.getTotalElements());
+            dto.setReviewPages(reviewPageResult.getTotalPages());
+            dto.setCurrentReviewPage(reviewPageResult.getNumber());
+
+        }
+
+        return dto;
     }
 
     public MenuItemDto save(MenuItemDto dto) {
