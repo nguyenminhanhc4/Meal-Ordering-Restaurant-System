@@ -4,6 +4,7 @@ import type { Page } from "../types/PageType";
 
 export interface Review {
   id: number;
+  userId: string;
   userName: string;
   userAvatar: string | null; // có thể null
   rating: number; // 1-5

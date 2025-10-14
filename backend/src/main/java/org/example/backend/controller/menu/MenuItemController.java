@@ -48,12 +48,18 @@ public class MenuItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMenuItemById(@PathVariable Long id) {
-        MenuItemDto menuItem = menuItemService.getById(id);
+    public ResponseEntity<?> getMenuItemById(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int reviewPage,
+            @RequestParam(defaultValue = "5") int reviewSize
+    ) {
+        MenuItemDto menuItem = menuItemService.getById(id, reviewPage, reviewSize);
         return ResponseEntity.ok(
                 new Response<>("success", menuItem, "Menu item retrieved successfully")
         );
     }
+
+
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

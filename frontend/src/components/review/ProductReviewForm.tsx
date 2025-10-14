@@ -11,6 +11,7 @@ interface ProductReviewFormProps {
 }
 
 const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productId,
   onSubmit,
 }) => {
