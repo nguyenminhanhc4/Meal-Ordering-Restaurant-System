@@ -23,6 +23,7 @@ import {
 import EditReviewForm from "./EditReviewForm ";
 import { useAuth } from "../../../store/AuthContext";
 import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import Pagination from "../../../components/common/PaginationClient";
 
 /**
  * ProductDetail
@@ -46,6 +47,14 @@ const ProductDetail: React.FC = () => {
   const { user } = useAuth();
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const reviewsPerPage = 5;
+
+  const paginatedReviews = useMemo(() => {
+    if (!product?.reviews) return [];
+    const start = currentPage * reviewsPerPage;
+    return product.reviews.slice(start, start + reviewsPerPage);
+  }, [product?.reviews, currentPage]);
 
   /**
    * Fetch product detail
@@ -76,6 +85,10 @@ const ProductDetail: React.FC = () => {
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [product?.reviews]);
 
   const handleDelete = async () => {
     if (!selectedReviewId) return;
@@ -487,7 +500,7 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              {product.reviews.map((review) => (
+              {paginatedReviews.map((review) => (
                 <div
                   key={review.id}
                   className="bg-white p-4 border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -648,6 +661,14 @@ const ProductDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(
+                (product.reviews?.length ?? 0) / reviewsPerPage
+              )}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
           </div>
         )}
       </div>
