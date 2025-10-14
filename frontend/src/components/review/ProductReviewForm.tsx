@@ -99,12 +99,14 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
 
   return (
     <div className="mt-8 border-t pt-6">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">
+      <h2 className="text-3xl font-bold mb-4 text-gray-800">
         Viết đánh giá của bạn
-      </h3>
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Label>
-          <Label className="mb-2 block font-semibold">Đánh giá</Label>
+          <Label className="mb-2 text-xl block !text-gray-800 font-semibold">
+            Đánh giá
+          </Label>
           <div
             className="flex items-center gap-1 mb-4"
             role="radiogroup"
@@ -119,7 +121,9 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
         </Label>
 
         <div>
-          <Label className="mb-2 block font-semibold">Bình luận</Label>
+          <Label className="mb-2 text-xl block !text-gray-800 font-semibold">
+            Bình luận
+          </Label>
           <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
