@@ -21,6 +21,7 @@ import {
   HiCog,
   HiLogout,
   HiCollection,
+  HiMenuAlt1,
 } from "react-icons/hi";
 import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
@@ -91,6 +92,13 @@ function AdminLayout() {
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiCollection}>
                 Categories
+              </SidebarItem>
+
+              <SidebarItem
+                onClick={() => navigate("/admin/menu-items")}
+                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
+                icon={HiMenuAlt1}>
+                Menu Items
               </SidebarItem>
 
               <SidebarItem

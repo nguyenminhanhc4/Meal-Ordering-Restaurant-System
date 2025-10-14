@@ -46,13 +46,12 @@ public class MenuItem extends BaseEntity {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItemIngredient> menuItemIngredients;
 
-    @OneToOne(mappedBy = "menuItem" ,fetch = FetchType.LAZY)
-    @JoinColumn(name = "quantity", nullable = false)
+    @OneToOne(mappedBy = "menuItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory inventory;
 }

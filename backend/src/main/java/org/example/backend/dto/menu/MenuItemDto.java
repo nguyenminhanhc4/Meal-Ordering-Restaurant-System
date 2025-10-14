@@ -4,6 +4,7 @@ import lombok.Data;
 import org.example.backend.dto.review.ReviewDto;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.menu.MenuItem;
+import org.example.backend.entity.menu.MenuItemIngredient;
 import org.example.backend.entity.review.Review;
 
 import java.math.BigDecimal;
@@ -22,12 +23,14 @@ public class MenuItemDto {
     private String categoryName; // Thêm từ Categories
     private String categorySlug; // Tạo từ categoryName
     private String status; // Từ params (AVAILABLE, OUT_OF_STOCK)
+    private Long statusId; // Add statusId for edit mode
     private LocalDateTime createdAt; // Từ menu_items
     private Double rating; // Trung bình từ reviews
     private Long sold; // Tổng quantity từ order_items
     private List<String> tags; // Nếu có
     private List<ReviewDto> reviews;
     private Integer availableQuantity;
+    private List<MenuItemIngredientDto> ingredients; // Add ingredients list for edit mode
 
     // Constructor từ entity
     public MenuItemDto(MenuItem entity) {
@@ -41,7 +44,8 @@ public class MenuItemDto {
         this.categoryName = entity.getCategory() != null ? entity.getCategory().getName() : null;
         this.categorySlug = entity.getCategory() != null ?
                 entity.getCategory().getName().toLowerCase().replace(" ", "-") : null;
-        this.status = entity.getStatus().getCode();
+        this.status = entity.getStatus() != null ? entity.getStatus().getCode() : null;
+        this.statusId = entity.getStatus() != null ? entity.getStatus().getId() : null;
         this.tags = entity.getMenuItemIngredients() != null ?
                 entity.getMenuItemIngredients().stream()
                         .map(menuItemIngredient -> menuItemIngredient.getIngredient().getName())
@@ -50,6 +54,10 @@ public class MenuItemDto {
                 entity.getReviews().stream()
                         .map(ReviewDto::new)
                         .collect(Collectors.toList()) : null;
-        this.availableQuantity = entity.getInventory().getQuantity();
+        this.availableQuantity = entity.getInventory() != null ? entity.getInventory().getQuantity() : 0;
+        this.ingredients = entity.getMenuItemIngredients() != null ?
+                entity.getMenuItemIngredients().stream()
+                        .map(MenuItemIngredientDto::new)
+                        .collect(Collectors.toList()) : null;
     }
 }

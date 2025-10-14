@@ -169,97 +169,164 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   };
 
   return (
-    <Modal show={show} onClose={handleClose} size="md">
-      <ModalHeader>
-        {isEditMode ? "Edit Category" : "Add New Category"}
+    <Modal show={show} onClose={handleClose} size="4xl" className="shadow-lg">
+      {/* Modal Header */}
+      <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
+        <h3 className="text-xl font-bold text-gray-800">
+          {isEditMode ? "Edit Category" : "Create New Category"}
+        </h3>
       </ModalHeader>
-      <form onSubmit={handleSubmit}>
-        <ModalBody className="space-y-4">
-          {/* Category Name */}
-          <div>
-            <Label htmlFor="name">Category Name *</Label>
-            <TextInput
-              id="name"
-              name="name"
-              type="text"
-              placeholder="Enter category name"
-              value={formData.name}
-              onChange={handleInputChange}
-              color={errors.name ? "failure" : "gray"}
-              disabled={isSubmitting}
-              required
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-            )}
-          </div>
 
-          {/* Description */}
-          <div>
-            <Label htmlFor="description">Description *</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Enter category description"
-              value={formData.description}
-              onChange={handleInputChange}
-              color={errors.description ? "failure" : "gray"}
-              disabled={isSubmitting}
-              rows={3}
-              required
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-            )}
-          </div>
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        {/* Modal Body */}
+        <ModalBody className="p-6 space-y-6 bg-gray-50">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Category Name */}
+              <div>
+                <Label htmlFor="name" className="mb-2 block text-sm font-medium !text-gray-700">
+                  Category Name *
+                </Label>
+                <TextInput
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter category name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  color={errors.name ? "failure" : "gray"}
+                  disabled={isSubmitting}
+                  required
+                  className="w-full"
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
+              </div>
 
-          {/* Parent Category */}
-          <div>
-            <Label htmlFor="parentId">Parent Category (Optional)</Label>
-            <Select
-              id="parentId"
-              name="parentId"
-              value={formData.parentId}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-            >
-              <option value="">-- No Parent (Root Category) --</option>
-              {parentCategories.map((parent) => (
-                <option key={parent.id} value={parent.id}>
-                  {parent.name}
-                </option>
-              ))}
-            </Select>
-            <p className="text-sm text-gray-500 mt-1">
-              Leave empty to create a root category
-            </p>
+              {/* Parent Category */}
+              <div>
+                <Label htmlFor="parentId" className="mb-2 block text-sm font-medium !text-gray-700">
+                  Parent Category (Optional)
+                </Label>
+                <Select
+                  id="parentId"
+                  name="parentId"
+                  value={formData.parentId}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="w-full"
+                  theme={{
+                    field: {
+                      select: {
+                        base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
+                >
+                  <option value="">-- No Parent (Root Category) --</option>
+                  {parentCategories.map((parent) => (
+                    <option key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </option>
+                  ))}
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave empty to create a root category
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Description */}
+              <div>
+                <Label htmlFor="description" className="mb-2 block text-sm font-medium !text-gray-700">
+                  Description *
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Enter category description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  color={errors.description ? "failure" : "gray"}
+                  disabled={isSubmitting}
+                  rows={6}
+                  required
+                  className="w-full resize-none"
+                  theme={{
+                    base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                  }}
+                />
+                {errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
+              </div>
+
+              {/* Preview/Info Section */}
+              <div className="bg-white p-4 rounded-lg border border-gray-300">
+                <Label className="mb-3 block text-lg font-medium !text-gray-700">
+                  Category Preview
+                </Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-gray-600">Name:</span>
+                    <span className="text-sm text-gray-800">{formData.name || "Not specified"}</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-medium text-gray-600">Parent:</span>
+                    <span className="text-sm text-gray-800">
+                      {formData.parentId 
+                        ? parentCategories.find(p => p.id.toString() === formData.parentId)?.name || "Unknown"
+                        : "Root Category"
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-medium text-gray-600">Description:</span>
+                    <span className="text-sm text-gray-800 flex-1">
+                      {formData.description || "Not specified"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </ModalBody>
 
-        <ModalFooter>
-          <div className="flex justify-end space-x-2">
-            <Button
-              color="gray"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              color="blue"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Spinner size="sm" className="mr-2" />
-                  {isEditMode ? "Updating..." : "Creating..."}
-                </>
-              ) : (
-                <>{isEditMode ? "Update Category" : "Create Category"}</>
-              )}
-            </Button>
-          </div>
+        {/* Modal Footer */}
+        <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
+          <Button
+            color="red"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="text-gray-50"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" light={true} />
+                {isEditMode ? "Updating..." : "Creating..."}
+              </div>
+            ) : (
+              <>{isEditMode ? "Update Category" : "Create Category"}</>
+            )}
+          </Button>
         </ModalFooter>
       </form>
     </Modal>

@@ -2,6 +2,9 @@ package org.example.backend.controller.menu;
 
 import org.example.backend.dto.Response;
 import org.example.backend.dto.menu.MenuItemDto;
+import org.example.backend.dto.menu.MenuItemCreateDTO;
+import org.example.backend.dto.menu.MenuItemUpdateDTO;
+import org.example.backend.dto.menu.MenuItemSearchRequest;
 import org.example.backend.service.menu.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -87,5 +90,86 @@ public class MenuItemController {
 
         MenuItemDto updated = menuItemService.uploadMenuItemAvatar(id, avatar);
         return ResponseEntity.ok(updated);
+    }
+
+    // Upload ảnh độc lập (không cần menuItem ID)
+    @PostMapping("/upload-image")
+    public ResponseEntity<?> uploadMenuItemImage(
+            @RequestParam("image") MultipartFile image) throws IOException {
+        try {
+            String imageUrl = menuItemService.uploadImageToCloudinary(image, "menu");
+            return ResponseEntity.ok(
+                new Response<>("success", imageUrl, "Image uploaded successfully")
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new Response<>("error", null, "Failed to upload image: " + e.getMessage()));
+        }
+    }
+
+    // ===========================================
+    // ADMIN APIs for MenuItem Management
+    // ===========================================
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllMenuItemsForAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection
+    ) {
+        Page<MenuItemDto> menuItems = menuItemService.findAllForAdmin(page, size, sortBy, sortDirection);
+        return ResponseEntity.ok(
+                new Response<>("success", menuItems, "Menu items for admin retrieved successfully")
+        );
+    }
+
+    @PostMapping("/admin/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> searchMenuItemsForAdmin(
+            @RequestBody MenuItemSearchRequest searchRequest,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size
+    ) {
+        Page<MenuItemDto> menuItems = menuItemService.searchMenuItemsWithPagination(searchRequest, page, size);
+        return ResponseEntity.ok(
+                new Response<>("success", menuItems, "Menu items search results retrieved successfully")
+        );
+    }
+
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createMenuItemForAdmin(@RequestBody MenuItemCreateDTO dto) {
+        MenuItemDto saved = menuItemService.createMenuItem(dto);
+        return ResponseEntity.ok(
+                new Response<>("success", saved, "Menu item created successfully")
+        );
+    }
+
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateMenuItemForAdmin(@PathVariable Long id, @RequestBody MenuItemUpdateDTO dto) {
+        MenuItemDto updated = menuItemService.updateMenuItem(id, dto);
+        return ResponseEntity.ok(
+                new Response<>("success", updated, "Menu item updated successfully")
+        );
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteMenuItemForAdmin(@PathVariable Long id) {
+        try {
+            menuItemService.deleteById(id);
+            return ResponseEntity.ok(
+                new Response<>("success", null, "Menu item deleted successfully")
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                .body(new Response<>("error", null, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(new Response<>("error", null, "Internal server error: " + e.getMessage()));
+        }
     }
 }
