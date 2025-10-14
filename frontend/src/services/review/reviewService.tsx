@@ -3,6 +3,7 @@ import api from "../../api/axios";
 
 export interface Review {
   id: number;
+  userId: string;
   userName: string;
   userAvatar?: string | null;
   rating: number;

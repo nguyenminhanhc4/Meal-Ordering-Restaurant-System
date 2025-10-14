@@ -5,10 +5,14 @@ import org.example.backend.dto.review.ReviewDto;
 import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.review.Review;
 import org.example.backend.entity.user.User;
+import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.review.ReviewRepository;
 import org.example.backend.repository.user.UserRepository;
+import org.example.backend.service.user.UserService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,20 +58,35 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found"));
     }
 
-    public ReviewDto updateById(Long id, ReviewDto dto) {
+    public ReviewDto updateById(Long id, ReviewDto dto, Long currentUserId) {
         Review entity = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if (!entity.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Bạn không có quyền sửa đánh giá này");
+        }
+
         entity.setRating(dto.getRating());
         entity.setComment(dto.getComment());
         entity.setUpdatedAt(LocalDateTime.now());
-        return new ReviewDto(reviewRepository.save(entity));
+
+        Review saved = reviewRepository.save(entity);
+        return new ReviewDto(saved);
     }
 
-    public void deleteById(Long id) {
-        Review entity = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-        reviewRepository.delete(entity);
+    @Transactional
+    public void deleteById(Long id, Long currentUserId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+
+        // Nếu không phải chủ sở hữu và không phải admin => cấm xóa
+        if (!review.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Bạn không có quyền sửa đánh giá này");
+        }
+
+        reviewRepository.delete(review);
     }
+
 
     public boolean existsByUserIdAndMenuId(Long userId, Long menuId) {
         return reviewRepository.existsByUserIdAndMenuItemId(userId, menuId);
