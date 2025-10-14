@@ -33,10 +33,20 @@ public class ReviewService {
         return reviewRepository.findById(id).map(ReviewDto::new);
     }
 
-    public ReviewDto save(ReviewDto dto) {
-        Review entity = toEntity(dto);
+    public ReviewDto save(ReviewDto dto, Long userId, Long menuItemId) {
+        Review entity = new Review();
+        entity.setUser(userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found")));
+        entity.setMenuItem(menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("Menu item not found")));
+        entity.setRating(dto.getRating());
+        entity.setComment(dto.getComment());
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+
         return new ReviewDto(reviewRepository.save(entity));
     }
+
 
     public ReviewDto getById(Long id) {
         return reviewRepository.findById(id)
@@ -57,6 +67,10 @@ public class ReviewService {
         Review entity = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
         reviewRepository.delete(entity);
+    }
+
+    public boolean existsByUserIdAndMenuId(Long userId, Long menuId) {
+        return reviewRepository.existsByUserIdAndMenuItemId(userId, menuId);
     }
 
     private Review toEntity(ReviewDto dto) {
