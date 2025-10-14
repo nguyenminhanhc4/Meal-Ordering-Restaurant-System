@@ -26,12 +26,13 @@ interface PaginationProps {
  * - Responsive bằng Tailwind (ẩn bớt khi màn hình nhỏ)
  */
 const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
   totalPages,
   loading = false,
   onPageChange,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = Number(searchParams.get("page")) || 0;
   const [inputPage, setInputPage] = useState<string>("");
 
   // Khi đổi trang → cập nhật URL + gọi callback

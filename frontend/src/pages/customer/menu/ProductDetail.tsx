@@ -48,7 +48,7 @@ const ProductDetail: React.FC = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const reviewsPerPage = 5;
+  const reviewsPerPage = 1;
 
   const paginatedReviews = useMemo(() => {
     if (!product?.reviews) return [];
@@ -182,6 +182,11 @@ const ProductDetail: React.FC = () => {
       setAddingToCart(false);
     }
   }, [product, quantity, addingToCart, notify]);
+
+  const userReview = useMemo(() => {
+    if (!product?.reviews || !user) return null;
+    return product.reviews.find((r) => r.userId === user.publicId) ?? null;
+  }, [product?.reviews, user]);
 
   // Hàm tạo màu gradient từ chuỗi
   const getRandomGradient = (str: string) => {
@@ -438,48 +443,73 @@ const ProductDetail: React.FC = () => {
         <HRTrimmed className="!bg-stone-300 w-full mt-16" />
 
         {/* Form viết review */}
-        <ProductReviewForm
-          productId={product.id}
-          onSubmit={async ({ rating, comment }) => {
-            try {
-              const newReview = await createReview(product.id, {
-                rating,
-                comment,
-              });
-              if (newReview) {
-                setProduct((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        reviews: [
-                          {
-                            ...newReview,
-                            userAvatar: newReview.userAvatar ?? null,
-                            id: newReview.id ?? 0,
-                          },
-                          ...prev.reviews,
-                        ],
-                      }
-                    : prev
-                );
-              }
-              notify("success", "Đã gửi đánh giá");
-            } catch (err: unknown) {
-              if (err instanceof AxiosError) {
-                if (
-                  err.response?.status === 400 &&
-                  err.response?.data?.message
-                ) {
-                  notify("error", err.response.data.message);
-                } else {
-                  notify("error", "Gửi đánh giá thất bại");
+        {user ? (
+          userReview ? (
+            <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm font-medium shadow-sm">
+              <p>
+                ✅ Bạn đã đánh giá món này vào{" "}
+                <strong>
+                  {new Date(userReview.createdAt).toLocaleDateString("vi-VN")}
+                </strong>
+              </p>
+              <p className="mt-2 italic text-gray-700">
+                “{userReview.comment}”
+              </p>
+              <p className="mt-1 text-yellow-500">
+                {Array.from({ length: userReview.rating }).map((_, i) => (
+                  <FaStar key={i} className="inline h-4 w-4" />
+                ))}
+              </p>
+            </div>
+          ) : (
+            <ProductReviewForm
+              productId={product.id}
+              onSubmit={async ({ rating, comment }) => {
+                try {
+                  const newReview = await createReview(product.id, {
+                    rating,
+                    comment,
+                  });
+                  if (newReview) {
+                    setProduct((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            reviews: [
+                              {
+                                ...newReview,
+                                userAvatar: newReview.userAvatar ?? null,
+                                id: newReview.id ?? 0,
+                              },
+                              ...prev.reviews,
+                            ],
+                          }
+                        : prev
+                    );
+                  }
+                  notify("success", "Đã gửi đánh giá");
+                } catch (err: unknown) {
+                  if (err instanceof AxiosError) {
+                    if (
+                      err.response?.status === 400 &&
+                      err.response?.data?.message
+                    ) {
+                      notify("error", err.response.data.message);
+                    } else {
+                      notify("error", "Gửi đánh giá thất bại");
+                    }
+                  } else {
+                    notify("error", "Gửi đánh giá thất bại");
+                  }
                 }
-              } else {
-                notify("error", "Gửi đánh giá thất bại");
-              }
-            }
-          }}
-        />
+              }}
+            />
+          )
+        ) : (
+          <p className="text-gray-500 mt-6 italic">
+            🔒 Vui lòng đăng nhập để viết đánh giá.
+          </p>
+        )}
 
         {/* Reviews */}
         {product.reviews && product.reviews.length > 0 && (
