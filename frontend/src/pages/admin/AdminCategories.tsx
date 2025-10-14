@@ -191,15 +191,15 @@ function AdminCategories() {
   };
 
   const getParentName = (parentId?: number) => {
-    if (!parentId) return "Danh mục gốc";
+    if (!parentId) return "Root Category";
     const parent = parentCategories.find((p) => p.id === parentId);
-    return parent ? parent.name : "Không xác định";
+    return parent ? parent.name : "Unknown";
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center border-none">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý danh mục</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Category Management</h1>
         <Button
           color="cyan"
           size="md"
@@ -208,7 +208,7 @@ function AdminCategories() {
             setShowModal(true);
           }}>
           <HiPlus className="mr-2 h-5 w-5" />
-          Thêm danh mục mới
+          Add New Category
         </Button>
       </div>
 
@@ -244,11 +244,11 @@ function AdminCategories() {
                     },
                   },
                 }}>
-                <option value="">Tất cả danh mục</option>
-                <option value="0">Chỉ danh mục gốc</option>
+                <option value="">All Categories</option>
+                <option value="0">Root Categories Only</option>
                 {parentCategories.map((parent) => (
                   <option key={parent.id} value={parent.id}>
-                    Thuộc: {parent.name}
+                    Under: {parent.name}
                   </option>
                 ))}
               </Select>
@@ -262,16 +262,16 @@ function AdminCategories() {
               <TableRow>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
                   <HiCollection className="inline mr-2" />
-                  Tên danh mục
+                  Category Name
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  Mô tả
+                  Description
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  Danh mục cha
+                  Parent Category
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700 text-center">
-                  Hành động
+                  Actions
                 </TableHeadCell>
               </TableRow>
             </TableHead>
@@ -281,7 +281,7 @@ function AdminCategories() {
                   <TableCell
                     colSpan={4}
                     className="text-center bg-white text-gray-700 py-4">
-                    Đang tải...
+                    Loading...
                   </TableCell>
                 </TableRow>
               ) : categories.length === 0 ? (
@@ -289,7 +289,7 @@ function AdminCategories() {
                   <TableCell
                     colSpan={4}
                     className="text-center bg-white text-gray-700 py-4">
-                    Không tìm thấy danh mục nào
+                    No categories found
                   </TableCell>
                 </TableRow>
               ) : (
@@ -307,7 +307,7 @@ function AdminCategories() {
                     </TableCell>
                     <TableCell className="p-3 bg-white text-gray-700">
                       <span className="text-sm text-gray-600">
-                        {category.description || "Không có mô tả"}
+                        {category.description || "No description"}
                       </span>
                     </TableCell>
                     <TableCell className="p-3 bg-white text-gray-700">
@@ -366,7 +366,7 @@ function AdminCategories() {
           setCategoryToDelete(null);
         }}
         onConfirm={confirmDelete}
-        message="Bạn có chắc chắn muốn xóa danh mục này không?"
+        message="Are you sure you want to delete this category?"
       />
 
       {/* Category Form Modal */}

@@ -7,6 +7,10 @@ import {
   Textarea,
   Select,
   Card,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Spinner,
 } from "flowbite-react";
 import { HiPlus, HiTrash } from "react-icons/hi";
 import api from "../../api/axios";
@@ -404,19 +408,22 @@ export function MenuItemFormModal({
   };
 
   return (
-    <Modal show={show} onClose={onClose} size="4xl">
-      <div className="border-b border-gray-200 p-6">
-        <h3 className="text-xl font-semibold text-gray-900">
-          {menuItemData ? "Edit Menu Item" : "Add New Menu Item"}
+    <Modal show={show} onClose={onClose} size="5xl" className="shadow-lg">
+      {/* Modal Header */}
+      <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
+        <h3 className="text-xl font-bold text-gray-800">
+          {menuItemData ? "Edit Menu Item" : "Create New Menu Item"}
         </h3>
-      </div>
+      </ModalHeader>
 
-      <div className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="name" className="mb-2 block">
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        {/* Modal Body */}
+        <ModalBody className="p-6 space-y-6 bg-gray-50">
+          {/* Basic Information Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
+            {/* Name */}
+            <div className="lg:col-span-1">
+              <Label htmlFor="name" className="mb-2 block text-sm font-medium !text-gray-700">
                 Name *
               </Label>
               <TextInput
@@ -426,11 +433,20 @@ export function MenuItemFormModal({
                 onChange={handleInputChange}
                 placeholder="Enter menu item name"
                 required
+                className="w-full"
+                theme={{
+                  field: {
+                    input: {
+                      base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}
               />
             </div>
 
-            <div>
-              <Label htmlFor="price" className="mb-2 block">
+            {/* Price */}
+            <div className="lg:col-span-1">
+              <Label htmlFor="price" className="mb-2 block text-sm font-medium !text-gray-700">
                 Price (VND) *
               </Label>
               <TextInput
@@ -443,49 +459,20 @@ export function MenuItemFormModal({
                 onChange={handleInputChange}
                 placeholder="Enter price"
                 required
+                className="w-full"
+                theme={{
+                  field: {
+                    input: {
+                      base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}
               />
             </div>
 
-            <div>
-              <Label htmlFor="categoryId" className="mb-2 block">
-                Category *
-              </Label>
-              <Select
-                id="categoryId"
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleInputChange}
-                required>
-                <option value={0}>Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="statusId" className="mb-2 block">
-                Status *
-              </Label>
-              <Select
-                id="statusId"
-                name="statusId"
-                value={formData.statusId}
-                onChange={handleInputChange}
-                required>
-                <option value={0}>Select Status</option>
-                {statuses.map((status) => (
-                  <option key={status.id} value={status.id}>
-                    {status.code}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="availableQuantity" className="mb-2 block">
+            {/* Available Quantity */}
+            <div className="lg:col-span-1">
+              <Label htmlFor="availableQuantity" className="mb-2 block text-sm font-medium !text-gray-700">
                 Available Quantity
               </Label>
               <TextInput
@@ -496,79 +483,78 @@ export function MenuItemFormModal({
                 value={formData.availableQuantity}
                 onChange={handleInputChange}
                 placeholder="Enter available quantity"
+                className="w-full"
+                theme={{
+                  field: {
+                    input: {
+                      base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}
               />
-            </div>
-
-            <div>
-              <Label htmlFor="avatarFile" className="mb-2 block">
-                Image Upload
-              </Label>
-              <div className="space-y-3">
-                {/* File Upload */}
-                <div>
-                  <input
-                    id="avatarFile"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="block w-full text-sm text-gray-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-cyan-50 file:text-cyan-700
-                      hover:file:bg-cyan-100"
-                    disabled={uploadingImage}
-                  />
-                  <div className="text-sm text-gray-500 mt-1">
-                    Max file size: 5MB. Supported formats: JPG, PNG, GIF
-                  </div>
-                </div>
-                
-                {/* Manual URL Input */}
-                <div>
-                  <Label htmlFor="avatarUrl" className="mb-1 block text-sm">
-                    Or enter image URL manually:
-                  </Label>
-                  <TextInput
-                    id="avatarUrl"
-                    name="avatarUrl"
-                    value={formData.avatarUrl}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/image.jpg"
-                    className="text-sm"
-                  />
-                </div>
-                
-                {/* Show current image if exists */}
-                {formData.avatarUrl && (
-                  <div className="space-y-2">
-                    <div className="text-sm text-gray-600">Current image:</div>
-                    <img 
-                      src={formData.avatarUrl} 
-                      alt="Preview" 
-                      className="w-20 h-20 object-cover rounded-lg border"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <div className="text-xs text-gray-500 break-all">
-                      {formData.avatarUrl}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Upload progress indicator */}
-                {uploadingImage && (
-                  <div className="text-sm text-cyan-600">
-                    Uploading image...
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
+          {/* Category and Status Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div>
+              <Label htmlFor="categoryId" className="mb-2 block text-sm font-medium !text-gray-700">
+                Category *
+              </Label>
+              <Select
+                id="categoryId"
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+                theme={{
+                  field: {
+                    select: {
+                      base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}>
+                <option value={0}>Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="statusId" className="mb-2 block text-sm font-medium !text-gray-700">
+                Status *
+              </Label>
+              <Select
+                id="statusId"
+                name="statusId"
+                value={formData.statusId}
+                onChange={handleInputChange}
+                required
+                className="w-full"
+                theme={{
+                  field: {
+                    select: {
+                      base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}>
+                <option value={0}>Select Status</option>
+                {statuses.map((status) => (
+                  <option key={status.id} value={status.id}>
+                    {status.code}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {/* Description */}
           <div>
-            <Label htmlFor="description" className="mb-2 block">
+            <Label htmlFor="description" className="mb-2 block text-sm font-medium !text-gray-700">
               Description
             </Label>
             <Textarea
@@ -578,17 +564,106 @@ export function MenuItemFormModal({
               onChange={handleInputChange}
               placeholder="Enter menu item description"
               rows={3}
+              className="w-full resize-none"
+              theme={{
+                base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+              }}
             />
           </div>
 
+          {/* Image Upload Section */}
+          <div className="bg-white p-4 rounded-lg border border-gray-300">
+            <Label className="mb-3 block text-lg font-medium !text-gray-700">
+              Image Upload
+            </Label>
+            <div className="space-y-4">
+              {/* File Upload */}
+              <div>
+                <Label htmlFor="avatarFile" className="mb-2 block text-sm font-medium !text-gray-700">
+                  Upload Image File:
+                </Label>
+                <input
+                  id="avatarFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-cyan-50 file:text-cyan-700
+                    hover:file:bg-cyan-100
+                    border border-gray-300 rounded-lg
+                    focus:ring-2 focus:ring-cyan-500 !bg-white"
+                  disabled={uploadingImage}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Max file size: 5MB. Supported formats: JPG, PNG, GIF
+                </div>
+              </div>
+              
+              {/* Manual URL Input */}
+              <div>
+                <Label htmlFor="avatarUrl" className="mb-2 block text-sm font-medium !text-gray-700">
+                  Or enter image URL manually:
+                </Label>
+                <TextInput
+                  id="avatarUrl"
+                  name="avatarUrl"
+                  value={formData.avatarUrl}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full text-sm"
+                  theme={{
+                    field: {
+                      input: {
+                        base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      },
+                    },
+                  }}
+                />
+              </div>
+              
+              {/* Upload Status */}
+              {uploadingImage && (
+                <div className="flex items-center text-sm text-cyan-600">
+                  <Spinner size="sm" className="mr-2" />
+                  Uploading image...
+                </div>
+              )}
+              
+              {/* Image Preview */}
+              {formData.avatarUrl && (
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-600">Current image:</div>
+                  <div className="flex items-start space-x-3">
+                    <img 
+                      src={formData.avatarUrl} 
+                      alt="Preview" 
+                      className="w-20 h-20 object-cover rounded-lg border-2 border-cyan-400"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-500 break-all bg-gray-100 p-2 rounded">
+                        {formData.avatarUrl}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Ingredients Section */}
-          <Card className="p-4">
+          <Card className="bg-white border border-gray-300">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Ingredients</h3>
+              <h3 className="text-lg font-semibold !text-gray-700">Ingredients</h3>
               <Button
                 type="button"
                 size="sm"
-                color="cyan"
+                className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white"
                 onClick={addIngredient}
                 disabled={selectedIngredients.length >= ingredients.length}>
                 <HiPlus className="mr-2 h-4 w-4" />
@@ -601,13 +676,20 @@ export function MenuItemFormModal({
             ) : (
               <div className="space-y-3">
                 {selectedIngredients.map((ingredient, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                  <div key={index} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="flex-1">
                       <Select
                         value={ingredient.ingredientId}
                         onChange={(e) =>
                           updateIngredient(index, "ingredientId", Number(e.target.value))
-                        }>
+                        }
+                        theme={{
+                          field: {
+                            select: {
+                              base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                            },
+                          },
+                        }}>
                         <option value={0}>Select Ingredient</option>
                         {getAvailableIngredients(ingredient.ingredientId).map((ing) => (
                           <option key={ing.id} value={ing.id}>
@@ -626,6 +708,13 @@ export function MenuItemFormModal({
                           updateIngredient(index, "quantityNeeded", Number(e.target.value))
                         }
                         placeholder="Quantity"
+                        theme={{
+                          field: {
+                            input: {
+                              base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                            },
+                          },
+                        }}
                       />
                     </div>
                     <Button
@@ -640,22 +729,30 @@ export function MenuItemFormModal({
               </div>
             )}
           </Card>
-        </form>
-      </div>
+        </ModalBody>
 
-      <div className="border-t border-gray-200 p-6">
-        <div className="flex justify-end gap-4">
-          <Button color="gray" onClick={onClose} disabled={loading}>
+        {/* Modal Footer */}
+        <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
+          <Button color="red" onClick={onClose} disabled={loading} className="text-gray-50">
             Cancel
           </Button>
           <Button
-            color="cyan"
-            onClick={handleSubmit}
-            disabled={loading}>
-            {loading ? "Saving..." : menuItemData ? "Update" : "Create"}
+            type="submit"
+            disabled={loading}
+            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400">
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" light={true} />
+                Saving...
+              </div>
+            ) : menuItemData ? (
+              "Update Menu Item"
+            ) : (
+              "Create Menu Item"
+            )}
           </Button>
-        </div>
-      </div>
+        </ModalFooter>
+      </form>
     </Modal>
   );
 }
