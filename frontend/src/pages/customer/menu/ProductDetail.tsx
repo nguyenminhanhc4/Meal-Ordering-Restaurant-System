@@ -13,6 +13,8 @@ import {
   createCart,
   addItemToCart,
 } from "../../../services/cart/cartService";
+import ProductReviewForm from "../../../components/review/ProductReviewForm";
+import { createReview } from "../../../services/review/reviewService";
 
 /**
  * ProductDetail
@@ -434,6 +436,49 @@ const ProductDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+            {/* Form viết review */}
+            <ProductReviewForm
+              productId={product.id}
+              onSubmit={async ({ rating, comment }) => {
+                try {
+                  const newReview = await createReview(product.id, {
+                    rating,
+                    comment,
+                  });
+                  if (newReview) {
+                    setProduct((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            reviews: [
+                              {
+                                ...newReview,
+                                userAvatar: newReview.userAvatar ?? null,
+                                id: newReview.id ?? 0,
+                              },
+                              ...prev.reviews,
+                            ],
+                          }
+                        : prev
+                    );
+                  }
+                  notify("success", "Đã gửi đánh giá");
+                } catch (err: unknown) {
+                  if (err instanceof AxiosError) {
+                    if (
+                      err.response?.status === 400 &&
+                      err.response?.data?.message
+                    ) {
+                      notify("error", err.response.data.message);
+                    } else {
+                      notify("error", "Gửi đánh giá thất bại");
+                    }
+                  } else {
+                    notify("error", "Gửi đánh giá thất bại");
+                  }
+                }
+              }}
+            />
           </div>
         )}
       </div>
