@@ -147,6 +147,7 @@ function AdminCategories() {
     };
   }, [currentPage, searchTerm, selectedParent, notify]);
 
+  
   // Handlers để reset page về 1 khi tìm kiếm/lọc
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
