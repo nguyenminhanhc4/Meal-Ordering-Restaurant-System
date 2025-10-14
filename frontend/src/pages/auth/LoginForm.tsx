@@ -15,6 +15,9 @@ export default function LoginForm() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
   const { notify } = useNotification();
@@ -51,15 +54,11 @@ export default function LoginForm() {
 
         // Redirect sang dashboard hoặc trang chính
         navigate("/");
-        notify("success", "Login successful!");
+        notify("success", "Đăng nhập thành công!");
         await refreshUser();
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
-          notify(
-            "error",
-            error.response?.data.message || "Login failed. Please try again."
-          );
-          console.error("Login failed:", error.response?.data);
+          notify("error", "Đăng nhập thất bại. Vui lòng đăng nhập lại.");
         } else {
           notify("error", "An unexpected error occurred. Please try again.");
           console.error("Unexpected error:", error);
@@ -67,6 +66,40 @@ export default function LoginForm() {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!forgotEmail.trim()) {
+      notify("error", "Vui lòng nhập email của bạn.");
+      return;
+    }
+
+    try {
+      setForgotLoading(true);
+      // Gọi API gửi yêu cầu đặt lại mật khẩu
+      await api.post("/auth/forgot-password", { email: forgotEmail });
+
+      // Luôn thông báo success giống nhau, không tiết lộ email có tồn tại hay không
+      notify(
+        "success",
+        "Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn."
+      );
+
+      setForgotEmail("");
+      setShowForgotModal(false); // đóng modal
+    } catch (error: unknown) {
+      console.error("Forgot password error:", error);
+
+      // Chỉ thông báo lỗi nếu có sự cố kỹ thuật thực sự (network/server)
+      notify(
+        "error",
+        "Không thể gửi yêu cầu vào lúc này. Vui lòng thử lại sau."
+      );
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -105,7 +138,7 @@ export default function LoginForm() {
         {/* Password */}
         <div className="relative">
           <Label htmlFor="password" className="!text-gray-100">
-            Password
+            Mật khẩu
           </Label>
           <TextInput
             id="password"
@@ -135,6 +168,15 @@ export default function LoginForm() {
           )}
         </div>
 
+        <div className="flex justify-end mt-1">
+          <button
+            type="button"
+            className="text-yellow-300 hover:text-yellow-400 text-sm"
+            onClick={() => setShowForgotModal(true)}>
+            Quên mật khẩu?
+          </button>
+        </div>
+
         {/* Submit */}
         <Button
           type="submit"
@@ -142,17 +184,50 @@ export default function LoginForm() {
           disabled={loading}
           fullSized>
           {loading && <Spinner size="sm" light={true} />}
-          {loading ? "Login..." : "Login"}
+          {loading ? "Đăng nhập..." : "Đăng nhập"}
         </Button>
       </form>
 
       {/* Switch to Register */}
       <p className="text-sm text-gray-300 text-center mt-6">
-        Don’t have an account?{" "}
+        Chưa có tài khoản?{" "}
         <Link to="/register" className="text-yellow-300 hover:text-yellow-400">
-          Register
+          Đăng ký mới
         </Link>
       </p>
+
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-stone-800 rounded-xl p-6 w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-semibold mb-4">Quên mật khẩu</h3>
+            <form onSubmit={handleForgotSubmit} className="space-y-4">
+              <input
+                type="email"
+                placeholder="Nhập email của bạn"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+                className="w-full p-3 border rounded-xl placeholder:text-gray-400 bg-stone-700 border-stone-600 text-white focus:ring-2 focus:ring-yellow-500"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="py-2 px-4 rounded-xl bg-orange-500 hover:bg-orange-600"
+                  disabled={forgotLoading}>
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="py-2 px-4 rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">
+                  {forgotLoading ? "Đang gửi..." : "Gửi"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

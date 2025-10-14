@@ -24,16 +24,13 @@ const ForgotPasswordContent = ({
       await api.post("/auth/forgot-password", { email }); // gọi API thật
       notify(
         "success",
-        `Yêu cầu đặt lại mật khẩu đã được gửi đến email: ${email}`
+        "Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn."
       );
+
       setEmail("");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        notify(
-          "error",
-          error.response?.data?.message ||
-            "Không thể gửi yêu cầu. Vui lòng thử lại."
-        );
+        notify("error", "Không thể gửi yêu cầu, vui lòng thử lại.");
       } else {
         notify("error", "Đã xảy ra lỗi không xác định!");
       }
