@@ -109,8 +109,12 @@
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.32.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -125,6 +129,9 @@
 							<version>1.18.30</version>
 						</path>
 					</annotationProcessorPaths>
+					<source>17</source>
+					<target>17</target>
+					<compilerArgs>--enable-preview</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

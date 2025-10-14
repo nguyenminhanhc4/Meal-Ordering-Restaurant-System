@@ -13,6 +13,8 @@ import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.reservation.ReservationRepository;
 import org.example.backend.repository.table.TableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,13 +86,18 @@ public class ReservationService {
     }
 
     // ========================= READ =========================
-    @Transactional(readOnly = true)
-    public List<ReservationDto> getMyReservations(Long userId) {
-        return reservationRepository.findAll().stream()
-                .filter(r -> r.getUserId().equals(userId))
-                .map(ReservationDto::new)
-                .collect(Collectors.toList());
+    public Page<ReservationDto> findMyReservations(Long userId, String status, Pageable pageable) {
+        Page<Reservation> page;
+
+        if (status != null && !status.isBlank()) {
+            page = reservationRepository.findByUserIdAndStatusCode(userId, status, pageable);
+        } else {
+            page = reservationRepository.findByUserId(userId, pageable);
+        }
+
+        return page.map(ReservationDto::new);
     }
+
 
     @Transactional(readOnly = true)
     public ReservationDto getReservationByPublicId(String publicId) {
@@ -105,6 +112,7 @@ public class ReservationService {
                 .map(ReservationDto::new)
                 .collect(Collectors.toList());
     }
+
 
     // ========================= UPDATE =========================
     @Transactional
@@ -128,9 +136,17 @@ public class ReservationService {
         }
 
         // ✅ Cập nhật status nếu có
-        if (dto.getStatusId() != null) {
-            Param status = paramRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
+        if (dto.getStatusId() != null || dto.getStatusName() != null) {
+            Param status = null;
+
+            if (dto.getStatusId() != null) {
+                status = paramRepository.findById(dto.getStatusId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Status not found with id: " + dto.getStatusId()));
+            } else {
+                status = paramRepository.findByTypeAndCode("STATUS_RESERVATION",dto.getStatusName())
+                        .orElseThrow(() -> new ResourceNotFoundException("Status not found with code: " + dto.getStatusName()));
+            }
+
             reservation.setStatus(status);
 
             if ("CANCELLED".equalsIgnoreCase(status.getCode())) {
@@ -230,9 +246,8 @@ public class ReservationService {
             messagingTemplate.convertAndSend("/topic/tables",
                     new TableStatusUpdate(table.getId(), availableStatus.getId()));
         }
-
-        reservation.getTables().clear();
-        reservationRepository.save(reservation);
+        //reservation.getTables().clear();
+        //reservationRepository.save(reservation);
     }
 
     @Getter

@@ -7,11 +7,14 @@ import { useNotification } from "../../../components/Notification/NotificationCo
 import { AxiosError } from "axios";
 import { getMenuItemById } from "../../../services/product/fetchProduct";
 import type { Product } from "../../../services/product/fetchProduct";
+import { useCart } from "../../../store/CartContext";
 import {
   getCurrentCart,
   createCart,
   addItemToCart,
 } from "../../../services/cart/cartService";
+import ProductReviewForm from "../../../components/review/ProductReviewForm";
+import { createReview } from "../../../services/review/reviewService";
 
 /**
  * ProductDetail
@@ -26,6 +29,7 @@ const ProductDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [addingToCart, setAddingToCart] = useState<boolean>(false);
   const [imgError, setImgError] = useState<boolean>(false);
+  const { fetchCart } = useCart();
 
   const { notify } = useNotification();
 
@@ -117,6 +121,7 @@ const ProductDetail: React.FC = () => {
       }
 
       await addItemToCart(cart.id, { menuItemId: product.id, quantity });
+      await fetchCart();
       notify("success", `Đã thêm ${quantity} × ${product.name} vào giỏ hàng`);
     } catch (err) {
       notify("error", "Lỗi khi thêm vào giỏ hàng");
@@ -125,6 +130,25 @@ const ProductDetail: React.FC = () => {
       setAddingToCart(false);
     }
   }, [product, quantity, addingToCart, notify]);
+
+  // Hàm tạo màu gradient từ chuỗi
+  const getRandomGradient = (str: string) => {
+    const colors = [
+      "from-green-400 to-teal-500",
+      "from-purple-400 to-pink-500",
+      "from-blue-400 to-indigo-500",
+      "from-yellow-400 to-orange-500",
+      "from-red-400 to-pink-500",
+      "from-cyan-400 to-blue-500",
+    ];
+    // Tạo index từ hash chuỗi
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
 
   // Loading skeleton
   if (isLoading) {
@@ -361,6 +385,50 @@ const ProductDetail: React.FC = () => {
 
         <HRTrimmed className="!bg-stone-300 w-full mt-16" />
 
+        {/* Form viết review */}
+        <ProductReviewForm
+          productId={product.id}
+          onSubmit={async ({ rating, comment }) => {
+            try {
+              const newReview = await createReview(product.id, {
+                rating,
+                comment,
+              });
+              if (newReview) {
+                setProduct((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        reviews: [
+                          {
+                            ...newReview,
+                            userAvatar: newReview.userAvatar ?? null,
+                            id: newReview.id ?? 0,
+                          },
+                          ...prev.reviews,
+                        ],
+                      }
+                    : prev
+                );
+              }
+              notify("success", "Đã gửi đánh giá");
+            } catch (err: unknown) {
+              if (err instanceof AxiosError) {
+                if (
+                  err.response?.status === 400 &&
+                  err.response?.data?.message
+                ) {
+                  notify("error", err.response.data.message);
+                } else {
+                  notify("error", "Gửi đánh giá thất bại");
+                }
+              } else {
+                notify("error", "Gửi đánh giá thất bại");
+              }
+            }
+          }}
+        />
+
         {/* Reviews */}
         {product.reviews && product.reviews.length > 0 && (
           <div className="mt-12">
@@ -392,7 +460,10 @@ const ProductDetail: React.FC = () => {
                         className="w-10 h-10 rounded-full object-cover border border-green-500/50"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-base shadow-sm">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shadow-sm bg-gradient-to-r ${getRandomGradient(
+                          review.userName ?? "U"
+                        )}`}>
                         {review.userName?.charAt(0) ?? "U"}
                       </div>
                     )}

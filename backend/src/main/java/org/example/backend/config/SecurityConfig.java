@@ -35,11 +35,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll() // Allow public access to auth endpoints
                         .requestMatchers("/api/v1/users/me").authenticated() // Require authentication for /users/me
+                        .requestMatchers("/api/v1/users/**").authenticated()
                         .requestMatchers("/api/v1/carts/**").authenticated()
                         .requestMatchers("/api/v1/cart-items/**").authenticated()
                         .requestMatchers("/api/v1/orders/**").authenticated()
                         .requestMatchers("/api/v1/payments/**").authenticated()
                         .requestMatchers("/api/v1/mock-payments/**").authenticated()
+                        .requestMatchers("/api/v1/reviews/**").authenticated()
                         .requestMatchers("/api/v1/tables/**").authenticated()
                         .requestMatchers("/api/v1/menu-items/**").permitAll()
                         .requestMatchers("/api/v1/staff/**").hasRole("ADMIN") // Require ADMIN role for /staff/**

@@ -1,4 +1,5 @@
 import type { ApiResponse } from "../types/ApiType";
+import type { Page } from "../types/PageType";
 import api from "../../api/axios";
 export interface Reservation {
   id: number;
@@ -42,18 +43,30 @@ export const createMyReservation = async (
 /**
  * CUSTOMER: lấy danh sách đặt bàn của mình
  */
-export const getMyReservations = async (): Promise<Reservation[]> => {
+export const getMyReservations = async (
+  page = 0,
+  size = 10,
+  sort: string = "createdAt,desc",
+  status?: string
+): Promise<Page<Reservation> | null> => {
   try {
-    const response = await api.get<ApiResponse<Reservation[]>>(
-      "/reservations/me",
-      {
-        withCredentials: true,
-      }
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort,
+    });
+    if (status && status.trim() !== "") {
+      params.set("status", status); // chỉ set 1 lần
+    }
+    console.log(params.toString());
+
+    const response = await api.get<ApiResponse<Page<Reservation>>>(
+      `/reservations/me?${params.toString()}`
     );
     return response.data.data;
   } catch (error) {
     console.error("Error fetching my reservations:", error);
-    return [];
+    return null;
   }
 };
 

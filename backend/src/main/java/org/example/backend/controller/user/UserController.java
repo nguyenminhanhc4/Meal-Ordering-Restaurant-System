@@ -1,5 +1,8 @@
 package org.example.backend.controller.user;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.UserService;
@@ -96,6 +99,29 @@ public class UserController {
         String email = authentication.getName();
         UserDTO updatedUser = userService.updateUserByEmail(email, userDTO);
         return ResponseEntity.ok(new Response<>("success", updatedUser, "User updated successfully"));
+    }
+
+    public static class ChangePasswordRequest {
+        @NotBlank(message = "Mật khẩu hiện tại không được để trống")
+        public String currentPassword;
+
+        @NotBlank(message = "Mật khẩu mới không được để trống")
+        @Size(min = 8, message = "Mật khẩu mới phải có ít nhất 8 ký tự")
+        public String newPassword;
+    }
+
+    @PutMapping("/me/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        userService.changePassword(email, request.currentPassword, request.newPassword);
+
+        return ResponseEntity.ok(
+                new Response<>("success", null, "Đổi mật khẩu thành công")
+        );
     }
 
     @GetMapping("/{publicId}")

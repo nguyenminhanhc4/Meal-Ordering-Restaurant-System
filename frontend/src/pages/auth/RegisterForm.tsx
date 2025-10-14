@@ -79,7 +79,7 @@ export default function RegisterForm() {
         {/* Full Name */}
         <div>
           <Label htmlFor="name" className="text-gray-100">
-            Full Name
+            Họ và tên
           </Label>
           <TextInput
             id="name"
@@ -127,7 +127,7 @@ export default function RegisterForm() {
         {/* Password */}
         <div className="relative">
           <Label htmlFor="password" className="!text-gray-100">
-            Password
+            Mật khẩu
           </Label>
           <TextInput
             id="password"
@@ -160,7 +160,7 @@ export default function RegisterForm() {
         {/* Confirm Password */}
         <div className="relative">
           <Label htmlFor="confirmPassword" className="!text-gray-100">
-            Confirm Password
+            Nhập lại mật khẩu
           </Label>
           <TextInput
             id="confirmPassword"
@@ -192,7 +192,7 @@ export default function RegisterForm() {
 
         {/* Gender */}
         <div>
-          <Label className="!text-gray-100 mb-2">Gender</Label>
+          <Label className="!text-gray-100 mb-2">Giới tính</Label>
           <div className="flex gap-6 mt-2">
             <div className="flex items-center gap-2">
               <Radio
@@ -204,7 +204,7 @@ export default function RegisterForm() {
                 className="!bg-stone-700 !border-stone-600"
               />
               <Label htmlFor="male" className="!text-gray-200">
-                Male
+                Nam
               </Label>
             </div>
             <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function RegisterForm() {
                 className="!bg-stone-700 !border-stone-600"
               />
               <Label htmlFor="female" className="!text-gray-200">
-                Female
+                Nữ
               </Label>
             </div>
           </div>
@@ -230,14 +230,14 @@ export default function RegisterForm() {
           disabled={loading}
           fullSized>
           {loading && <Spinner size="sm" light={true} />}
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Đăng ký..." : "Đăng ký"}
         </Button>
       </form>
 
       <p className="text-sm text-gray-300 text-center mt-6">
-        Already have an account?{" "}
+        Đã có tài khoản?{" "}
         <Link to="/login" className="text-yellow-300 hover:text-yellow-400">
-          Login
+          Đăng nhập
         </Link>
       </p>
     </div>

@@ -6,6 +6,10 @@ import org.example.backend.dto.table.TableDto;
 import org.example.backend.service.reservation.ReservationService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -40,10 +44,28 @@ public class ReservationController {
     // CUSTOMER gets all their reservations
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> getMyReservations(@RequestBody Long userId) {
-        List<ReservationDto> list = reservationService.getMyReservations(userId);
-        return ResponseEntity.ok(new Response<>("success", list, "Reservations retrieved successfully"));
+    public ResponseEntity<?> getMyReservations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @RequestParam(required = false) String status
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long userId = userService.getUserByEmail(email).getId();
+
+        String[] sortParts = sort.split(",");
+        Sort.Direction direction = sortParts.length > 1
+                ? Sort.Direction.fromString(sortParts[1])
+                : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
+
+        Page<ReservationDto> reservations = reservationService.findMyReservations(userId, status, pageable);
+
+        return ResponseEntity.ok(new Response<>("success", reservations, "Reservations retrieved successfully"));
     }
+
+
 
     // CUSTOMER gets their reservation by publicId
     @GetMapping("/me/{publicId}")
