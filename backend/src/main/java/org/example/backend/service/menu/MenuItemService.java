@@ -110,28 +110,34 @@ public class MenuItemService {
         return dto;
     }
 
-    public MenuItemDto getById(Long id, Integer reviewPage, Integer reviewSize) {
+    public MenuItemDto getById(Long id, Integer reviewPage, Integer reviewSize, String reviewFilter) {
         MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Menu item not found"));
-
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
         MenuItemDto dto = new MenuItemDto(menuItem);
 
-        // Nếu người dùng truyền vào param phân trang review
-        if (reviewPage != null && reviewSize != null) {
-            Pageable pageable = PageRequest.of(reviewPage, reviewSize, Sort.by("createdAt").descending());
-            Page<Review> reviewPageResult = reviewRepository.findByMenuItemId(id, pageable);
+        Pageable pageable = PageRequest.of(reviewPage, reviewSize, Sort.by("createdAt").descending());
 
-            List<ReviewDto> reviewDtos = reviewPageResult.getContent()
-                    .stream()
-                    .map(ReviewDto::new) // convert từng Review -> ReviewDto
-                    .collect(Collectors.toList());
-
-            dto.setReviews(reviewDtos);
-            dto.setTotalReviews(reviewPageResult.getTotalElements());
-            dto.setReviewPages(reviewPageResult.getTotalPages());
-            dto.setCurrentReviewPage(reviewPageResult.getNumber());
-
+        Page<Review> reviewPageResult;
+        switch (reviewFilter) {
+            case "positive":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRatingGreaterThanEqual(id, 4, pageable);
+                break;
+            case "neutral":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRating(id, 3, pageable);
+                break;
+            case "negative":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRatingLessThanEqual(id, 2, pageable);
+                break;
+            default:
+                reviewPageResult = reviewRepository.findByMenuItemId(id, pageable);
         }
+
+        dto.setReviews(reviewPageResult.getContent().stream()
+                .map(ReviewDto::new)
+                .collect(Collectors.toList()));
+        dto.setTotalReviews(reviewPageResult.getTotalElements());
+        dto.setReviewPages(reviewPageResult.getTotalPages());
+        dto.setCurrentReviewPage(reviewPageResult.getNumber());
 
         return dto;
     }

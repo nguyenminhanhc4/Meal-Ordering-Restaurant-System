@@ -65,11 +65,19 @@ export const getAllMenuItems = async (
 };
 
 export const getMenuItemById = async (
-  id: string | number
+  id: string | number,
+  filter?: string
 ): Promise<Product | null> => {
   try {
-    const response = await api.get<ApiResponse<Product>>(`/menu-items/${id}`);
-    return response.data.data; // giả sử backend trả trực tiếp product
+    const params: Record<string, string> = {};
+    if (filter && filter !== "all") {
+      params.reviewFilter = filter;
+    }
+
+    const response = await api.get<ApiResponse<Product>>(`/menu-items/${id}`, {
+      params,
+    });
+    return response.data.data;
   } catch (error) {
     console.error(`Error fetching menu item ${id}:`, error);
     return null;

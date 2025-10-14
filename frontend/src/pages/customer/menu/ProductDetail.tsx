@@ -48,7 +48,12 @@ const ProductDetail: React.FC = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const reviewsPerPage = 1;
+  const reviewsPerPage = 5;
+  const [filter, setFilter] = useState("all");
+  const [hasReviewed, setHasReviewed] = useState<boolean>(false);
+  const [userReview, setUserReview] = useState<Product["reviews"][0] | null>(
+    null
+  );
 
   const paginatedReviews = useMemo(() => {
     if (!product?.reviews) return [];
@@ -61,26 +66,39 @@ const ProductDetail: React.FC = () => {
    * useCallback để tham chiếu hàm ổn định
    */
   const fetchProduct = useCallback(async () => {
+    const scrollY = window.scrollY;
     setIsLoading(true);
     try {
-      const res = await getMenuItemById(id!);
+      const res = await getMenuItemById(id!, filter);
       if (!res) {
         notify("error", "Không tìm thấy món ăn");
         setProduct(null);
+        setHasReviewed(false);
+        setUserReview(null);
       } else {
         setProduct(res);
+        if (filter === "all") {
+          const userHasReviewed = res.reviews.some(
+            (r) => r.userId === user?.publicId
+          );
+          setHasReviewed(userHasReviewed);
+          if (userHasReviewed) {
+            const foundReview = res.reviews.find(
+              (r) => r.userId === user?.publicId
+            );
+            setUserReview(foundReview || null);
+          }
+        }
       }
-    } catch (err: unknown) {
-      if (err instanceof AxiosError) {
-        notify("error", "Không thể tải thông tin món ăn");
-      } else {
-        notify("error", "Lỗi khi tải thông tin");
-      }
-      setProduct(null);
+    } catch {
+      notify("error", "Không thể tải thông tin món ăn");
+      setHasReviewed(false);
+      setUserReview(null);
     } finally {
       setIsLoading(false);
     }
-  }, [id, notify]);
+    window.scrollTo(0, scrollY);
+  }, [id, filter, notify, user?.publicId]);
 
   useEffect(() => {
     fetchProduct();
@@ -103,7 +121,8 @@ const ProductDetail: React.FC = () => {
             }
           : prev
       );
-
+      setHasReviewed(false);
+      setUserReview(null);
       notify("success", "Đã xóa đánh giá");
     } catch (err) {
       notify("error", "Không thể xóa đánh giá");
@@ -183,10 +202,10 @@ const ProductDetail: React.FC = () => {
     }
   }, [product, quantity, addingToCart, notify]);
 
-  const userReview = useMemo(() => {
-    if (!product?.reviews || !user) return null;
-    return product.reviews.find((r) => r.userId === user.publicId) ?? null;
-  }, [product?.reviews, user]);
+  // const userReview = useMemo(() => {
+  //   if (!product?.reviews || !user) return null;
+  //   return product.reviews.find((r) => r.userId === user.publicId) ?? null;
+  // }, [product?.reviews, user]);
 
   // Hàm tạo màu gradient từ chuỗi
   const getRandomGradient = (str: string) => {
@@ -444,22 +463,28 @@ const ProductDetail: React.FC = () => {
 
         {/* Form viết review */}
         {user ? (
-          userReview ? (
+          hasReviewed ? (
             <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm font-medium shadow-sm">
               <p>
                 ✅ Bạn đã đánh giá món này vào{" "}
                 <strong>
-                  {new Date(userReview.createdAt).toLocaleDateString("vi-VN")}
+                  {userReview?.createdAt
+                    ? new Date(userReview.createdAt).toLocaleDateString("vi-VN")
+                    : "N/A"}
                 </strong>
               </p>
-              <p className="mt-2 italic text-gray-700">
-                “{userReview.comment}”
-              </p>
-              <p className="mt-1 text-yellow-500">
-                {Array.from({ length: userReview.rating }).map((_, i) => (
-                  <FaStar key={i} className="inline h-4 w-4" />
-                ))}
-              </p>
+              {userReview && (
+                <>
+                  <p className="mt-2 italic text-gray-700">
+                    “{userReview.comment}”
+                  </p>
+                  <p className="mt-1 text-yellow-500">
+                    {Array.from({ length: userReview.rating }).map((_, i) => (
+                      <FaStar key={i} className="inline h-4 w-4" />
+                    ))}
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <ProductReviewForm
@@ -486,6 +511,12 @@ const ProductDetail: React.FC = () => {
                           }
                         : prev
                     );
+                    setHasReviewed(true);
+                    setUserReview({
+                      ...newReview,
+                      userAvatar: newReview.userAvatar ?? null,
+                      id: newReview.id ?? 0,
+                    });
                   }
                   notify("success", "Đã gửi đánh giá");
                 } catch (err: unknown) {
@@ -507,17 +538,26 @@ const ProductDetail: React.FC = () => {
           )
         ) : (
           <p className="text-gray-500 mt-6 italic">
-            🔒 Vui lòng đăng nhập để viết đánh giá.
+            Vui lòng đăng nhập để viết đánh giá.
           </p>
         )}
 
         {/* Reviews */}
-        {product.reviews && product.reviews.length > 0 && (
+        {product && (
           <div className="mt-12">
             <div className="flex items-center justify-between mb-8 pb-3 border-b border-stone-300">
               <h2 className="text-3xl font-bold text-gray-800">
                 Đánh giá của khách hàng
               </h2>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="border border-stone-300 rounded-lg px-3 py-2 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                <option value="all">Tất cả</option>
+                <option value="positive">Tích cực (≥4★)</option>
+                <option value="neutral">Trung lập (3★)</option>
+                <option value="negative">Tiêu cực (≤2★)</option>
+              </select>
               <span className="text-gray-600 font-semibold">
                 Tổng hợp:{" "}
                 <span className="text-yellow-500 text-xl font-extrabold ml-1">
@@ -529,176 +569,191 @@ const ProductDetail: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-4">
-              {paginatedReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="bg-white p-4 border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <div className="flex items-start gap-3">
-                    {/* PHẦN AVATAR (GIỮ NGUYÊN) */}
-                    {review.userAvatar ? (
-                      <img
-                        src={review.userAvatar}
-                        alt={review.userName}
-                        className="w-10 h-10 rounded-full object-cover border border-green-500/50"
-                      />
-                    ) : (
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shadow-sm bg-gradient-to-r ${getRandomGradient(
-                          review.userName ?? "U"
-                        )}`}>
-                        {review.userName?.charAt(0) ?? "U"}
-                      </div>
-                    )}
-
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        {/* PHẦN TÊN VÀ RATING (GIỮ NGUYÊN) */}
-                        <div className="flex items-center gap-3">
-                          <span className="font-semibold text-gray-900 text-base">
-                            {review.userName}
-                          </span>
-                          <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar
-                                key={i}
-                                className={`h-3.5 w-3.5 ${
-                                  i < review.rating
-                                    ? "text-yellow-500"
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
+            {/* Nếu không có review trong filter hiện tại */}
+            {!product.reviews || product.reviews.length === 0 ? (
+              <div className="text-center text-gray-500 italic py-6">
+                Không có đánh giá nào phù hợp với bộ lọc hiện tại.
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {paginatedReviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="bg-white p-4 border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-start gap-3">
+                        {/* PHẦN AVATAR (GIỮ NGUYÊN) */}
+                        {review.userAvatar ? (
+                          <img
+                            src={review.userAvatar}
+                            alt={review.userName}
+                            className="w-10 h-10 rounded-full object-cover border border-green-500/50"
+                          />
+                        ) : (
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shadow-sm bg-gradient-to-r ${getRandomGradient(
+                              review.userName ?? "U"
+                            )}`}>
+                            {review.userName?.charAt(0) ?? "U"}
                           </div>
-                        </div>
+                        )}
 
-                        <div className="flex items-center gap-2 relative">
-                          {/* NGÀY TẠO (GIỮ NGUYÊN) */}
-                          <p className="text-xs text-gray-500">
-                            {new Date(review.createdAt).toLocaleDateString(
-                              "vi-VN"
-                            )}
-                          </p>
-
-                          {/* NÚT 3 CHẤM (THÊM MỚI) */}
-                          {/* Thêm điều kiện chỉ hiển thị nếu đây là review của người dùng hiện tại */}
-                          {user?.publicId === review.userId && (
-                            <button
-                              className={`text-gray-500 hover:text-gray-900 p-1 rounded-full transition ${
-                                editingReviewId === review.id
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : "hover:bg-stone-100"
-                              }`}
-                              disabled={editingReviewId === review.id}
-                              onClick={() =>
-                                setIsDropdownOpen(
-                                  isDropdownOpen === review.id
-                                    ? null
-                                    : review.id
-                                )
-                              }>
-                              <BsThreeDotsVertical className="w-4 h-4" />
-                            </button>
-                          )}
-
-                          {/* DROPDOWN MENU */}
-                          {isDropdownOpen === review.id && (
-                            <div
-                              className="absolute right-0 top-full mt-2 w-40 bg-white border border-stone-200 rounded-lg shadow-xl z-10 overflow-hidden"
-                              // Thêm onBlur handler để đóng menu khi click ra ngoài (cần thêm ref hoặc logic bên ngoài để hoạt động tốt)
-                            >
-                              <button
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
-                                onClick={() => {
-                                  setEditingReviewId(review.id);
-                                  setIsDropdownOpen(null); // Đóng dropdown sau khi chọn
-                                }}>
-                                <BsPencil className="w-4 h-4 mr-2" />
-                                Sửa
-                              </button>
-                              <button
-                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
-                                onClick={() => {
-                                  setSelectedReviewId(review.id);
-                                  setOpenConfirm(true);
-                                }}>
-                                <BsTrash className="w-4 h-4 mr-2" />
-                                Xóa
-                              </button>
-                              <ConfirmDialog
-                                open={openConfirm}
-                                title="Xóa đánh giá"
-                                message="Bạn có chắc chắn muốn xóa đánh giá này không?"
-                                confirmText="Xóa"
-                                cancelText="Hủy"
-                                onConfirm={handleDelete}
-                                onCancel={() => {
-                                  setOpenConfirm(false);
-                                  setIsDropdownOpen(null);
-                                }}
-                              />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            {/* PHẦN TÊN VÀ RATING (GIỮ NGUYÊN) */}
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-gray-900 text-base">
+                                {review.userName}
+                              </span>
+                              <div className="flex items-center gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar
+                                    key={i}
+                                    className={`h-3.5 w-3.5 ${
+                                      i < review.rating
+                                        ? "text-yellow-500"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
                             </div>
+
+                            <div className="flex items-center gap-2 relative">
+                              {/* NGÀY TẠO (GIỮ NGUYÊN) */}
+                              <p className="text-xs text-gray-500">
+                                {new Date(review.createdAt).toLocaleDateString(
+                                  "vi-VN"
+                                )}
+                              </p>
+
+                              {/* NÚT 3 CHẤM (THÊM MỚI) */}
+                              {/* Thêm điều kiện chỉ hiển thị nếu đây là review của người dùng hiện tại */}
+                              {user?.publicId === review.userId && (
+                                <button
+                                  className={`text-gray-500 hover:text-gray-900 p-1 rounded-full transition ${
+                                    editingReviewId === review.id
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : "hover:bg-stone-100"
+                                  }`}
+                                  disabled={editingReviewId === review.id}
+                                  onClick={() =>
+                                    setIsDropdownOpen(
+                                      isDropdownOpen === review.id
+                                        ? null
+                                        : review.id
+                                    )
+                                  }>
+                                  <BsThreeDotsVertical className="w-4 h-4" />
+                                </button>
+                              )}
+
+                              {/* DROPDOWN MENU */}
+                              {isDropdownOpen === review.id && (
+                                <div
+                                  className="absolute right-0 top-full mt-2 w-40 bg-white border border-stone-200 rounded-lg shadow-xl z-10 overflow-hidden"
+                                  // Thêm onBlur handler để đóng menu khi click ra ngoài (cần thêm ref hoặc logic bên ngoài để hoạt động tốt)
+                                >
+                                  <button
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                                    onClick={() => {
+                                      setEditingReviewId(review.id);
+                                      setIsDropdownOpen(null); // Đóng dropdown sau khi chọn
+                                    }}>
+                                    <BsPencil className="w-4 h-4 mr-2" />
+                                    Sửa
+                                  </button>
+                                  <button
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
+                                    onClick={() => {
+                                      setSelectedReviewId(review.id);
+                                      setOpenConfirm(true);
+                                    }}>
+                                    <BsTrash className="w-4 h-4 mr-2" />
+                                    Xóa
+                                  </button>
+                                  <ConfirmDialog
+                                    open={openConfirm}
+                                    title="Xóa đánh giá"
+                                    message="Bạn có chắc chắn muốn xóa đánh giá này không?"
+                                    confirmText="Xóa"
+                                    cancelText="Hủy"
+                                    onConfirm={handleDelete}
+                                    onCancel={() => {
+                                      setOpenConfirm(false);
+                                      setIsDropdownOpen(null);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                              {/* KẾT THÚC DROPDOWN MENU */}
+                            </div>
+                          </div>
+
+                          {/* PHẦN HIỂN THỊ COMMENT HOẶC FORM CHỈNH SỬA */}
+                          {editingReviewId === review.id ? (
+                            // FORM CHỈNH SỬA THAY THẾ COMMENT
+                            <EditReviewForm
+                              review={review}
+                              onSave={async (updatedData: {
+                                rating: number;
+                                comment: string;
+                              }) => {
+                                try {
+                                  const updated = await updateReview(
+                                    review.id,
+                                    updatedData
+                                  );
+
+                                  setProduct((prev) =>
+                                    prev
+                                      ? {
+                                          ...prev,
+                                          reviews: prev.reviews.map((r) =>
+                                            r.id === review.id
+                                              ? { ...r, ...updated }
+                                              : r
+                                          ),
+                                        }
+                                      : prev
+                                  );
+
+                                  notify(
+                                    "success",
+                                    "Cập nhật đánh giá thành công"
+                                  );
+                                  setEditingReviewId(null);
+                                } catch (err) {
+                                  notify(
+                                    "error",
+                                    "Không thể cập nhật đánh giá"
+                                  );
+                                  console.error(err);
+                                }
+                              }}
+                              onCancel={() => setEditingReviewId(null)}
+                            />
+                          ) : (
+                            // HIỂN THỊ COMMENT BÌNH THƯỜNG (GIAO DIỆN CŨ)
+                            <p className="mt-2 text-gray-700 text-sm bg-stone-100 p-3 rounded-md italic border border-stone-200">
+                              "{review.comment}"
+                            </p>
                           )}
-                          {/* KẾT THÚC DROPDOWN MENU */}
                         </div>
                       </div>
-
-                      {/* PHẦN HIỂN THỊ COMMENT HOẶC FORM CHỈNH SỬA */}
-                      {editingReviewId === review.id ? (
-                        // FORM CHỈNH SỬA THAY THẾ COMMENT
-                        <EditReviewForm
-                          review={review}
-                          onSave={async (updatedData: {
-                            rating: number;
-                            comment: string;
-                          }) => {
-                            try {
-                              const updated = await updateReview(
-                                review.id,
-                                updatedData
-                              );
-
-                              setProduct((prev) =>
-                                prev
-                                  ? {
-                                      ...prev,
-                                      reviews: prev.reviews.map((r) =>
-                                        r.id === review.id
-                                          ? { ...r, ...updated }
-                                          : r
-                                      ),
-                                    }
-                                  : prev
-                              );
-
-                              notify("success", "Cập nhật đánh giá thành công");
-                              setEditingReviewId(null);
-                            } catch (err) {
-                              notify("error", "Không thể cập nhật đánh giá");
-                              console.error(err);
-                            }
-                          }}
-                          onCancel={() => setEditingReviewId(null)}
-                        />
-                      ) : (
-                        // HIỂN THỊ COMMENT BÌNH THƯỜNG (GIAO DIỆN CŨ)
-                        <p className="mt-2 text-gray-700 text-sm bg-stone-100 p-3 rounded-md italic border border-stone-200">
-                          "{review.comment}"
-                        </p>
-                      )}
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <Pagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(
-                (product.reviews?.length ?? 0) / reviewsPerPage
-              )}
-              onPageChange={(page) => setCurrentPage(page)}
-            />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(
+                    (product.reviews?.length ?? 0) / reviewsPerPage
+                  )}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
+              </>
+            )}
           </div>
         )}
       </div>

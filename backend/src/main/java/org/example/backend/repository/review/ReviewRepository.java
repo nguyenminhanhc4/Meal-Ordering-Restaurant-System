@@ -13,4 +13,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByUserIdAndMenuItemId(Long userId, Long menuItemId);
     boolean existsByUserIdAndMenuItemId(Long userId, Long menuItemId);
     Page<Review> findByMenuItemId(Long menuItemId, Pageable pageable);
+    Page<Review> findByMenuItemIdAndRatingGreaterThanEqual(Long menuItemId, int rating, Pageable pageable);
+    Page<Review> findByMenuItemIdAndRatingLessThanEqual(Long menuItemId, int rating, Pageable pageable);
+    Page<Review> findByMenuItemIdAndRating(Long menuItemId, int rating, Pageable pageable);
+
 }
