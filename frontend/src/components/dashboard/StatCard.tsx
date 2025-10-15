@@ -80,38 +80,81 @@ const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className={`bg-gradient-to-br ${getGradient()} rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border transform hover:scale-105`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mb-2">
-            {formatValue(value)}
-          </p>
-          {change !== undefined && (
-            <div className="flex items-center text-sm">
+      className={`
+        bg-gradient-to-br 
+        ${getGradient()} 
+        rounded-2xl 
+        shadow-xl 
+        hover:shadow-2xl 
+        transition-all 
+        duration-500 
+        p-2 sm:p-4 
+        border 
+        border-gray-200 
+        transform 
+        hover:scale-[1.02] 
+        w-full
+        min-h-[140px]
+        flex flex-col justify-between
+      `}>
+      {/* -------------------- Dòng 1: Tiêu đề và Icon -------------------- */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        {/* TIÊU ĐỀ: Vẫn cho phép xuống dòng nếu cần (do không dùng truncate) */}
+        <p className="text-sm font-medium text-gray-700 leading-snug pr-2">
+          {title}
+        </p>
+
+        {/* ICON - Tối ưu căn giữa */}
+        <div className="flex-shrink-0 bg-white shadow-inner p-2 rounded-lg flex items-center justify-center">
+          {getIcon()}
+        </div>
+      </div>
+
+      {/* -------------------- Dòng 2: Giá trị và Thay đổi -------------------- */}
+      <div className="mt-auto overflow-hidden">
+        {/* GIÁ TRỊ: KHÔNG cho phép xuống dòng (whitespace-nowrap) và Tăng cỡ chữ linh hoạt */}
+        <p
+          className="
+          text-base
+          xs:text-lg 
+          sm:text-xl
+          lg:text-2xl
+          font-extrabold 
+          text-gray-900 
+          mb-1 
+          leading-none 
+          whitespace-nowrap
+          overflow-x-auto
+        ">
+          {formatValue(value)}
+        </p>
+
+        {/* Phần Thay đổi (Change) */}
+        {change !== undefined && (
+          <div className="flex flex-wrap items-center text-sm mt-2">
+            <div className="flex items-center flex-shrink-0">
               {change >= 0 ? (
                 <>
-                  <HiTrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-green-600 font-semibold">
+                  <HiTrendingUp className="w-4 h-4 text-green-600 mr-1" />
+                  <span className="text-green-700 font-semibold">
                     +{change.toFixed(1)}%
                   </span>
                 </>
               ) : (
                 <>
-                  <HiTrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                  <span className="text-red-600 font-semibold">
+                  <HiTrendingDown className="w-4 h-4 text-red-600 mr-1" />
+                  <span className="text-red-700 font-semibold">
                     {change.toFixed(1)}%
                   </span>
                 </>
               )}
-              <span className="ml-2 text-gray-500">so với tháng trước</span>
             </div>
-          )}
-        </div>
-        <div className="flex-shrink-0 bg-white bg-opacity-50 p-3 rounded-xl">
-          {getIcon()}
-        </div>
+
+            <span className="ml-2 text-gray-600 text-xs sm:text-sm whitespace-nowrap">
+              so với tháng trước
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

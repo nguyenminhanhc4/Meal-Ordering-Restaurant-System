@@ -24,11 +24,17 @@ function AdminDashboard() {
   });
 
   // Revenue data
-  const [currentMonthRevenue, setCurrentMonthRevenue] = useState<RevenueStatisticsDto[]>([]);
-  const [currentYearRevenue, setCurrentYearRevenue] = useState<RevenueStatisticsDto[]>([]);
-  
+  const [currentMonthRevenue, setCurrentMonthRevenue] = useState<
+    RevenueStatisticsDto[]
+  >([]);
+  const [currentYearRevenue, setCurrentYearRevenue] = useState<
+    RevenueStatisticsDto[]
+  >([]);
+
   // Active tab
-  const [activeTab, setActiveTab] = useState<'overview' | 'month' | 'year'>('overview');
+  const [activeTab, setActiveTab] = useState<"overview" | "month" | "year">(
+    "overview"
+  );
 
   // Menu items data
   const [bestSellingItems, setBestSellingItems] = useState<MenuItemSalesDto[]>(
@@ -121,15 +127,16 @@ function AdminDashboard() {
               Dashboard Analytics
             </h1>
             <p className="mt-2 text-sm text-gray-600 flex items-center gap-2">
-              <Badge color="success" className="animate-pulse">Live</Badge>
+              <Badge color="success" className="animate-pulse">
+                Live
+              </Badge>
               Tổng quan thống kê và báo cáo kinh doanh
             </p>
           </div>
           <button
             onClick={fetchDashboardData}
             disabled={loading}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-          >
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             {loading ? (
               <>
                 <Spinner size="sm" />
@@ -178,35 +185,32 @@ function AdminDashboard() {
       <div className="bg-white rounded-2xl shadow-lg p-2 border border-gray-100">
         <div className="flex gap-2">
           <button
-            onClick={() => setActiveTab('overview')}
+            onClick={() => setActiveTab("overview")}
             className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-              activeTab === 'overview'
-                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
+              activeTab === "overview"
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}>
             <HiChartPie className="w-5 h-5" />
             Tổng quan
           </button>
           <button
-            onClick={() => setActiveTab('month')}
+            onClick={() => setActiveTab("month")}
             className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-              activeTab === 'month'
-                ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
+              activeTab === "month"
+                ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}>
             <HiTrendingUp className="w-5 h-5" />
             Theo tháng
           </button>
           <button
-            onClick={() => setActiveTab('year')}
+            onClick={() => setActiveTab("year")}
             className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-              activeTab === 'year'
-                ? 'bg-gradient-to-r from-pink-600 to-pink-700 text-white shadow-lg'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
+              activeTab === "year"
+                ? "bg-gradient-to-r from-pink-600 to-pink-700 text-white shadow-lg"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}>
             <HiCalendar className="w-5 h-5" />
             Theo năm
           </button>
@@ -214,7 +218,7 @@ function AdminDashboard() {
       </div>
 
       {/* Content based on active tab */}
-      {activeTab === 'overview' && (
+      {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Best Selling Items */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -238,7 +242,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'month' && (
+      {activeTab === "month" && (
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <RevenueChart
             data={currentMonthRevenue}
@@ -249,7 +253,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'year' && (
+      {activeTab === "year" && (
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <RevenueChart
             data={currentYearRevenue}
