@@ -37,7 +37,6 @@ const MegaMenuComponent: React.FC = () => {
   // Lấy đường dẫn URL hiện tại để xác định link active
   const location = useLocation();
 
-  // Giả định số lượng món trong giỏ hàng (thay bằng state thực tế)
   const { cartItemCount, isLoading } = useCart();
 
   useEffect(() => {

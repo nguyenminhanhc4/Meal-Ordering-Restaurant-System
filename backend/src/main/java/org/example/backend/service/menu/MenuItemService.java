@@ -154,35 +154,42 @@ public class MenuItemService {
 
     @Transactional
     public List<Long> reduceInventory(Long orderId) {
-        // Lấy danh sách OrderItem theo OrderId
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
-
         List<Long> affectedMenuIds = new ArrayList<>();
 
         for (OrderItem orderItem : orderItems) {
             MenuItem menuItem = orderItem.getMenuItem();
 
-            // Lấy tồn kho hiện tại
             Inventory inventory = inventoryRepository.findByMenuItem(menuItem)
-                    .orElseThrow(() -> new RuntimeException("Inventory not found for menu item: " + menuItem.getName()));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Inventory not found for menu item: " + menuItem.getName()
+                    ));
 
-            // Kiểm tra đủ hàng
             int remaining = inventory.getQuantity() - orderItem.getQuantity();
             if (remaining < 0) {
                 throw new RuntimeException("Không đủ số lượng cho món: " + menuItem.getName());
             }
 
-            // Giảm tồn
             inventory.setQuantity(remaining);
             inventoryRepository.save(inventory);
 
+            // 🔹 Lấy status param tương ứng
+            if (remaining == 0) {
+                Param outOfStockParam = paramRepository.findByTypeAndCode("MENU_ITEM_STATUS", "OUT_OF_STOCK")
+                        .orElseThrow(() -> new RuntimeException("Param OUT_OF_STOCK not found"));
+                menuItem.setStatus(outOfStockParam);
+            } else {
+                Param availableParam = paramRepository.findByTypeAndCode("MENU_ITEM_STATUS", "AVAILABLE")
+                        .orElseThrow(() -> new RuntimeException("Param AVAILABLE not found"));
+                menuItem.setStatus(availableParam);
+            }
+
+            menuItemRepository.save(menuItem);
             affectedMenuIds.add(menuItem.getId());
         }
 
         return affectedMenuIds;
     }
-
-
 
     // --- NEW METHODS ---
     public MenuItemDto getById(Long id) {

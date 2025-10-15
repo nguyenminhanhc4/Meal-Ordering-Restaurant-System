@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartItemDto;
 import org.example.backend.entity.cart.Cart;
 import org.example.backend.entity.cart.CartItem;
+import org.example.backend.entity.inventory.Inventory;
+import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.repository.cart.CartItemRepository;
 import org.example.backend.repository.cart.CartRepository;
+import org.example.backend.repository.inventory.InventoryRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,8 @@ public class CartItemService {
     private final CartItemRepository cartItemRepository;
 
     private final MenuItemRepository menuItemRepository;
+
+    private final InventoryRepository inventoryRepository;
 
     private final CartRepository cartRepository;
 
@@ -39,23 +44,40 @@ public class CartItemService {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
+        // Lấy món ăn + tồn kho
+        MenuItem menuItem = menuItemRepository.findById(dto.getMenuItemId())
+                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
+        Inventory inventory = inventoryRepository.findByMenuItem(menuItem)
+                .orElseThrow(() -> new RuntimeException("Inventory not found for menu item: " + menuItem.getName()));
+
         // Kiểm tra trùng item
-        Optional<CartItem> existing = cartItemRepository.findByCartIdAndMenuItemId(cartId, dto.getMenuItemId());
-        if (existing.isPresent()) {
-            // Nếu đã có thì tăng số lượng
-            CartItem item = existing.get();
-            item.setQuantity(item.getQuantity() + dto.getQuantity());
-            return new CartItemDto(cartItemRepository.save(item));
+        Optional<CartItem> existingOpt  = cartItemRepository.findByCartIdAndMenuItemId(cartId, dto.getMenuItemId());
+        CartItem saved;
+
+        if (existingOpt.isPresent()) {
+            CartItem existing = existingOpt.get();
+            int newQuantity = existing.getQuantity() + dto.getQuantity();
+
+            // 🔒 Kiểm tra tồn kho
+            if (newQuantity > inventory.getQuantity()) {
+                throw new RuntimeException("Số lượng vượt quá tồn kho cho món: " + menuItem.getName());
+            }
+
+            existing.setQuantity(newQuantity);
+            saved = cartItemRepository.save(existing);
+        } else {
+            // 🔒 Kiểm tra tồn kho
+            if (dto.getQuantity() > inventory.getQuantity()) {
+                throw new RuntimeException("Số lượng vượt quá tồn kho cho món: " + menuItem.getName());
+            }
+
+            CartItem newItem = new CartItem();
+            newItem.setCart(cart);
+            newItem.setMenuItem(menuItem);
+            newItem.setQuantity(dto.getQuantity());
+            saved = cartItemRepository.save(newItem);
         }
-
-        // Nếu chưa có thì tạo mới
-        CartItem entity = new CartItem();
-        entity.setCart(cart);
-        entity.setMenuItem(menuItemRepository.findById(dto.getMenuItemId())
-                .orElseThrow(() -> new RuntimeException("MenuItem not found")));
-        entity.setQuantity(dto.getQuantity());
-
-        return new CartItemDto(cartItemRepository.save(entity));
+        return new CartItemDto(saved);
     }
 
 

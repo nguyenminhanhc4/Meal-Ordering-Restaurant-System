@@ -25,6 +25,7 @@ import { useAuth } from "../../../store/AuthContext";
 import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
 import Pagination from "../../../components/common/PaginationClient";
 import { connectWebSocket } from "../../../api/websocketClient";
+import axios from "axios";
 
 /**
  * ProductDetail
@@ -215,8 +216,13 @@ const ProductDetail: React.FC = () => {
       await addItemToCart(cart.id, { menuItemId: product.id, quantity });
       await fetchCart();
       notify("success", `Đã thêm ${quantity} × ${product.name} vào giỏ hàng`);
-    } catch (err) {
-      notify("error", "Lỗi khi thêm vào giỏ hàng");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const msg = err.response?.data?.message ?? err.message;
+        notify("error", msg);
+      } else {
+        notify("error", "Lỗi không xác định khi thêm vào giỏ hàng");
+      }
       console.error("add to cart error:", err);
     } finally {
       setAddingToCart(false);

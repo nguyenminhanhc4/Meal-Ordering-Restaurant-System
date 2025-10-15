@@ -27,6 +27,8 @@ import { checkoutCart } from "../../../services/order/checkoutService";
 import type { OrderDto } from "../../../services/types/OrderType";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../../store/CartContext";
+import { connectWebSocket } from "../../../api/websocketClient";
+import { getMenuItemById } from "../../../services/product/fetchProduct";
 
 const CartPage: React.FC = () => {
   /** State quản lý giỏ hàng */
@@ -61,6 +63,47 @@ const CartPage: React.FC = () => {
     fetchCart();
   }, [cartUpdated]);
 
+  useEffect(() => {
+    if (!cart?.items?.length) return;
+
+    // Tạo danh sách clients để cleanup
+    const clients = cart.items.map((item) =>
+      connectWebSocket<{ menuItemId: number }>(
+        `/topic/menu/${item.menuItemId}`,
+        async (message) => {
+          console.log("🔔 Cập nhật realtime trong giỏ:", message.menuItemId);
+
+          try {
+            // Gọi API lấy dữ liệu mới nhất của món
+            const updated = await getMenuItemById(message.menuItemId);
+
+            // Cập nhật item trong giỏ
+            setCart((prev) => {
+              if (!prev) return prev;
+              const updatedItems = prev?.items?.map((it) =>
+                it.menuItemId === message.menuItemId
+                  ? ({
+                      ...it,
+                      status: updated?.status ?? it.status,
+                      price: updated?.price ?? it.price,
+                      availableQuantity:
+                        updated?.availableQuantity ?? it.availableQuantity,
+                    } as CartItem)
+                  : it
+              );
+              return { ...prev, items: updatedItems };
+            });
+          } catch (err) {
+            console.error("❌ Lỗi cập nhật realtime trong giỏ:", err);
+          }
+        }
+      )
+    );
+
+    return () => {
+      clients.forEach((client) => client.deactivate());
+    };
+  }, [cart?.items]);
   /**
    * Cập nhật số lượng món
    */
@@ -303,14 +346,6 @@ const CartPage: React.FC = () => {
                           <HiPlus className="h-4 w-4 text-stone-800" />
                         </button>
                       </div>
-
-                      {/* Thông báo còn ít hàng */}
-                      {item.availableQuantity &&
-                        item.quantity > item.availableQuantity && (
-                          <p className="text-red-500 text-sm mt-2">
-                            Chỉ còn {item.availableQuantity} món
-                          </p>
-                        )}
                     </TableCell>
 
                     <TableCell className="text-center !text-gray-800">
@@ -333,8 +368,7 @@ const CartPage: React.FC = () => {
                             `Bạn có chắc muốn xóa "${item.menuItemName}" khỏi giỏ hàng?`,
                             () => handleRemoveItem([item.id])
                           )
-                        }
-                        disabled={item.status === "OUT_OF_STOCK"}>
+                        }>
                         <HiTrash className="h-5 w-5" />
                       </Button>
                     </TableCell>
