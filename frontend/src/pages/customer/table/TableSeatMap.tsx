@@ -13,6 +13,7 @@ import {
 import type { Reservation } from "../../../services/reservation/reservationService";
 import BookedListModal from "./BookedListModal";
 import { useNotification } from "../../../components/Notification/NotificationContext";
+import { connectWebSocket } from "../../../api/websocketClient";
 
 /** ================================
  *  COMPONENT: TableBooking
@@ -72,6 +73,30 @@ export default function TableBooking() {
       setLoading(false);
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const client = connectWebSocket<{ tableId: number; statusId: number }>(
+      "/topic/tables",
+      (update) => {
+        setTables((prev) =>
+          prev.map((t) =>
+            t.id === update.tableId
+              ? {
+                  ...t,
+                  statusId: update.statusId,
+                  statusName: getStatusNameFromId(update.statusId),
+                }
+              : t
+          )
+        );
+      }
+    );
+
+    return () => {
+      // gọi async nhưng không trả về Promise cho useEffect
+      client.deactivate();
+    };
   }, []);
 
   /** Lấy danh sách bàn */
@@ -239,7 +264,7 @@ export default function TableBooking() {
           `Đã đặt bàn ${selectedTable.name} thành công vào lúc ${data.reservationTime}!`
         );
         setBookingModalState(null);
-        await Promise.all([fetchTables(), fetchMyReservations()]);
+        await fetchMyReservations();
       } else {
         notify("error", "Không thể đặt bàn, vui lòng thử lại!");
       }
@@ -490,4 +515,15 @@ function getTableStatusClass(
     colorClass: "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed",
     statusText: translateStatus(table.statusName),
   };
+}
+
+function getStatusNameFromId(statusId: number) {
+  switch (statusId) {
+    case 11:
+      return "AVAILABLE";
+    case 12:
+      return "OCCUPIED";
+    default:
+      return "AVAILABLE";
+  }
 }
