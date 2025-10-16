@@ -46,8 +46,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
       // Tính tổng số lượng
       const totalCount =
-        currentCart.items?.reduce((total, item) => total + item.quantity, 0) ||
-        0;
+        currentCart.items
+          ?.filter((item) => item.status === "AVAILABLE") // chỉ tính món còn hàng
+          .reduce((total, item) => total + item.quantity, 0) || 0;
 
       setCartItemCount(totalCount);
     } catch (error) {

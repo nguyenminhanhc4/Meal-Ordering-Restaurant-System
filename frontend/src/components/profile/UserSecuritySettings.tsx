@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import api from "../../api/axios";
 import axios from "axios";
 import { useNotification } from "../Notification";
+import { FaUserLock } from "react-icons/fa";
 
-// Component nội dung Quên mật khẩu (cập nhật để cân đối layout)
 const ForgotPasswordContent = ({
   notify,
 }: {
@@ -21,12 +21,11 @@ const ForgotPasswordContent = ({
 
     try {
       setLoading(true);
-      await api.post("/auth/forgot-password", { email }); // gọi API thật
+      await api.post("/auth/forgot-password", { email });
       notify(
         "success",
         "Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn."
       );
-
       setEmail("");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -40,18 +39,18 @@ const ForgotPasswordContent = ({
   };
 
   return (
-    // Bỏ max-w-md để nó tự lấp đầy container
     <form
       onSubmit={handleForgotPasswordSubmit}
-      className="space-y-4 pt-4 w-full md:w-3/4 lg:w-2/3 xl:w-1/2">
-      <h3 className="text-lg font-semibold text-gray-800">
+      className="w-full max-w-lg bg-red-50 p-8 rounded-3xl shadow-lg border border-red-200 space-y-6">
+      <h3 className="text-xl font-bold text-red-700 text-center">
         Yêu cầu đặt lại mật khẩu
       </h3>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-red-600 text-center">
         Nhập email của bạn để nhận liên kết đặt lại mật khẩu.
       </p>
+
       <div>
-        <label className="block text-gray-700 mb-1" htmlFor="email">
+        <label className="block text-red-700 mb-2" htmlFor="email">
           Email đăng ký
         </label>
         <input
@@ -61,13 +60,14 @@ const ForgotPasswordContent = ({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Nhập email của bạn"
           required
-          className="w-full p-3 border placeholder:text-gray-400 rounded-xl focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border border-red-300 rounded-xl placeholder:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-400 transition"
         />
       </div>
+
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition disabled:opacity-50">
+        className="w-full py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 focus:ring-2 focus:ring-red-400 transition disabled:opacity-50">
         {loading ? "Đang gửi..." : "Gửi yêu cầu đặt lại mật khẩu"}
       </button>
     </form>
@@ -77,7 +77,6 @@ const ForgotPasswordContent = ({
 export default function UserSecuritySettings() {
   const { notify } = useNotification();
   const [activeTab, setActiveTab] = useState("changePassword");
-
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -92,7 +91,6 @@ export default function UserSecuritySettings() {
   };
 
   const validateForm = () => {
-    // ... (Giữ nguyên logic validateForm) ...
     const newErrors: { [key: string]: string } = {};
     if (!form.currentPassword.trim()) {
       newErrors.currentPassword = "Vui lòng nhập mật khẩu hiện tại";
@@ -146,13 +144,13 @@ export default function UserSecuritySettings() {
     }`;
 
   return (
-    // Giữ nguyên container
-    <div className="p-8 bg-white rounded-3xl shadow-2xl border border-blue-800">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6 border-b pb-3">
+    <div className="w-full max-w-4xl p-8 bg-white rounded-3xl shadow-2xl border border-blue-800">
+      <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center border-b pb-3">
+        <FaUserLock className="mr-2 text-yellow-500" />
         Cài đặt Bảo mật
       </h2>
 
-      {/* --- Cấu trúc Tabs --- */}
+      {/* Tabs */}
       <div className="text-sm font-medium text-center text-gray-500 mb-6">
         <ul className="flex -mb-4">
           <li className="flex-1">
@@ -173,35 +171,31 @@ export default function UserSecuritySettings() {
         <div className="border-b-2 border-gray-200"></div>
       </div>
 
-      {/* --- Nội dung Tabs được căn chỉnh lại --- */}
-      <div className="tab-content pt-4 flex justify-center">
-        {" "}
-        {/* Thêm flex justify-center để căn giữa form */}
+      {/* Tab Content */}
+      <div className="tab-content flex justify-center pt-4">
         {activeTab === "changePassword" && (
-          // Bỏ max-w-md và thay bằng giới hạn cho form đổi mật khẩu
           <form
-            onSubmit={handleSubmit}
-            className="space-y-4 w-full md:w-3/4 lg:w-2/3 xl:w-1/2" // Đặt giới hạn cân đối
-          >
-            {/* Tiêu đề cho form đổi mật khẩu */}
-            <h3 className="text-lg font-semibold text-gray-800">
+            className="w-full max-w-lg space-y-6 bg-blue-50 p-8 rounded-3xl shadow-lg border border-blue-200"
+            onSubmit={handleSubmit}>
+            <h3 className="text-xl font-bold text-blue-800 text-center">
               Thay đổi mật khẩu tài khoản
             </h3>
-            {/* Mật khẩu hiện tại */}
+
             <div>
-              <label className="block text-gray-700 mb-1">
+              <label className="block text-blue-700 mb-2">
                 Mật khẩu hiện tại
               </label>
               <input
                 type="password"
                 name="currentPassword"
                 value={form.currentPassword}
+                placeholder="Nhập mật khẩu hiện tại của bạn"
                 onChange={handleChange}
                 className={`w-full p-3 border rounded-xl focus:ring-2 ${
                   errors.currentPassword
                     ? "border-red-500 focus:ring-red-400"
-                    : "focus:ring-blue-500"
-                }`}
+                    : "border-blue-300 placeholder:text-blue-400 focus:ring-blue-500"
+                } transition`}
               />
               {errors.currentPassword && (
                 <p className="text-sm text-red-500 mt-1">
@@ -210,19 +204,19 @@ export default function UserSecuritySettings() {
               )}
             </div>
 
-            {/* Mật khẩu mới */}
             <div>
-              <label className="block text-gray-700 mb-1">Mật khẩu mới</label>
+              <label className="block text-blue-700 mb-2">Mật khẩu mới</label>
               <input
                 type="password"
                 name="newPassword"
                 value={form.newPassword}
                 onChange={handleChange}
+                placeholder="Nhập mật khẩu mới"
                 className={`w-full p-3 border rounded-xl focus:ring-2 ${
                   errors.newPassword
                     ? "border-red-500 focus:ring-red-400"
-                    : "focus:ring-blue-500"
-                }`}
+                    : "border-blue-300 placeholder:text-blue-400 focus:ring-blue-500"
+                } transition`}
               />
               {errors.newPassword && (
                 <p className="text-sm text-red-500 mt-1">
@@ -231,9 +225,8 @@ export default function UserSecuritySettings() {
               )}
             </div>
 
-            {/* Xác nhận mật khẩu mới */}
             <div>
-              <label className="block text-gray-700 mb-1">
+              <label className="block text-blue-700 mb-2">
                 Xác nhận mật khẩu mới
               </label>
               <input
@@ -241,11 +234,12 @@ export default function UserSecuritySettings() {
                 name="confirmPassword"
                 value={form.confirmPassword}
                 onChange={handleChange}
+                placeholder="Nhập lại mật khẩu mới"
                 className={`w-full p-3 border rounded-xl focus:ring-2 ${
                   errors.confirmPassword
                     ? "border-red-500 focus:ring-red-400"
-                    : "focus:ring-blue-500"
-                }`}
+                    : "border-blue-300 placeholder:text-blue-400 focus:ring-blue-500"
+                } transition`}
               />
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500 mt-1">
@@ -257,13 +251,13 @@ export default function UserSecuritySettings() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+              className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 transition disabled:opacity-50">
               {loading ? "Đang cập nhật..." : "Đổi mật khẩu"}
             </button>
           </form>
         )}
+
         {activeTab === "forgotPassword" && (
-          // Truyền hàm notify vào component Quên mật khẩu
           <ForgotPasswordContent notify={notify} />
         )}
       </div>

@@ -6,7 +6,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.MenuItemMapper;
 import org.example.backend.dto.review.ReviewDto;
+import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.review.Review;
+import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.review.ReviewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,10 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +51,7 @@ public class MenuItemService {
     private final ReviewRepository reviewRepository;
     private final Cloudinary cloudinary;
     private final MenuItemMapper menuItemMapper;
+    private final OrderItemRepository orderItemRepository;
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
@@ -150,6 +150,45 @@ public class MenuItemService {
 
     public void delete(Long id) {
         menuItemRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<Long> reduceInventory(Long orderId) {
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        List<Long> affectedMenuIds = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItems) {
+            MenuItem menuItem = orderItem.getMenuItem();
+
+            Inventory inventory = inventoryRepository.findByMenuItem(menuItem)
+                    .orElseThrow(() -> new RuntimeException(
+                            "Inventory not found for menu item: " + menuItem.getName()
+                    ));
+
+            int remaining = inventory.getQuantity() - orderItem.getQuantity();
+            if (remaining < 0) {
+                throw new RuntimeException("Không đủ số lượng cho món: " + menuItem.getName());
+            }
+
+            inventory.setQuantity(remaining);
+            inventoryRepository.save(inventory);
+
+            // 🔹 Lấy status param tương ứng
+            if (remaining == 0) {
+                Param outOfStockParam = paramRepository.findByTypeAndCode("MENU_ITEM_STATUS", "OUT_OF_STOCK")
+                        .orElseThrow(() -> new RuntimeException("Param OUT_OF_STOCK not found"));
+                menuItem.setStatus(outOfStockParam);
+            } else {
+                Param availableParam = paramRepository.findByTypeAndCode("MENU_ITEM_STATUS", "AVAILABLE")
+                        .orElseThrow(() -> new RuntimeException("Param AVAILABLE not found"));
+                menuItem.setStatus(availableParam);
+            }
+
+            menuItemRepository.save(menuItem);
+            affectedMenuIds.add(menuItem.getId());
+        }
+
+        return affectedMenuIds;
     }
 
     // --- NEW METHODS ---

@@ -2,16 +2,21 @@ package org.example.backend.controller.payment;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.payment.PaymentDto;
+import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.payment.Payment;
+import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.payment.PaymentRepository;
+import org.example.backend.service.menu.MenuItemService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +28,9 @@ public class MockPaymentController {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final ParamRepository paramRepository;
+    private final MenuItemRepository menuItemRepository;
+    private final MenuItemService menuItemService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 1️⃣ Initiate payment (API FE gọi)
@@ -75,6 +83,12 @@ public class MockPaymentController {
         Order order = payment.getOrder();
         order.setStatus(orderPaid);
         orderRepository.save(order);
+
+        List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
+
+        for (Long id : affectedMenuIds) {
+            messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
+        }
 
         return Map.of("redirectUrl", payment.getReturnUrl());
     }

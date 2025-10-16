@@ -9,11 +9,15 @@ import org.example.backend.entity.user.ShippingInfo;
 import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
+import org.example.backend.service.menu.MenuItemService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.backend.dto.payment.PaymentDto;
 import org.example.backend.repository.payment.PaymentRepository;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +30,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final ParamRepository paramRepository;
     private final ShippingInfoRepository shippingInfoRepository;
+    private final MenuItemService menuItemService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public PaymentDto createPayment(PaymentRequestDto request, String publicId) {
@@ -69,7 +75,15 @@ public class PaymentService {
         order.setStatus(statusOrder);
         orderRepository.save(order);
 
-        return new PaymentDto(savedPayment);
+        List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
+
+        PaymentDto dto = new PaymentDto(savedPayment);
+        messagingTemplate.convertAndSend("/topic/payments", dto);
+
+            for (Long id : affectedMenuIds) {
+                messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
+            }
+        return dto;
     }
 
     public PaymentDto updatePaymentStatus(Long id, Param status, String transactionId) {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import UserProfileContent from "../../../components/profile/UserProfileContent";
 import UserReservationHistory from "../../../components/profile/UserReservationHistory";
 import UserSecuritySettings from "../../../components/profile/UserSecuritySettings";
-import { useNavigate } from "react-router-dom";
+import OrderHistoryPage from "../../../components/profile/OrderHistoryPage";
 import {
   HiOutlineUser,
   HiOutlineClock,
@@ -38,7 +38,6 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
 );
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
 
   const profileTabs = [
@@ -52,8 +51,7 @@ export default function ProfilePage() {
       id: "orders",
       label: "Lịch sử đặt món",
       icon: HiOutlineClock,
-      // ✅ Khi click, điều hướng sang trang khác
-      onClick: () => navigate("/order"),
+      component: OrderHistoryPage,
     },
     {
       id: "reservations",
@@ -91,11 +89,7 @@ export default function ProfilePage() {
                   label={tab.label}
                   Icon={tab.icon}
                   isActive={activeTab === tab.id}
-                  onClick={
-                    tab.onClick
-                      ? tab.onClick // Nếu có onClick riêng → gọi navigate
-                      : () => setActiveTab(tab.id)
-                  }
+                  onClick={() => setActiveTab(tab.id)}
                 />
               ))}
             </ul>
