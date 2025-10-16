@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderHistoryDto {
-    private Long id;
+    private String id;
     private LocalDateTime createdAt;
     private String status;
     private BigDecimal totalAmount;
@@ -21,7 +21,7 @@ public class OrderHistoryDto {
 
     public static OrderHistoryDto fromEntity(Order order) {
         return new OrderHistoryDto(
-                order.getId(),
+                order.getPublicId(),
                 order.getCreatedAt(),
                 order.getStatus().getCode(),
                 order.getTotalAmount(),

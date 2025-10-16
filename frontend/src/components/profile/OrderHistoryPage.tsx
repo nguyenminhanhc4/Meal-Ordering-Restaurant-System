@@ -1,6 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner, Badge } from "flowbite-react";
-import { FaSearch, FaClock, FaCalendar } from "react-icons/fa";
+import {
+  FaSearch,
+  FaClock,
+  FaCalendar,
+  FaChevronUp,
+  FaChevronDown,
+} from "react-icons/fa";
 import {
   fetchOrderHistory,
   type Order,
@@ -23,6 +29,16 @@ export default function OrderHistoryPage() {
     sort: "createdAt,desc",
   });
 
+  const handleReorder = (orderId: number) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+  };
+
+  // Trạng thái collapse cho từng đơn
+  const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>(
+    {}
+  );
+
   const loadOrders = async (pageNumber = 0) => {
     setLoading(true);
     try {
@@ -43,17 +59,15 @@ export default function OrderHistoryPage() {
     loadOrders(page);
   }, [filters]);
 
-  //   const handleFilterChange = (
-  //     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  //   ) => {
-  //     setFilters((prev) => ({
-  //       ...prev,
-  //       [e.target.name]: e.target.value,
-  //     }));
-  //   };
-
   const handleSearch = () => {
     loadOrders(0);
+  };
+
+  const toggleExpand = (orderId: number) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId],
+    }));
   };
 
   return (
@@ -119,13 +133,6 @@ export default function OrderHistoryPage() {
             }}
           />
         </div>
-
-        {/* Button lọc */}
-        {/* <button
-          onClick={handleSearch}
-          className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white font-medium px-4 py-2 rounded-xl shadow-md hover:opacity-90 transition">
-          <FaSearch className="w-5 h-5" />
-        </button> */}
       </div>
 
       {/* === Danh sách đơn hàng === */}
@@ -139,46 +146,93 @@ export default function OrderHistoryPage() {
         </p>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <p className="text-sm text-gray-500">
-                    Mã đơn: #{order.id} •{" "}
-                    {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
-                  </p>
-                  <Badge color="success" className="mt-1">
-                    {order.status}
-                  </Badge>
-                </div>
-                <p className="font-semibold text-lg text-amber-700">
-                  {order.totalAmount.toLocaleString()} ₫
-                </p>
-              </div>
+          {orders.map((order) => {
+            const maxVisible = 3;
+            const isExpanded = expandedOrders[order.id] || false;
+            const displayItems = isExpanded
+              ? order.items
+              : order.items.length <= maxVisible
+              ? order.items
+              : order.items.slice(0, maxVisible - 1);
+            const remainingCount = order.items.length - displayItems.length;
 
-              <div className="grid sm:grid-cols-3 gap-4">
-                {order.items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex gap-3 bg-gray-50 p-3 rounded-lg items-center">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.menuItemName}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-medium">{item.menuItemName}</span>
-                      <span className="text-sm text-gray-600">
-                        SL: {item.quantity} • {item.price.toLocaleString()} ₫
-                      </span>
-                    </div>
+            return (
+              <div
+                key={order.id}
+                className="border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      Mã đơn: #{order.id} •{" "}
+                      {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
+                    </p>
+                    <Badge color="success" className="mt-1">
+                      {order.status}
+                    </Badge>
                   </div>
-                ))}
+                  <p className="font-semibold text-lg text-amber-700">
+                    {order.totalAmount.toLocaleString()} ₫
+                  </p>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {displayItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex gap-3 bg-gray-50 p-3 rounded-lg items-center">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.menuItemName}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-medium">{item.menuItemName}</span>
+                        <span className="text-sm text-gray-600">
+                          SL: {item.quantity} • {item.price.toLocaleString()} ₫
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {!isExpanded && order.items.length > 3 && (
+                    <div
+                      className="flex items-center justify-center bg-gray-100 p-3 rounded-lg text-gray-500 font-medium cursor-pointer"
+                      onClick={() => toggleExpand(order.id)}>
+                      +{remainingCount} món khác
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center mt-3">
+                  {/* Collapse / Xem tất cả */}
+                  {order.items.length > maxVisible && (
+                    <button
+                      className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-800 transition rounded px-2 py-1 bg-blue-50 hover:bg-blue-100"
+                      onClick={() => toggleExpand(order.id)}>
+                      {isExpanded
+                        ? "Thu gọn"
+                        : `Xem tất cả (+${remainingCount})`}
+                      {isExpanded ? (
+                        <FaChevronUp className="w-4 h-4" />
+                      ) : (
+                        <FaChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+
+                  {/* Spacer để đẩy nút Đặt lại sang phải */}
+                  <div className="flex-grow" />
+
+                  {/* Nút Đặt lại luôn nằm bên phải */}
+                  <button
+                    className="text-sm text-white font-medium rounded px-3 py-1 bg-amber-600 hover:bg-amber-700 transition"
+                    onClick={() => handleReorder(order.id)}>
+                    Đặt hàng lại
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
