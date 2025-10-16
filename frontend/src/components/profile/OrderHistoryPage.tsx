@@ -11,14 +11,23 @@ import {
   fetchOrderHistory,
   type Order,
 } from "../../services/order/orderService";
+import {
+  getCurrentCart,
+  createCart,
+  addItemToCart,
+} from "../../services/cart/cartService";
+import { useNotification } from "../Notification/NotificationContext";
 import Pagination from "../../components/common/PaginationClient";
 import { format } from "date-fns";
+import { useCart } from "../../store/CartContext";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
+  const { notify } = useNotification();
+  const { fetchCart } = useCart();
 
   // Bộ lọc
   const [filters, setFilters] = useState({
@@ -29,9 +38,28 @@ export default function OrderHistoryPage() {
     sort: "createdAt,desc",
   });
 
-  const handleReorder = (orderId: number) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
+  const handleReorder = async (orderId: number) => {
+    try {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order || !order.items) return;
+
+      let cart = await getCurrentCart().catch(() => null);
+      if (!cart) cart = await createCart();
+
+      for (const item of order.items) {
+        await addItemToCart(cart.id, {
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+        });
+      }
+
+      notify("success", "Đã thêm món vào giỏ hàng!");
+      await fetchCart();
+      // navigate("/cart");
+    } catch (error) {
+      console.error(error);
+      notify("error", "Thêm món vào giỏ hàng thất bại!");
+    }
   };
 
   // Trạng thái collapse cho từng đơn

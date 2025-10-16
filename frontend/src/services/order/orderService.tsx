@@ -1,6 +1,7 @@
 import api from "../../api/axios";
 
 export interface OrderItem {
+  menuItemId: number;
   menuItemName: string;
   imageUrl: string;
   quantity: number;

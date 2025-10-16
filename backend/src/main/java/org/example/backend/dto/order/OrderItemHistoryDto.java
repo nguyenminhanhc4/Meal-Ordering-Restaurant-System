@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemHistoryDto {
+    private Long menuItemId;
     private String menuItemName;
     private String imageUrl;
     private int quantity;
@@ -16,6 +17,7 @@ public class OrderItemHistoryDto {
 
     public static OrderItemHistoryDto fromEntity(OrderItem item) {
         return new OrderItemHistoryDto(
+                item.getMenuItem().getId(),
                 item.getMenuItem().getName(),
                 item.getMenuItem().getAvatarUrl(),
                 item.getQuantity(),
