@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Spinner, Badge } from "flowbite-react";
 import {
   FaSearch,
-  FaClock,
+  FaFilter,
   FaCalendar,
   FaChevronUp,
   FaChevronDown,
 } from "react-icons/fa";
+import { MdFastfood } from "react-icons/md";
 import {
   fetchOrderHistory,
   type Order,
@@ -136,8 +137,8 @@ export default function OrderHistoryPage() {
 
   return (
     <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-200">
-      <h2 className="text-2xl font-bold text-amber-700 mb-6">
-        🍜 Lịch sử đặt món
+      <h2 className="text-2xl font-bold text-blue-800 mb-6 flex items-center">
+        <MdFastfood className="mr-2 text-yellow-600" /> Lịch sử đặt món
       </h2>
 
       {/* === Bộ lọc === */}
@@ -159,7 +160,7 @@ export default function OrderHistoryPage() {
 
         {/* Status filter */}
         <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl border border-blue-200 shadow-sm">
-          <FaClock className="w-5 h-5 text-blue-600" />
+          <FaFilter className="w-5 h-5 text-blue-600" />
           <select
             className="border border-blue-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
             value={filters.status}

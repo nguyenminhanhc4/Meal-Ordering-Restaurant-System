@@ -25,9 +25,8 @@ import {
   HiOutlinePencilSquare,
   HiOutlineXMark,
   HiOutlineArrowsUpDown,
-  HiOutlineDocument,
 } from "react-icons/hi2";
-import { FaChair } from "react-icons/fa";
+import { FaChair, FaFilter } from "react-icons/fa";
 import Pagination from "../../components/common/PaginationClient";
 import BookingModal, {
   type BookingData,
@@ -158,7 +157,7 @@ export default function UserReservationHistory() {
 
   return (
     <div className="p-8 w-full bg-white rounded-3xl shadow-2xl border border-blue-800">
-      <h2 className="text-2xl font-bold text-blue-800 mb-6 flex items-center">
+      <h2 className="text-2xl font-bold text-blue-800 mb-6  ">
         <FaChair className="mr-2 text-yellow-600" /> Lịch sử đặt bàn
       </h2>
 
@@ -166,7 +165,7 @@ export default function UserReservationHistory() {
         {/* Bộ lọc trạng thái */}
         <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
           <span className="font-medium text-blue-800 flex items-center gap-1">
-            <HiOutlineDocument className="w-4 h-4 text-blue-600" /> Lọc:
+            <FaFilter className="w-4 h-4 text-blue-600" /> Lọc:
           </span>
           <select
             className="border border-blue-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
