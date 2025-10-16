@@ -4,6 +4,7 @@ export interface OrderItem {
   menuItemId: number;
   menuItemName: string;
   imageUrl: string;
+  status: string;
   quantity: number;
   price: number;
 }

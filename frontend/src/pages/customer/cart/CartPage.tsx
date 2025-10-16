@@ -37,6 +37,10 @@ const CartPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [cartUpdated, setCartUpdated] = useState<number>(0);
 
+  /** State show-more */
+  const [showAllItems, setShowAllItems] = useState(false);
+  const ITEMS_TO_SHOW = 5;
+
   /** State xác nhận xóa */
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
@@ -50,7 +54,7 @@ const CartPage: React.FC = () => {
 
   /** Fetch giỏ hàng mỗi khi cartUpdated thay đổi */
   useEffect(() => {
-    const fetchCart = async () => {
+    const fetchCartData = async () => {
       try {
         const data = await getCurrentCart();
         setCart(data);
@@ -60,35 +64,31 @@ const CartPage: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchCart();
+    fetchCartData();
   }, [cartUpdated]);
 
+  /** WebSocket realtime */
   useEffect(() => {
     if (!cart?.items?.length) return;
 
-    // Tạo danh sách clients để cleanup
     const clients = cart.items.map((item) =>
       connectWebSocket<{ menuItemId: number }>(
         `/topic/menu/${item.menuItemId}`,
         async (message) => {
           console.log("🔔 Cập nhật realtime trong giỏ:", message.menuItemId);
-
           try {
-            // Gọi API lấy dữ liệu mới nhất của món
             const updated = await getMenuItemById(message.menuItemId);
-
-            // Cập nhật item trong giỏ
             setCart((prev) => {
               if (!prev) return prev;
               const updatedItems = prev?.items?.map((it) =>
                 it.menuItemId === message.menuItemId
-                  ? ({
+                  ? {
                       ...it,
                       status: updated?.status ?? it.status,
                       price: updated?.price ?? it.price,
                       availableQuantity:
                         updated?.availableQuantity ?? it.availableQuantity,
-                    } as CartItem)
+                    }
                   : it
               );
               return { ...prev, items: updatedItems };
@@ -104,9 +104,8 @@ const CartPage: React.FC = () => {
       clients.forEach((client) => client.deactivate());
     };
   }, [cart?.items]);
-  /**
-   * Cập nhật số lượng món
-   */
+
+  /** Cập nhật số lượng món */
   const handleUpdateQuantity = async (
     itemId: number,
     newQuantity: number,
@@ -130,9 +129,7 @@ const CartPage: React.FC = () => {
     }
   };
 
-  /**
-   * Xóa một hoặc nhiều món
-   */
+  /** Xóa một hoặc nhiều món */
   const handleRemoveItem = async (itemIds: number[]) => {
     try {
       await deleteCartItems({ itemIds });
@@ -215,6 +212,17 @@ const CartPage: React.FC = () => {
     );
   };
 
+  const availableItems =
+    cart?.items?.filter((item) => item.status === "AVAILABLE") || [];
+
+  /** Lọc các item để hiển thị rút gọn */
+  const visibleItems = cart?.items
+    ? showAllItems
+      ? cart.items
+      : cart.items.slice(0, ITEMS_TO_SHOW)
+    : [];
+  const hasMoreItems = cart?.items && cart.items.length > ITEMS_TO_SHOW;
+
   /** Mở dialog xác nhận xóa */
   const openConfirm = (message: string, action: () => void) => {
     setConfirmMessage(message);
@@ -272,7 +280,7 @@ const CartPage: React.FC = () => {
               </TableHead>
 
               <TableBody className="divide-y">
-                {cart.items.map((item) => (
+                {visibleItems.map((item) => (
                   <TableRow
                     key={item.id}
                     className={`!bg-white hover:!bg-amber-50 transition-colors duration-200 ${
@@ -312,7 +320,6 @@ const CartPage: React.FC = () => {
 
                     <TableCell className="flex justify-center items-center translate-y-1/4 gap-2">
                       <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-full overflow-hidden w-max">
-                        {/* Nút giảm */}
                         <button
                           onClick={() =>
                             handleUpdateQuantity(
@@ -332,7 +339,6 @@ const CartPage: React.FC = () => {
                           {item.quantity}
                         </span>
 
-                        {/* Nút tăng */}
                         <button
                           onClick={() =>
                             handleUpdateQuantity(
@@ -376,6 +382,20 @@ const CartPage: React.FC = () => {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Nút Xem thêm / Thu gọn */}
+            {hasMoreItems && (
+              <div className="mt-2 text-center">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => setShowAllItems(!showAllItems)}>
+                  {showAllItems
+                    ? "Thu gọn danh sách"
+                    : `Xem thêm ${availableItems.length - ITEMS_TO_SHOW} món`}
+                </Button>
+              </div>
+            )}
 
             {/* Nút xóa món */}
             <div className="mt-4 flex justify-between">

@@ -20,6 +20,8 @@ import { useNotification } from "../Notification/NotificationContext";
 import Pagination from "../../components/common/PaginationClient";
 import { format } from "date-fns";
 import { useCart } from "../../store/CartContext";
+import axios from "axios";
+import { connectWebSocket } from "../../api/websocketClient";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -56,9 +58,13 @@ export default function OrderHistoryPage() {
       notify("success", "Đã thêm món vào giỏ hàng!");
       await fetchCart();
       // navigate("/cart");
-    } catch (error) {
-      console.error(error);
-      notify("error", "Thêm món vào giỏ hàng thất bại!");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const msg = error.response?.data?.message ?? error.message;
+        notify("error", msg);
+      } else {
+        notify("error", "Lỗi không xác định khi thêm vào giỏ hàng");
+      }
     }
   };
 
@@ -86,6 +92,36 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     loadOrders(page);
   }, [filters]);
+
+  /** WebSocket realtime cho từng món */
+  useEffect(() => {
+    if (!orders?.length) return;
+
+    // Lấy tất cả menuItemIds trong orders
+    const itemIds = orders.flatMap((o) => o.items.map((i) => i.menuItemId));
+
+    const clients = itemIds.map((id) =>
+      connectWebSocket<{ menuItemId: number; status: string }>(
+        `/topic/menu/${id}`,
+        (data) => {
+          setOrders((prev) =>
+            prev.map((order) => ({
+              ...order,
+              items: order.items.map((item) =>
+                item.menuItemId === data.menuItemId
+                  ? { ...item, status: data.status }
+                  : item
+              ),
+            }))
+          );
+        }
+      )
+    );
+
+    return () => {
+      clients.forEach((c) => c.deactivate());
+    };
+  }, [orders]);
 
   const handleSearch = () => {
     loadOrders(0);
@@ -207,7 +243,9 @@ export default function OrderHistoryPage() {
                   {displayItems.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex gap-3 bg-gray-50 p-3 rounded-lg items-center">
+                      className={`flex gap-3 bg-gray-50 p-3 rounded-lg items-center ${
+                        item.status === "OUT_OF_STOCK" ? "opacity-50" : ""
+                      }`}>
                       <img
                         src={item.imageUrl}
                         alt={item.menuItemName}
@@ -218,6 +256,11 @@ export default function OrderHistoryPage() {
                         <span className="text-sm text-gray-600">
                           SL: {item.quantity} • {item.price.toLocaleString()} ₫
                         </span>
+                        {item.status === "OUT_OF_STOCK" && (
+                          <Badge color="failure" size="sm" className="mt-1">
+                            Hết hàng
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   ))}

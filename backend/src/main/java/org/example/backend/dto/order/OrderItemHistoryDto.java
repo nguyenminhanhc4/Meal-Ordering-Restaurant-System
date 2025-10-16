@@ -12,6 +12,7 @@ public class OrderItemHistoryDto {
     private Long menuItemId;
     private String menuItemName;
     private String imageUrl;
+    private String status;
     private int quantity;
     private BigDecimal price;
 
@@ -20,6 +21,7 @@ public class OrderItemHistoryDto {
                 item.getMenuItem().getId(),
                 item.getMenuItem().getName(),
                 item.getMenuItem().getAvatarUrl(),
+                item.getMenuItem().getStatus().getCode(),
                 item.getQuantity(),
                 item.getPrice()
         );
