@@ -58,18 +58,26 @@ public class ReviewController {
         return ResponseEntity.ok(new Response<>("success", saved, "Review created successfully"));
     }
 
-
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #dto.userId == authentication.principal.id")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ReviewDto dto) {
-        ReviewDto updated = reviewService.updateById(id, dto);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long currentUserId = userService.getUserByEmail(email).getId();
+
+        ReviewDto updated = reviewService.updateById(id, dto, currentUserId);
         return ResponseEntity.ok(new Response<>("success", updated, "Review updated successfully"));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @reviewSecurity.isOwner(#id, authentication.principal.id)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        reviewService.deleteById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long currentUserId = userService.getUserByEmail(email).getId();
+
+        reviewService.deleteById(id, currentUserId);
         return ResponseEntity.ok(new Response<>("success", null, "Review deleted successfully"));
     }
+
 }

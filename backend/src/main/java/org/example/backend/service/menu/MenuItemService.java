@@ -2,18 +2,33 @@ package org.example.backend.service.menu;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.MenuItemMapper;
+import org.example.backend.dto.review.ReviewDto;
+import org.example.backend.entity.review.Review;
+import org.example.backend.repository.review.ReviewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.menu.MenuItemDto;
+import org.example.backend.dto.menu.MenuItemCreateDTO;
+import org.example.backend.dto.menu.MenuItemUpdateDTO;
+import org.example.backend.dto.menu.MenuItemSearchRequest;
 import org.example.backend.entity.category.Categories;
+import org.example.backend.entity.ingredient.Ingredient;
+import org.example.backend.entity.inventory.Inventory;
 import org.example.backend.entity.menu.MenuItem;
+import org.example.backend.entity.menu.MenuItemIngredient;
+import org.example.backend.entity.param.Param;
 import org.example.backend.repository.category.CategoryRepository;
+import org.example.backend.repository.ingredient.IngredientRepository;
+import org.example.backend.repository.inventory.InventoryRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
+import org.example.backend.repository.menu.MenuItemIngredientRepository;
+import org.example.backend.repository.param.ParamRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +45,11 @@ public class MenuItemService {
 
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoriesRepository;
+    private final ParamRepository paramRepository;
+    private final IngredientRepository ingredientRepository;
+    private final MenuItemIngredientRepository menuItemIngredientRepository;
+    private final InventoryRepository inventoryRepository;
+    private final ReviewRepository reviewRepository;
     private final Cloudinary cloudinary;
     private final MenuItemMapper menuItemMapper;
 
@@ -37,12 +57,17 @@ public class MenuItemService {
     @Transactional(readOnly = true)
     public Page<MenuItemDto> findAll(int page, int size, String search, String sort, String categorySlug) {
         // 1️⃣ Xác định kiểu sắp xếp
-        Sort sortOption = switch (sort.toLowerCase()) {
-            case "price-asc" -> Sort.by(Sort.Direction.ASC, "m.price");
-            case "price-desc" -> Sort.by(Sort.Direction.DESC, "m.price");
-            case "newest" -> Sort.by(Sort.Direction.DESC, "m.createdAt");
-            default -> Sort.unsorted(); // "popular" sẽ xử lý logic trong query
-        };
+        Sort sortOption;
+        String sortLower = sort.toLowerCase();
+        if ("price-asc".equals(sortLower)) {
+            sortOption = Sort.by(Sort.Direction.ASC, "m.price");
+        } else if ("price-desc".equals(sortLower)) {
+            sortOption = Sort.by(Sort.Direction.DESC, "m.price");
+        } else if ("newest".equals(sortLower)) {
+            sortOption = Sort.by(Sort.Direction.DESC, "m.createdAt");
+        } else {
+            sortOption = Sort.unsorted(); // "popular" sẽ xử lý logic trong query
+        }
 
         Pageable pageable = PageRequest.of(page, size, sortOption);
 
@@ -69,7 +94,7 @@ public class MenuItemService {
         List<Object[]> results = menuItemRepository.findTopPopular(PageRequest.of(0, limit));
         return results.stream()
                 .map(menuItemMapper::toDto)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private MenuItemDto toMenuItemDto(Object[] result) {
@@ -85,9 +110,36 @@ public class MenuItemService {
         return dto;
     }
 
-    public Optional<MenuItemDto> findById(Long id) {
-        return menuItemRepository.findById(id)
-                .map(MenuItemDto::new);
+    public MenuItemDto getById(Long id, Integer reviewPage, Integer reviewSize, String reviewFilter) {
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+        MenuItemDto dto = new MenuItemDto(menuItem);
+
+        Pageable pageable = PageRequest.of(reviewPage, reviewSize, Sort.by("createdAt").descending());
+
+        Page<Review> reviewPageResult;
+        switch (reviewFilter) {
+            case "positive":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRatingGreaterThanEqual(id, 4, pageable);
+                break;
+            case "neutral":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRating(id, 3, pageable);
+                break;
+            case "negative":
+                reviewPageResult = reviewRepository.findByMenuItemIdAndRatingLessThanEqual(id, 2, pageable);
+                break;
+            default:
+                reviewPageResult = reviewRepository.findByMenuItemId(id, pageable);
+        }
+
+        dto.setReviews(reviewPageResult.getContent().stream()
+                .map(ReviewDto::new)
+                .collect(Collectors.toList()));
+        dto.setTotalReviews(reviewPageResult.getTotalElements());
+        dto.setReviewPages(reviewPageResult.getTotalPages());
+        dto.setCurrentReviewPage(reviewPageResult.getNumber());
+
+        return dto;
     }
 
     public MenuItemDto save(MenuItemDto dto) {
@@ -126,10 +178,51 @@ public class MenuItemService {
         return new MenuItemDto(entity);
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        MenuItem entity = menuItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
-        menuItemRepository.delete(entity);
+        try {
+            // Check if MenuItem exists first
+            MenuItem entity = menuItemRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("MenuItem not found with id: " + id));
+
+            System.out.println("🔍 Found MenuItem with id: " + id + ", name: " + entity.getName());
+
+            // Check if menu item is being used in cart_items (RESTRICT constraint)
+            Long cartItemsCount = menuItemRepository.countMenuItemInCartItems(id);
+            System.out.println("📊 Cart items count: " + cartItemsCount);
+            if (cartItemsCount > 0) {
+                throw new RuntimeException("Cannot delete menu item because it's currently in " + cartItemsCount + " shopping cart(s). Please remove it from carts first.");
+            }
+
+            // Check if menu item is being used in order_items (RESTRICT constraint) 
+            Long orderItemsCount = menuItemRepository.countMenuItemInOrderItems(id);
+            System.out.println("📊 Order items count: " + orderItemsCount);
+            if (orderItemsCount > 0) {
+                throw new RuntimeException("Cannot delete menu item because it has been ordered " + orderItemsCount + " time(s). Menu items with order history cannot be deleted.");
+            }
+
+            // If we reach here, it's safe to delete
+            // The following will be deleted automatically due to CASCADE configuration:
+            // - inventory (CASCADE ALL with orphanRemoval)
+            // - reviews (CASCADE ALL with orphanRemoval) 
+            // - menu_item_ingredients (CASCADE ALL with orphanRemoval)
+            
+            System.out.println("✅ No foreign key constraints found. Proceeding with delete...");
+            menuItemRepository.deleteById(id);
+            System.out.println("🎉 Successfully deleted MenuItem with id: " + id);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting MenuItem with id " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            
+            if (e instanceof RuntimeException) {
+                throw e; // Re-throw our custom exceptions
+            } else if (e.getMessage().contains("foreign key") || e.getMessage().contains("constraint")) {
+                throw new RuntimeException("Database relationship error. Please try again or contact administrator.");
+            } else {
+                throw new RuntimeException("Failed to delete menu item: " + e.getMessage());
+            }
+        }
     }
 
     // --- Conversion helper ---
@@ -176,5 +269,168 @@ public class MenuItemService {
                 ));
 
         return uploadResult.get("secure_url").toString();
+    }
+
+    // Public method for standalone image upload
+    public String uploadImageToCloudinary(MultipartFile file, String folder) throws IOException {
+        return uploadAvatarToCloudinary(file, folder);
+    }
+
+    // ===========================================
+    // ADMIN Methods for MenuItem Management
+    // ===========================================
+
+    @Transactional(readOnly = true)
+    public Page<MenuItemDto> findAllForAdmin(int page, int size, String sortBy, String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        Page<Object[]> results = menuItemRepository.findAllWithDetails(pageable);
+        return results.map(this::toMenuItemDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MenuItemDto> searchMenuItemsWithPagination(MenuItemSearchRequest searchRequest, int page, int size) {
+        Sort.Direction direction = searchRequest.getSortDirection().equalsIgnoreCase("desc") ? 
+                Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        // Call repository method with search criteria (need to implement this)
+        Page<Object[]> results = menuItemRepository.searchMenuItemsWithFilters(
+                searchRequest.getName(),
+                searchRequest.getDescription(),
+                searchRequest.getCategoryId(),
+                searchRequest.getStatusId(),
+                searchRequest.getMinPrice(),
+                searchRequest.getMaxPrice(),
+                pageable
+        );
+        
+        return results.map(this::toMenuItemDto);
+    }
+
+    @Transactional
+    public MenuItemDto createMenuItem(MenuItemCreateDTO dto) {
+        // 1. Create MenuItem entity
+        MenuItem menuItem = new MenuItem();
+        menuItem.setName(dto.getName());
+        menuItem.setDescription(dto.getDescription());
+        menuItem.setPrice(dto.getPrice());
+        menuItem.setAvatarUrl(dto.getAvatarUrl());
+
+        // 2. Set Category
+        Categories category = categoriesRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        menuItem.setCategory(category);
+
+        // 3. Set Status (Param)
+        Param status = paramRepository.findById(dto.getStatusId())
+                .orElseThrow(() -> new RuntimeException("Status not found"));
+        menuItem.setStatus(status);
+
+        // 4. Save MenuItem first
+        menuItem = menuItemRepository.save(menuItem);
+
+        // 5. Create Inventory if quantity provided
+        if (dto.getAvailableQuantity() != null) {
+            Inventory inventory = new Inventory();
+            inventory.setMenuItem(menuItem);
+            inventory.setQuantity(dto.getAvailableQuantity());
+            inventoryRepository.save(inventory);
+        }
+
+        // 6. Handle ingredients
+        if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
+            for (MenuItemCreateDTO.MenuItemIngredientCreateDTO ingredientDto : dto.getIngredients()) {
+                Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngredientId())
+                        .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredientDto.getIngredientId()));
+                
+                MenuItemIngredient menuItemIngredient = MenuItemIngredient.builder()
+                        .menuItem(menuItem)
+                        .ingredient(ingredient)
+                        .quantityNeeded(ingredientDto.getQuantityNeeded())
+                        .build();
+                
+                menuItemIngredientRepository.save(menuItemIngredient);
+            }
+        }
+
+        return new MenuItemDto(menuItem);
+    }
+
+    @Transactional
+    public MenuItemDto updateMenuItem(Long id, MenuItemUpdateDTO dto) {
+        // 1. Get existing MenuItem
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
+
+        // 2. Update basic fields
+        menuItem.setName(dto.getName());
+        menuItem.setDescription(dto.getDescription());
+        menuItem.setPrice(dto.getPrice());
+        menuItem.setAvatarUrl(dto.getAvatarUrl());
+
+        // 3. Update Category
+        Categories category = categoriesRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        menuItem.setCategory(category);
+
+        // 4. Update Status
+        Param status = paramRepository.findById(dto.getStatusId())
+                .orElseThrow(() -> new RuntimeException("Status not found"));
+        menuItem.setStatus(status);
+
+        // 5. Update Inventory quantity
+        if (dto.getAvailableQuantity() != null) {
+            Inventory inventory = menuItem.getInventory();
+            if (inventory != null) {
+                inventory.setQuantity(dto.getAvailableQuantity());
+                inventoryRepository.save(inventory);
+            } else {
+                // Create new inventory if not exists
+                inventory = new Inventory();
+                inventory.setMenuItem(menuItem);
+                inventory.setQuantity(dto.getAvailableQuantity());
+                inventoryRepository.save(inventory);
+            }
+        }
+
+        // 6. Handle ingredients update
+        if (dto.getIngredients() != null) {
+            System.out.println("🔄 Updating ingredients for MenuItem ID: " + id);
+            
+            // Use @Modifying query to ensure proper deletion
+            System.out.println("🗑️ Deleting existing ingredients for MenuItem ID: " + id);
+            menuItemIngredientRepository.deleteByMenuItemId(id);
+            
+            // Force flush to ensure deletion is committed
+            menuItemIngredientRepository.flush();
+            System.out.println("✅ Completed deletion");
+            
+            System.out.println("➕ Adding " + dto.getIngredients().size() + " new ingredients");
+            // Add new ingredients
+            for (MenuItemUpdateDTO.MenuItemIngredientUpdateDTO ingredientDto : dto.getIngredients()) {
+                Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngredientId())
+                        .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredientDto.getIngredientId()));
+                
+                MenuItemIngredient menuItemIngredient = MenuItemIngredient.builder()
+                        .menuItem(menuItem)
+                        .ingredient(ingredient)
+                        .quantityNeeded(ingredientDto.getQuantityNeeded())
+                        .build();
+                
+                System.out.println("💾 Saving new ingredient: MenuItem=" + id + ", Ingredient=" + ingredient.getId() + ", Quantity=" + ingredientDto.getQuantityNeeded());
+                menuItemIngredientRepository.save(menuItemIngredient);
+            }
+            
+            System.out.println("✅ Completed adding " + dto.getIngredients().size() + " new ingredients");
+        }
+
+        // 7. Save MenuItem
+        menuItem = menuItemRepository.save(menuItem);
+        
+        return new MenuItemDto(menuItem);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -33,13 +34,29 @@ public class ReservationController {
     @PostMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> createMyReservation(@RequestBody ReservationDto dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Long userId = userService.getUserByEmail(email).getId();
-        ReservationDto created = reservationService.createMyReservation(userId, dto);
-        return ResponseEntity.ok(new Response<>("success", created, "Reservation created successfully"));
-    }
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            Long userId = userService.getUserByEmail(email).getId();
 
+            ReservationDto created = reservationService.createMyReservation(userId, dto);
+
+            return ResponseEntity.ok(
+                    new Response<>("success", created, "Reservation created successfully")
+            );
+
+        } catch (RuntimeException e) {
+            // RuntimeException từ service khi bàn đã được đặt hoặc không đủ chỗ
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        } catch (Exception e) {
+            // các lỗi khác
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Response<>("error", null, "Internal server error"));
+        }
+    }
 
     // CUSTOMER gets all their reservations
     @GetMapping("/me")

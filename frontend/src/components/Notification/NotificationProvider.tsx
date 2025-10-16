@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { Toast, Button } from "flowbite-react";
 import { HiCheck, HiExclamation, HiInformationCircle } from "react-icons/hi";
@@ -14,7 +14,7 @@ export default function NotificationProvider({
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const notify = (type: NotificationType, message: string) => {
+  const notify = useCallback((type: NotificationType, message: string) => {
     const id = ++idCounter;
     setNotifications((prev) => [...prev, { id, type, message }]);
 
@@ -22,7 +22,7 @@ export default function NotificationProvider({
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 3000);
-  };
+  }, []);
 
   const removeNotification = (id: number) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));

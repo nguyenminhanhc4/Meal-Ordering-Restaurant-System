@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +43,7 @@ public class ReservationService {
     @Transactional
     public ReservationDto createMyReservation(Long userId, ReservationDto dto) {
         try {
+            // 1. Tạo reservation mới
             Reservation reservation = new Reservation();
             reservation.setPublicId(UUID.randomUUID().toString());
             reservation.setUserId(userId);
@@ -48,33 +51,49 @@ public class ReservationService {
             reservation.setNumberOfPeople(dto.getNumberOfPeople());
             reservation.setNote(dto.getNote());
 
-            // Default status = CONFIRMED
             Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "CONFIRMED")
                     .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
             reservation.setStatus(status);
+
             reservationRepository.save(reservation);
 
-            // Merge tables logic
+            // 2. Merge tables
             MergeTableResult result = mergeTables(dto.getTableIds(), dto.getNumberOfPeople());
             if (!result.isEnough()) {
-                throw new IllegalStateException(
-                        "Not enough seats for " + dto.getNumberOfPeople() + " people");
+                throw new IllegalStateException("Not enough seats for " + dto.getNumberOfPeople() + " people");
             }
 
-            // Mark tables occupied and link them
+            // 3. Pessimistic lock + kiểm tra bàn còn trống
+            List<TableEntity> tablesToReserve = tableRepository.findAllById(result.getAllocatedTables()
+                    .stream().map(TableEntity::getId).toList());
+
+            for (TableEntity table : tablesToReserve) {
+                if (!table.getStatus().getCode().equals("AVAILABLE")) {
+                    throw new IllegalStateException("Table " + table.getId() + " is already reserved");
+                }
+            }
+
+            // 4. Update status bàn
             Param occupiedStatus = paramRepository.findByTypeAndCode("STATUS_TABLE", "OCCUPIED")
                     .orElseThrow(() -> new ResourceNotFoundException("Status OCCUPIED not found"));
 
-            for (TableEntity table : result.getAllocatedTables()) {
-                table.setStatus(occupiedStatus); // ✅ thay vì setStatusId()
-                tableRepository.save(table);
+            tablesToReserve.forEach(table -> table.setStatus(occupiedStatus));
+            tableRepository.saveAll(tablesToReserve);
 
-                messagingTemplate.convertAndSend("/topic/tables",
-                        new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
-            }
-
-            reservation.setTables(new HashSet<>(result.getAllocatedTables()));
+            // 5. Link tables với reservation
+            reservation.setTables(new HashSet<>(tablesToReserve));
             reservationRepository.save(reservation);
+
+            // 6. Gửi WebSocket sau commit
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    for (TableEntity table : tablesToReserve) {
+                        messagingTemplate.convertAndSend("/topic/tables",
+                                new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
+                    }
+                }
+            });
 
             return new ReservationDto(reservation);
 
@@ -84,6 +103,7 @@ public class ReservationService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
 
     // ========================= READ =========================
     public Page<ReservationDto> findMyReservations(Long userId, String status, Pageable pageable) {
