@@ -80,9 +80,9 @@ public class PaymentService {
         PaymentDto dto = new PaymentDto(savedPayment);
         messagingTemplate.convertAndSend("/topic/payments", dto);
 
-        for (Long id : affectedMenuIds) {
-            messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
-        }
+            for (Long id : affectedMenuIds) {
+                messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
+            }
         return dto;
     }
 
