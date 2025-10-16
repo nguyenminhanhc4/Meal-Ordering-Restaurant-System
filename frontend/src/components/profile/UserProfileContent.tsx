@@ -1,5 +1,5 @@
 import { useAuth } from "../../store/AuthContext";
-import { useState, useEffect, type InputHTMLAttributes } from "react";
+import { useMemo, useState, useEffect, type InputHTMLAttributes } from "react";
 import api from "../../api/axios";
 import { useNotification } from "../../components/Notification";
 
@@ -34,24 +34,20 @@ export default function UserProfileContent() {
   const [editing, setEditing] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const { notify } = useNotification();
-  const [form, setForm] = useState({
-    name: user?.name || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
-    gender: user?.gender || "",
-    email: user?.email || "",
-  });
+  const initialForm = useMemo(() => {
+    return {
+      name: user?.name || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+      gender: user?.gender || "",
+      email: user?.email || "",
+    };
+  }, [user]);
+
+  const [form, setForm] = useState(initialForm);
 
   useEffect(() => {
-    if (user) {
-      setForm({
-        name: user.name || "",
-        phone: user.phone || "",
-        address: user.address || "",
-        gender: user.gender || "",
-        email: user.email || "",
-      });
-    }
+    setForm(initialForm);
   }, [user]);
 
   if (!user) return <p className="p-8 text-center">Đang tải thông tin...</p>;
@@ -190,7 +186,10 @@ export default function UserProfileContent() {
         {editing ? (
           <>
             <button
-              onClick={() => setEditing(false)}
+              onClick={() => {
+                setForm(initialForm); // reset về giá trị ban đầu
+                setEditing(false);
+              }}
               className="px-6 py-2.5 bg-white text-gray-700 font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition duration-150 shadow-sm">
               Hủy
             </button>
