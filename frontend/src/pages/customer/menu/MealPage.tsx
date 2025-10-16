@@ -110,12 +110,14 @@ const MealPage: React.FC = () => {
 
         {/* === Thanh tìm kiếm & bộ lọc === */}
         <Card className="mb-8 !bg-white !border-stone-400 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between gap-4 p-4 items-center">
-            <div className="w-full md:w-auto flex-1">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
+            {/* Search bar */}
+            <div className="flex-1 w-full md:w-auto">
               <SearchBar search={search} setSearch={setSearch} />
             </div>
 
-            <div className="mt-3 md:mt-0 md:ml-4 flex-none w-full md:w-auto">
+            {/* Sort filter */}
+            <div className="w-full md:w-auto flex-none">
               <SortFilter
                 sort={sort}
                 setSort={setSort}
@@ -123,14 +125,13 @@ const MealPage: React.FC = () => {
               />
             </div>
 
-            <div className="mt-3 md:mt-0 md:ml-4 flex-none w-full md:w-auto">
-              <Button
-                color="warning"
-                size="md"
-                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-lg transition-colors duration-200"
-                href="/menu">
+            {/* Button "Xem tất cả" */}
+            <div className="w-full md:w-auto flex-none">
+              <a
+                href="/menu"
+                className="block w-full md:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-colors duration-200">
                 Xem tất cả
-              </Button>
+              </a>
             </div>
           </div>
         </Card>

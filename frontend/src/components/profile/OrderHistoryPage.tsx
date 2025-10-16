@@ -6,6 +6,7 @@ import {
   FaCalendar,
   FaChevronUp,
   FaChevronDown,
+  FaLongArrowAltRight,
 } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
 import {
@@ -187,7 +188,9 @@ export default function OrderHistoryPage() {
               handleSearch();
             }}
           />
-          <span className="text-gray-400">→</span>
+          <span className="text-gray-400">
+            <FaLongArrowAltRight className="text-yellow-600" />
+          </span>
           <input
             type="date"
             className="border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
