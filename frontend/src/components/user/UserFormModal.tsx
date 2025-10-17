@@ -393,7 +393,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   return (
-    <Modal show={show} onClose={onClose} size="4xl" className="shadow-lg">
+    <Modal
+      show={show}
+      onClose={onClose}
+      size="4xl"
+      className="shadow-lg z-[70]">
       {/* 2. Dùng Modal.Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">

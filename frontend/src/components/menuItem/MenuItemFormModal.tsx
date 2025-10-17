@@ -60,7 +60,9 @@ export function MenuItemFormModal({
   });
 
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [selectedIngredients, setSelectedIngredients] = useState<IngredientSelection[]>([]);
+  const [selectedIngredients, setSelectedIngredients] = useState<
+    IngredientSelection[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,7 +73,7 @@ export function MenuItemFormModal({
     if (show) {
       const loadIngredients = async () => {
         try {
-          const response = await api.get('/ingredients');
+          const response = await api.get("/ingredients");
           if (response.data?.data) {
             setIngredients(response.data.data);
           } else if (response.data) {
@@ -90,11 +92,17 @@ export function MenuItemFormModal({
   // Reset form when modal opens/closes or menuItemData changes
   useEffect(() => {
     if (show) {
-      console.log("� STATUS DEBUG - Modal opened with statuses:", statuses.length, "items");
-      statuses.forEach(status => {
-        console.log(`📊 STATUS DEBUG - Form Status: ID=${status.id}, Code=${status.code}, Name=${status.name}`);
+      console.log(
+        "� STATUS DEBUG - Modal opened with statuses:",
+        statuses.length,
+        "items"
+      );
+      statuses.forEach((status) => {
+        console.log(
+          `📊 STATUS DEBUG - Form Status: ID=${status.id}, Code=${status.code}, Name=${status.name}`
+        );
       });
-      
+
       if (menuItemData) {
         // Edit mode
         setFormData({
@@ -109,7 +117,10 @@ export function MenuItemFormModal({
 
         // Load existing ingredients
         if (menuItemData.ingredients && menuItemData.ingredients.length > 0) {
-          console.log("🥬 Loading existing ingredients:", menuItemData.ingredients);
+          console.log(
+            "🥬 Loading existing ingredients:",
+            menuItemData.ingredients
+          );
           setSelectedIngredients(
             menuItemData.ingredients.map((ing) => ({
               ingredientId: ing.ingredientId,
@@ -124,8 +135,11 @@ export function MenuItemFormModal({
       } else {
         // Create mode
         console.log("➕ Setting form to create mode");
-        console.log("📊 STATUS DEBUG - Available statuses for create mode:", statuses);
-        
+        console.log(
+          "📊 STATUS DEBUG - Available statuses for create mode:",
+          statuses
+        );
+
         const defaultData = {
           name: "",
           description: "",
@@ -136,7 +150,10 @@ export function MenuItemFormModal({
           availableQuantity: 0,
         };
         console.log("📝 Default form data:", defaultData);
-        console.log("📊 STATUS DEBUG - Default statusId set to:", defaultData.statusId);
+        console.log(
+          "📊 STATUS DEBUG - Default statusId set to:",
+          defaultData.statusId
+        );
         setFormData(defaultData);
         setSelectedIngredients([]);
       }
@@ -144,15 +161,21 @@ export function MenuItemFormModal({
   }, [show, menuItemData, categories, statuses]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
-    const newValue = name === "price" || name === "categoryId" || name === "statusId" || name === "availableQuantity" 
-      ? Number(value) 
-      : value;
-    
+    const newValue =
+      name === "price" ||
+      name === "categoryId" ||
+      name === "statusId" ||
+      name === "availableQuantity"
+        ? Number(value)
+        : value;
+
     console.log(`📝 Form field changed: ${name} = ${newValue}`);
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
@@ -182,7 +205,11 @@ export function MenuItemFormModal({
     setSelectedIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateIngredient = (index: number, field: keyof IngredientSelection, value: string | number) => {
+  const updateIngredient = (
+    index: number,
+    field: keyof IngredientSelection,
+    value: string | number
+  ) => {
     setSelectedIngredients((prev) =>
       prev.map((ing, i) => {
         if (i === index) {
@@ -211,17 +238,17 @@ export function MenuItemFormModal({
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith("image/")) {
         notify("error", "Please select a valid image file");
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         notify("error", "Image size must be less than 5MB");
         return;
       }
-      
+
       setSelectedFile(file);
       uploadImageToCloudinary(file);
     }
@@ -230,177 +257,217 @@ export function MenuItemFormModal({
   // Upload image to Cloudinary
   const uploadImageToCloudinary = async (file: File) => {
     setUploadingImage(true);
-    
+
     try {
       console.log("📤 Uploading file:", file.name, file.size, file.type);
-      
+
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append("image", file);
 
       console.log("🌐 Calling API: POST /menu-items/upload-image");
-      
+
       // Try new endpoint first
       let response;
       try {
-        response = await api.post('/menu-items/upload-image', formData, {
+        response = await api.post("/menu-items/upload-image", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
       } catch (uploadError) {
         console.warn("❌ New upload endpoint failed, trying fallback...");
         // Fallback: For now, just show a placeholder URL and let user input manually
-        notify("warning", "Upload feature requires backend restart. Please enter image URL manually for now.");
+        notify(
+          "warning",
+          "Upload feature requires backend restart. Please enter image URL manually for now."
+        );
         return;
       }
 
       console.log("✅ Upload response:", response.data);
 
       if (response.data?.data) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          avatarUrl: response.data.data
+          avatarUrl: response.data.data,
         }));
         notify("success", "Image uploaded successfully");
         console.log("🖼️ Image URL set:", response.data.data);
       }
     } catch (error) {
       console.error("❌ Error uploading image:", error);
-      
+
       // Log detailed error information
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { 
-          status?: number; 
-          message?: string; 
-          response?: { data?: { message?: string; error?: string } }; 
-          config?: { url?: string } 
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          status?: number;
+          message?: string;
+          response?: { data?: { message?: string; error?: string } };
+          config?: { url?: string };
         };
         console.error("📊 UPLOAD DEBUG - Error details:");
         console.error("  - Status:", axiosError.status);
         console.error("  - URL:", axiosError.config?.url);
         console.error("  - Response data:", axiosError.response?.data);
-        
+
         if (axiosError.status === 500) {
-          notify("error", "Server error during upload. Please restart backend and try again.");
+          notify(
+            "error",
+            "Server error during upload. Please restart backend and try again."
+          );
         } else if (axiosError.response?.data?.message) {
           notify("error", `Upload failed: ${axiosError.response.data.message}`);
         } else {
           notify("error", `Upload failed: ${axiosError.message}`);
         }
       } else {
-        notify("error", "Failed to upload image. Please check if backend is running.");
+        notify(
+          "error",
+          "Failed to upload image. Please check if backend is running."
+        );
       }
     } finally {
       setUploadingImage(false);
       setSelectedFile(null);
       // Reset file input
-      const fileInput = document.getElementById('avatarFile') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
+      const fileInput = document.getElementById(
+        "avatarFile"
+      ) as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log("🚀 Submitting form with data:", formData);
     console.log("🥬 Selected ingredients:", selectedIngredients);
-    
+
     if (!formData.name.trim()) {
       notify("error", "Menu item name is required");
       return;
     }
-    
+
     if (formData.price <= 0) {
       notify("error", "Price must be greater than 0");
       return;
     }
-    
+
     if (!formData.categoryId) {
       notify("error", "Category is required");
       return;
     }
-    
+
     if (!formData.statusId) {
       notify("error", "Status is required");
       return;
     }
 
     // Validate statusId exists in available statuses
-    const validStatus = statuses.find(s => s.id === formData.statusId);
+    const validStatus = statuses.find((s) => s.id === formData.statusId);
     if (!validStatus) {
       console.error("📊 STATUS DEBUG - Invalid statusId:", formData.statusId);
-      console.error("📊 STATUS DEBUG - Available status IDs:", statuses.map(s => s.id));
+      console.error(
+        "📊 STATUS DEBUG - Available status IDs:",
+        statuses.map((s) => s.id)
+      );
       notify("error", "Selected status is invalid");
       return;
     }
     console.log("📊 STATUS DEBUG - Valid status selected:", validStatus);
 
     setLoading(true);
-    
+
     try {
       if (menuItemData) {
         // Update existing menu item
         const updateData: MenuItemUpdateDTO = {
           ...formData,
-          ingredients: selectedIngredients.map((ing) => ({
-            ingredientId: ing.ingredientId,
-            quantityNeeded: ing.quantityNeeded,
-          } as MenuItemIngredientUpdateDTO)),
+          ingredients: selectedIngredients.map(
+            (ing) =>
+              ({
+                ingredientId: ing.ingredientId,
+                quantityNeeded: ing.quantityNeeded,
+              } as MenuItemIngredientUpdateDTO)
+          ),
         };
 
         console.log("✏️ Updating menu item with data:", updateData);
-        const response = await api.put(`/menu-items/admin/${menuItemData.id}`, updateData);
+        const response = await api.put(
+          `/menu-items/admin/${menuItemData.id}`,
+          updateData
+        );
         console.log("✅ Update response:", response.data);
         notify("success", "Menu item updated successfully");
       } else {
         // Create new menu item
         const createData: MenuItemCreateDTO = {
           ...formData,
-          ingredients: selectedIngredients.map((ing) => ({
-            ingredientId: ing.ingredientId,
-            quantityNeeded: ing.quantityNeeded,
-          } as MenuItemIngredientCreateDTO)),
+          ingredients: selectedIngredients.map(
+            (ing) =>
+              ({
+                ingredientId: ing.ingredientId,
+                quantityNeeded: ing.quantityNeeded,
+              } as MenuItemIngredientCreateDTO)
+          ),
         };
 
         console.log("➕ Creating menu item with data:", createData);
         console.log("📊 STATUS DEBUG - Available statuses for validation:");
-        statuses.forEach(s => console.log(`  - Status ID=${s.id}, Code=${s.code}`));
-        console.log("📊 STATUS DEBUG - Selected statusId in form:", createData.statusId);
-        
+        statuses.forEach((s) =>
+          console.log(`  - Status ID=${s.id}, Code=${s.code}`)
+        );
+        console.log(
+          "📊 STATUS DEBUG - Selected statusId in form:",
+          createData.statusId
+        );
+
         const response = await api.post("/menu-items/admin", createData);
         console.log("✅ Create response:", response.data);
         notify("success", "Menu item created successfully");
       }
-      
+
       onSuccess();
     } catch (error: unknown) {
       console.error("❌ Error saving menu item:", error);
-      
+
       // Log detailed error information for debugging
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { 
-          status?: number; 
-          message?: string; 
-          response?: { data?: { message?: string } }; 
-          config?: { data?: string } 
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          status?: number;
+          message?: string;
+          response?: { data?: { message?: string } };
+          config?: { data?: string };
         };
         console.error("📊 STATUS DEBUG - Error details:");
         console.error("  - Status:", axiosError.status);
         console.error("  - Response data:", axiosError.response?.data);
         console.error("  - Request data:", axiosError.config?.data);
-        
+
         if (axiosError.response?.data?.message) {
-          console.error("📊 STATUS DEBUG - Backend error message:", axiosError.response.data.message);
+          console.error(
+            "📊 STATUS DEBUG - Backend error message:",
+            axiosError.response.data.message
+          );
           if (axiosError.response.data.message.includes("getInventory")) {
-            notify("error", "Backend inventory error. Please check if inventory table exists and has proper setup.");
+            notify(
+              "error",
+              "Backend inventory error. Please check if inventory table exists and has proper setup."
+            );
           } else {
-            notify("error", `Failed to save menu item: ${axiosError.response.data.message}`);
+            notify(
+              "error",
+              `Failed to save menu item: ${axiosError.response.data.message}`
+            );
           }
         } else {
           notify("error", `Failed to save menu item: ${axiosError.message}`);
         }
       } else {
-        notify("error", `Failed to save menu item: ${(error as Error).message}`);
+        notify(
+          "error",
+          `Failed to save menu item: ${(error as Error).message}`
+        );
       }
     } finally {
       setLoading(false);
@@ -408,7 +475,11 @@ export function MenuItemFormModal({
   };
 
   return (
-    <Modal show={show} onClose={onClose} size="5xl" className="shadow-lg">
+    <Modal
+      show={show}
+      onClose={onClose}
+      size="5xl"
+      className="shadow-lg z-[70]">
       {/* Modal Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
@@ -423,7 +494,9 @@ export function MenuItemFormModal({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
             {/* Name */}
             <div className="lg:col-span-1">
-              <Label htmlFor="name" className="mb-2 block text-sm font-medium !text-gray-700">
+              <Label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium !text-gray-700">
                 Name *
               </Label>
               <TextInput
@@ -446,7 +519,9 @@ export function MenuItemFormModal({
 
             {/* Price */}
             <div className="lg:col-span-1">
-              <Label htmlFor="price" className="mb-2 block text-sm font-medium !text-gray-700">
+              <Label
+                htmlFor="price"
+                className="mb-2 block text-sm font-medium !text-gray-700">
                 Price (VND) *
               </Label>
               <TextInput
@@ -472,7 +547,9 @@ export function MenuItemFormModal({
 
             {/* Available Quantity */}
             <div className="lg:col-span-1">
-              <Label htmlFor="availableQuantity" className="mb-2 block text-sm font-medium !text-gray-700">
+              <Label
+                htmlFor="availableQuantity"
+                className="mb-2 block text-sm font-medium !text-gray-700">
                 Available Quantity
               </Label>
               <TextInput
@@ -498,7 +575,9 @@ export function MenuItemFormModal({
           {/* Category and Status Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
-              <Label htmlFor="categoryId" className="mb-2 block text-sm font-medium !text-gray-700">
+              <Label
+                htmlFor="categoryId"
+                className="mb-2 block text-sm font-medium !text-gray-700">
                 Category *
               </Label>
               <Select
@@ -525,7 +604,9 @@ export function MenuItemFormModal({
             </div>
 
             <div>
-              <Label htmlFor="statusId" className="mb-2 block text-sm font-medium !text-gray-700">
+              <Label
+                htmlFor="statusId"
+                className="mb-2 block text-sm font-medium !text-gray-700">
                 Status *
               </Label>
               <Select
@@ -554,7 +635,9 @@ export function MenuItemFormModal({
 
           {/* Description */}
           <div>
-            <Label htmlFor="description" className="mb-2 block text-sm font-medium !text-gray-700">
+            <Label
+              htmlFor="description"
+              className="mb-2 block text-sm font-medium !text-gray-700">
               Description
             </Label>
             <Textarea
@@ -579,7 +662,9 @@ export function MenuItemFormModal({
             <div className="space-y-4">
               {/* File Upload */}
               <div>
-                <Label htmlFor="avatarFile" className="mb-2 block text-sm font-medium !text-gray-700">
+                <Label
+                  htmlFor="avatarFile"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Upload Image File:
                 </Label>
                 <input
@@ -601,10 +686,12 @@ export function MenuItemFormModal({
                   Max file size: 5MB. Supported formats: JPG, PNG, GIF
                 </div>
               </div>
-              
+
               {/* Manual URL Input */}
               <div>
-                <Label htmlFor="avatarUrl" className="mb-2 block text-sm font-medium !text-gray-700">
+                <Label
+                  htmlFor="avatarUrl"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Or enter image URL manually:
                 </Label>
                 <TextInput
@@ -623,7 +710,7 @@ export function MenuItemFormModal({
                   }}
                 />
               </div>
-              
+
               {/* Upload Status */}
               {uploadingImage && (
                 <div className="flex items-center text-sm text-cyan-600">
@@ -631,18 +718,18 @@ export function MenuItemFormModal({
                   Uploading image...
                 </div>
               )}
-              
+
               {/* Image Preview */}
               {formData.avatarUrl && (
                 <div className="space-y-2">
                   <div className="text-sm text-gray-600">Current image:</div>
                   <div className="flex items-start space-x-3">
-                    <img 
-                      src={formData.avatarUrl} 
-                      alt="Preview" 
+                    <img
+                      src={formData.avatarUrl}
+                      alt="Preview"
                       className="w-20 h-20 object-cover rounded-lg border-2 border-cyan-400"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.style.display = "none";
                       }}
                     />
                     <div className="flex-1">
@@ -657,9 +744,11 @@ export function MenuItemFormModal({
           </div>
 
           {/* Ingredients Section */}
-          <Card className="bg-white border border-gray-300">
+          <Card className="!bg-white border !border-gray-300">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold !text-gray-700">Ingredients</h3>
+              <h3 className="text-lg font-semibold !text-gray-700">
+                Ingredients
+              </h3>
               <Button
                 type="button"
                 size="sm"
@@ -672,16 +761,24 @@ export function MenuItemFormModal({
             </div>
 
             {selectedIngredients.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No ingredients added yet</p>
+              <p className="text-gray-500 text-center py-4">
+                No ingredients added yet
+              </p>
             ) : (
               <div className="space-y-3">
                 {selectedIngredients.map((ingredient, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="flex-1">
                       <Select
                         value={ingredient.ingredientId}
                         onChange={(e) =>
-                          updateIngredient(index, "ingredientId", Number(e.target.value))
+                          updateIngredient(
+                            index,
+                            "ingredientId",
+                            Number(e.target.value)
+                          )
                         }
                         theme={{
                           field: {
@@ -691,11 +788,13 @@ export function MenuItemFormModal({
                           },
                         }}>
                         <option value={0}>Select Ingredient</option>
-                        {getAvailableIngredients(ingredient.ingredientId).map((ing) => (
-                          <option key={ing.id} value={ing.id}>
-                            {ing.name} ({ing.unit})
-                          </option>
-                        ))}
+                        {getAvailableIngredients(ingredient.ingredientId).map(
+                          (ing) => (
+                            <option key={ing.id} value={ing.id}>
+                              {ing.name} ({ing.unit})
+                            </option>
+                          )
+                        )}
                       </Select>
                     </div>
                     <div className="w-32">
@@ -705,7 +804,11 @@ export function MenuItemFormModal({
                         step="0.1"
                         value={ingredient.quantityNeeded}
                         onChange={(e) =>
-                          updateIngredient(index, "quantityNeeded", Number(e.target.value))
+                          updateIngredient(
+                            index,
+                            "quantityNeeded",
+                            Number(e.target.value)
+                          )
                         }
                         placeholder="Quantity"
                         theme={{
@@ -733,7 +836,11 @@ export function MenuItemFormModal({
 
         {/* Modal Footer */}
         <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
-          <Button color="red" onClick={onClose} disabled={loading} className="text-gray-50">
+          <Button
+            color="red"
+            onClick={onClose}
+            disabled={loading}
+            className="text-gray-50">
             Cancel
           </Button>
           <Button

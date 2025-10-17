@@ -20,7 +20,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = "Cancel",
 }) => {
   return (
-    <Modal show={show} size="md" onClose={onClose} popup dismissible>
+    <Modal
+      show={show}
+      size="md"
+      onClose={onClose}
+      popup
+      dismissible
+      className="z-[70]">
       <div className="p-6 text-center">
         <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-red-600" />
         <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
