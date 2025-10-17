@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.order.OrderItem;
+import org.example.backend.entity.param.Param;
 import org.example.backend.repository.order.OrderRepository;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +35,9 @@ public class OrderHistoryService {
             }
 
             if (status != null && !status.isEmpty()) {
-                predicate = cb.and(predicate, cb.equal(root.get("status").get("code"), status));
+                Join<Order, Param> statusJoin = root.join("status");
+                predicate = cb.and(predicate, cb.equal(statusJoin.get("code"), status));
+
             }
 
             if (fromDate != null) {

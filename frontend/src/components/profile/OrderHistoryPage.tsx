@@ -59,7 +59,6 @@ export default function OrderHistoryPage() {
 
       notify("success", "Đã thêm món vào giỏ hàng!");
       await fetchCart();
-      // navigate("/cart");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const msg = error.response?.data?.message ?? error.message;
@@ -70,12 +69,13 @@ export default function OrderHistoryPage() {
     }
   };
 
-  // Trạng thái collapse cho từng đơn
   const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>(
     {}
   );
 
   const loadOrders = async (pageNumber = 0) => {
+    console.log("🚀 [loadOrders] page =", pageNumber);
+    console.log("🧩 [loadOrders] filters:", filters);
     setLoading(true);
     try {
       const data = await fetchOrderHistory({
@@ -83,6 +83,7 @@ export default function OrderHistoryPage() {
         size: 5,
         ...filters,
       });
+      console.log("✅ [loadOrders] response:", data);
       setOrders(data.content);
       setTotalPages(data.totalPages);
       setPage(data.number);
@@ -91,17 +92,16 @@ export default function OrderHistoryPage() {
     }
   };
 
+  // Chỉ useEffect gọi loadOrders, không gọi handleSearch trong onChange
   useEffect(() => {
-    loadOrders(page);
+    loadOrders(0);
   }, [filters]);
 
   /** WebSocket realtime cho từng món */
   useEffect(() => {
     if (!orders?.length) return;
 
-    // Lấy tất cả menuItemIds trong orders
     const itemIds = orders.flatMap((o) => o.items.map((i) => i.menuItemId));
-
     const clients = itemIds.map((id) =>
       connectWebSocket<{ menuItemId: number; status: string }>(
         `/topic/menu/${id}`,
@@ -124,10 +124,6 @@ export default function OrderHistoryPage() {
       clients.forEach((c) => c.deactivate());
     };
   }, [orders]);
-
-  const handleSearch = () => {
-    loadOrders(0);
-  };
 
   const toggleExpand = (orderId: number) => {
     setExpandedOrders((prev) => ({
@@ -152,10 +148,9 @@ export default function OrderHistoryPage() {
             placeholder="Tìm món..."
             className="border border-green-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-green-400 outline-none"
             value={filters.keyword}
-            onChange={(e) => {
-              setFilters((prev) => ({ ...prev, keyword: e.target.value }));
-              handleSearch(); // tự động load khi thay đổi
-            }}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, keyword: e.target.value }))
+            }
           />
         </div>
 
@@ -165,28 +160,26 @@ export default function OrderHistoryPage() {
           <select
             className="border border-blue-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
             value={filters.status}
-            onChange={(e) => {
-              setFilters((prev) => ({ ...prev, status: e.target.value }));
-              handleSearch();
-            }}>
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, status: e.target.value }))
+            }>
             <option value="">Tất cả</option>
             <option value="PAID">Đã thanh toán</option>
             <option value="PENDING">Chờ xác nhận</option>
-            <option value="CANCELLED">Đã hủy</option>
+            <option value="FAILED">Đã hủy</option>
           </select>
         </div>
 
-        {/* From date */}
+        {/* From - To date */}
         <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-200 shadow-sm">
           <FaCalendar className="w-5 h-5 text-yellow-600" />
           <input
             type="date"
             className="border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
             value={filters.fromDate}
-            onChange={(e) => {
-              setFilters((prev) => ({ ...prev, fromDate: e.target.value }));
-              handleSearch();
-            }}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, fromDate: e.target.value }))
+            }
           />
           <span className="text-gray-400">
             <FaLongArrowAltRight className="text-yellow-600" />
@@ -195,10 +188,9 @@ export default function OrderHistoryPage() {
             type="date"
             className="border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
             value={filters.toDate}
-            onChange={(e) => {
-              setFilters((prev) => ({ ...prev, toDate: e.target.value }));
-              handleSearch();
-            }}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, toDate: e.target.value }))
+            }
           />
         </div>
       </div>
@@ -279,7 +271,6 @@ export default function OrderHistoryPage() {
                 </div>
 
                 <div className="flex items-center mt-3">
-                  {/* Collapse / Xem tất cả */}
                   {order.items.length > maxVisible && (
                     <button
                       className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-800 transition rounded px-2 py-1 bg-blue-50 hover:bg-blue-100"
@@ -295,10 +286,8 @@ export default function OrderHistoryPage() {
                     </button>
                   )}
 
-                  {/* Spacer để đẩy nút Đặt lại sang phải */}
                   <div className="flex-grow" />
 
-                  {/* Nút Đặt lại luôn nằm bên phải */}
                   <button
                     className="text-sm text-white font-medium rounded px-3 py-1 bg-amber-600 hover:bg-amber-700 transition"
                     onClick={() => handleReorder(order.id)}>
