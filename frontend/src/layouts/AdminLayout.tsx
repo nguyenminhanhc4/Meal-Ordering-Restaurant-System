@@ -39,6 +39,8 @@ function AdminLayout() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const sidebarWidth = isSidebarOpen ? "w-80" : "w-[80px]";
+
   if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
@@ -57,16 +59,6 @@ function AdminLayout() {
     return null;
   }
 
-  // -------------------- LOGIC CSS CẢI TIẾN --------------------
-  const mobileSidebarClasses = isSidebarOpen
-    ? "fixed inset-y-0 left-0 translate-x-0" // Mở trên mobile
-    : "fixed inset-y-0 left-0 -translate-x-full"; // Ẩn hoàn toàn trên mobile
-
-  // Desktop
-  const desktopSidebarClasses = isSidebarOpen
-    ? "relative w-80" // Mở trên desktop
-    : "relative w-[72px]"; // Thu gọn trên desktop (chỉ hiện icon)
-  // -----------------------------------------------------------
   return (
     <section className="admin-layout">
       {isSidebarOpen && (
@@ -79,19 +71,13 @@ function AdminLayout() {
         <Sidebar
           aria-label="Sidebar"
           className={`
-          flex-shrink-0 
-          transition-all 
-          duration-300 
-          ease-in-out 
-          z-40 
-          h-full 
-          border-r shadow-lg 
+            flex-shrink-0 
+            transition-all duration-300 ease-in-out 
+            z-40 h-full border-r shadow-lg
           !bg-gray-900 !text-gray-100 
-          ${mobileSidebarClasses} /* Mobile */
-          ${desktopSidebarClasses} /* Desktop */
-          overflow-y-auto /* Quan trọng để cuộn */
-          overflow-x-hidden /* Quan trọng để tránh thanh cuộn ngang */
-        `}
+            ${sidebarWidth}
+            overflow-y-auto overflow-x-hidden
+            `}
           theme={{
             root: {
               inner: "h-full !bg-gray-900 !text-gray-100",
@@ -116,7 +102,7 @@ function AdminLayout() {
             img={`${logo}`}
             imgAlt="Logo"
             className="!text-white">
-            Admin Panel
+            {isSidebarOpen && <span>Admin Panel</span>}
           </SidebarLogo>
 
           <SidebarItems>
@@ -125,42 +111,42 @@ function AdminLayout() {
                 onClick={() => navigate("/admin/dashboard")}
                 className="hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200"
                 icon={HiChartPie}>
-                Dashboard
+                {isSidebarOpen && <span>Dashboard</span>}
               </SidebarItem>
 
               <SidebarItem
                 onClick={() => navigate("/admin/users")}
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiUser}>
-                Users
+                {isSidebarOpen && <span>Users</span>}
               </SidebarItem>
 
               <SidebarItem
                 onClick={() => navigate("/admin/categories")}
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiCollection}>
-                Categories
+                {isSidebarOpen && <span>Categories</span>}
               </SidebarItem>
 
               <SidebarItem
                 onClick={() => navigate("/admin/menu-items")}
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiMenuAlt1}>
-                Menu Items
+                {isSidebarOpen && <span>Menu Items</span>}
               </SidebarItem>
 
               <SidebarItem
                 onClick={() => navigate("/admin/orders")}
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiShoppingBag}>
-                Orders
+                {isSidebarOpen && <span>Orders</span>}
               </SidebarItem>
 
               <SidebarItem
                 onClick={() => navigate("/admin/settings")}
                 className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
                 icon={HiCog}>
-                Settings
+                {isSidebarOpen && <span>Settings</span>}
               </SidebarItem>
             </SidebarItemGroup>
           </SidebarItems>
