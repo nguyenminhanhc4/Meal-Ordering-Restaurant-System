@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import {
   Navbar,
@@ -32,6 +32,7 @@ import "./AdminLayout.css";
 function AdminLayout() {
   const { user, logout, isChecking, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
 
@@ -39,7 +40,18 @@ function AdminLayout() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const sidebarWidth = isSidebarOpen ? "w-80" : "w-[80px]";
+  // Giảm chiều rộng Sidebar để đỡ chiếm chỗ
+  const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
+
+  // Menu cấu hình
+  const menuItems = [
+    { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
+    { path: "/admin/users", label: "Users", icon: HiUser },
+    { path: "/admin/categories", label: "Categories", icon: HiCollection },
+    { path: "/admin/menu-items", label: "Menu Items", icon: HiMenuAlt1 },
+    { path: "/admin/orders", label: "Orders", icon: HiShoppingBag },
+    { path: "/admin/settings", label: "Settings", icon: HiCog },
+  ];
 
   if (isChecking) {
     return (
@@ -66,18 +78,18 @@ function AdminLayout() {
           className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
           onClick={toggleSidebar}></div>
       )}
+
       <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar
           aria-label="Sidebar"
           className={`
-            flex-shrink-0 
-            transition-all duration-300 ease-in-out 
+            flex-shrink-0 transition-all duration-300 ease-in-out 
             z-40 h-full border-r shadow-lg
-          !bg-gray-900 !text-gray-100 
+            !bg-gray-900 !text-gray-100 
             ${sidebarWidth}
             overflow-y-auto overflow-x-hidden
-            `}
+          `}
           theme={{
             root: {
               inner: "h-full !bg-gray-900 !text-gray-100",
@@ -87,7 +99,7 @@ function AdminLayout() {
               base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
             },
           }}>
-          {/* Nút đóng Sidebar trên mobile */}
+          {/* Nút đóng Sidebar (mobile) */}
           <div className="flex justify-end p-2 md:hidden">
             <Button
               color="gray"
@@ -97,57 +109,56 @@ function AdminLayout() {
             </Button>
           </div>
 
+          {/* Logo */}
           <SidebarLogo
             href="/admin/dashboard"
             img={`${logo}`}
             imgAlt="Logo"
-            className="!text-white">
-            {isSidebarOpen && <span>Admin Panel</span>}
+            className={`!text-white flex items-center py-3 ${
+              isSidebarOpen ? "px-4" : "justify-center"
+            }`}>
+            {isSidebarOpen && (
+              <span className="ml-2 text-lg font-semibold tracking-wide">
+                Admin Panel
+              </span>
+            )}
           </SidebarLogo>
 
+          {/* Menu items */}
           <SidebarItems>
             <SidebarItemGroup>
-              <SidebarItem
-                onClick={() => navigate("/admin/dashboard")}
-                className="hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200"
-                icon={HiChartPie}>
-                {isSidebarOpen && <span>Dashboard</span>}
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/users")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiUser}>
-                {isSidebarOpen && <span>Users</span>}
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/categories")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiCollection}>
-                {isSidebarOpen && <span>Categories</span>}
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/menu-items")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiMenuAlt1}>
-                {isSidebarOpen && <span>Menu Items</span>}
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/orders")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiShoppingBag}>
-                {isSidebarOpen && <span>Orders</span>}
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/settings")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiCog}>
-                {isSidebarOpen && <span>Settings</span>}
-              </SidebarItem>
+              {menuItems.map(({ path, label, icon: Icon }) => {
+                const isActive = location.pathname === path;
+                return (
+                  <div key={path} className="relative group">
+                    <SidebarItem
+                      onClick={() => {
+                        navigate(path);
+                        if (window.innerWidth < 768) setIsSidebarOpen(false);
+                      }}
+                      className={`
+                        relative transition-all duration-200 cursor-pointer select-none text-gray-300
+                        ${
+                          isActive
+                            ? "!bg-gray-800 !text-white font-semibold border-l-4 border-blue-500"
+                            : "hover:!bg-gray-800 hover:!text-white"
+                        }
+                      `}>
+                      <div
+                        className={`flex items-center ${
+                          isSidebarOpen
+                            ? "gap-3 px-3 py-2"
+                            : "justify-center py-2"
+                        }`}>
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {isSidebarOpen && (
+                          <span className="truncate text-sm">{label}</span>
+                        )}
+                      </div>
+                    </SidebarItem>
+                  </div>
+                );
+              })}
             </SidebarItemGroup>
           </SidebarItems>
         </Sidebar>
@@ -158,7 +169,6 @@ function AdminLayout() {
           <Navbar
             fluid
             className="border-b !border-gray-200 !bg-white shadow-sm">
-            {/* NÚT HAMBURGER MỚI */}
             <div className="flex items-center">
               <Button
                 onClick={toggleSidebar}
@@ -206,7 +216,7 @@ function AdminLayout() {
             </div>
           </Navbar>
 
-          {/* Main Content */}
+          {/* Main content */}
           <main className="admin-content">
             <Outlet />
           </main>
