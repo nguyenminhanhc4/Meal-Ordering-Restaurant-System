@@ -14,6 +14,7 @@ import {
   DropdownItem,
   DropdownDivider,
   Button,
+  Tooltip,
 } from "flowbite-react";
 import { useAuth } from "../store/AuthContext";
 import {
@@ -84,16 +85,15 @@ function AdminLayout() {
         <Sidebar
           aria-label="Sidebar"
           className={`
-            flex-shrink-0 transition-all duration-300 ease-in-out 
-            z-40 h-full border-r shadow-lg
-            !bg-gray-900 !text-gray-100 
-            ${sidebarWidth}
-            overflow-y-auto overflow-x-hidden
-          `}
+    flex-shrink-0 transition-all duration-300 ease-in-out 
+    z-[60] h-full border-r shadow-lg
+    ${sidebarWidth}
+  `}
           theme={{
             root: {
-              inner: "h-full !bg-gray-900 !text-gray-100",
-              base: "h-full",
+              inner:
+                "h-full !bg-gray-900 !text-gray-100 relative !overflow-visible",
+              base: "h-full relative !rounded-l-none",
             },
             item: {
               base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
@@ -129,30 +129,61 @@ function AdminLayout() {
             <SidebarItemGroup>
               {menuItems.map(({ path, label, icon: Icon }) => {
                 const isActive = location.pathname === path;
+
                 return (
-                  <div key={path} className="relative group">
+                  <div key={path} className="relative">
                     <SidebarItem
                       onClick={() => {
                         navigate(path);
                         if (window.innerWidth < 768) setIsSidebarOpen(false);
                       }}
                       className={`
-                        relative transition-all duration-200 cursor-pointer select-none text-gray-300
-                        ${
-                          isActive
-                            ? "!bg-gray-800 !text-white font-semibold border-l-4 border-blue-500"
-                            : "hover:!bg-gray-800 hover:!text-white"
-                        }
-                      `}>
+          relative transition-all duration-200 cursor-pointer select-none text-gray-300
+          ${
+            isActive
+              ? "!bg-gray-800 !text-white font-semibold border-l-4 border-blue-500"
+              : "hover:!bg-gray-800 hover:!text-white"
+          }
+        `}>
                       <div
                         className={`flex items-center ${
                           isSidebarOpen
-                            ? "gap-3 px-3 py-2"
-                            : "justify-center py-2"
+                            ? "gap-3 px-3 py-2 justify-start"
+                            : "justify-center py-3"
                         }`}>
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        {/* Tooltip chỉ hiển thị khi sidebar đóng */}
+                        {!isSidebarOpen ? (
+                          <Tooltip
+                            content={label}
+                            placement="right"
+                            trigger="hover"
+                            animation="duration-300"
+                            theme={{
+                              target: "inline-flex",
+                              base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                              style: {
+                                dark: "!bg-blue-600 !text-white",
+                                light: "!bg-blue-600 !text-white",
+                              },
+                              arrow: {
+                                style: {
+                                  dark: "!bg-blue-600",
+                                  light: "!bg-blue-600",
+                                },
+                              },
+                            }}>
+                            <div>
+                              <Icon className="w-5 h-5 flex-shrink-0" />
+                            </div>
+                          </Tooltip>
+                        ) : (
+                          <Icon className="w-5 h-5 flex-shrink-0" />
+                        )}
+
                         {isSidebarOpen && (
-                          <span className="truncate text-sm">{label}</span>
+                          <span className="truncate text-sm leading-none">
+                            {label}
+                          </span>
                         )}
                       </div>
                     </SidebarItem>
