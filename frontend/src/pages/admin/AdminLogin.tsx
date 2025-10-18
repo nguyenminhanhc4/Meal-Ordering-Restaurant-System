@@ -29,11 +29,11 @@ function AdminLogin() {
 
       console.log(user?.role);
 
-      if (user?.role === "ADMIN") {
-        notify("success", "Đăng nhập admin thành công!");
+      if (user?.role === "ADMIN" || user?.role === "STAFF") {
+        notify("success", "Đăng nhập thành công!");
         navigate("/admin/dashboard");
       } else {
-        notify("error", "Bạn không có quyền admin!");
+        notify("error", "Bạn không có quyền!");
       }
     } catch (err) {
       if (err instanceof AxiosError) {

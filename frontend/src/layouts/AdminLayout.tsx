@@ -212,7 +212,7 @@ function AdminLayout() {
               ))}
             </SidebarItemGroup>
 
-            <hr className="my-2 border-gray-700" />
+            {/* <hr className="my-2 border-gray-700" /> */}
 
             {/* 🔹 Menu riêng ADMIN */}
             {user?.role === "ADMIN" && (
