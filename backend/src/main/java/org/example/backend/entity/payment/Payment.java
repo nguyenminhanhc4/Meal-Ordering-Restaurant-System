@@ -5,6 +5,7 @@ import lombok.*;
 import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.order.Order;
+import org.example.backend.entity.user.ShippingInfo;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -41,6 +42,9 @@ public class Payment extends BaseEntity {
     private Param status;
 
     private String transactionId;
+
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ShippingInfo shippingInfo;
 
     // ----------------- Thêm cho Mock Gateway -----------------
     @Column(nullable = false, unique = true)

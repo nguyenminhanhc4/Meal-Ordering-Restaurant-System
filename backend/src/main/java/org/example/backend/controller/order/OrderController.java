@@ -3,10 +3,14 @@ package org.example.backend.controller.order;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
+import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.service.order.OrderService;
 import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +27,21 @@ public class OrderController {
     @Autowired
     private JwtUtil jwtUtil;
 
+//    @GetMapping
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> getAll() {
+//        List<OrderDto> orders = orderService.findAll();
+//        return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
+//    }
+
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAll() {
-        List<OrderDto> orders = orderService.findAll();
-        return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
+    public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<OrderResponseDTO> orders = orderService.getAllOrders(status, keyword, pageable);
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping("/checkout")

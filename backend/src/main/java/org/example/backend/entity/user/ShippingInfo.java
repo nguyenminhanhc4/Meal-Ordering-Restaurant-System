@@ -18,12 +18,11 @@ import java.time.LocalDateTime;
 @Table(name = "shipping_info")
 @Data
 public class ShippingInfo extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 

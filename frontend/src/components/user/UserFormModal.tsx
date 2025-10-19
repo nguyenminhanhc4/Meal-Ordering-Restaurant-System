@@ -254,11 +254,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               }
             );
 
-            if (!avatarResponse.data.data?.url) {
+            if (!avatarResponse.data.avatarUrl) {
               throw new Error("No URL returned from upload");
             }
 
-            avatarUrl = avatarResponse.data.data.url;
+            avatarUrl = avatarResponse.data.avatarUrl;
             console.log("Avatar update response:", avatarResponse.data);
           } else {
             // For new user, upload avatar first
@@ -272,11 +272,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
               }
             );
 
-            if (!uploadResponse.data.data?.url) {
+            if (!uploadResponse.data.avatarUrl) {
               throw new Error("No URL returned from upload");
             }
 
-            avatarUrl = uploadResponse.data.data.url;
+            avatarUrl = uploadResponse.data.avatarUrl;
             console.log("Avatar upload response:", uploadResponse.data);
           }
         } catch (error) {
@@ -393,7 +393,11 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   return (
-    <Modal show={show} onClose={onClose} size="4xl" className="shadow-lg">
+    <Modal
+      show={show}
+      onClose={onClose}
+      size="4xl"
+      className="shadow-lg z-[70]">
       {/* 2. Dùng Modal.Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">

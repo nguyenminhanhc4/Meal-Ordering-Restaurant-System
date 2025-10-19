@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import {
   Navbar,
@@ -14,30 +14,87 @@ import {
   DropdownItem,
   DropdownDivider,
   Button,
+  Tooltip,
 } from "flowbite-react";
 import { useAuth } from "../store/AuthContext";
 import {
   HiChartPie,
   HiUser,
-  HiShoppingBag,
   HiCog,
   HiLogout,
   HiCollection,
   HiMenuAlt1,
   HiX,
+  HiFolder,
+  HiFolderOpen,
+  HiMenu,
 } from "react-icons/hi";
+import { FaChair } from "react-icons/fa";
+import { MdFastfood } from "react-icons/md";
 import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
+
+interface SidebarItemButtonProps {
+  path: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
 
 function AdminLayout() {
   const { user, logout, isChecking, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
+
+  // ✅ Dùng 1 state tổng để quản lý các menu expand/close
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    Orders: true, // mặc định mở "Orders"
+  });
+
+  const toggleExpand = (label: string) => {
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
   };
+
+  // 🔹 Menu chung cho cả ADMIN và STAFF
+  const commonMenu = [
+    { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
+    {
+      label: "Orders",
+      icon: HiFolder,
+      children: [
+        {
+          path: "/admin/orders/food",
+          label: "Food Orders",
+          icon: MdFastfood,
+        },
+        {
+          path: "/admin/orders/tables",
+          label: "Table Orders",
+          icon: FaChair,
+        },
+      ],
+    },
+  ];
+
+  // 🔹 Menu riêng cho ADMIN
+  const adminMenu = [
+    { path: "/admin/users", label: "Users", icon: HiUser },
+    { path: "/admin/categories", label: "Categories", icon: HiCollection },
+    { path: "/admin/menu-items", label: "Menu Items", icon: HiMenuAlt1 },
+    { path: "/admin/settings", label: "Settings", icon: HiCog },
+  ];
+
+  // 🔹 Menu riêng cho STAFF
+  const staffMenu = [
+    { path: "/admin/my-tasks", label: "My Tasks", icon: HiCollection },
+  ];
 
   if (isChecking) {
     return (
@@ -52,21 +109,73 @@ function AdminLayout() {
     return null;
   }
 
-  if (user?.role !== "ADMIN") {
+  if (!["ADMIN", "STAFF"].includes(user!.role)) {
     navigate("/");
     return null;
   }
 
-  // -------------------- LOGIC CSS CẢI TIẾN --------------------
-  const mobileSidebarClasses = isSidebarOpen
-    ? "fixed inset-y-0 left-0 translate-x-0" // Mở trên mobile
-    : "fixed inset-y-0 left-0 -translate-x-full"; // Ẩn hoàn toàn trên mobile
+  // Component render menu item (để tránh lặp code)
+  const SidebarItemButton: React.FC<SidebarItemButtonProps> = ({
+    path,
+    label,
+    icon: Icon,
+  }) => {
+    const isActive = location.pathname === path;
+    return (
+      <SidebarItem
+        onClick={() => {
+          navigate(path);
+          if (window.innerWidth < 768) setIsSidebarOpen(false);
+        }}
+        className={`
+          relative transition-all duration-200 cursor-pointer select-none text-gray-300
+          ${
+            isActive
+              ? "!bg-gray-800 !text-white font-semibold border-l-4 border-blue-500"
+              : "hover:!bg-gray-800 hover:!text-white"
+          }
+        `}>
+        <div
+          className={`flex items-center ${
+            isSidebarOpen
+              ? "gap-3 px-3 py-2 justify-start"
+              : "justify-center py-3"
+          }`}>
+          {!isSidebarOpen ? (
+            <Tooltip
+              content={label}
+              placement="right"
+              trigger="hover"
+              animation="duration-300"
+              theme={{
+                target: "inline-flex",
+                base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                style: {
+                  dark: "!bg-blue-600 !text-white",
+                  light: "!bg-blue-600 !text-white",
+                },
+                arrow: {
+                  style: {
+                    dark: "!bg-blue-600",
+                    light: "!bg-blue-600",
+                  },
+                },
+              }}>
+              <div>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+              </div>
+            </Tooltip>
+          ) : (
+            <Icon className="w-5 h-5 flex-shrink-0" />
+          )}
+          {isSidebarOpen && (
+            <span className="truncate text-sm leading-none">{label}</span>
+          )}
+        </div>
+      </SidebarItem>
+    );
+  };
 
-  // Desktop
-  const desktopSidebarClasses = isSidebarOpen
-    ? "relative w-80" // Mở trên desktop
-    : "relative w-[72px]"; // Thu gọn trên desktop (chỉ hiện icon)
-  // -----------------------------------------------------------
   return (
     <section className="admin-layout">
       {isSidebarOpen && (
@@ -74,34 +183,27 @@ function AdminLayout() {
           className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
           onClick={toggleSidebar}></div>
       )}
+
       <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar
           aria-label="Sidebar"
           className={`
-          flex-shrink-0 
-          transition-all 
-          duration-300 
-          ease-in-out 
-          z-40 
-          h-full 
-          border-r shadow-lg 
-          !bg-gray-900 !text-gray-100 
-          ${mobileSidebarClasses} /* Mobile */
-          ${desktopSidebarClasses} /* Desktop */
-          overflow-y-auto /* Quan trọng để cuộn */
-          overflow-x-hidden /* Quan trọng để tránh thanh cuộn ngang */
-        `}
+            flex-shrink-0 transition-all duration-300 ease-in-out 
+            z-[60] h-full border-r shadow-lg
+            ${sidebarWidth}
+          `}
           theme={{
             root: {
-              inner: "h-full !bg-gray-900 !text-gray-100",
-              base: "h-full",
+              inner:
+                "h-full !bg-gray-900 !text-gray-100 relative !overflow-visible",
+              base: "h-full relative !rounded-l-none",
             },
             item: {
               base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
             },
           }}>
-          {/* Nút đóng Sidebar trên mobile */}
+          {/* Nút đóng Sidebar (mobile) */}
           <div className="flex justify-end p-2 md:hidden">
             <Button
               color="gray"
@@ -111,58 +213,146 @@ function AdminLayout() {
             </Button>
           </div>
 
+          {/* Logo */}
           <SidebarLogo
             href="/admin/dashboard"
             img={`${logo}`}
             imgAlt="Logo"
-            className="!text-white">
-            Admin Panel
+            className={`!text-white flex items-center py-3 ${
+              isSidebarOpen ? "px-4" : "justify-center"
+            }`}>
+            {isSidebarOpen && (
+              <span className="ml-2 text-lg font-semibold tracking-wide">
+                Admin Panel
+              </span>
+            )}
           </SidebarLogo>
 
+          {/* Sidebar content */}
           <SidebarItems>
+            {/* 🔹 Menu chung */}
             <SidebarItemGroup>
-              <SidebarItem
-                onClick={() => navigate("/admin/dashboard")}
-                className="hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200"
-                icon={HiChartPie}>
-                Dashboard
-              </SidebarItem>
+              <h6
+                className={`${
+                  isSidebarOpen ? "px-3 mb-1" : "hidden"
+                } text-xs uppercase tracking-wide text-gray-400`}>
+                Chung
+              </h6>
 
-              <SidebarItem
-                onClick={() => navigate("/admin/users")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiUser}>
-                Users
-              </SidebarItem>
+              {(() => {
+                return commonMenu.map((item) => {
+                  // Nếu có children (ví dụ: Orders)
+                  if (item.children) {
+                    const isExpanded = expandedMenus[item.label];
 
-              <SidebarItem
-                onClick={() => navigate("/admin/categories")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiCollection}>
-                Categories
-              </SidebarItem>
+                    return (
+                      <div key={item.label}>
+                        {/* Nút nhóm cha */}
+                        <SidebarItem
+                          onClick={() => {
+                            if (isSidebarOpen) toggleExpand(item.label);
+                          }}
+                          className={`relative transition-all duration-200 cursor-pointer select-none text-gray-300 ${
+                            isExpanded
+                              ? "!text-white"
+                              : "hover:!bg-gray-800 hover:!text-white"
+                          }`}>
+                          <div
+                            className={`flex items-center justify-between ${
+                              isSidebarOpen
+                                ? "gap-3 px-3 py-2 justify-start"
+                                : "justify-center py-3"
+                            }`}>
+                            {!isSidebarOpen ? (
+                              <Tooltip
+                                content={item.label}
+                                placement="right"
+                                trigger="hover"
+                                animation="duration-300"
+                                theme={{
+                                  target: "inline-flex",
+                                  base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                                  style: {
+                                    dark: "!bg-blue-600 !text-white",
+                                    light: "!bg-blue-600 !text-white",
+                                  },
+                                  arrow: {
+                                    style: {
+                                      dark: "!bg-blue-600",
+                                      light: "!bg-blue-600",
+                                    },
+                                  },
+                                }}>
+                                <div>
+                                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                                </div>
+                              </Tooltip>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-3">
+                                  {isExpanded ? (
+                                    <HiFolderOpen className="w-5 h-5 flex-shrink-0 text-blue-400" />
+                                  ) : (
+                                    <HiFolder className="w-5 h-5 flex-shrink-0" />
+                                  )}
+                                  <span className="truncate text-sm leading-none">
+                                    {item.label}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </SidebarItem>
 
-              <SidebarItem
-                onClick={() => navigate("/admin/menu-items")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiMenuAlt1}>
-                Menu Items
-              </SidebarItem>
+                        {/* Các mục con */}
+                        {isSidebarOpen && isExpanded && (
+                          <div className="ml-4 border-l border-gray-700">
+                            {item.children.map((sub) => (
+                              <SidebarItemButton key={sub.path} {...sub} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
 
-              <SidebarItem
-                onClick={() => navigate("/admin/orders")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiShoppingBag}>
-                Orders
-              </SidebarItem>
-
-              <SidebarItem
-                onClick={() => navigate("/admin/settings")}
-                className="hover:bg-gray-800 hover:text-white cursor-pointer text-gray-200"
-                icon={HiCog}>
-                Settings
-              </SidebarItem>
+                  // Nếu là menu đơn
+                  return <SidebarItemButton key={item.path} {...item} />;
+                });
+              })()}
             </SidebarItemGroup>
+
+            {/* <hr className="my-2 border-gray-700" /> */}
+
+            {/* 🔹 Menu riêng ADMIN */}
+            {user?.role === "ADMIN" && (
+              <SidebarItemGroup>
+                <h6
+                  className={`${
+                    isSidebarOpen ? "px-3 mb-1" : "hidden"
+                  } text-xs uppercase tracking-wide text-gray-400`}>
+                  Quản trị hệ thống
+                </h6>
+                {adminMenu.map((item) => (
+                  <SidebarItemButton key={item.path} {...item} />
+                ))}
+              </SidebarItemGroup>
+            )}
+
+            {/* 🔹 Menu riêng STAFF */}
+            {user?.role === "STAFF" && (
+              <SidebarItemGroup>
+                <h6
+                  className={`${
+                    isSidebarOpen ? "px-3 mb-1" : "hidden"
+                  } text-xs uppercase tracking-wide text-gray-400`}>
+                  Tác vụ nhân viên
+                </h6>
+                {staffMenu.map((item) => (
+                  <SidebarItemButton key={item.path} {...item} />
+                ))}
+              </SidebarItemGroup>
+            )}
           </SidebarItems>
         </Sidebar>
 
@@ -172,13 +362,12 @@ function AdminLayout() {
           <Navbar
             fluid
             className="border-b !border-gray-200 !bg-white shadow-sm">
-            {/* NÚT HAMBURGER MỚI */}
             <div className="flex items-center">
               <Button
                 onClick={toggleSidebar}
                 color="gray"
                 className="mr-3 p-2 !bg-transparent !border-none text-gray-600 hover:!bg-gray-100">
-                <HiMenuAlt1 className="w-6 h-6" />
+                <HiMenu className="w-6 h-6" />
               </Button>
 
               <NavbarBrand>
@@ -220,7 +409,7 @@ function AdminLayout() {
             </div>
           </Navbar>
 
-          {/* Main Content */}
+          {/* Main content */}
           <main className="admin-content">
             <Outlet />
           </main>

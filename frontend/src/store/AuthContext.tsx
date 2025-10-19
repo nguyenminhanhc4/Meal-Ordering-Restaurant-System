@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const roleMap: Record<number, string> = {
     1: "CUSTOMER",
     2: "ADMIN",
-    3: "STAFF",
+    5: "STAFF",
   };
 
   // Gọi /me để lấy thông tin user

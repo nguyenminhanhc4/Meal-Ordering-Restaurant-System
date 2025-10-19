@@ -36,15 +36,12 @@
 //
 //    @Override
 //    public void run(String... args) {
-//        // STATUS
-////        createParamIfNotExists("STATUS", "CONFIRMED", "Confirmed Reservation","sda");
-////        createParamIfNotExists("STATUS", "CANCELLED", "Cancelled Reservation","gdsg");
-////        createParamIfNotExists("STATUS", "PENDING", "Pending Reservation","qw");
-////        createParamIfNotExists("STATUS", "AVAILABLE", "Available Table","sdg");
-////        createParamIfNotExists("STATUS", "OCCUPIED", "Occupied Table","qrw");
-////        createParamIfNotExists("POSITION","VIP","VIP Table","gá");
-////        createParamIfNotExists("POSITION","GOOD_VIEW","GOOD_VIEW Table","ưe");
-////        createParamIfNotExists("POSITION","PERSONAL","PERSONAL Table","gra");
+//        // ==================== STATUS ====================
+//        createParamIfNotExists("STATUS_RESERVATION", "CONFIRMED", "Confirmed Reservation", "Đặt bàn đã được xác nhận");
+//        createParamIfNotExists("STATUS_RESERVATION", "CANCELLED", "Cancelled Reservation", "Đặt bàn đã bị hủy");
+//        createParamIfNotExists("STATUS_RESERVATION", "PENDING", "Pending Reservation", "Đang chờ xác nhận đặt bàn");
+//        createParamIfNotExists("STATUS_TABLE", "AVAILABLE", "Available Table", "Bàn trống, có thể đặt");
+//        createParamIfNotExists("STATUS_TABLE", "OCCUPIED", "Occupied Table", "Bàn đang có khách");
 //
 //        // ==================== POSITION ====================
 //        createParamIfNotExists("POSITION", "VIP", "VIP Table", "Bàn sang trọng, dành cho khách VIP");

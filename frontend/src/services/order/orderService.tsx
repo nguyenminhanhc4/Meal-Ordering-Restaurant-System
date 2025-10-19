@@ -28,7 +28,15 @@ export interface OrderPage {
   empty: boolean;
 }
 
-export async function fetchOrderHistory(params: {
+export async function fetchOrderHistory({
+  page = 0,
+  size = 10,
+  keyword = "",
+  status = "",
+  fromDate = "",
+  toDate = "",
+  sort = "createdAt,desc",
+}: {
   page?: number;
   size?: number;
   keyword?: string;
@@ -37,8 +45,25 @@ export async function fetchOrderHistory(params: {
   toDate?: string;
   sort?: string;
 }) {
-  const response = await api.get<OrderPage>("/orders/history", {
-    params,
-  });
-  return response.data;
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort,
+    });
+
+    // 🔍 chỉ set những params có giá trị thực
+    if (keyword.trim()) params.set("keyword", keyword);
+    if (status.trim()) params.set("status", status);
+    if (fromDate.trim()) params.set("fromDate", fromDate);
+    if (toDate.trim()) params.set("toDate", toDate);
+
+    const response = await api.get<OrderPage>(
+      `/orders/history?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("❌ Lỗi khi fetch order history:", error);
+    throw error;
+  }
 }

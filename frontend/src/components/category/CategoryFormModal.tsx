@@ -49,7 +49,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     parentId: "",
   });
 
-  const [parentCategories, setParentCategories] = useState<ParentCategoryOption[]>([]);
+  const [parentCategories, setParentCategories] = useState<
+    ParentCategoryOption[]
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<CategoryFormData>>({});
   const { notify } = useNotification();
@@ -82,7 +84,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         // Filter out current category if editing to prevent self-reference
         let categories = response.data;
         if (categoryData) {
-          categories = categories.filter((cat: ParentCategoryOption) => cat.id !== categoryData.id);
+          categories = categories.filter(
+            (cat: ParentCategoryOption) => cat.id !== categoryData.id
+          );
         }
         setParentCategories(categories);
       }
@@ -99,7 +103,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   }, [show, categoryData]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -153,7 +159,8 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
       onSuccess();
     } catch (error: unknown) {
       console.error("Error saving category:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to save category";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save category";
       notify("error", errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -169,7 +176,11 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   };
 
   return (
-    <Modal show={show} onClose={handleClose} size="4xl" className="shadow-lg">
+    <Modal
+      show={show}
+      onClose={handleClose}
+      size="4xl"
+      className="shadow-lg z-[70]">
       {/* Modal Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
@@ -185,7 +196,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             <div className="space-y-6">
               {/* Category Name */}
               <div>
-                <Label htmlFor="name" className="mb-2 block text-sm font-medium !text-gray-700">
+                <Label
+                  htmlFor="name"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Category Name *
                 </Label>
                 <TextInput
@@ -214,7 +227,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
               {/* Parent Category */}
               <div>
-                <Label htmlFor="parentId" className="mb-2 block text-sm font-medium !text-gray-700">
+                <Label
+                  htmlFor="parentId"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Parent Category (Optional)
                 </Label>
                 <Select
@@ -230,8 +245,7 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                         base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
                       },
                     },
-                  }}
-                >
+                  }}>
                   <option value="">-- No Parent (Root Category) --</option>
                   {parentCategories.map((parent) => (
                     <option key={parent.id} value={parent.id}>
@@ -249,7 +263,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             <div className="space-y-6">
               {/* Description */}
               <div>
-                <Label htmlFor="description" className="mb-2 block text-sm font-medium !text-gray-700">
+                <Label
+                  htmlFor="description"
+                  className="mb-2 block text-sm font-medium !text-gray-700">
                   Description *
                 </Label>
                 <Textarea
@@ -268,7 +284,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   }}
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.description}
+                  </p>
                 )}
               </div>
 
@@ -279,20 +297,29 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                 </Label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-600">Name:</span>
-                    <span className="text-sm text-gray-800">{formData.name || "Not specified"}</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-medium text-gray-600">Parent:</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Name:
+                    </span>
                     <span className="text-sm text-gray-800">
-                      {formData.parentId 
-                        ? parentCategories.find(p => p.id.toString() === formData.parentId)?.name || "Unknown"
-                        : "Root Category"
-                      }
+                      {formData.name || "Not specified"}
                     </span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-sm font-medium text-gray-600">Description:</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Parent:
+                    </span>
+                    <span className="text-sm text-gray-800">
+                      {formData.parentId
+                        ? parentCategories.find(
+                            (p) => p.id.toString() === formData.parentId
+                          )?.name || "Unknown"
+                        : "Root Category"}
+                    </span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-medium text-gray-600">
+                      Description:
+                    </span>
                     <span className="text-sm text-gray-800 flex-1">
                       {formData.description || "Not specified"}
                     </span>
@@ -309,15 +336,13 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             color="red"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="text-gray-50"
-          >
+            className="text-gray-50">
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400"
-          >
+            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400">
             {isSubmitting ? (
               <div className="flex items-center gap-2">
                 <Spinner size="sm" light={true} />
