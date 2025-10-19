@@ -20,13 +20,17 @@ import { useAuth } from "../store/AuthContext";
 import {
   HiChartPie,
   HiUser,
-  HiShoppingBag,
   HiCog,
   HiLogout,
   HiCollection,
   HiMenuAlt1,
   HiX,
+  HiFolder,
+  HiFolderOpen,
+  HiMenu,
 } from "react-icons/hi";
+import { FaChair } from "react-icons/fa";
+import { MdFastfood } from "react-icons/md";
 import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
 
@@ -46,10 +50,37 @@ function AdminLayout() {
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
 
+  // ✅ Dùng 1 state tổng để quản lý các menu expand/close
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    Orders: true, // mặc định mở "Orders"
+  });
+
+  const toggleExpand = (label: string) => {
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
   // 🔹 Menu chung cho cả ADMIN và STAFF
   const commonMenu = [
     { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
-    { path: "/admin/orders", label: "Orders", icon: HiShoppingBag },
+    {
+      label: "Orders",
+      icon: HiFolder,
+      children: [
+        {
+          path: "/admin/orders/food",
+          label: "Food Orders",
+          icon: MdFastfood,
+        },
+        {
+          path: "/admin/orders/tables",
+          label: "Table Orders",
+          icon: FaChair,
+        },
+      ],
+    },
   ];
 
   // 🔹 Menu riêng cho ADMIN
@@ -207,9 +238,88 @@ function AdminLayout() {
                 } text-xs uppercase tracking-wide text-gray-400`}>
                 Chung
               </h6>
-              {commonMenu.map((item) => (
-                <SidebarItemButton key={item.path} {...item} />
-              ))}
+
+              {(() => {
+                return commonMenu.map((item) => {
+                  // Nếu có children (ví dụ: Orders)
+                  if (item.children) {
+                    const isExpanded = expandedMenus[item.label];
+
+                    return (
+                      <div key={item.label}>
+                        {/* Nút nhóm cha */}
+                        <SidebarItem
+                          onClick={() => {
+                            if (isSidebarOpen) toggleExpand(item.label);
+                          }}
+                          className={`relative transition-all duration-200 cursor-pointer select-none text-gray-300 ${
+                            isExpanded
+                              ? "!text-white"
+                              : "hover:!bg-gray-800 hover:!text-white"
+                          }`}>
+                          <div
+                            className={`flex items-center justify-between ${
+                              isSidebarOpen
+                                ? "gap-3 px-3 py-2 justify-start"
+                                : "justify-center py-3"
+                            }`}>
+                            {!isSidebarOpen ? (
+                              <Tooltip
+                                content={item.label}
+                                placement="right"
+                                trigger="hover"
+                                animation="duration-300"
+                                theme={{
+                                  target: "inline-flex",
+                                  base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                                  style: {
+                                    dark: "!bg-blue-600 !text-white",
+                                    light: "!bg-blue-600 !text-white",
+                                  },
+                                  arrow: {
+                                    style: {
+                                      dark: "!bg-blue-600",
+                                      light: "!bg-blue-600",
+                                    },
+                                  },
+                                }}>
+                                <div>
+                                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                                </div>
+                              </Tooltip>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-3">
+                                  {isExpanded ? (
+                                    <HiFolderOpen className="w-5 h-5 flex-shrink-0 text-blue-400" />
+                                  ) : (
+                                    <HiFolder className="w-5 h-5 flex-shrink-0" />
+                                  )}
+                                  <span className="truncate text-sm leading-none">
+                                    {item.label}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </SidebarItem>
+
+                        {/* Các mục con */}
+                        {isSidebarOpen && isExpanded && (
+                          <div className="ml-4 border-l border-gray-700">
+                            {item.children.map((sub) => (
+                              <SidebarItemButton key={sub.path} {...sub} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Nếu là menu đơn
+                  return <SidebarItemButton key={item.path} {...item} />;
+                });
+              })()}
             </SidebarItemGroup>
 
             {/* <hr className="my-2 border-gray-700" /> */}
@@ -257,7 +367,7 @@ function AdminLayout() {
                 onClick={toggleSidebar}
                 color="gray"
                 className="mr-3 p-2 !bg-transparent !border-none text-gray-600 hover:!bg-gray-100">
-                <HiMenuAlt1 className="w-6 h-6" />
+                <HiMenu className="w-6 h-6" />
               </Button>
 
               <NavbarBrand>
