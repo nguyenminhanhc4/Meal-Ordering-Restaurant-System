@@ -4,6 +4,7 @@ import org.example.backend.entity.order.Order;
 import org.example.backend.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,6 +17,18 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
+    @EntityGraph(attributePaths = {
+            "user",
+            "status",
+            "payment",
+            "payment.shippingInfo",
+            "orderItems",
+            "orderItems.menuItem",
+            "orderItems.combo"
+    })
+    Page<Order> findAll(Specification<Order> spec, Pageable pageable);
+
+
     Optional<Order> findByPublicId(String publicId);
 
     @EntityGraph(attributePaths = {"orderItems", "status"})

@@ -3,6 +3,8 @@ package org.example.backend.service.order;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
+import org.example.backend.dto.order.OrderMapper;
+import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.cart.Cart;
 import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
@@ -12,11 +14,14 @@ import org.example.backend.repository.cart.CartRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.order.OrderRepository;
+import org.example.backend.repository.order.OrderSpecification;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +78,14 @@ public class OrderService {
         return new OrderDto(order);
     }
 
+    public Page<OrderResponseDTO> getAllOrders(String status, String keyword, Pageable pageable) {
+        Specification<Order> spec = Specification
+                .where(OrderSpecification.hasStatus(status))
+                .and(OrderSpecification.keywordSearch(keyword));
+
+        return orderRepository.findAll(spec, pageable)
+                .map(OrderMapper::toDto);
+    }
 
     public List<OrderDto> findAll() {
         return orderRepository.findAll()
