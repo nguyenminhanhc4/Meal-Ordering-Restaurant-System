@@ -79,13 +79,22 @@ public class OrderService {
     }
 
     public Page<OrderResponseDTO> getAllOrders(String status, String keyword, Pageable pageable) {
-        Specification<Order> spec = Specification
-                .where(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.keywordSearch(keyword));
+        Specification<Order> spec = Specification.where(null);
 
-        return orderRepository.findAll(spec, pageable)
-                .map(OrderMapper::toDto);
+        // Nếu là staff (hoặc API dùng cho staff)
+        spec = spec.and(OrderSpecification.forStaffReview());
+
+        // Nếu cần lọc thêm theo status hoặc keyword
+        if (status != null && !status.isBlank()) {
+            spec = spec.and(OrderSpecification.hasStatus(status));
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            spec = spec.and(OrderSpecification.keywordSearch(keyword));
+        }
+
+        return orderRepository.findAll(spec, pageable).map(OrderMapper::toDto);
     }
+
 
     public List<OrderDto> findAll() {
         return orderRepository.findAll()

@@ -54,3 +54,30 @@ export const getOrderById = async (
     throw error;
   }
 };
+
+// Lấy tất cả orders (dành cho staff/admin)
+export const getAllOrders = async (
+  page: number = 0,
+  size: number = 10,
+  status?: string,
+  keyword?: string
+): Promise<Page<OrderDto>> => {
+  try {
+    const params = new URLSearchParams();
+    params.append("page", String(page));
+    params.append("size", String(size));
+    if (status) params.append("status", status);
+    if (keyword) params.append("keyword", keyword);
+
+    const res = await api.get<ApiResponse<Page<OrderDto>>>(
+      `/orders?${params.toString()}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching all orders", error);
+    throw error;
+  }
+};

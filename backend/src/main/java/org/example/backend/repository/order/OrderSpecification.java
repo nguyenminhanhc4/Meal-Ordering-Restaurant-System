@@ -26,5 +26,28 @@ public class OrderSpecification {
             );
         };
     }
+
+    public static Specification<Order> forStaffReview() {
+        return (root, query, cb) -> {
+            // Join đến payment và các bảng con
+            Join<Object, Object> paymentJoin = root.join("payment", JoinType.LEFT);
+            Join<Object, Object> methodJoin = paymentJoin.join("paymentMethod", JoinType.LEFT);
+            Join<Object, Object> statusJoin = paymentJoin.join("status", JoinType.LEFT);
+
+            // Điều kiện:
+            // COD + PENDING  hoặc  ONLINE + COMPLETED
+            return cb.or(
+                    cb.and(
+                            cb.equal(methodJoin.get("code"), "COD"),
+                            cb.equal(statusJoin.get("code"), "PENDING")
+                    ),
+                    cb.and(
+                            cb.equal(methodJoin.get("code"), "ONLINE"),
+                            cb.equal(statusJoin.get("code"), "COMPLETED")
+                    )
+            );
+        };
+    }
+
 }
 
