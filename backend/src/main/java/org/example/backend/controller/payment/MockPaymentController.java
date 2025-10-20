@@ -73,7 +73,7 @@ public class MockPaymentController {
 
         Param statusSuccess = paramRepository.findByTypeAndCode("PAYMENT_STATUS", "COMPLETED").orElseThrow();
 
-        Param orderPaid = paramRepository.findByTypeAndCode("ORDER_STATUS", "PAID").orElseThrow();
+        Param orderPending = paramRepository.findByTypeAndCode("ORDER_STATUS", "PENDING").orElseThrow();
 
         // Update Payment & Order
         payment.setStatus(statusSuccess);
@@ -81,7 +81,7 @@ public class MockPaymentController {
         paymentRepository.save(payment);
 
         Order order = payment.getOrder();
-        order.setStatus(orderPaid);
+        order.setStatus(orderPending);
         orderRepository.save(order);
 
         List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
@@ -103,16 +103,11 @@ public class MockPaymentController {
 
         Param statusFailed = paramRepository.findByTypeAndCode("PAYMENT_STATUS", "FAILED").orElseThrow();
 
-        Param orderPaid = paramRepository.findByTypeAndCode("ORDER_STATUS", "FAILED").orElseThrow();
 
         // Update Payment
         payment.setStatus(statusFailed);
         payment.setTransactionId("MOCK-" + UUID.randomUUID());
         paymentRepository.save(payment);
-
-        Order order = payment.getOrder();
-        order.setStatus(orderPaid);
-        orderRepository.save(order);
 
         return Map.of("redirectUrl", "http://localhost:5173/payments/failed");
     }

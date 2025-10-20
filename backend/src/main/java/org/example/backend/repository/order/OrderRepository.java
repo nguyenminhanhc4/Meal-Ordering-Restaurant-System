@@ -35,41 +35,59 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Page<Order> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 
     // Revenue statistics by day
-    @Query(value = "SELECT DATE(o.created_at) as period, " +
-            "SUM(o.total_amount) as totalRevenue, " +
-            "COUNT(o.id) as totalOrders " +
-            "FROM orders o " +
-            "WHERE o.created_at BETWEEN :startDate AND :endDate " +
-            "AND o.status_id = (SELECT id FROM params WHERE type = 'ORDER_STATUS' AND code = 'PAID') " +
-            "GROUP BY DATE(o.created_at) " +
-            "ORDER BY period DESC", nativeQuery = true)
+    @Query(value = """
+    SELECT 
+        DATE(o.created_at) AS period,
+        SUM(o.total_amount) AS totalRevenue,
+        COUNT(o.id) AS totalOrders
+    FROM orders o
+    JOIN params s ON o.status_id = s.id
+    WHERE o.created_at BETWEEN :startDate AND :endDate
+      AND s.type = 'ORDER_STATUS'
+      AND s.code = 'DELIVERED'
+    GROUP BY DATE(o.created_at)
+    ORDER BY period DESC
+    """, nativeQuery = true)
     List<Map<String, Object>> getRevenueStatisticsByDay(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
+
     // Revenue statistics by month
-    @Query(value = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') as period, " +
-            "SUM(o.total_amount) as totalRevenue, " +
-            "COUNT(o.id) as totalOrders " +
-            "FROM orders o " +
-            "WHERE o.created_at BETWEEN :startDate AND :endDate " +
-            "AND o.status_id = (SELECT id FROM params WHERE type = 'ORDER_STATUS' AND code = 'PAID') " +
-            "GROUP BY DATE_FORMAT(o.created_at, '%Y-%m') " +
-            "ORDER BY period DESC", nativeQuery = true)
+    @Query(value = """
+    SELECT 
+        DATE_FORMAT(o.created_at, '%Y-%m') AS period,
+        SUM(o.total_amount) AS totalRevenue,
+        COUNT(o.id) AS totalOrders
+    FROM orders o
+    JOIN params s ON o.status_id = s.id
+    WHERE o.created_at BETWEEN :startDate AND :endDate
+      AND s.type = 'ORDER_STATUS'
+      AND s.code = 'DELIVERED'
+    GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+    ORDER BY period DESC
+    """, nativeQuery = true)
     List<Map<String, Object>> getRevenueStatisticsByMonth(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
+
     // Revenue statistics by year
-    @Query(value = "SELECT YEAR(o.created_at) as period, " +
-            "SUM(o.total_amount) as totalRevenue, " +
-            "COUNT(o.id) as totalOrders " +
-            "FROM orders o " +
-            "WHERE o.created_at BETWEEN :startDate AND :endDate " +
-            "AND o.status_id = (SELECT id FROM params WHERE type = 'ORDER_STATUS' AND code = 'PAID') " +
-            "GROUP BY YEAR(o.created_at) " +
-            "ORDER BY period DESC", nativeQuery = true)
+    @Query(value = """
+    SELECT 
+        YEAR(o.created_at) AS period,
+        SUM(o.total_amount) AS totalRevenue,
+        COUNT(o.id) AS totalOrders
+    FROM orders o
+    JOIN params s ON o.status_id = s.id
+    WHERE o.created_at BETWEEN :startDate AND :endDate
+      AND s.type = 'ORDER_STATUS'
+      AND s.code = 'DELIVERED'
+    GROUP BY YEAR(o.created_at)
+    ORDER BY period DESC
+    """, nativeQuery = true)
     List<Map<String, Object>> getRevenueStatisticsByYear(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
 }

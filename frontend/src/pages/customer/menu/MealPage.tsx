@@ -61,6 +61,7 @@ const MealPage: React.FC = () => {
         );
 
         let fetched = pageData.content;
+        console.log("Fetched products:", fetched);
         if (categorySlug) {
           fetched = fetched.filter(
             (p: Product) => p.categorySlug === categorySlug

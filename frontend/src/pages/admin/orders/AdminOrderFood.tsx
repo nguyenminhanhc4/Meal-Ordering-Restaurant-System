@@ -279,7 +279,7 @@ export const AdminOrderFood = () => {
                     key={order.publicId}
                     className="!bg-white hover:!bg-gray-100">
                     <TableCell className="p-3 bg-white text-gray-700 text-center">
-                      {order.publicId}
+                      {order.publicId.slice(0, 8)}
                     </TableCell>
                     <TableCell className="p-3 bg-white text-gray-700 text-center">
                       {order.userName}

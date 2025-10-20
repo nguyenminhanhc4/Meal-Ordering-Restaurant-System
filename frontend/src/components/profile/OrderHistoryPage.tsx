@@ -42,7 +42,7 @@ export default function OrderHistoryPage() {
     sort: "createdAt,desc",
   });
 
-  const handleReorder = async (orderId: number) => {
+  const handleReorder = async (orderId: string) => {
     try {
       const order = orders.find((o) => o.id === orderId);
       if (!order || !order.items) return;
@@ -69,7 +69,7 @@ export default function OrderHistoryPage() {
     }
   };
 
-  const [expandedOrders, setExpandedOrders] = useState<Record<number, boolean>>(
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>(
     {}
   );
 
@@ -125,11 +125,45 @@ export default function OrderHistoryPage() {
     };
   }, [orders]);
 
-  const toggleExpand = (orderId: number) => {
+  const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({
       ...prev,
       [orderId]: !prev[orderId],
     }));
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "warning"; // vàng
+      case "APPROVED":
+        return "info"; // xanh dương nhạt
+      case "DELIVERING":
+        return "purple"; // tím
+      case "DELIVERED":
+        return "success"; // xanh lá
+      case "CANCELLED":
+        return "failure"; // đỏ
+      default:
+        return "gray"; // fallback
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Chờ duyệt";
+      case "APPROVED":
+        return "Đã duyệt";
+      case "DELIVERING":
+        return "Đang giao";
+      case "DELIVERED":
+        return "Đã giao";
+      case "CANCELLED":
+        return "Đã hủy";
+      default:
+        return status;
+    }
   };
 
   return (
@@ -164,9 +198,9 @@ export default function OrderHistoryPage() {
               setFilters((prev) => ({ ...prev, status: e.target.value }))
             }>
             <option value="">Tất cả</option>
-            <option value="PAID">Đã thanh toán</option>
+            <option value="DELIVERED">Đã giao</option>
             <option value="PENDING">Chờ xác nhận</option>
-            <option value="FAILED">Đã hủy</option>
+            <option value="CANCELLED">Đã hủy</option>
           </select>
         </div>
 
@@ -223,11 +257,13 @@ export default function OrderHistoryPage() {
                 <div className="flex justify-between items-center mb-3">
                   <div>
                     <p className="text-sm text-gray-500">
-                      Mã đơn: #{order.id} •{" "}
+                      Mã đơn: #{order.id.slice(0, 8)} •{" "}
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                     </p>
-                    <Badge color="success" className="mt-1">
-                      {order.status}
+                    <Badge
+                      color={getStatusColor(order.status)}
+                      className="mt-1">
+                      {getStatusLabel(order.status)}
                     </Badge>
                   </div>
                   <p className="font-semibold text-lg text-amber-700">

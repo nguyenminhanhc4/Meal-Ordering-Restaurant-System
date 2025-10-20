@@ -18,7 +18,7 @@ public interface ComboRepository extends JpaRepository<Combo, Long> {
             "LEFT JOIN c.category cat " +
             "LEFT JOIN c.status p " +
             "LEFT JOIN OrderItem oi ON c.id = oi.combo.id " +
-            "LEFT JOIN oi.order o ON o.status.code = 'PAID' " +
+            "LEFT JOIN oi.order o ON o.status.code = 'DELIVERED' " +
             "GROUP BY c.id, cat.name, p.code")
     List<Object[]> findAllWithDetails();
 
@@ -31,7 +31,7 @@ public interface ComboRepository extends JpaRepository<Combo, Long> {
             "LEFT JOIN c.category cat " +
             "LEFT JOIN c.status p " +
             "LEFT JOIN OrderItem oi ON c.id = oi.combo.id " +
-            "LEFT JOIN oi.order o ON o.status.code = 'PAID' " +
+            "LEFT JOIN oi.order o ON o.status.code = 'DELIVERED' " +
             "GROUP BY c.id, cat.name, p.code " +
             "ORDER BY COALESCE(SUM(oi.quantity), 0) DESC")
     List<Object[]> findTopPopular(Pageable pageable);

@@ -48,6 +48,57 @@ const OrderListPage: React.FC = () => {
     fetchOrders();
   }, [currentPage]);
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "warning"; // vàng
+      case "APPROVED":
+        return "info"; // xanh dương
+      case "DELIVERING":
+        return "purple"; // tím
+      case "DELIVERED":
+        return "success"; // xanh lá
+      case "CANCELLED":
+        return "failure"; // đỏ
+      default:
+        return "gray"; // fallback
+    }
+  };
+
+  const getBorderColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "!border-yellow-300";
+      case "APPROVED":
+        return "!border-blue-300";
+      case "DELIVERING":
+        return "!border-purple-300";
+      case "DELIVERED":
+        return "!border-green-300";
+      case "CANCELLED":
+        return "!border-red-300";
+      default:
+        return "!border-gray-200";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Chờ duyệt";
+      case "APPROVED":
+        return "Đã duyệt";
+      case "DELIVERING":
+        return "Đang giao";
+      case "DELIVERED":
+        return "Đã giao";
+      case "CANCELLED":
+        return "Đã hủy";
+      default:
+        return status;
+    }
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-6xl py-12 px-4 md:px-6">
@@ -89,12 +140,7 @@ const OrderListPage: React.FC = () => {
               const hasMoreItems =
                 order.orderItems && order.orderItems.length > 2;
 
-              const borderColor =
-                order.status === "PENDING"
-                  ? "!border-yellow-300"
-                  : order.status === "PAID"
-                  ? "!border-green-300"
-                  : "!border-red-300";
+              const borderColor = getBorderColor(order.status);
 
               return (
                 <Card
@@ -104,15 +150,8 @@ const OrderListPage: React.FC = () => {
                     <h2 className="text-lg font-bold text-gray-800">
                       Order #{shortId}
                     </h2>
-                    <Badge
-                      color={
-                        order.status === "PENDING"
-                          ? "yellow"
-                          : order.status === "PAID"
-                          ? "green"
-                          : "red"
-                      }>
-                      {order.status}
+                    <Badge color={getStatusColor(order.status)}>
+                      {getStatusLabel(order.status)}
                     </Badge>
                   </div>
 

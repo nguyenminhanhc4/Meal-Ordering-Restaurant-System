@@ -71,7 +71,7 @@ public class PaymentService {
         shippingInfo.setNote(request.getNote());
         shippingInfoRepository.save(shippingInfo); // cần inject repository
 
-        Param statusOrder = paramRepository.findByTypeAndCode("ORDER_STATUS","PAID").get();
+        Param statusOrder = paramRepository.findByTypeAndCode("ORDER_STATUS","PENDING").get();
         order.setStatus(statusOrder);
         orderRepository.save(order);
 

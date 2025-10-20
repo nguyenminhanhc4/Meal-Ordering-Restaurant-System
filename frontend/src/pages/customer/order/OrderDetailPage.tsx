@@ -50,6 +50,23 @@ const OrderDetailPage: React.FC = () => {
     );
   }
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "Chờ duyệt";
+      case "APPROVED":
+        return "Đã duyệt";
+      case "DELIVERING":
+        return "Đang giao";
+      case "DELIVERED":
+        return "Đã giao";
+      case "CANCELLED":
+        return "Đã hủy";
+      default:
+        return status;
+    }
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-4xl py-12 px-4 md:px-6">
@@ -64,13 +81,19 @@ const OrderDetailPage: React.FC = () => {
               color={
                 order.status === "PENDING"
                   ? "yellow"
-                  : order.status === "PAID"
+                  : order.status === "APPROVED"
+                  ? "blue"
+                  : order.status === "DELIVERING"
+                  ? "indigo"
+                  : order.status === "DELIVERED"
                   ? "green"
-                  : "red"
+                  : order.status === "CANCELLED"
+                  ? "red"
+                  : "gray"
               }
               size="lg"
               className="px-3 py-1 text-sm">
-              {order.status}
+              {getStatusLabel(order.status)}
             </Badge>
           </div>
 
