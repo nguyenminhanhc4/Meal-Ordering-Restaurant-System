@@ -45,6 +45,12 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
+    @GetMapping("/admin/{publicId}")
+    public ResponseEntity<OrderResponseDTO> getOrderDetail(@PathVariable String publicId) {
+        OrderResponseDTO order = orderService.getOrderDetail(publicId);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/checkout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> checkout(@RequestBody CartDto cart) {

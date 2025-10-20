@@ -6,7 +6,6 @@ import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.order.OrderMapper;
 import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.cart.Cart;
-import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.param.Param;
@@ -98,6 +97,11 @@ public class OrderService {
         return orderRepository.findAll(spec, pageable).map(OrderMapper::toDto);
     }
 
+    public OrderResponseDTO getOrderDetail(String publicId) {
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return OrderMapper.toDto(order);
+    }
 
     public List<OrderDto> findAll() {
         return orderRepository.findAll()

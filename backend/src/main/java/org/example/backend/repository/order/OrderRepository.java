@@ -28,8 +28,18 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     })
     Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
-
+    @EntityGraph(attributePaths = {
+            "user",
+            "status",
+            "payment",
+            "payment.shippingInfo",
+            "orderItems",
+            "orderItems.menuItem",
+            "orderItems.combo"
+    })
     Optional<Order> findByPublicId(String publicId);
+
+//    Optional<Order> findByPublicId(String publicId);
 
     @EntityGraph(attributePaths = {"orderItems", "status"})
     Page<Order> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);

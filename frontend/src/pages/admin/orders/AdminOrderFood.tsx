@@ -18,17 +18,30 @@ import { useNotification } from "../../../components/Notification";
 import { Pagination } from "../../../components/common/Pagination";
 import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 import { format } from "date-fns";
+import { OrderDetailModal } from "../../../components/order/OrderDetailModal";
 
-interface Order {
-  id: number;
+export interface OrderItem {
+  menuItemId: number;
+  menuItemName: string;
+  imageUrl: string;
+  status: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
   publicId: string;
-  orderCode: string;
+  orderCode?: string;
   totalAmount: number;
   createdAt: string;
   userName: string;
+  userEmail: string;
   paymentMethod: string;
   paymentStatus: string;
   status: string;
+  shippingAddress: string;
+  shippingPhone: string;
+  items: OrderItem[];
 }
 
 export const AdminOrderFood = () => {
@@ -50,6 +63,8 @@ export const AdminOrderFood = () => {
   const [paymentStatuses, setPaymentStatuses] = useState<
     { id: number; code: string; name: string }[]
   >([]);
+  const [orderDetail, setOrderDetail] = useState<Order | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // ✅ Fetch Orders API (đã fix cấu trúc dữ liệu)
   const fetchOrders = useCallback(
@@ -101,6 +116,18 @@ export const AdminOrderFood = () => {
     },
     [notify]
   );
+
+  const fetchOrderDetail = async (publicId: string) => {
+    try {
+      const res = await api.get(`/orders/admin/${publicId}`);
+      console.log("Order detail response:", res.data);
+      setOrderDetail(res.data); // data là OrderResponseDTO từ backend
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error(error);
+      notify("error", "Failed to load order details.");
+    }
+  };
 
   // Load order statuses and orders
   useEffect(() => {
@@ -199,10 +226,10 @@ export const AdminOrderFood = () => {
     }
   };
 
-  const openConfirmDialog = (orderPublicId: string) => {
-    setSelectedOrder(orderPublicId);
-    setShowConfirmDialog(true);
-  };
+  // const openConfirmDialog = (orderPublicId: string) => {
+  //   setSelectedOrder(orderPublicId);
+  //   setShowConfirmDialog(true);
+  // };
 
   // UI rendering
   const getStatusBadgeColor = (status: string) => {
@@ -364,15 +391,13 @@ export const AdminOrderFood = () => {
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                     </TableCell>
-                    <TableCell className="px-3 py-2  text-gray-700 text-center">
-                      {order.status === "PENDING" && (
-                        <Button
-                          size="xs"
-                          color="success"
-                          onClick={() => openConfirmDialog(order.publicId)}>
-                          Approve
-                        </Button>
-                      )}
+                    <TableCell className="px-3 py-2 text-center">
+                      <Button
+                        size="xs"
+                        color="blue"
+                        onClick={() => fetchOrderDetail(order.publicId)}>
+                        View Details
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -398,6 +423,15 @@ export const AdminOrderFood = () => {
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleApproveOrder}
         message="Are you sure you want to approve this order?"
+      />
+
+      <OrderDetailModal
+        show={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        order={orderDetail}
+        formatPrice={formatPrice}
+        onApprove={handleApproveOrder}
+        // onCancel={handleCancelOrder}
       />
     </div>
   );
