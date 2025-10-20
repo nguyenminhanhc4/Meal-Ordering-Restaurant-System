@@ -46,6 +46,10 @@ export const AdminOrderFood = () => {
   const { notify } = useNotification();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("");
+  const [paymentStatuses, setPaymentStatuses] = useState<
+    { id: number; code: string; name: string }[]
+  >([]);
 
   // ✅ Fetch Orders API (đã fix cấu trúc dữ liệu)
   const fetchOrders = useCallback(
@@ -54,6 +58,7 @@ export const AdminOrderFood = () => {
       size: number,
       keyword: string,
       statusCode: string,
+      paymentStatus: string,
       signal: AbortSignal
     ) => {
       setLoading(true);
@@ -66,6 +71,7 @@ export const AdminOrderFood = () => {
             sort: "createdAt,desc",
             keyword: keyword.trim() || undefined,
             status: statusCode || undefined,
+            paymentStatus: paymentStatus || undefined,
           },
         });
 
@@ -110,17 +116,37 @@ export const AdminOrderFood = () => {
       }
     };
 
+    const loadPaymentStatuses = async (signal: AbortSignal) => {
+      try {
+        const res = await api.get("/params?type=PAYMENT_STATUS", { signal });
+        console.log("Order statuses response:", res.data.data);
+        if (res.data?.data) setPaymentStatuses(res.data.data);
+      } catch {
+        if (!signal.aborted)
+          notify("error", "Could not load payment statuses.");
+      }
+    };
+
     void loadStatuses(abortController.signal);
+    void loadPaymentStatuses(abortController.signal);
     void fetchOrders(
       currentPage,
       pageSize,
       searchTerm,
       selectedStatus,
+      selectedPaymentStatus,
       abortController.signal
     );
 
     return () => abortController.abort();
-  }, [notify, currentPage, searchTerm, selectedStatus, fetchOrders]);
+  }, [
+    notify,
+    currentPage,
+    searchTerm,
+    selectedStatus,
+    selectedPaymentStatus,
+    fetchOrders,
+  ]);
 
   // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +159,21 @@ export const AdminOrderFood = () => {
     setCurrentPage(1);
   };
 
+  const handlePaymentStatusChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedPaymentStatus(e.target.value);
+    setCurrentPage(1);
+  };
+
   const handlePageChange = (page: number) => setCurrentPage(page);
+
+  const formatPrice = useCallback((price: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  }, []);
 
   // Approve order (example action)
   const handleApproveOrder = async () => {
@@ -147,6 +187,7 @@ export const AdminOrderFood = () => {
         pageSize,
         searchTerm,
         selectedStatus,
+        selectedPaymentStatus,
         abortController.signal
       );
     } catch (error: unknown) {
@@ -200,7 +241,7 @@ export const AdminOrderFood = () => {
                 theme={{
                   field: {
                     input: {
-                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
                     },
                   },
                 }}
@@ -225,33 +266,52 @@ export const AdminOrderFood = () => {
                 ))}
               </Select>
             </div>
+            <div className="w-48">
+              <Select
+                value={selectedPaymentStatus}
+                onChange={handlePaymentStatusChange}
+                theme={{
+                  field: {
+                    select: {
+                      base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    },
+                  },
+                }}>
+                <option value="">All Payment Statuses</option>
+                {paymentStatuses.map((p) => (
+                  <option key={p.id} value={p.code}>
+                    {p.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
         </div>
 
         {/* Orders Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto shadow-sm rounded-md">
           <Table hoverable>
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Order Code
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Customer
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Payment
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Total
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Status
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Created At
                 </TableHeadCell>
-                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center p-3 text-center">
+                <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
                   Action
                 </TableHeadCell>
               </TableRow>
@@ -269,7 +329,7 @@ export const AdminOrderFood = () => {
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="text-center bg-white text-gray-700 py-4">
+                    className="text-center !bg-white text-gray-700 py-4">
                     No orders found
                   </TableCell>
                 </TableRow>
@@ -277,30 +337,34 @@ export const AdminOrderFood = () => {
                 orders.map((order) => (
                   <TableRow
                     key={order.publicId}
-                    className="!bg-white hover:!bg-gray-100">
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
+                    className="!bg-gray-50 hover:!bg-gray-100 transition-colors duration-150">
+                    <TableCell className="text-sm text-gray-700 px-3 py-2 text-center truncate">
                       {order.publicId.slice(0, 8)}
                     </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
+                    <TableCell
+                      className="text-sm text-gray-700 px-3 py-2 text-left truncate"
+                      title={order.userName}>
                       {order.userName}
                     </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
-                      <span className="text-sm text-gray-700">
-                        {order.paymentMethod} - {order.paymentStatus}
+                    <TableCell
+                      className="text-sm text-gray-700 px-3 py-2 text-left truncate"
+                      title={`${order.paymentMethod} - ${order.paymentStatus}`}>
+                      {order.paymentMethod} - {order.paymentStatus}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
+                      <span className="font-semibold text-green-600">
+                        {formatPrice(order.totalAmount)}
                       </span>
                     </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
-                      ${order.totalAmount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
+                    <TableCell className="px-3 py-2 text-center">
                       <Badge color={getStatusBadgeColor(order.status)}>
                         {order.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
+                    <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                     </TableCell>
-                    <TableCell className="p-3 bg-white text-gray-700 text-center">
+                    <TableCell className="px-3 py-2  text-gray-700 text-center">
                       {order.status === "PENDING" && (
                         <Button
                           size="xs"

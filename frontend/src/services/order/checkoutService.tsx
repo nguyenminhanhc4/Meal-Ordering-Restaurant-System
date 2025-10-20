@@ -55,11 +55,11 @@ export const getOrderById = async (
   }
 };
 
-// Lấy tất cả orders (dành cho staff/admin)
 export const getAllOrders = async (
   page: number = 0,
   size: number = 10,
   status?: string,
+  paymentStatus?: string, // thêm param mới
   keyword?: string
 ): Promise<Page<OrderDto>> => {
   try {
@@ -67,13 +67,12 @@ export const getAllOrders = async (
     params.append("page", String(page));
     params.append("size", String(size));
     if (status) params.append("status", status);
+    if (paymentStatus) params.append("paymentStatus", paymentStatus); // thêm đây
     if (keyword) params.append("keyword", keyword);
 
     const res = await api.get<ApiResponse<Page<OrderDto>>>(
       `/orders?${params.toString()}`,
-      {
-        withCredentials: true,
-      }
+      { withCredentials: true }
     );
     return res.data.data;
   } catch (error) {

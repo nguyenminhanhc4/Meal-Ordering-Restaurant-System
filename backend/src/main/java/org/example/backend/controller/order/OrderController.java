@@ -37,10 +37,11 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<OrderResponseDTO> orders = orderService.getAllOrders(status, keyword, pageable);
+        Page<OrderResponseDTO> orders = orderService.getAllOrders(status,paymentStatus, keyword,pageable);
         return ResponseEntity.ok(orders);
     }
 
