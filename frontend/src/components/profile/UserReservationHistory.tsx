@@ -31,7 +31,7 @@ import Pagination from "../../components/common/PaginationClient";
 import BookingModal, {
   type BookingData,
 } from "../../pages/customer/table/BookingModal";
-import ConfirmDialog from "../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../common/ConfirmDialogProps";
 import { useNotification } from "../Notification/NotificationContext";
 
 export default function UserReservationHistory() {

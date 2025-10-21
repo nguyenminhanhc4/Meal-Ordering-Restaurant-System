@@ -3,7 +3,7 @@ import { Button, Spinner, Tooltip } from "flowbite-react";
 import { getAllTables } from "../../../services/table/tableService";
 import type { TableEntity } from "../../../services/table/tableService";
 import BookingModal, { type BookingData } from "./BookingModal";
-import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps";
 import {
   createMyReservation,
   getMyReservations,

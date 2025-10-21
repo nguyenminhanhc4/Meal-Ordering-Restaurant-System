@@ -22,7 +22,7 @@ import {
 } from "../../../services/review/reviewService";
 import EditReviewForm from "./EditReviewForm ";
 import { useAuth } from "../../../store/AuthContext";
-import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps";
 import Pagination from "../../../components/common/PaginationClient";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 import axios from "axios";
