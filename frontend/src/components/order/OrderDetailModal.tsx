@@ -136,7 +136,9 @@ export const OrderDetailModal = ({
                 : "Online Payment"}{" "}
               -{" "}
               <Badge
-                color={order.paymentStatus === "PAID" ? "success" : "warning"}>
+                color={
+                  order.paymentStatus === "COMPLETED" ? "success" : "warning"
+                }>
                 {order.paymentStatus}
               </Badge>
             </p>

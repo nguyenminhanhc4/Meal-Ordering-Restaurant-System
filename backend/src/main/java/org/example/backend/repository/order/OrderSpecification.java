@@ -46,18 +46,17 @@ public class OrderSpecification {
             Join<Object, Object> methodJoin = paymentJoin.join("paymentMethod", JoinType.LEFT);
             Join<Object, Object> statusJoin = paymentJoin.join("status", JoinType.LEFT);
 
-            // Điều kiện:
-            // COD + PENDING  hoặc  ONLINE + COMPLETED
-            return cb.or(
+            var validPayment = cb.or(
                     cb.and(
                             cb.equal(methodJoin.get("code"), "COD"),
-                            cb.equal(statusJoin.get("code"), "PENDING")
+                            statusJoin.get("code").in("PENDING", "COMPLETED") // COD chưa hoặc đã thanh toán
                     ),
                     cb.and(
                             cb.equal(methodJoin.get("code"), "ONLINE"),
-                            cb.equal(statusJoin.get("code"), "COMPLETED")
+                            cb.equal(statusJoin.get("code"), "COMPLETED") // Online đã thanh toán xong
                     )
             );
+            return cb.and(validPayment);
         };
     }
 
