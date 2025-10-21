@@ -12,7 +12,10 @@ import {
   TableHeadCell,
   Badge,
 } from "flowbite-react";
-import { updateOrderStatus } from "../../../services/order/checkoutService";
+import {
+  updateOrderStatus,
+  updatePaymentStatusByOrder,
+} from "../../../services/order/checkoutService";
 import { HiSearch } from "react-icons/hi";
 import api from "../../../api/axios";
 import { useNotification } from "../../../components/Notification";
@@ -31,6 +34,7 @@ export interface OrderItem {
 }
 
 export interface Order {
+  id: number;
   publicId: string;
   orderCode?: string;
   totalAmount: number;
@@ -42,6 +46,7 @@ export interface Order {
   status: string;
   shippingAddress: string;
   shippingPhone: string;
+  shippingNote?: string;
   items: OrderItem[];
 }
 
@@ -111,6 +116,17 @@ export const AdminOrderFood = () => {
       refreshOrders();
     } catch {
       notify("error", "Failed to cancel order.");
+    }
+  };
+
+  const handleMarkPaid = async (id: number, publicId: string) => {
+    try {
+      await updatePaymentStatusByOrder(id, "COMPLETED");
+      notify("success", "Payment marked as paid successfully!");
+      fetchOrderDetail(publicId);
+      refreshOrders();
+    } catch {
+      notify("error", "Failed to mark payment as paid.");
     }
   };
 
@@ -471,6 +487,7 @@ export const AdminOrderFood = () => {
         onStartDelivery={handleStartDelivery}
         onMarkDelivered={handleMarkDelivered}
         onCancel={handleCancelOrder}
+        onMarkPaid={handleMarkPaid}
       />
     </div>
   );

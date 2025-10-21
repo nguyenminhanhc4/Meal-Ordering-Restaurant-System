@@ -17,6 +17,7 @@ public class OrderMapper {
         ShippingInfo shipping = (payment != null) ? payment.getShippingInfo() : null;
 
         return OrderResponseDTO.builder()
+                .id(order.getId())
                 .publicId(order.getPublicId())
                 .userName(order.getUser() != null ? order.getUser().getName() : null)
                 .userEmail(order.getUser() != null ? order.getUser().getEmail() : null)
@@ -26,6 +27,7 @@ public class OrderMapper {
                 .paymentMethod(payment != null && payment.getPaymentMethod() != null ? payment.getPaymentMethod().getCode() : null)
                 .shippingAddress(shipping != null ? shipping.getAddress() : null)
                 .shippingPhone(shipping != null ? shipping.getPhone() : null)
+                .shippingNote(shipping != null ? shipping.getNote() : null)
                 .createdAt(order.getCreatedAt())
                 .items(toItemDtoList(order.getOrderItems()))
                 .build();

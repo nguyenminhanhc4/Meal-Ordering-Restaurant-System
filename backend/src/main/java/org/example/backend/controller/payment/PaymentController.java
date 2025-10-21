@@ -1,6 +1,8 @@
 package org.example.backend.controller.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.order.OrderDto;
+import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.dto.payment.PaymentRequestDto;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -48,7 +50,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PaymentDto> updatePaymentStatus(
             @PathVariable Long id,
             @RequestParam String statusCode,
@@ -59,5 +61,23 @@ public class PaymentController {
 
         PaymentDto updated = paymentService.updatePaymentStatus(id, status, transactionId);
         return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/orders/{orderId}/payment-status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PaymentDto> updatePaymentStatus(
+            @PathVariable Long orderId,
+            @RequestParam String statusCode
+    ) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        Param status = paramRepository.findByTypeAndCode("PAYMENT_STATUS", statusCode)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid status code"));
+
+        payment.setStatus(status);
+        paymentRepository.save(payment);
+
+        return ResponseEntity.ok(new PaymentDto(payment));
     }
 }

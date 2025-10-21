@@ -98,3 +98,20 @@ export const updateOrderStatus = async (
     throw error;
   }
 };
+
+// Cập nhật trạng thái thanh toán theo orderId hoặc publicId
+export const updatePaymentStatusByOrder = async (
+  orderId: number,
+  statusCode: string
+): Promise<void> => {
+  try {
+    await api.put(
+      `/payments/orders/${orderId}/payment-status?statusCode=${statusCode}`,
+      {},
+      { withCredentials: true }
+    );
+  } catch (error) {
+    console.error("Error updating payment status", error);
+    throw error;
+  }
+};

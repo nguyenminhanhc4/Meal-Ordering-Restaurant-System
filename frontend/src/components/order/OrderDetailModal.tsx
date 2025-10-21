@@ -24,7 +24,7 @@ interface OrderDetailModalProps {
   onStartDelivery?: (publicId: string) => void;
   onMarkDelivered?: (publicId: string) => void;
   onCancel?: (publicId: string) => void;
-  onMarkPaid?: (publicId: string) => void;
+  onMarkPaid?: (id: number, publicId: string) => void;
   formatPrice: (price: number) => string;
 }
 
@@ -60,7 +60,6 @@ export const OrderDetailModal = ({
     return colors[status] || "gray";
   };
 
-  console.log(order.status);
   // 🧭 Nút hành động chính
   const actions: OrderAction[] = [
     {
@@ -220,7 +219,9 @@ export const OrderDetailModal = ({
 
         {/* Nút riêng cho COD */}
         {showMarkPaid && (
-          <Button color="green" onClick={() => onMarkPaid?.(order.publicId)}>
+          <Button
+            color="green"
+            onClick={() => onMarkPaid?.(order.id, order.publicId)}>
             Mark as Paid
           </Button>
         )}

@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class OrderResponseDTO {
+    private Long id;
     private String publicId;
     private String userName;
     private String userEmail;
@@ -18,6 +19,7 @@ public class OrderResponseDTO {
     private String paymentMethod;
     private String shippingAddress;
     private String shippingPhone;
+    private String shippingNote;
     private LocalDateTime createdAt;
     private List<OrderItemDto> items;
 }
