@@ -91,7 +91,9 @@ export const OrderDetailModal = ({
 
   // 💵 Nút xác nhận thanh toán (chỉ dành cho COD)
   const showMarkPaid =
-    order.paymentMethod === "COD" && order.paymentStatus === "PENDING";
+    order.paymentMethod === "COD" &&
+    order.paymentStatus === "PENDING" &&
+    order.status !== "CANCELLED";
 
   return (
     <Modal

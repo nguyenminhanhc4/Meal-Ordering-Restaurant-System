@@ -2,7 +2,7 @@
 import api from "../../api/axios";
 import type { ApiResponse } from "../types/ApiType";
 import type { Cart } from "../cart/cartService";
-import type { OrderDto } from "../types/OrderType"; // định nghĩa DTO trả về
+import type { OrderDto, OrderDtoDetail } from "../types/OrderType"; // định nghĩa DTO trả về
 import type { Page } from "../types/PageType";
 
 export const checkoutCart = async (cart: Cart): Promise<OrderDto> => {
@@ -40,9 +40,9 @@ export const getOrdersByUser = async (
 // Lấy chi tiết một order theo publicId
 export const getOrderById = async (
   orderPublicId: string
-): Promise<OrderDto> => {
+): Promise<OrderDtoDetail> => {
   try {
-    const res = await api.get<ApiResponse<OrderDto>>(
+    const res = await api.get<ApiResponse<OrderDtoDetail>>(
       `/orders/${orderPublicId}`,
       {
         withCredentials: true,

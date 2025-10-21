@@ -10,11 +10,11 @@ import {
   HiCurrencyDollar,
 } from "react-icons/hi";
 import { getOrderById } from "../../../services/order/checkoutService";
-import type { OrderDto } from "../../../services/types/OrderType";
+import type { OrderDtoDetail } from "../../../services/types/OrderType";
 
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams(); // lấy orderId từ URL
-  const [order, setOrder] = useState<OrderDto | null>(null);
+  const [order, setOrder] = useState<OrderDtoDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -66,7 +66,6 @@ const OrderDetailPage: React.FC = () => {
         return status;
     }
   };
-
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-4xl py-12 px-4 md:px-6">
@@ -171,9 +170,8 @@ const OrderDetailPage: React.FC = () => {
               className="flex items-center gap-2">
               <HiArrowLeft className="text-lg" /> Quay lại
             </Button>
-
             {/* Thanh toán (chỉ khi PENDING) */}
-            {order.status === "PENDING" && (
+            {(!order.paymentStatus || order.paymentStatus === "FAILED") && (
               <Button
                 color="green"
                 onClick={() =>

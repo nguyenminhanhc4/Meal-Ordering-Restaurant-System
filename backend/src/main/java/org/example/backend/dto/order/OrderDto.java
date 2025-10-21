@@ -21,6 +21,7 @@ public class OrderDto {
     private String userName;
     private String status;
     private BigDecimal totalAmount;
+    private String paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<OrderItemDto> orderItems;
@@ -33,6 +34,7 @@ public class OrderDto {
             this.userName = entity.getUser().getName();
             this.status = entity.getStatus() != null ? entity.getStatus().getCode() : null;
             this.totalAmount = entity.getTotalAmount();
+            this.paymentStatus = entity.getPayment() != null ? entity.getPayment().getStatus().getCode() : null;
             this.createdAt = entity.getCreatedAt();
             this.updatedAt = entity.getUpdatedAt();
             this.orderItems = entity.getOrderItems() != null
