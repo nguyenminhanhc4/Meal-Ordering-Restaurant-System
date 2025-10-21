@@ -165,3 +165,63 @@ export const deleteReservation = async (id: number): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * ADMIN / STAFF: lấy danh sách reservation với paging, filter, search, sort
+ */
+export interface ReservationFilter {
+  keyword?: string; // tìm kiếm theo tên user, note, v.v.
+  statusId?: number; // lọc theo status
+  from?: string; // ISO string, từ thời gian reservationTime
+  to?: string; // ISO string, đến thời gian reservationTime
+  numberOfPeople?: number;
+}
+
+export interface ReservationDTO {
+  id: number;
+  publicId: string;
+  userId: number;
+  userName: string;
+  userPhone: string;
+  userEmail: string;
+  reservationTime: string;
+  numberOfPeople: number;
+  note?: string;
+  statusId: number;
+  statusName: string;
+  tableIds: number[];
+  tableNames: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getReservations = async (
+  filter: ReservationFilter = {},
+  page = 0,
+  size = 10,
+  sort: string = "reservationTime,desc"
+): Promise<Page<ReservationDTO> | null> => {
+  try {
+    const params = new URLSearchParams({
+      filter: JSON.stringify(filter),
+      page: page.toString(),
+      size: size.toString(),
+      sort,
+    });
+
+    if (filter.keyword) params.set("keyword", filter.keyword);
+    if (filter.statusId) params.set("statusId", filter.statusId.toString());
+    if (filter.from) params.set("from", filter.from);
+    if (filter.to) params.set("to", filter.to);
+    if (filter.numberOfPeople)
+      params.set("numberOfPeople", filter.numberOfPeople.toString());
+
+    const response = await api.get<Page<ReservationDTO>>(
+      `/reservations?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reservations:", error);
+    return null;
+  }
+};

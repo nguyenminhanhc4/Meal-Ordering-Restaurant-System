@@ -49,13 +49,17 @@ export default function TableBooking() {
   const { notify } = useNotification();
 
   /** Danh sách ID bàn mà user đã đặt */
-  const myBookedTableIds = useMemo(
-    () =>
-      myReservations
-        .filter((res) => res.statusName !== "CANCELLED")
-        .flatMap((res) => res.tableIds || []),
-    [myReservations]
-  );
+  const myBookedStatusMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    myReservations
+      .filter((res) => res.statusName !== "CANCELLED")
+      .forEach((res) => {
+        (res.tableIds || []).forEach((id) => {
+          map[id] = res.statusName; // PENDING hoặc CONFIRMED
+        });
+      });
+    return map;
+  }, [myReservations]);
 
   /** -------------------------------
    *  DATE TIME LIMIT (chỉ cho phép đặt từ thời điểm hiện tại)
@@ -366,6 +370,7 @@ export default function TableBooking() {
                 <span className="font-semibold mr-2">Chú thích:</span>
                 <Legend color="green" label="Còn trống" />
                 <Legend color="red" label="Đã được đặt" />
+                <Legend color="yellow" label="Bàn đang chờ duyệt" />
                 <Legend color="blue" label="Bàn của tôi" />
               </div>
             </>
@@ -376,14 +381,15 @@ export default function TableBooking() {
         {!loading && (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             {filteredTables.map((table) => {
-              const isMyBooked = myBookedTableIds.includes(table.id);
+              const myStatus = myBookedStatusMap[table.id];
+              const isMyBooked = !!myStatus;
               const isOtherBooked =
                 !isMyBooked &&
                 ["PENDING", "CONFIRMED", "OCCUPIED"].includes(table.statusName);
 
               const { colorClass, statusText } = getTableStatusClass(
                 table,
-                isMyBooked,
+                myStatus, // truyền status thay vì true/false
                 isOtherBooked,
                 translateStatus
               );
@@ -475,6 +481,7 @@ function Legend({ color, label }: { color: string; label: string }) {
     green: "bg-green-100 border-green-300",
     red: "bg-red-200 border-red-400",
     blue: "bg-blue-200 border-blue-400",
+    yellow: "bg-yellow-200 border-yellow-400",
   };
   return (
     <div className="flex items-center gap-1">
@@ -487,29 +494,40 @@ function Legend({ color, label }: { color: string; label: string }) {
 /** Helper xác định class & status text theo trạng thái bàn */
 function getTableStatusClass(
   table: TableEntity,
-  isMyBooked: boolean,
+  myStatus: string | undefined, // PENDING / CONFIRMED / undefined
   isOtherBooked: boolean,
   translateStatus: (s: string) => string
 ) {
-  if (isMyBooked)
+  if (myStatus === "CONFIRMED") {
     return {
       colorClass:
         "bg-blue-100 border-blue-400 text-blue-800 cursor-not-allowed",
-      statusText: "Bạn đã đặt bàn này",
+      statusText: "Bạn đã đặt bàn (Đã duyệt)",
     };
+  }
 
-  if (isOtherBooked)
+  if (myStatus === "PENDING") {
+    return {
+      colorClass:
+        "bg-yellow-200 border-yellow-400 text-yellow-800 cursor-not-allowed",
+      statusText: "Bạn đã đặt bàn (Đang chờ duyệt)",
+    };
+  }
+
+  if (isOtherBooked) {
     return {
       colorClass: "bg-red-200 border-red-400 text-gray-600 cursor-not-allowed",
       statusText: "Đã có người đặt",
     };
+  }
 
-  if (table.statusName === "AVAILABLE")
+  if (table.statusName === "AVAILABLE") {
     return {
       colorClass:
         "bg-green-100 border-green-300 hover:bg-green-200 text-green-800 hover:shadow-md",
       statusText: "Còn trống",
     };
+  }
 
   return {
     colorClass: "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed",

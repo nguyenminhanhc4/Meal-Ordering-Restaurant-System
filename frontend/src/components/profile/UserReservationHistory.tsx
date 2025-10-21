@@ -282,8 +282,8 @@ export default function UserReservationHistory() {
                         {res.note && (
                           <p className="text-gray-500 italic flex items-center">
                             <HiOutlineClipboardDocumentList className="w-4 h-4 mr-1 text-purple-500" />
-                            {res.note.length > 50
-                              ? res.note.substring(0, 50) + "..."
+                            {res.note.length > 20
+                              ? res.note.substring(0, 20) + "..."
                               : res.note}
                           </p>
                         )}

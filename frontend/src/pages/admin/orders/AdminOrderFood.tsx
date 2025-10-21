@@ -230,7 +230,6 @@ export const AdminOrderFood = () => {
     const loadPaymentStatuses = async (signal: AbortSignal) => {
       try {
         const res = await api.get("/params?type=PAYMENT_STATUS", { signal });
-        console.log("Order statuses response:", res.data.data);
         if (res.data?.data) setPaymentStatuses(res.data.data);
       } catch {
         if (!signal.aborted)

@@ -5,9 +5,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.entity.table.TableEntity;
+import org.example.backend.entity.user.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,8 +17,16 @@ import java.util.List;
 public class ReservationDto {
     private Long id;
     private String publicId;
+    // user info
     private Long userId;
-    private List<Long> tableIds; // 🔹 multiple tables now
+    private String userName;
+    private String userEmail;
+    private String userPhone;
+
+    // table info
+    private List<Long> tableIds;
+    private List<String> tableNames;
+
     private LocalDateTime reservationTime;
     private Long statusId;
     private String statusName;
@@ -29,7 +39,15 @@ public class ReservationDto {
         if (reservation != null) {
             this.id = reservation.getId();
             this.publicId = reservation.getPublicId();
-            this.userId = reservation.getUserId();
+            // user
+            User user = reservation.getUser(); // dùng relation ManyToOne
+            if (user != null) {
+                this.userId = user.getId();
+                this.userName = user.getName();
+                this.userEmail = user.getEmail();
+                this.userPhone = user.getPhone();
+            }
+
             this.reservationTime = reservation.getReservationTime();
             this.statusId = reservation.getStatus().getId();
             this.statusName = reservation.getStatus().getCode();
@@ -38,11 +56,12 @@ public class ReservationDto {
             this.note = reservation.getNote();
             this.numberOfPeople = reservation.getNumberOfPeople();
 
-            // map tables -> ids
-            this.tableIds = reservation.getTables()
-                    .stream()
-                    .map(TableEntity::getId)
-                    .toList();
+            // tables
+            Set<TableEntity> tables = reservation.getTables();
+            if (tables != null && !tables.isEmpty()) {
+                this.tableIds = tables.stream().map(TableEntity::getId).toList();
+                this.tableNames = tables.stream().map(TableEntity::getName).toList();
+            }
         }
     }
 }

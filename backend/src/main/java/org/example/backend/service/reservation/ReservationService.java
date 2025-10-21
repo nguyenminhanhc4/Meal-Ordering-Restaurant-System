@@ -8,19 +8,26 @@ import org.example.backend.dto.table.TableStatusUpdate;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.entity.table.TableEntity;
+import org.example.backend.entity.user.User;
 import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.reservation.ReservationRepository;
+import org.example.backend.repository.reservation.ReservationSpecification;
 import org.example.backend.repository.table.TableRepository;
+import org.example.backend.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +44,9 @@ public class ReservationService {
     private ParamRepository paramRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     // ========================= CREATE =========================
@@ -46,12 +56,14 @@ public class ReservationService {
             // 1. Tạo reservation mới
             Reservation reservation = new Reservation();
             reservation.setPublicId(UUID.randomUUID().toString());
-            reservation.setUserId(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            reservation.setUser(user);
             reservation.setReservationTime(dto.getReservationTime());
             reservation.setNumberOfPeople(dto.getNumberOfPeople());
             reservation.setNote(dto.getNote());
 
-            Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "CONFIRMED")
+            Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "PENDING")
                     .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
             reservation.setStatus(status);
 
@@ -118,6 +130,36 @@ public class ReservationService {
         return page.map(ReservationDto::new);
     }
 
+    public Page<ReservationDto> getReservations(
+            String keyword,
+            Long statusId,
+            LocalDateTime from,
+            LocalDateTime to,
+            Integer numberOfPeople,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir
+    ) {
+        // Build specification
+        List<Specification<Reservation>> specs = new ArrayList<>();
+        specs.add(ReservationSpecification.containsKeyword(keyword));
+        specs.add(ReservationSpecification.hasStatus(statusId));
+        specs.add(ReservationSpecification.reservationBetween(from, to));
+        specs.add(ReservationSpecification.numberOfPeopleEquals(numberOfPeople));
+
+        Specification<Reservation> finalSpec = specs.stream()
+                .filter(Objects::nonNull)
+                .reduce(Specification::and)
+                .orElse(null);
+
+        // Sort
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Reservation> reservations = reservationRepository.findAll(finalSpec, pageable);
+        return reservations.map(ReservationDto::new);
+    }
 
     @Transactional(readOnly = true)
     public ReservationDto getReservationByPublicId(String publicId) {
@@ -132,7 +174,6 @@ public class ReservationService {
                 .map(ReservationDto::new)
                 .collect(Collectors.toList());
     }
-
 
     // ========================= UPDATE =========================
     @Transactional

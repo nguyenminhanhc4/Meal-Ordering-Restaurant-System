@@ -3,6 +3,7 @@ package org.example.backend.controller.reservation;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.table.TableDto;
+import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.service.reservation.ReservationService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +85,30 @@ public class ReservationController {
         return ResponseEntity.ok(new Response<>("success", reservations, "Reservations retrieved successfully"));
     }
 
+    @GetMapping
+    public Page<ReservationDto> getReservations(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long statusId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(required = false) Integer numberOfPeople,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "reservationTime") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return reservationService.getReservations(
+                keyword,
+                statusId,
+                from,
+                to,
+                numberOfPeople,
+                page,
+                size,
+                sortBy,
+                sortDir
+        );
+    }
 
 
     // CUSTOMER gets their reservation by publicId
@@ -137,12 +164,12 @@ public class ReservationController {
     }
 
     // STAFF or ADMIN can see all reservations
-    @GetMapping
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    public ResponseEntity<?> getAllReservations() {
-        List<ReservationDto> list = reservationService.getAllReservations();
-        return ResponseEntity.ok(new Response<>("success", list, "All reservations retrieved successfully"));
-    }
+//    @GetMapping
+//    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+//    public ResponseEntity<?> getAllReservations() {
+//        List<ReservationDto> list = reservationService.getAllReservations();
+//        return ResponseEntity.ok(new Response<>("success", list, "All reservations retrieved successfully"));
+//    }
 
     // STAFF or ADMIN can update any reservation
     @PutMapping("/{id}")
