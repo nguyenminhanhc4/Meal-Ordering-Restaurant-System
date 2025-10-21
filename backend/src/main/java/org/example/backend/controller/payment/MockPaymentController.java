@@ -11,6 +11,7 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.payment.PaymentRepository;
 import org.example.backend.service.menu.MenuItemService;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ public class MockPaymentController {
     private final MenuItemRepository menuItemRepository;
     private final MenuItemService menuItemService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketNotifier webSocketNotifier;
 
     /**
      * 1️⃣ Initiate payment (API FE gọi)
@@ -87,7 +89,7 @@ public class MockPaymentController {
         List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
 
         for (Long id : affectedMenuIds) {
-            messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
+            webSocketNotifier.notifyMenuItemStock(id);
         }
 
         return Map.of("redirectUrl", payment.getReturnUrl());

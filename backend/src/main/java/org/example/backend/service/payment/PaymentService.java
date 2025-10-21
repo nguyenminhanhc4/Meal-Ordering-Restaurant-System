@@ -10,6 +10,7 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
 import org.example.backend.service.menu.MenuItemService;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class PaymentService {
     private final ParamRepository paramRepository;
     private final ShippingInfoRepository shippingInfoRepository;
     private final MenuItemService menuItemService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketNotifier webSocketNotifier;
 
     @Transactional
     public PaymentDto createPayment(PaymentRequestDto request, String publicId) {
@@ -78,11 +79,9 @@ public class PaymentService {
         List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
 
         PaymentDto dto = new PaymentDto(savedPayment);
-        messagingTemplate.convertAndSend("/topic/payments", dto);
-
-            for (Long id : affectedMenuIds) {
-                messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
-            }
+        for (Long id : affectedMenuIds) {
+            webSocketNotifier.notifyMenuItemStock(id);
+        }
         return dto;
     }
 

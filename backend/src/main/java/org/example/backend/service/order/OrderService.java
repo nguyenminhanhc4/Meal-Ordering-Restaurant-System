@@ -17,6 +17,7 @@ import org.example.backend.repository.order.OrderSpecification;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
+    private final WebSocketNotifier wsNotifier;
 
     @Transactional
     public OrderDto checkoutCart(CartDto cart) {
@@ -171,6 +173,7 @@ public class OrderService {
 
         // Lưu và trả về DTO
         order = orderRepository.save(order);
+        wsNotifier.notifyOrderStatus(order.getPublicId(), statusCode);
         return new OrderDto(order);
     }
 

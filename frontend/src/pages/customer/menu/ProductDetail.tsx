@@ -24,7 +24,7 @@ import EditReviewForm from "./EditReviewForm ";
 import { useAuth } from "../../../store/AuthContext";
 import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
 import Pagination from "../../../components/common/PaginationClient";
-import { connectWebSocket } from "../../../api/websocketClient";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 import axios from "axios";
 
 /**
@@ -110,25 +110,14 @@ const ProductDetail: React.FC = () => {
     setCurrentPage(0);
   }, [product?.reviews]);
 
-  useEffect(() => {
-    // chỉ kết nối khi có id
-    if (!id) return;
-
-    const client = connectWebSocket<{ menuItemId: number }>(
-      `/topic/menu/${id}`,
-      async (data) => {
-        console.log("🔄 Cập nhật WebSocket:", data);
-
-        // Khi có thông báo cập nhật món ăn, gọi lại API lấy chi tiết mới
-        await fetchProduct();
-      }
-    );
-
-    // cleanup khi rời trang
-    return () => {
-      client.deactivate();
-    };
-  }, [id, fetchProduct]);
+  useRealtimeUpdate(
+    `/topic/menu/${id}`, // topic
+    () => fetchProduct(), // fetchFn: lấy dữ liệu mới từ API
+    () => {
+      notify("info", "Món ăn đã được cập nhật");
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId // lấy id từ payload
+  );
 
   const handleDelete = async () => {
     if (!selectedReviewId) return;

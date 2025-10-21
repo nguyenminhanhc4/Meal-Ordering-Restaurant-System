@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Badge } from "flowbite-react";
 import { HiEye, HiShoppingCart } from "react-icons/hi";
 import { FaStar, FaStarHalf } from "react-icons/fa";
@@ -11,8 +11,7 @@ import {
   createCart,
   addItemToCart,
 } from "../../services/cart/cartService";
-import { connectWebSocket } from "../../api/websocketClient";
-
+import { useRealtimeUpdate } from "../../api/useRealtimeUpdate";
 interface ProductCardProps {
   product: Product;
 }
@@ -25,30 +24,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [currentProduct, setCurrentProduct] = useState(product);
 
   // 🧠 Lắng nghe cập nhật realtime từ WebSocket
-  useEffect(() => {
-    if (!product?.id) return;
-
-    const client = connectWebSocket<{ menuItemId: number }>(
-      `/topic/menu/${product.id}`,
-      async (message) => {
-        console.log("🔔 Cập nhật realtime món:", message.menuItemId);
-
-        try {
-          const updated = await getMenuItemById(message.menuItemId);
-          if (updated) {
-            setCurrentProduct(updated);
-            notify("info", `${updated.name} đã được cập nhật`);
-          }
-        } catch (err) {
-          console.error("❌ Lỗi khi cập nhật realtime:", err);
-        }
+  useRealtimeUpdate(
+    `/topic/menu/${product?.id}`, // topic
+    getMenuItemById, // fetchFn: lấy dữ liệu mới từ API
+    (updated) => {
+      if (updated) {
+        setCurrentProduct(updated);
+        notify("info", `${updated.name} đã được cập nhật`);
       }
-    );
-
-    return () => {
-      client.deactivate();
-    };
-  }, [product?.id]);
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
 
   // 🛒 Xử lý thêm vào giỏ hàng
   const handleAddToCart = async () => {
@@ -61,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       const cart = await getCurrentCart().catch(() => createCart());
       const updatedCart = await addItemToCart(cart.id, {
         menuItemId: currentProduct.id,
-        quantity: 1,
+        quantity: 0,
       });
 
       notify("success", `Đã thêm ${currentProduct.name} vào giỏ hàng`);

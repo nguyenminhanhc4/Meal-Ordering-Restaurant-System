@@ -10,6 +10,7 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.payment.PaymentRepository;
 import org.example.backend.util.JwtUtil;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ public class PaymentController {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final JwtUtil jwtUtil;
+    private final WebSocketNotifier wsNotifier;
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -77,6 +79,8 @@ public class PaymentController {
 
         payment.setStatus(status);
         paymentRepository.save(payment);
+
+        wsNotifier.notifyPaymentStatus(payment.getOrder().getPublicId(), status.getCode());
 
         return ResponseEntity.ok(new PaymentDto(payment));
     }
