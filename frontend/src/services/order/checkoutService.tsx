@@ -80,3 +80,21 @@ export const getAllOrders = async (
     throw error;
   }
 };
+
+// Cập nhật trạng thái đơn hàng (ví dụ: APPROVED, DELIVERING, DELIVERED, CANCELLED)
+export const updateOrderStatus = async (
+  publicId: string,
+  status: string
+): Promise<OrderDto> => {
+  try {
+    const res = await api.put<ApiResponse<OrderDto>>(
+      `/orders/${publicId}/status?status=${status}`, // 👈 thêm query param
+      {},
+      { withCredentials: true }
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error updating order status", error);
+    throw error;
+  }
+};

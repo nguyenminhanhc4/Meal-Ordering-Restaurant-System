@@ -12,11 +12,12 @@ import {
   TableHeadCell,
   Badge,
 } from "flowbite-react";
+import { updateOrderStatus } from "../../../services/order/checkoutService";
 import { HiSearch } from "react-icons/hi";
 import api from "../../../api/axios";
 import { useNotification } from "../../../components/Notification";
 import { Pagination } from "../../../components/common/Pagination";
-import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
+// import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 import { format } from "date-fns";
 import { OrderDetailModal } from "../../../components/order/OrderDetailModal";
 
@@ -57,14 +58,61 @@ export const AdminOrderFood = () => {
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 15;
   const { notify } = useNotification();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  // const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  // const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("");
   const [paymentStatuses, setPaymentStatuses] = useState<
     { id: number; code: string; name: string }[]
   >([]);
   const [orderDetail, setOrderDetail] = useState<Order | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  const handleApproveOrder = async (publicId: string) => {
+    try {
+      await updateOrderStatus(publicId, "APPROVED");
+      notify("success", "Order approved successfully!");
+      fetchOrderDetail(publicId);
+      refreshOrders(); // reload list
+    } catch {
+      notify("error", "Failed to approve order.");
+    }
+  };
+
+  // 🚚 Bắt đầu giao hàng
+  const handleStartDelivery = async (publicId: string) => {
+    try {
+      await updateOrderStatus(publicId, "DELIVERING");
+      notify("success", "Order is now delivering.");
+      fetchOrderDetail(publicId);
+      refreshOrders();
+    } catch {
+      notify("error", "Failed to update delivery status.");
+    }
+  };
+
+  // 📦 Đánh dấu đã giao
+  const handleMarkDelivered = async (publicId: string) => {
+    try {
+      await updateOrderStatus(publicId, "DELIVERED");
+      notify("success", "Order delivered successfully!");
+      fetchOrderDetail(publicId);
+      refreshOrders();
+    } catch {
+      notify("error", "Failed to mark delivered.");
+    }
+  };
+
+  // ❌ Hủy đơn
+  const handleCancelOrder = async (publicId: string) => {
+    try {
+      await updateOrderStatus(publicId, "CANCELLED");
+      notify("success", "Order cancelled successfully.");
+      fetchOrderDetail(publicId);
+      refreshOrders();
+    } catch {
+      notify("error", "Failed to cancel order.");
+    }
+  };
 
   // ✅ Fetch Orders API (đã fix cấu trúc dữ liệu)
   const fetchOrders = useCallback(
@@ -117,11 +165,31 @@ export const AdminOrderFood = () => {
     [notify]
   );
 
+  const refreshOrders = useCallback(() => {
+    const abortController = new AbortController();
+    fetchOrders(
+      currentPage,
+      pageSize,
+      searchTerm,
+      selectedStatus,
+      selectedPaymentStatus,
+      abortController.signal
+    );
+    return () => abortController.abort();
+  }, [
+    fetchOrders,
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedStatus,
+    selectedPaymentStatus,
+  ]);
+
   const fetchOrderDetail = async (publicId: string) => {
     try {
       const res = await api.get(`/orders/admin/${publicId}`);
       console.log("Order detail response:", res.data);
-      setOrderDetail(res.data); // data là OrderResponseDTO từ backend
+      setOrderDetail({ ...res.data }); // data là OrderResponseDTO từ backend
       setShowDetailModal(true);
     } catch (error) {
       console.error(error);
@@ -201,30 +269,6 @@ export const AdminOrderFood = () => {
       currency: "VND",
     }).format(price);
   }, []);
-
-  // Approve order (example action)
-  const handleApproveOrder = async () => {
-    if (!selectedOrder) return;
-    try {
-      await api.post(`/orders/approve/${selectedOrder}`);
-      notify("success", "Order approved successfully");
-      const abortController = new AbortController();
-      void fetchOrders(
-        currentPage,
-        pageSize,
-        searchTerm,
-        selectedStatus,
-        selectedPaymentStatus,
-        abortController.signal
-      );
-    } catch (error: unknown) {
-      console.error(error);
-      notify("error", "Failed to approve order.");
-    } finally {
-      setShowConfirmDialog(false);
-      setSelectedOrder(null);
-    }
-  };
 
   // const openConfirmDialog = (orderPublicId: string) => {
   //   setSelectedOrder(orderPublicId);
@@ -418,20 +462,15 @@ export const AdminOrderFood = () => {
         </div>
       </Card>
 
-      <ConfirmDialog
-        show={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
-        onConfirm={handleApproveOrder}
-        message="Are you sure you want to approve this order?"
-      />
-
       <OrderDetailModal
         show={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         order={orderDetail}
         formatPrice={formatPrice}
         onApprove={handleApproveOrder}
-        // onCancel={handleCancelOrder}
+        onStartDelivery={handleStartDelivery}
+        onMarkDelivered={handleMarkDelivered}
+        onCancel={handleCancelOrder}
       />
     </div>
   );

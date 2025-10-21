@@ -155,7 +155,29 @@ public class OrderService {
 
         entity.setTotalAmount(dto.getTotalAmount());
         entity = orderRepository.save(entity);
-        return new OrderDto(entity);
+        return saveAndReturn(entity);
+    }
+
+    public OrderDto updateStatus(String publicId, String statusCode) {
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Tìm Param tương ứng trong DB
+        Param statusParam = paramRepository.findByTypeAndCode("ORDER_STATUS", statusCode )
+                .orElseThrow(() -> new RuntimeException("Invalid status code: " + statusCode));
+
+        // Gán lại
+        order.setStatus(statusParam);
+
+        // Lưu và trả về DTO
+        order = orderRepository.save(order);
+        return new OrderDto(order);
+    }
+
+
+    private OrderDto saveAndReturn(Order order) {
+        Order saved = orderRepository.save(order);
+        return new OrderDto(saved);
     }
 
     public void deleteById(Long id) {

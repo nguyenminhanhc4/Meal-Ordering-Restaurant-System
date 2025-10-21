@@ -4,6 +4,7 @@ import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.order.OrderResponseDTO;
+import org.example.backend.entity.param.Param;
 import org.example.backend.service.order.OrderService;
 import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,12 @@ public class OrderController {
     public ResponseEntity<?> update(@PathVariable String publicId, @RequestBody OrderDto dto) {
         OrderDto updated = orderService.updateByPublicId(publicId, dto);
         return ResponseEntity.ok(new Response<>("success", updated, "Order updated successfully"));
+    }
+
+    @PutMapping("/{publicId}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable String publicId, @RequestParam String  status) {
+        OrderDto updated = orderService.updateStatus(publicId, status);
+        return ResponseEntity.ok(new Response<>("success", updated, "Order status updated"));
     }
 
     @DeleteMapping("/{publicId}")
