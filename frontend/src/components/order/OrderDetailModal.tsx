@@ -125,6 +125,9 @@ export const OrderDetailModal = ({
             <p>
               <strong>Address:</strong> {order.shippingAddress}
             </p>
+            <p>
+              <strong>Note:</strong> {order.shippingNote?.slice(0, 20)}
+            </p>
           </div>
 
           {/* Right: Payment + Status info */}

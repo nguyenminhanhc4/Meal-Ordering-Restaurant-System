@@ -150,6 +150,7 @@ export default function PaymentPage() {
         const payment = await initiatePayment(paymentDataToSend); // gọi /mock-payments/initiate
         console.log("Initiated payment:", payment.redirectUrl);
 
+        sessionStorage.setItem("shippingInfo", JSON.stringify(shippingInfo));
         window.location.href = `http://localhost:5173${payment.redirectUrl}`;
       }
     } catch (err: unknown) {

@@ -29,7 +29,16 @@ export default function MockPaymentPage() {
     if (!publicId) return;
     setSubmitting(true);
     try {
-      const result = await approveMockPayment(publicId);
+      const savedShipping = sessionStorage.getItem("shippingInfo");
+      const shippingInfo = savedShipping ? JSON.parse(savedShipping) : null;
+
+      if (!shippingInfo) {
+        notify("error", "Shipping information is missing!");
+        return;
+      }
+
+      // Gửi shipping info từ sessionStorage
+      const result = await approveMockPayment(publicId, shippingInfo);
       notify("success", "Payment Approved!");
       window.location.href = `${result.redirectUrl}`;
     } catch (err) {
