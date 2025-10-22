@@ -58,7 +58,6 @@ export const getMyReservations = async (
     if (status && status.trim() !== "") {
       params.set("status", status); // chỉ set 1 lần
     }
-    console.log(params.toString());
 
     const response = await api.get<ApiResponse<Page<Reservation>>>(
       `/reservations/me?${params.toString()}`

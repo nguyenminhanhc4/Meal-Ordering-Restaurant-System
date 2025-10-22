@@ -41,7 +41,11 @@ export default function TableBooking() {
 
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
   const activeReservations = useMemo(
-    () => myReservations.filter((res) => res.statusName !== "CANCELLED"),
+    () =>
+      myReservations.filter(
+        (res) =>
+          res.statusName !== "CANCELLED" && res.statusName !== "COMPLETED"
+      ),
     [myReservations]
   );
 
@@ -52,7 +56,10 @@ export default function TableBooking() {
   const myBookedStatusMap = useMemo(() => {
     const map: Record<number, string> = {};
     myReservations
-      .filter((res) => res.statusName !== "CANCELLED")
+      .filter(
+        (res) =>
+          res.statusName !== "CANCELLED" && res.statusName !== "COMPLETED"
+      )
       .forEach((res) => {
         (res.tableIds || []).forEach((id) => {
           map[id] = res.statusName; // PENDING hoặc CONFIRMED
@@ -160,8 +167,6 @@ export default function TableBooking() {
         editingReservation.publicId,
         payload
       );
-
-      console.log("Update payload:", payload);
 
       if (updated) {
         notify("success", "✅ Cập nhật đặt bàn thành công!");
