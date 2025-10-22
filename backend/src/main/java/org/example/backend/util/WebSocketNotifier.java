@@ -75,5 +75,16 @@ public class WebSocketNotifier {
                 "status", newStatus
         ));
     }
+    /**
+     * Gửi thông báo khi tạo mới MenuItem
+     */
+    public void notifyNewMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId) {
+        notify("/topic/menu/new", Map.of(
+                "menuItemId", menuItemId,
+                "name", name,
+                "avatarUrl", avatarUrl,
+                "categoryId", categoryId
+        ));
+    }
 
 }

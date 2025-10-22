@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Card, Button, Spinner } from "flowbite-react";
-import { getAllMenuItems } from "../../../services/product/fetchProduct";
+import {
+  getAllMenuItems,
+  getMenuItemById,
+} from "../../../services/product/fetchProduct";
 import type { Product } from "../../../services/product/fetchProduct";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import ProductCard from "../../../components/card/ProductCard";
 import SearchBar from "../../../components/search_filter/SearchBar";
 import SortFilter from "../../../components/search_filter/SortFilter";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate.ts";
 
 /**
  * 🍽️ MealPage
@@ -92,6 +96,30 @@ const MealPage: React.FC = () => {
     setCurrentPage(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [search, sort, categorySlug]);
+
+  useRealtimeUpdate(
+    `/topic/menu/new`,
+    getMenuItemById,
+    (updatedOrNewProduct) => {
+      if (!updatedOrNewProduct) return;
+
+      setProducts((prev) => {
+        const exists = prev.some((p) => p.id === updatedOrNewProduct.id);
+        if (exists) {
+          return prev.map((p) =>
+            p.id === updatedOrNewProduct.id ? updatedOrNewProduct : p
+          );
+        }
+        return [updatedOrNewProduct, ...prev];
+      });
+
+      notify(
+        "info",
+        `${updatedOrNewProduct.name} đã được cập nhật hoặc thêm mới`
+      );
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-100 py-12 px-4 sm:px-6 md:px-8">

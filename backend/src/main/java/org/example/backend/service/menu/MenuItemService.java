@@ -10,6 +10,7 @@ import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.review.Review;
 import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.review.ReviewRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,7 @@ public class MenuItemService {
     private final Cloudinary cloudinary;
     private final MenuItemMapper menuItemMapper;
     private final OrderItemRepository orderItemRepository;
+    private final WebSocketNotifier webSocketNotifier;
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
@@ -395,6 +397,14 @@ public class MenuItemService {
                 menuItemIngredientRepository.save(menuItemIngredient);
             }
         }
+
+        // Thông báo realtime cho client
+        webSocketNotifier.notifyNewMenuItem(
+                menuItem.getId(),
+                menuItem.getName(),
+                menuItem.getAvatarUrl(),
+                menuItem.getCategory().getId()
+        );
 
         return new MenuItemDto(menuItem);
     }
