@@ -17,10 +17,7 @@ import org.example.backend.repository.table.TableRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -108,8 +105,14 @@ public class ReservationService {
                         messagingTemplate.convertAndSend("/topic/tables",
                                 new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
                     }
+
+                    messagingTemplate.convertAndSend("/topic/reservations", Map.of(
+                            "reservationPublicId", reservation.getPublicId(),
+                            "status", reservation.getStatus().getCode()
+                    ));
                 }
             });
+
 
             return new ReservationDto(reservation);
 
@@ -145,25 +148,32 @@ public class ReservationService {
             String sortBy,
             String sortDir
     ) {
-        // Build specification
-        List<Specification<Reservation>> specs = new ArrayList<>();
-        specs.add(ReservationSpecification.containsKeyword(keyword));
-        specs.add(ReservationSpecification.hasStatus(statusId));
-        specs.add(ReservationSpecification.reservationBetween(from, to));
-        specs.add(ReservationSpecification.numberOfPeopleEquals(numberOfPeople));
+        Pageable pageable = PageRequest.of(page, size);
 
-        Specification<Reservation> finalSpec = specs.stream()
-                .filter(Objects::nonNull)
-                .reduce(Specification::and)
-                .orElse(null);
+        Page<Reservation> reservations = reservationRepository.findAllWithCustomSort(
+                keyword,
+                statusId,
+                from,
+                to,
+                numberOfPeople,
+                pageable
+        );
 
-        // Sort
-        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Reservation> reservations = reservationRepository.findAll(finalSpec, pageable);
         return reservations.map(ReservationDto::new);
     }
+
+
+    // 🎯 Helper function: xác định độ ưu tiên của status
+    private int getStatusPriority(String code) {
+        return switch (code) {
+            case "PENDING" -> 1;
+            case "CONFIRMED" -> 2;
+            case "COMPLETED" -> 3;
+            case "CANCELLED" -> 4;
+            default -> 5;
+        };
+    }
+
 
     @Transactional(readOnly = true)
     public ReservationDto getReservationByPublicId(String publicId) {

@@ -24,6 +24,7 @@ import type {
 import { AxiosError } from "axios";
 import api from "../../../api/axios";
 import { ReservationDetailModal } from "../../../components/order/ReservationDetailModal";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 export const AdminTableOrders = () => {
   const [reservations, setReservations] = useState<ReservationDTO[]>([]);
@@ -99,6 +100,22 @@ export const AdminTableOrders = () => {
     void loadStatuses(abortController.signal);
     void fetchReservations();
   }, [notify, fetchReservations]);
+
+  useRealtimeUpdate<void, string, { reservationPublicId: string }>(
+    "/topic/reservations",
+    async (id: string) => {
+      console.log("🔄 Admin fetching updated reservation:", id);
+      // We don't have a single-reservation fetch here; refresh the list instead.
+      await fetchReservations();
+      return;
+    },
+    (data) => {
+      console.log("📡 Admin got new reservation:", data);
+      // data is void/undefined; refetch to update the list
+      void fetchReservations();
+    },
+    (msg) => msg.reservationPublicId
+  );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

@@ -94,7 +94,7 @@ public class ReservationController {
             @RequestParam(required = false) Integer numberOfPeople,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "reservationTime") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
         return reservationService.getReservations(
