@@ -68,9 +68,27 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Optional<Order> findByPublicId(String publicId);
 
 //    Optional<Order> findByPublicId(String publicId);
+@Query("""
+    select o from Order o
+    join fetch o.status s
+    where (:status is null or s.code = :status)
+    order by
+      case s.code
+        when 'PENDING' then 1
+        when 'APPROVED' then 2
+        when 'DELIVERING' then 3
+        when 'DELIVERED' then 4
+        when 'CANCELLED' then 5
+        else 6
+      end,
+      o.createdAt desc
+""")
+Page<Order> findByUserWithStatusOrder(
+        @Param("status") String status,
+        @Param("user") User user,
+        Pageable pageable
+);
 
-    @EntityGraph(attributePaths = {"orderItems", "status"})
-    Page<Order> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 
     // Revenue statistics by day
     @Query(value = """

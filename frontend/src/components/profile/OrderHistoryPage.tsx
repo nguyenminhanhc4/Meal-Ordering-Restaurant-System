@@ -219,6 +219,8 @@ export default function OrderHistoryPage() {
             <option value="">Tất cả</option>
             <option value="DELIVERED">Đã giao</option>
             <option value="PENDING">Chờ xác nhận</option>
+            <option value="DELIVERING">Đang giao</option>
+            <option value="APPROVED">Đã xác nhận</option>
             <option value="CANCELLED">Đã hủy</option>
           </select>
         </div>

@@ -61,12 +61,16 @@ public class OrderController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token,
-                                                  @RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<?> getCurrentUserOrders(
+            @CookieValue("token") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String status
+    ) {
         String publicId = jwtUtil.getPublicIdFromToken(token);
-        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6);
+        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6, status);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
+
 
     @GetMapping("/{publicId}")
     @PreAuthorize("isAuthenticated()")

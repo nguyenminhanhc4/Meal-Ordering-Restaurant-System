@@ -106,15 +106,16 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size) {
+    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size, String status) {
         User user = userRepository.findByPublicId(userPublicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Order> orderPage = orderRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        Page<Order> orderPage = orderRepository.findByUserWithStatusOrder(status, user, pageable);
 
         return orderPage.map(OrderDto::new);
     }
+
 
     public OrderDto save(OrderDto dto) {
         Order entity = toEntity(dto);

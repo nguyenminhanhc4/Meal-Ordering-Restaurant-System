@@ -8,7 +8,7 @@ import {
   HiOutlineHome,
   HiOutlineClipboardList,
 } from "react-icons/hi";
-import { FaUtensils } from "react-icons/fa";
+import { FaUtensils, FaFilter } from "react-icons/fa";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import {
   getOrdersByUser,
@@ -17,6 +17,7 @@ import {
 import type { OrderDto } from "../../../services/types/OrderType";
 import Pagination from "../../../components/common/PaginationClient";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
+import api from "../../../api/axios";
 
 const OrderListPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
@@ -27,6 +28,10 @@ const OrderListPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(6);
+  const [orderStatuses, setOrderStatuses] = useState<
+    { code: string; name: string }[]
+  >([]);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const { notify } = useNotification();
 
@@ -37,7 +42,11 @@ const OrderListPage: React.FC = () => {
       else setLoadingNext(true);
 
       try {
-        const data = await getOrdersByUser(currentPage, pageSize);
+        const data = await getOrdersByUser(
+          currentPage,
+          pageSize,
+          selectedStatus
+        );
         setOrders(data.content);
         setTotalPages(data.totalPages);
       } catch (err) {
@@ -50,7 +59,7 @@ const OrderListPage: React.FC = () => {
       }
     };
     fetchOrders();
-  }, [notify, currentPage, pageSize]);
+  }, [notify, currentPage, pageSize, selectedStatus]);
 
   useRealtimeUpdate(
     `/topic/order`, // topic backend gửi
@@ -64,6 +73,28 @@ const OrderListPage: React.FC = () => {
     },
     (msg: { orderPublicId: string; status: string }) => msg.orderPublicId // getIdFromMsg
   );
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadOrderStatuses = async (signal: AbortSignal) => {
+      try {
+        const res = await api.get("/params?type=ORDER_STATUS", { signal });
+        if (res.data?.data) setOrderStatuses(res.data.data);
+      } catch {
+        if (!signal.aborted)
+          notify("error", "Không thể tải danh sách trạng thái.");
+      }
+    };
+
+    loadOrderStatuses(controller.signal);
+    return () => controller.abort();
+  }, [notify]);
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStatus(e.target.value);
+    setCurrentPage(0); // reset về trang đầu tiên
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,11 +150,28 @@ const OrderListPage: React.FC = () => {
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-6xl py-12 px-4 md:px-6">
-        <div className="flex justify-between items-center mb-10 p-4 bg-amber-50 rounded-xl shadow-sm border border-amber-100">
+        <div className="flex justify-between items-center mb-10 p-4 bg-amber-50 rounded-xl shadow-sm border border-amber-100 flex-wrap gap-4">
           <h1 className="text-3xl font-extrabold text-amber-800 flex items-center gap-3">
             <HiOutlineClipboardList className="w-8 h-8 text-amber-600" />
             Danh sách đơn hàng
           </h1>
+
+          <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-200 shadow-sm w-full md:max-w-xs">
+            <FaFilter className="w-5 h-5 text-yellow-600" />
+            <select
+              className="flex-1 border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
+              value={selectedStatus}
+              onChange={handleStatusChange}
+              aria-label="Chọn trạng thái đơn hàng">
+              <option value="">Tất cả</option>
+              {orderStatuses.map((s) => (
+                <option key={s.code} value={s.code}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <Button
             size="sm"
             className="!bg-emerald-600 hover:!bg-emerald-700 text-white shadow-md flex items-center gap-2 rounded-lg"
