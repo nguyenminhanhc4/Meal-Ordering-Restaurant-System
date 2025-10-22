@@ -1,6 +1,8 @@
 package org.example.backend.util;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.entity.param.Param;
+import org.example.backend.repository.param.ParamRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import java.util.Map;
 public class WebSocketNotifier {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ParamRepository paramRepository;
 
     /**
      * Gửi thông báo cho client theo topic.
@@ -47,4 +50,24 @@ public class WebSocketNotifier {
     public void notifyMenuItemStock(Long menuItemId) {
         notify("/topic/menu/" + menuItemId, Map.of("menuItemId", menuItemId));
     }
+
+    /**
+     * Gửi thông báo cập nhật trạng thái bàn
+     */
+    public void notifyTableStatus(Long tableId, String newStatus) {
+        Param status = paramRepository.findByTypeAndCode("STATUS_TABLE", newStatus)
+                .orElseThrow(() -> new RuntimeException("Table status not found: " + newStatus));
+        notify("/topic/tables", Map.of(
+                "tableId", tableId,
+                "statusId", status.getId()
+        ));
+    }
+
+    public void notifyReservationStatus(String publicId, String newStatus) {
+        notify("/topic/reservations", Map.of(
+                "reservationPublicId", publicId,
+                "status", newStatus
+        ));
+    }
+
 }

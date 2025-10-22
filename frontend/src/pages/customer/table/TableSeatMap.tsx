@@ -14,6 +14,7 @@ import type { Reservation } from "../../../services/reservation/reservationServi
 import BookedListModal from "./BookedListModal";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { connectWebSocket } from "../../../api/websocketClient";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 /** ================================
  *  COMPONENT: TableBooking
@@ -109,6 +110,27 @@ export default function TableBooking() {
       client.deactivate();
     };
   }, []);
+
+  useRealtimeUpdate<Reservation, string, { reservationPublicId: string }>(
+    "/topic/reservations",
+    async (id) => {
+      console.log("🔄 Fetching reservation by publicId:", id);
+      const res = await getMyReservationByPublicId(id);
+      console.log("✅ Fetched reservation:", res);
+      if (!res) throw new Error("Reservation not found");
+      return res;
+    },
+    async (data) => {
+      console.log("📡 onUpdate triggered with:", data);
+      await fetchMyReservations();
+      await fetchTables();
+      console.log("✅ Refetched reservations and tables");
+    },
+    (msg) => {
+      console.log("📩 WS message received:", msg);
+      return msg.reservationPublicId;
+    }
+  );
 
   /** Lấy danh sách bàn */
   const fetchTables = async () => {

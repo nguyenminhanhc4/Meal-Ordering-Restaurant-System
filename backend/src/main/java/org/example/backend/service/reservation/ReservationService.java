@@ -15,6 +15,7 @@ import org.example.backend.repository.reservation.ReservationRepository;
 import org.example.backend.repository.reservation.ReservationSpecification;
 import org.example.backend.repository.table.TableRepository;
 import org.example.backend.repository.user.UserRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +49,9 @@ public class ReservationService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private WebSocketNotifier webSocketNotifier;
 
     // ========================= CREATE =========================
     @Transactional
@@ -235,6 +239,8 @@ public class ReservationService {
 
         Reservation updated = reservationRepository.save(reservation);
 
+        webSocketNotifier.notifyReservationStatus(publicId, newStatus);
+
         return new ReservationDto(updated);
     }
 
@@ -257,6 +263,16 @@ public class ReservationService {
         }
 
         Reservation saved = reservationRepository.save(reservation);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                webSocketNotifier.notifyReservationStatus(publicId, "COMPLETED");
+                reservation.getTables().forEach(table ->
+                        webSocketNotifier.notifyTableStatus(table.getId(), "AVAILABLE")
+                );
+            }
+        });
         return new ReservationDto(saved);
     }
 
