@@ -154,7 +154,6 @@ export const AdminOrderFood = () => {
           },
         });
 
-        console.log("Orders API response:", response.data);
         const result = response.data;
 
         // ✅ Lấy đúng cấu trúc dữ liệu trả về

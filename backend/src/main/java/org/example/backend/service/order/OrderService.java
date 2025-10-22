@@ -79,24 +79,9 @@ public class OrderService {
         return new OrderDto(order);
     }
 
-    public Page<OrderResponseDTO> getAllOrders(String status,String paymentStatus, String keyword, Pageable pageable) {
-        Specification<Order> spec = Specification.where(null);
-
-        // Nếu là staff (hoặc API dùng cho staff)
-        spec = spec.and(OrderSpecification.forStaffReview());
-
-        // Nếu cần lọc thêm theo status hoặc keyword
-        if (status != null && !status.isBlank()) {
-            spec = spec.and(OrderSpecification.hasStatus(status));
-        }
-        if (paymentStatus != null && !paymentStatus.isBlank()) {
-            spec = spec.and(OrderSpecification.hasPaymentStatus(paymentStatus));
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            spec = spec.and(OrderSpecification.keywordSearch(keyword));
-        }
-
-        return orderRepository.findAll(spec, pageable).map(OrderMapper::toDto);
+    public Page<OrderResponseDTO> getAllOrders(String status, String paymentStatus, String keyword, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllWithCustomSort(status, paymentStatus, keyword, pageable);
+        return orders.map(OrderMapper::toDto);
     }
 
     public OrderResponseDTO getOrderDetail(String publicId) {

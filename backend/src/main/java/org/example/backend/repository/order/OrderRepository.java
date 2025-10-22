@@ -17,16 +17,44 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    @EntityGraph(attributePaths = {
-            "user",
-            "status",
-            "payment",
-            "payment.shippingInfo",
-            "orderItems",
-            "orderItems.menuItem",
-            "orderItems.combo"
-    })
-    Page<Order> findAll(Specification<Order> spec, Pageable pageable);
+    @Query("""
+    SELECT o FROM Order o
+    LEFT JOIN o.payment p
+    LEFT JOIN p.paymentMethod m
+    LEFT JOIN p.shippingInfo s
+    LEFT JOIN o.user u
+    WHERE (:keyword IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND (:status IS NULL OR o.status.code = :status)
+      AND (:paymentStatus IS NULL OR p.status.code = :paymentStatus)
+    ORDER BY 
+      CASE o.status.code
+        WHEN 'PENDING' THEN 1
+        WHEN 'APPROVED' THEN 2
+        WHEN 'DELIVERING' THEN 3
+        WHEN 'DELIVERED' THEN 4
+        WHEN 'COMPLETED' THEN 5
+        WHEN 'CANCELLED' THEN 6
+        ELSE 7
+      END,
+      CASE p.status.code
+        WHEN 'PENDING' THEN 1
+        WHEN 'COMPLETED' THEN 2
+        WHEN 'FAILED' THEN 3
+        ELSE 4
+      END,
+      CASE m.code
+        WHEN 'COD' THEN 1
+        WHEN 'ONLINE' THEN 2
+        ELSE 3
+      END,
+      o.createdAt DESC
+""")
+    Page<Order> findAllWithCustomSort(
+            @Param("status") String status,
+            @Param("paymentStatus") String paymentStatus,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 
     @EntityGraph(attributePaths = {
             "user",

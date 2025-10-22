@@ -59,7 +59,6 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", order, "Order created successfully"));
     }
 
-
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token,
