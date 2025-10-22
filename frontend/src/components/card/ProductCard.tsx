@@ -47,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       const cart = await getCurrentCart().catch(() => createCart());
       const updatedCart = await addItemToCart(cart.id, {
         menuItemId: currentProduct.id,
-        quantity: 0,
+        quantity: 1,
       });
 
       notify("success", `Đã thêm ${currentProduct.name} vào giỏ hàng`);
