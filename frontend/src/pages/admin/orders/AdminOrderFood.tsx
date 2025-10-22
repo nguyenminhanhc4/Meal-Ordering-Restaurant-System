@@ -275,7 +275,7 @@ export const AdminOrderFood = () => {
       });
       notify("info", `New order received: ${newOrder.publicId.slice(0, 8)}`);
     },
-    (msg) => msg.publicId // ✅ CHỈ CẦN ĐỔI DÒNG NÀY
+    (msg) => msg.publicId
   );
 
   // Handlers

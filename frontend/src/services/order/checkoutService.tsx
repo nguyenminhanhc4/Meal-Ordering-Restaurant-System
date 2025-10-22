@@ -88,7 +88,7 @@ export const updateOrderStatus = async (
 ): Promise<OrderDto> => {
   try {
     const res = await api.put<ApiResponse<OrderDto>>(
-      `/orders/${publicId}/status?status=${status}`, // 👈 thêm query param
+      `/orders/${publicId}/status?status=${status}`,
       {},
       { withCredentials: true }
     );
