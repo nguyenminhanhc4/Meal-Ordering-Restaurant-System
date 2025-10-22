@@ -10,9 +10,13 @@ import {
 } from "react-icons/hi";
 import { FaUtensils } from "react-icons/fa";
 import { useNotification } from "../../../components/Notification/NotificationContext";
-import { getOrdersByUser } from "../../../services/order/checkoutService";
+import {
+  getOrdersByUser,
+  getOrderById,
+} from "../../../services/order/checkoutService";
 import type { OrderDto } from "../../../services/types/OrderType";
 import Pagination from "../../../components/common/PaginationClient";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 const OrderListPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderDto[]>([]);
@@ -46,7 +50,20 @@ const OrderListPage: React.FC = () => {
       }
     };
     fetchOrders();
-  }, [currentPage]);
+  }, [notify, currentPage, pageSize]);
+
+  useRealtimeUpdate(
+    `/topic/order`, // topic backend gửi
+    getOrderById, // fetchFn: lấy order mới nhất
+    (updatedOrder: OrderDto) => {
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.publicId === updatedOrder.publicId ? updatedOrder : o
+        )
+      );
+    },
+    (msg: { orderPublicId: string; status: string }) => msg.orderPublicId // getIdFromMsg
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -158,7 +158,7 @@ public class OrderService {
 
         // Lưu và trả về DTO
         order = orderRepository.save(order);
-        wsNotifier.notifyOrderStatus(order.getPublicId(), statusCode);
+        wsNotifier.notifyOrderStatus(publicId, statusCode);
         return new OrderDto(order);
     }
 

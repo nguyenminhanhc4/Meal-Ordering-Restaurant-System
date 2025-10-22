@@ -30,7 +30,7 @@ public class WebSocketNotifier {
      * Gửi thông báo cập nhật trạng thái order
      */
     public void notifyOrderStatus(String publicId, String newStatus) {
-        notify("/topic/order/" + publicId, Map.of(
+        notify("/topic/order", Map.of(
                 "orderPublicId", publicId,
                 "status", newStatus
         ));

@@ -115,7 +115,6 @@ public class MockPaymentController {
         return Map.of("redirectUrl", payment.getReturnUrl());
     }
 
-
     /**
      * 4️⃣ Cancel payment
      */
