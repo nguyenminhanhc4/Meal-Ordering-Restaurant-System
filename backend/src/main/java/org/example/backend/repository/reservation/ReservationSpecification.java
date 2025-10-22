@@ -43,7 +43,6 @@ public class ReservationSpecification {
         };
     }
 
-
     // Filter theo khoảng thời gian
     public static Specification<Reservation> reservationBetween(LocalDateTime from, LocalDateTime to) {
         return (root, query, cb) -> {

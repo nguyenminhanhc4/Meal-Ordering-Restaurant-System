@@ -110,6 +110,52 @@ public class ReservationController {
         );
     }
 
+    @GetMapping("/{publicId}")
+    public ReservationDto getReservationById(@PathVariable String publicId) {
+        return reservationService.getReservationByPublicId(publicId);
+    }
+
+    @PutMapping("/{publicId}/approve")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> approveReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.updateStatus(publicId, "CONFIRMED");
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation approved successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{publicId}/cancel")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> cancelReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.updateStatus(publicId, "CANCELLED");
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation cancelled successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{publicId}/complete")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> completeReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.markAsCompleted(publicId);
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation marked as completed and tables released"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Response<>("error", null, "Internal server error"));
+        }
+    }
+
 
     // CUSTOMER gets their reservation by publicId
     @GetMapping("/me/{publicId}")

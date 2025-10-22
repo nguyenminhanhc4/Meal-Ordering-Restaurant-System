@@ -225,3 +225,20 @@ export const getReservations = async (
     return null;
   }
 };
+
+/**
+ * ADMIN / STAFF: lấy chi tiết 1 reservation theo publicId
+ */
+export const getReservationByPublicId = async (
+  publicId: string
+): Promise<ReservationDTO | null> => {
+  try {
+    const response = await api.get<ApiResponse<ReservationDTO>>(
+      `/reservations/${publicId}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error(`Error fetching reservation detail ${publicId}:`, error);
+    return null;
+  }
+};

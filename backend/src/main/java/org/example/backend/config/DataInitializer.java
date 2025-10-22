@@ -69,6 +69,7 @@ public class DataInitializer implements CommandLineRunner {
         createParamIfNotExists("ORDER_STATUS", "PENDING", "Đang chờ xác nhận", "Đang chờ xác nhận");
         createParamIfNotExists("ORDER_STATUS", "APPROVED", "Đã xác nhận đơn", "Đã xác nhận đơn");
         createParamIfNotExists("ORDER_STATUS", "DELIVERING", "Đang giao hàng", "Đang giao hàng");
+        createParamIfNotExists("STATUS_RESERVATION", "COMPLETED", "Khách trả bản", "Khách trả bản");
 
 //        // ==================== TABLES ====================
 //        createSampleTables();

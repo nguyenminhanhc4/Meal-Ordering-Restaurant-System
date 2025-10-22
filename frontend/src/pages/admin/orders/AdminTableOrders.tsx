@@ -23,6 +23,7 @@ import type {
 } from "../../../services/reservation/reservationService";
 import { AxiosError } from "axios";
 import api from "../../../api/axios";
+import { ReservationDetailModal } from "../../../components/order/ReservationDetailModal";
 
 export const AdminTableOrders = () => {
   const [reservations, setReservations] = useState<ReservationDTO[]>([]);
@@ -37,6 +38,11 @@ export const AdminTableOrders = () => {
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 10;
   const { notify } = useNotification();
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+  const [selectedReservation, setSelectedReservation] =
+    useState<ReservationDTO | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const fetchReservations = useCallback(async () => {
     setLoading(true);
@@ -44,6 +50,8 @@ export const AdminTableOrders = () => {
       const filter: ReservationFilter = {
         keyword: searchTerm || undefined,
         statusId: selectedStatus ? Number(selectedStatus) : undefined,
+        from: fromDate || undefined,
+        to: toDate || undefined,
       };
       const data = await getReservations(filter, currentPage - 1, pageSize);
       if (data) {
@@ -65,7 +73,15 @@ export const AdminTableOrders = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, searchTerm, selectedStatus, notify]);
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedStatus,
+    fromDate,
+    toDate,
+    notify,
+  ]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -75,7 +91,6 @@ export const AdminTableOrders = () => {
         const res = await api.get("/params?type=STATUS_RESERVATION", {
           signal,
         });
-        console.log("Order statuses response:", res.data.data);
         if (res.data?.data) setStatuses(res.data.data);
       } catch {
         if (!signal.aborted) notify("error", "Could not load order statuses.");
@@ -100,6 +115,42 @@ export const AdminTableOrders = () => {
   const formatDateTime = (iso: string) =>
     format(new Date(iso), "dd/MM/yyyy HH:mm");
 
+  const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFromDate(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setToDate(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleView = (res: ReservationDTO) => {
+    setSelectedReservation(res);
+    setShowModal(true);
+  };
+
+  const handleApprove = async (publicId: string) => {
+    await api.put(`/reservations/${publicId}/approve`);
+    notify("success", "Reservation approved successfully!");
+    setShowModal(false);
+    fetchReservations();
+  };
+
+  const handleComplete = async (publicId: string) => {
+    await api.put(`/reservations/${publicId}/complete`);
+    notify("success", "Reservation completed successfully!");
+    setShowModal(false);
+    fetchReservations();
+  };
+
+  const handleCancel = async (publicId: string) => {
+    await api.put(`/reservations/${publicId}/cancel`);
+    notify("success", "Reservation cancelled successfully!");
+    setShowModal(false);
+    fetchReservations();
+  };
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "PENDING":
@@ -108,6 +159,8 @@ export const AdminTableOrders = () => {
         return "success";
       case "CANCELLED":
         return "failure";
+      case "COMPLETED":
+        return "info";
       default:
         return "gray";
     }
@@ -124,7 +177,7 @@ export const AdminTableOrders = () => {
         <div className="flex gap-4 mb-4">
           <div className="relative w-64">
             <TextInput
-              placeholder="Search by customer or note..."
+              placeholder="Search by customer or order code..."
               value={searchTerm}
               onChange={handleSearchChange}
               icon={HiSearch}
@@ -151,10 +204,28 @@ export const AdminTableOrders = () => {
               <option value="">All Statuses</option>
               {statuses.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {s.code}
                 </option>
               ))}
             </Select>
+          </div>
+          {/* From Date */}
+          <div>
+            <input
+              type="datetime-local"
+              value={fromDate}
+              onChange={handleFromDateChange}
+              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500"
+            />
+          </div>
+          {/* To Date */}
+          <div>
+            <input
+              type="datetime-local"
+              value={toDate}
+              onChange={handleToDateChange}
+              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500"
+            />
           </div>
         </div>
 
@@ -231,8 +302,11 @@ export const AdminTableOrders = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center truncate">
-                      <Button size="xs" color="blue">
-                        View
+                      <Button
+                        size="xs"
+                        color="blue"
+                        onClick={() => handleView(res)}>
+                        Review
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -253,6 +327,14 @@ export const AdminTableOrders = () => {
           />
         </div>
       </Card>
+      <ReservationDetailModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        reservation={selectedReservation}
+        onApprove={handleApprove}
+        onComplete={handleComplete}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };

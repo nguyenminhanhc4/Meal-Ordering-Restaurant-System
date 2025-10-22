@@ -347,7 +347,7 @@ export const AdminOrderFood = () => {
                 <option value="">All Statuses</option>
                 {statuses.map((s) => (
                   <option key={s.id} value={s.code}>
-                    {s.name}
+                    {s.code}
                   </option>
                 ))}
               </Select>
@@ -366,7 +366,7 @@ export const AdminOrderFood = () => {
                 <option value="">All Payment Statuses</option>
                 {paymentStatuses.map((p) => (
                   <option key={p.id} value={p.code}>
-                    {p.name}
+                    {p.code}
                   </option>
                 ))}
               </Select>

@@ -225,6 +225,40 @@ public class ReservationService {
         return new ReservationDto(updated);
     }
 
+    public ReservationDto updateStatus(String publicId, String newStatus) {
+        Reservation reservation = reservationRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+        Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION",newStatus)
+                .orElseThrow(() -> new RuntimeException("Status not found: " + newStatus));
+        reservation.setStatus(status);
+        reservation.setUpdatedAt(LocalDateTime.now());
+
+        Reservation updated = reservationRepository.save(reservation);
+
+        return new ReservationDto(updated);
+    }
+
+    @Transactional
+    public ReservationDto markAsCompleted(String publicId) {
+        Reservation reservation = reservationRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        // 1️⃣ Cập nhật trạng thái đặt bàn
+        Param completedStatus = paramRepository.findByTypeAndCode("STATUS_RESERVATION","COMPLETED")
+                .orElseThrow(() -> new RuntimeException("Status COMPLETED not found"));
+        reservation.setStatus(completedStatus);
+
+        // 2️⃣ Cập nhật trạng thái các bàn về "AVAILABLE"
+        for (TableEntity table : reservation.getTables()) {
+            Param available = paramRepository.findByTypeAndCode("STATUS_TABLE","AVAILABLE")
+                    .orElseThrow(() -> new RuntimeException("Table status AVAILABLE not found"));
+            table.setStatus(available);
+            tableRepository.save(table);
+        }
+
+        Reservation saved = reservationRepository.save(reservation);
+        return new ReservationDto(saved);
+    }
 
     @Transactional
     public ReservationDto updateReservation(Long id, ReservationDto dto) {
