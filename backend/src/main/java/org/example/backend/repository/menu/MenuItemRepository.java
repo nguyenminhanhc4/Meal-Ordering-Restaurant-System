@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -34,6 +37,33 @@ GROUP BY m.id, c.name, p.code
 """)
     Page<Object[]> findAllWithDetails(Pageable pageable);
 
+    @Query("""
+SELECT m,
+       c.name AS categoryName,
+       LOWER(REPLACE(c.name, ' ', '-')) AS categorySlug,
+       p.code AS status,
+       (SELECT COALESCE(AVG(r.rating), 0)
+        FROM Review r
+        WHERE r.menuItem.id = m.id) AS rating,
+       (SELECT COALESCE(SUM(oi.quantity), 0)
+        FROM OrderItem oi
+        JOIN oi.order o
+        WHERE oi.menuItem.id = m.id
+          AND o.status.code = 'DELIVERED') AS sold
+FROM MenuItem m
+LEFT JOIN m.category c
+LEFT JOIN m.status p
+GROUP BY m.id, c.name, p.code
+            ORDER BY
+            CASE WHEN m.createdAt > :newThreshold THEN 1 ELSE 0 END DESC,
+            CASE WHEN p.code = 'OUT_OF_STOCK' THEN 1 ELSE 0 END ASC,
+            (SELECT COALESCE(SUM(oi.quantity), 0)
+            FROM OrderItem oi
+            JOIN oi.order o
+            WHERE oi.menuItem.id = m.id
+            AND o.status.code = 'DELIVERED') DESC 
+""")
+    Page<Object[]> findAllWithDetailsOrdered(@Param("newThreshold") LocalDateTime newThreshold, Pageable pageable);
 
     @Query("""
 SELECT m,

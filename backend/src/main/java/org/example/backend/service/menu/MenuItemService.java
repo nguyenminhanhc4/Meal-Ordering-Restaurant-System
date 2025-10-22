@@ -36,6 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,6 +64,8 @@ public class MenuItemService {
         // 1️⃣ Xác định kiểu sắp xếp
         Sort sortOption;
         String sortLower = sort.toLowerCase();
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
         if ("price-asc".equals(sortLower)) {
             sortOption = Sort.by(Sort.Direction.ASC, "m.price");
         } else if ("price-desc".equals(sortLower)) {
@@ -68,11 +73,10 @@ public class MenuItemService {
         } else if ("newest".equals(sortLower)) {
             sortOption = Sort.by(Sort.Direction.DESC, "m.createdAt");
         } else {
-            sortOption = Sort.unsorted(); // "popular" sẽ xử lý logic trong query
+            sortOption = Sort.unsorted(); // Sẽ sử dụng findAllWithDetailsOrdered cho sort=popular
         }
 
         Pageable pageable = PageRequest.of(page, size, sortOption);
-
         // 2️⃣ Gọi repository phù hợp với bộ lọc
         Page<Object[]> results;
 
@@ -85,6 +89,8 @@ public class MenuItemService {
             results = menuItemRepository.findAllWithDetailsByCategory(categorySlug, pageable);
         } else if (hasSearch) {
             results = menuItemRepository.findAllWithDetailsByNameContainingIgnoreCase("%" + search.trim() + "%", pageable);
+        } else if ("popular".equals(sortLower)) {
+            results = menuItemRepository.findAllWithDetailsOrdered(sevenDaysAgo, pageable);
         } else {
             results = menuItemRepository.findAllWithDetails(pageable);
         }
