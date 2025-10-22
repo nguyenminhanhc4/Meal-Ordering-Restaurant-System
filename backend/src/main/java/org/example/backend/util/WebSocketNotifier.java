@@ -1,6 +1,8 @@
 package org.example.backend.util;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.order.OrderResponseDTO;
+import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
 import org.example.backend.repository.param.ParamRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -49,6 +51,10 @@ public class WebSocketNotifier {
      */
     public void notifyMenuItemStock(Long menuItemId) {
         notify("/topic/menu/" + menuItemId, Map.of("menuItemId", menuItemId));
+    }
+
+    public void notifyNewOrderForAdmin(OrderResponseDTO order) {
+        messagingTemplate.convertAndSend("/topic/admin/orders", order);
     }
 
     /**

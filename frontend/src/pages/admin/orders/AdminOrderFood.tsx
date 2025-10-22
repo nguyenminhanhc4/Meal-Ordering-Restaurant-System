@@ -23,6 +23,7 @@ import { Pagination } from "../../../components/common/Pagination";
 // import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 import { format } from "date-fns";
 import { OrderDetailModal } from "../../../components/order/OrderDetailModal";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 export interface OrderItem {
   menuItemId: number;
@@ -256,6 +257,26 @@ export const AdminOrderFood = () => {
     selectedPaymentStatus,
     fetchOrders,
   ]);
+
+  useRealtimeUpdate<Order, string, { publicId: string }>(
+    "/topic/admin/orders",
+    async (publicId) => {
+      const res = await api.get(`/orders/admin/${publicId}`);
+      return res.data;
+    },
+    (newOrder) => {
+      setOrders((prev) => {
+        if (prev.some((o) => o.publicId === newOrder.publicId)) {
+          return prev.map((o) =>
+            o.publicId === newOrder.publicId ? newOrder : o
+          );
+        }
+        return [newOrder, ...prev];
+      });
+      notify("info", `New order received: ${newOrder.publicId.slice(0, 8)}`);
+    },
+    (msg) => msg.publicId // ✅ CHỈ CẦN ĐỔI DÒNG NÀY
+  );
 
   // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,6 +1,7 @@
 package org.example.backend.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.order.OrderMapper;
 import org.example.backend.dto.payment.PaymentRequestDto;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -82,6 +83,7 @@ public class PaymentService {
         for (Long id : affectedMenuIds) {
             webSocketNotifier.notifyMenuItemStock(id);
         }
+        webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
         return dto;
     }
 

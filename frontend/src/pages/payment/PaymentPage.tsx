@@ -422,7 +422,7 @@ export default function PaymentPage() {
                       Đang xử lý...
                     </span>
                   ) : (
-                    "Xác nhận Thanh toán & Đặt hàng"
+                    "Thanh toán"
                   )}
                 </button>
                 <p className="mt-3 text-center text-xs text-gray-500">
