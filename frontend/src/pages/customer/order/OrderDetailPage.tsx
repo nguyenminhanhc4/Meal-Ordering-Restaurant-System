@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi";
 import { getOrderById } from "../../../services/order/checkoutService";
 import type { OrderDtoDetail } from "../../../services/types/OrderType";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate.ts";
 
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams(); // lấy orderId từ URL
@@ -33,6 +34,22 @@ const OrderDetailPage: React.FC = () => {
     };
     fetchOrder();
   }, [orderId]);
+
+  useRealtimeUpdate<
+    OrderDtoDetail,
+    string,
+    { orderPublicId: string; status: string }
+  >(
+    "/topic/order",
+    getOrderById,
+    (updatedOrder) => {
+      setOrder((prev) => {
+        if (!prev) return updatedOrder;
+        return prev.publicId === updatedOrder.publicId ? updatedOrder : prev;
+      });
+    },
+    (msg) => msg.orderPublicId
+  );
 
   if (loading) {
     return (

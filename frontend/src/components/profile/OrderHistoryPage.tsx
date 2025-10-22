@@ -83,7 +83,6 @@ export default function OrderHistoryPage() {
         size: 5,
         ...filters,
       });
-      console.log("✅ [loadOrders] response:", data);
       setOrders(data.content);
       setTotalPages(data.totalPages);
       setPage(data.number);
@@ -122,6 +121,26 @@ export default function OrderHistoryPage() {
 
     return () => {
       clients.forEach((c) => c.deactivate());
+    };
+  }, [orders]);
+
+  // === WebSocket realtime cho trạng thái đơn hàng ===
+  useEffect(() => {
+    if (!orders?.length) return;
+
+    const client = connectWebSocket<{ orderPublicId: string; status: string }>(
+      "/topic/order",
+      (data) => {
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === data.orderPublicId ? { ...o, status: data.status } : o
+          )
+        );
+      }
+    );
+
+    return () => {
+      client.deactivate();
     };
   }, [orders]);
 
