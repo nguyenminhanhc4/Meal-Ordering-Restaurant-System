@@ -3,7 +3,7 @@ import { Button, Spinner, Tooltip } from "flowbite-react";
 import { getAllTables } from "../../../services/table/tableService";
 import type { TableEntity } from "../../../services/table/tableService";
 import BookingModal, { type BookingData } from "./BookingModal";
-import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps";
 import {
   createMyReservation,
   getMyReservations,
@@ -14,6 +14,7 @@ import type { Reservation } from "../../../services/reservation/reservationServi
 import BookedListModal from "./BookedListModal";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { connectWebSocket } from "../../../api/websocketClient";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 /** ================================
  *  COMPONENT: TableBooking
@@ -41,7 +42,11 @@ export default function TableBooking() {
 
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
   const activeReservations = useMemo(
-    () => myReservations.filter((res) => res.statusName !== "CANCELLED"),
+    () =>
+      myReservations.filter(
+        (res) =>
+          res.statusName !== "CANCELLED" && res.statusName !== "COMPLETED"
+      ),
     [myReservations]
   );
 
@@ -49,13 +54,20 @@ export default function TableBooking() {
   const { notify } = useNotification();
 
   /** Danh sách ID bàn mà user đã đặt */
-  const myBookedTableIds = useMemo(
-    () =>
-      myReservations
-        .filter((res) => res.statusName !== "CANCELLED")
-        .flatMap((res) => res.tableIds || []),
-    [myReservations]
-  );
+  const myBookedStatusMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    myReservations
+      .filter(
+        (res) =>
+          res.statusName !== "CANCELLED" && res.statusName !== "COMPLETED"
+      )
+      .forEach((res) => {
+        (res.tableIds || []).forEach((id) => {
+          map[id] = res.statusName; // PENDING hoặc CONFIRMED
+        });
+      });
+    return map;
+  }, [myReservations]);
 
   /** -------------------------------
    *  DATE TIME LIMIT (chỉ cho phép đặt từ thời điểm hiện tại)
@@ -98,6 +110,27 @@ export default function TableBooking() {
       client.deactivate();
     };
   }, []);
+
+  useRealtimeUpdate<Reservation, string, { reservationPublicId: string }>(
+    "/topic/reservations",
+    async (id) => {
+      console.log("🔄 Fetching reservation by publicId:", id);
+      const res = await getMyReservationByPublicId(id);
+      console.log("✅ Fetched reservation:", res);
+      if (!res) throw new Error("Reservation not found");
+      return res;
+    },
+    async (data) => {
+      console.log("📡 onUpdate triggered with:", data);
+      await fetchMyReservations();
+      await fetchTables();
+      console.log("✅ Refetched reservations and tables");
+    },
+    (msg) => {
+      console.log("📩 WS message received:", msg);
+      return msg.reservationPublicId;
+    }
+  );
 
   /** Lấy danh sách bàn */
   const fetchTables = async () => {
@@ -156,8 +189,6 @@ export default function TableBooking() {
         editingReservation.publicId,
         payload
       );
-
-      console.log("Update payload:", payload);
 
       if (updated) {
         notify("success", "✅ Cập nhật đặt bàn thành công!");
@@ -366,6 +397,7 @@ export default function TableBooking() {
                 <span className="font-semibold mr-2">Chú thích:</span>
                 <Legend color="green" label="Còn trống" />
                 <Legend color="red" label="Đã được đặt" />
+                <Legend color="yellow" label="Bàn đang chờ duyệt" />
                 <Legend color="blue" label="Bàn của tôi" />
               </div>
             </>
@@ -376,14 +408,15 @@ export default function TableBooking() {
         {!loading && (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             {filteredTables.map((table) => {
-              const isMyBooked = myBookedTableIds.includes(table.id);
+              const myStatus = myBookedStatusMap[table.id];
+              const isMyBooked = !!myStatus;
               const isOtherBooked =
                 !isMyBooked &&
                 ["PENDING", "CONFIRMED", "OCCUPIED"].includes(table.statusName);
 
               const { colorClass, statusText } = getTableStatusClass(
                 table,
-                isMyBooked,
+                myStatus, // truyền status thay vì true/false
                 isOtherBooked,
                 translateStatus
               );
@@ -475,6 +508,7 @@ function Legend({ color, label }: { color: string; label: string }) {
     green: "bg-green-100 border-green-300",
     red: "bg-red-200 border-red-400",
     blue: "bg-blue-200 border-blue-400",
+    yellow: "bg-yellow-200 border-yellow-400",
   };
   return (
     <div className="flex items-center gap-1">
@@ -487,29 +521,40 @@ function Legend({ color, label }: { color: string; label: string }) {
 /** Helper xác định class & status text theo trạng thái bàn */
 function getTableStatusClass(
   table: TableEntity,
-  isMyBooked: boolean,
+  myStatus: string | undefined, // PENDING / CONFIRMED / undefined
   isOtherBooked: boolean,
   translateStatus: (s: string) => string
 ) {
-  if (isMyBooked)
+  if (myStatus === "CONFIRMED") {
     return {
       colorClass:
         "bg-blue-100 border-blue-400 text-blue-800 cursor-not-allowed",
-      statusText: "Bạn đã đặt bàn này",
+      statusText: "Bạn đã đặt bàn (Đã duyệt)",
     };
+  }
 
-  if (isOtherBooked)
+  if (myStatus === "PENDING") {
+    return {
+      colorClass:
+        "bg-yellow-200 border-yellow-400 text-yellow-800 cursor-not-allowed",
+      statusText: "Bạn đã đặt bàn (Đang chờ duyệt)",
+    };
+  }
+
+  if (isOtherBooked) {
     return {
       colorClass: "bg-red-200 border-red-400 text-gray-600 cursor-not-allowed",
       statusText: "Đã có người đặt",
     };
+  }
 
-  if (table.statusName === "AVAILABLE")
+  if (table.statusName === "AVAILABLE") {
     return {
       colorClass:
         "bg-green-100 border-green-300 hover:bg-green-200 text-green-800 hover:shadow-md",
       statusText: "Còn trống",
     };
+  }
 
   return {
     colorClass: "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed",

@@ -58,7 +58,6 @@ export const getMyReservations = async (
     if (status && status.trim() !== "") {
       params.set("status", status); // chỉ set 1 lần
     }
-    console.log(params.toString());
 
     const response = await api.get<ApiResponse<Page<Reservation>>>(
       `/reservations/me?${params.toString()}`
@@ -163,5 +162,82 @@ export const deleteReservation = async (id: number): Promise<boolean> => {
   } catch (error) {
     console.error(`Error deleting reservation with id ${id}:`, error);
     return false;
+  }
+};
+
+/**
+ * ADMIN / STAFF: lấy danh sách reservation với paging, filter, search, sort
+ */
+export interface ReservationFilter {
+  keyword?: string; // tìm kiếm theo tên user, note, v.v.
+  statusId?: number; // lọc theo status
+  from?: string; // ISO string, từ thời gian reservationTime
+  to?: string; // ISO string, đến thời gian reservationTime
+  numberOfPeople?: number;
+}
+
+export interface ReservationDTO {
+  id: number;
+  publicId: string;
+  userId: number;
+  userName: string;
+  userPhone: string;
+  userEmail: string;
+  reservationTime: string;
+  numberOfPeople: number;
+  note?: string;
+  statusId: number;
+  statusName: string;
+  tableIds: number[];
+  tableNames: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getReservations = async (
+  filter: ReservationFilter = {},
+  page = 0,
+  size = 10,
+  sort: string = "reservationTime,desc"
+): Promise<Page<ReservationDTO> | null> => {
+  try {
+    const params = new URLSearchParams({
+      filter: JSON.stringify(filter),
+      page: page.toString(),
+      size: size.toString(),
+      sort,
+    });
+
+    if (filter.keyword) params.set("keyword", filter.keyword);
+    if (filter.statusId) params.set("statusId", filter.statusId.toString());
+    if (filter.from) params.set("from", filter.from);
+    if (filter.to) params.set("to", filter.to);
+    if (filter.numberOfPeople)
+      params.set("numberOfPeople", filter.numberOfPeople.toString());
+
+    const response = await api.get<Page<ReservationDTO>>(
+      `/reservations?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reservations:", error);
+    return null;
+  }
+};
+
+/**
+ * ADMIN / STAFF: lấy chi tiết 1 reservation theo publicId
+ */
+export const getReservationByPublicId = async (
+  publicId: string
+): Promise<ReservationDTO | null> => {
+  try {
+    const response = await api.get<ApiResponse<ReservationDTO>>(
+      `/reservations/${publicId}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error(`Error fetching reservation detail ${publicId}:`, error);
+    return null;
   }
 };

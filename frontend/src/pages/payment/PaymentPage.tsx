@@ -150,6 +150,7 @@ export default function PaymentPage() {
         const payment = await initiatePayment(paymentDataToSend); // gọi /mock-payments/initiate
         console.log("Initiated payment:", payment.redirectUrl);
 
+        sessionStorage.setItem("shippingInfo", JSON.stringify(shippingInfo));
         window.location.href = `http://localhost:5173${payment.redirectUrl}`;
       }
     } catch (err: unknown) {
@@ -422,7 +423,7 @@ export default function PaymentPage() {
                       Đang xử lý...
                     </span>
                   ) : (
-                    "Xác nhận Thanh toán & Đặt hàng"
+                    "Thanh toán"
                   )}
                 </button>
                 <p className="mt-3 text-center text-xs text-gray-500">

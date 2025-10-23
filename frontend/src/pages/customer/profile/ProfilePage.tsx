@@ -3,10 +3,12 @@ import UserProfileContent from "../../../components/profile/UserProfileContent";
 import UserReservationHistory from "../../../components/profile/UserReservationHistory";
 import UserSecuritySettings from "../../../components/profile/UserSecuritySettings";
 import OrderHistoryPage from "../../../components/profile/OrderHistoryPage";
+import NotificationList from "../../../components/Notification/NotificationList.tsx";
 import {
   HiOutlineUser,
   HiOutlineClock,
   HiOutlineLockClosed,
+  HiOutlineBell,
 } from "react-icons/hi";
 
 interface SidebarLinkProps {
@@ -58,6 +60,12 @@ export default function ProfilePage() {
       label: "Lịch sử đặt bàn",
       icon: HiOutlineClock,
       component: UserReservationHistory,
+    },
+    {
+      id: "notifications",
+      label: "Thông báo",
+      icon: HiOutlineBell,
+      component: NotificationList,
     },
     {
       id: "security",

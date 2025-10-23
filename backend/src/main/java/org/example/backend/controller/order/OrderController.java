@@ -4,6 +4,7 @@ import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.order.OrderResponseDTO;
+import org.example.backend.entity.param.Param;
 import org.example.backend.service.order.OrderService;
 import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,18 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<OrderResponseDTO> orders = orderService.getAllOrders(status, keyword, pageable);
+        Page<OrderResponseDTO> orders = orderService.getAllOrders(status,paymentStatus, keyword,pageable);
         return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/admin/{publicId}")
+    public ResponseEntity<OrderResponseDTO> getOrderDetail(@PathVariable String publicId) {
+        OrderResponseDTO order = orderService.getOrderDetail(publicId);
+        return ResponseEntity.ok(order);
     }
 
     @PostMapping("/checkout")
@@ -51,15 +59,18 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", order, "Order created successfully"));
     }
 
-
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCurrentUserOrders(@CookieValue("token") String token,
-                                                  @RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<?> getCurrentUserOrders(
+            @CookieValue("token") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String status
+    ) {
         String publicId = jwtUtil.getPublicIdFromToken(token);
-        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6);
+        Page<OrderDto> orders = orderService.findOrdersByUserPublicId(publicId, page, 6, status);
         return ResponseEntity.ok(new Response<>("success", orders, "Orders retrieved successfully"));
     }
+
 
     @GetMapping("/{publicId}")
     @PreAuthorize("isAuthenticated()")
@@ -81,6 +92,12 @@ public class OrderController {
     public ResponseEntity<?> update(@PathVariable String publicId, @RequestBody OrderDto dto) {
         OrderDto updated = orderService.updateByPublicId(publicId, dto);
         return ResponseEntity.ok(new Response<>("success", updated, "Order updated successfully"));
+    }
+
+    @PutMapping("/{publicId}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable String publicId, @RequestParam String  status) {
+        OrderDto updated = orderService.updateStatus(publicId, status);
+        return ResponseEntity.ok(new Response<>("success", updated, "Order status updated"));
     }
 
     @DeleteMapping("/{publicId}")

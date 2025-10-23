@@ -65,6 +65,7 @@ export function MenuItemFormModal({
   >([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { notify } = useNotification();
 
@@ -275,7 +276,9 @@ export function MenuItemFormModal({
           },
         });
       } catch (uploadError) {
-        console.warn("❌ New upload endpoint failed, trying fallback...");
+        console.warn(
+          "❌ New upload endpoint failed, trying fallback..." + uploadError
+        );
         // Fallback: For now, just show a placeholder URL and let user input manually
         notify(
           "warning",

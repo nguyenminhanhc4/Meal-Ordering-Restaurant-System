@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Navbar,
   Sidebar,
@@ -28,11 +28,14 @@ import {
   HiFolder,
   HiFolderOpen,
   HiMenu,
+  HiBell,
 } from "react-icons/hi";
 import { FaChair } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
 import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
+import type { NotificationDto } from "../services/types/notification";
+import { fetchMyNotifications } from "../services/notification/notificationService";
 
 interface SidebarItemButtonProps {
   path: string;
@@ -47,6 +50,10 @@ function AdminLayout() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [notifications, setNotifications] = useState<NotificationDto[]>([]); // danh sách noti
+  const [unreadCount, setUnreadCount] = useState(0); // số thông báo chưa đọc
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
 
@@ -82,6 +89,29 @@ function AdminLayout() {
       ],
     },
   ];
+
+  useEffect(() => {
+    if (user) {
+      fetchMyNotifications()
+        .then((data: NotificationDto[]) => {
+          setNotifications(data);
+          setUnreadCount(data.filter((n) => !n.isRead).length);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [user]);
+
+  // const markNotificationAsRead = async (id: number) => {
+  //   try {
+  //     await api.put(`/notifications/${id}/read`);
+  //     setNotifications((prev) =>
+  //       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+  //     );
+  //     setUnreadCount((prev) => prev - 1);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   // 🔹 Menu riêng cho ADMIN
   const adminMenu = [
@@ -377,7 +407,20 @@ function AdminLayout() {
               </NavbarBrand>
             </div>
 
-            <div className="flex md:order-2">
+            <div className="flex items-center gap-3 md:order-2">
+              {/* 🔔 Notification */}
+              <div className="relative">
+                <HiBell
+                  className="w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800"
+                  onClick={() => navigate("/admin/notifications")}
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 text-xs w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+
               <Dropdown
                 inline
                 label={

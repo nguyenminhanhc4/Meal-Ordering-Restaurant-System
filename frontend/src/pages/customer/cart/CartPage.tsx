@@ -22,7 +22,7 @@ import {
 } from "../../../services/cart/cartService";
 import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
-import ConfirmDialog from "../../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps";
 import { checkoutCart } from "../../../services/order/checkoutService";
 import type { OrderDto } from "../../../services/types/OrderType";
 import { useNavigate } from "react-router-dom";

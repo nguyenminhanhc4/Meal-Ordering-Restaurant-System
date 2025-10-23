@@ -13,6 +13,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { useNotification } from "../Notification";
 import api from "../../api/axios";
+import { AxiosError } from "axios";
 
 interface CategoryFormData {
   name: string;
@@ -158,10 +159,16 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
       onSuccess();
     } catch (error: unknown) {
-      console.error("Error saving category:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to save category";
-      notify("error", errorMessage);
+      if (error instanceof AxiosError) {
+        notify(
+          "error",
+          error.response?.data.message || "Lỗi tải danh mục. Vui lòng thử lại."
+        );
+        console.error("Categories retrieve failed:", error.response?.data);
+      } else {
+        notify("error", "Đã xảy ra lỗi không mong muốn.");
+        console.error("Unexpected error:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }

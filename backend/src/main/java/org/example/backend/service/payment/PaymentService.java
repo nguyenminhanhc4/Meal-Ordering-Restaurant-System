@@ -1,6 +1,7 @@
 package org.example.backend.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.order.OrderMapper;
 import org.example.backend.dto.payment.PaymentRequestDto;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -10,11 +11,15 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
 import org.example.backend.service.menu.MenuItemService;
+import org.example.backend.service.notification.NotificationService;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.backend.dto.payment.PaymentDto;
 import org.example.backend.repository.payment.PaymentRepository;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +36,8 @@ public class PaymentService {
     private final ParamRepository paramRepository;
     private final ShippingInfoRepository shippingInfoRepository;
     private final MenuItemService menuItemService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final WebSocketNotifier webSocketNotifier;
 
     @Transactional
     public PaymentDto createPayment(PaymentRequestDto request, String publicId) {
@@ -71,18 +77,23 @@ public class PaymentService {
         shippingInfo.setNote(request.getNote());
         shippingInfoRepository.save(shippingInfo); // cần inject repository
 
-        Param statusOrder = paramRepository.findByTypeAndCode("ORDER_STATUS","PAID").get();
+        Param statusOrder = paramRepository.findByTypeAndCode("ORDER_STATUS","PENDING").get();
         order.setStatus(statusOrder);
         orderRepository.save(order);
 
         List<Long> affectedMenuIds = menuItemService.reduceInventory(order.getId());
 
         PaymentDto dto = new PaymentDto(savedPayment);
-        messagingTemplate.convertAndSend("/topic/payments", dto);
-
-            for (Long id : affectedMenuIds) {
-                messagingTemplate.convertAndSend("/topic/menu/" + id, Map.of("menuItemId", id));
+        for (Long id : affectedMenuIds) {
+            webSocketNotifier.notifyMenuItemStock(id);
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
             }
+        });
+        notificationService.notifyNewOrder(order);
         return dto;
     }
 

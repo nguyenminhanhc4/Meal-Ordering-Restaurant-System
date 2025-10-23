@@ -17,10 +17,19 @@ export const getMockPayment = async (publicId: string) => {
 };
 
 // Approve
-export const approveMockPayment = async (publicId: string) => {
+export const approveMockPayment = async (
+  publicId: string,
+  shipping: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+    note?: string;
+  }
+) => {
   const res = await api.post(
     `/mock-payments/approve/${publicId}`,
-    {},
+    shipping, // gửi shipping info trong body
     { withCredentials: true }
   );
   return res.data;

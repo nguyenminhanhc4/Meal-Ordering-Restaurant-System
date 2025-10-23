@@ -7,6 +7,19 @@ export interface OrderItemDto {
   price: number;
 }
 
+export interface OrderDtoDetail {
+  id: number;
+  publicId: string;
+  userId: number;
+  userName?: string;
+  status: string;
+  totalAmount: number;
+  paymentStatus: string;
+  createdAt?: string;
+  updatedAt?: string;
+  orderItems?: OrderItemDto[];
+}
+
 export interface OrderDto {
   id: number;
   publicId: string;

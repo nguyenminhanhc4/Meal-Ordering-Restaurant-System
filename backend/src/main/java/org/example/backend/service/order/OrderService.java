@@ -6,7 +6,6 @@ import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.order.OrderMapper;
 import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.cart.Cart;
-import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.param.Param;
@@ -18,6 +17,8 @@ import org.example.backend.repository.order.OrderSpecification;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
+import org.example.backend.service.notification.NotificationService;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,8 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
+    private final WebSocketNotifier wsNotifier;
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderDto checkoutCart(CartDto cart) {
@@ -78,13 +81,15 @@ public class OrderService {
         return new OrderDto(order);
     }
 
-    public Page<OrderResponseDTO> getAllOrders(String status, String keyword, Pageable pageable) {
-        Specification<Order> spec = Specification
-                .where(OrderSpecification.hasStatus(status))
-                .and(OrderSpecification.keywordSearch(keyword));
+    public Page<OrderResponseDTO> getAllOrders(String status, String paymentStatus, String keyword, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllWithCustomSort(status, paymentStatus, keyword, pageable);
+        return orders.map(OrderMapper::toDto);
+    }
 
-        return orderRepository.findAll(spec, pageable)
-                .map(OrderMapper::toDto);
+    public OrderResponseDTO getOrderDetail(String publicId) {
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return OrderMapper.toDto(order);
     }
 
     public List<OrderDto> findAll() {
@@ -103,15 +108,16 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size) {
+    public Page<OrderDto> findOrdersByUserPublicId(String userPublicId, int page, int size, String status) {
         User user = userRepository.findByPublicId(userPublicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Order> orderPage = orderRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        Page<Order> orderPage = orderRepository.findByUserWithStatusOrder(status, user, pageable);
 
         return orderPage.map(OrderDto::new);
     }
+
 
     public OrderDto save(OrderDto dto) {
         Order entity = toEntity(dto);
@@ -139,7 +145,48 @@ public class OrderService {
 
         entity.setTotalAmount(dto.getTotalAmount());
         entity = orderRepository.save(entity);
-        return new OrderDto(entity);
+        return saveAndReturn(entity);
+    }
+
+    public OrderDto updateStatus(String publicId, String statusCode) {
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Tìm Param tương ứng trong DB
+        Param statusParam = paramRepository.findByTypeAndCode("ORDER_STATUS", statusCode )
+                .orElseThrow(() -> new RuntimeException("Invalid status code: " + statusCode));
+
+        // Gán lại
+        order.setStatus(statusParam);
+
+        // Lưu và trả về DTO
+        order = orderRepository.save(order);
+        wsNotifier.notifyOrderStatus(publicId, statusCode);
+        // --- Tạo notification cho user dựa theo status ---
+        switch (statusCode) {
+            case "APPROVED":
+                notificationService.notifyOrderApproved(order);
+                break;
+            case "CANCELLED":
+                notificationService.notifyOrderCancelled(order);
+                break;
+            case "DELIVERED":
+                notificationService.notifyOrderDelivered(order);
+                break;
+            case "DELIVERING":
+                notificationService.notifyOrderDelivering(order);
+                break;
+            default:
+                // Không gửi notification cho các trạng thái khác
+                break;
+        }
+        return new OrderDto(order);
+    }
+
+
+    private OrderDto saveAndReturn(Order order) {
+        Order saved = orderRepository.save(order);
+        return new OrderDto(saved);
     }
 
     public void deleteById(Long id) {

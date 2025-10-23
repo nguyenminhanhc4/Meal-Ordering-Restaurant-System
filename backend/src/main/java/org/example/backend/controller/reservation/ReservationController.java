@@ -3,6 +3,7 @@ package org.example.backend.controller.reservation;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.table.TableDto;
+import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.service.reservation.ReservationService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +85,76 @@ public class ReservationController {
         return ResponseEntity.ok(new Response<>("success", reservations, "Reservations retrieved successfully"));
     }
 
+    @GetMapping
+    public Page<ReservationDto> getReservations(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long statusId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(required = false) Integer numberOfPeople,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return reservationService.getReservations(
+                keyword,
+                statusId,
+                from,
+                to,
+                numberOfPeople,
+                page,
+                size,
+                sortBy,
+                sortDir
+        );
+    }
+
+    @GetMapping("/{publicId}")
+    public ReservationDto getReservationById(@PathVariable String publicId) {
+        return reservationService.getReservationByPublicId(publicId);
+    }
+
+    @PutMapping("/{publicId}/approve")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> approveReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.updateStatus(publicId, "CONFIRMED");
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation approved successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{publicId}/cancel")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> cancelReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.updateStatus(publicId, "CANCELLED");
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation cancelled successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{publicId}/complete")
+    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+    public ResponseEntity<?> completeReservation(@PathVariable String publicId) {
+        try {
+            ReservationDto updated = reservationService.markAsCompleted(publicId);
+            return ResponseEntity.ok(new Response<>("success", updated, "Reservation marked as completed and tables released"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("error", null, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Response<>("error", null, "Internal server error"));
+        }
+    }
 
 
     // CUSTOMER gets their reservation by publicId
@@ -125,12 +198,12 @@ public class ReservationController {
     }
 
     // STAFF or ADMIN can see all reservations
-    @GetMapping
-    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
-    public ResponseEntity<?> getAllReservations() {
-        List<ReservationDto> list = reservationService.getAllReservations();
-        return ResponseEntity.ok(new Response<>("success", list, "All reservations retrieved successfully"));
-    }
+//    @GetMapping
+//    @PreAuthorize("hasAnyRole('STAFF','ADMIN')")
+//    public ResponseEntity<?> getAllReservations() {
+//        List<ReservationDto> list = reservationService.getAllReservations();
+//        return ResponseEntity.ok(new Response<>("success", list, "All reservations retrieved successfully"));
+//    }
 
     // STAFF or ADMIN can update any reservation
     @PutMapping("/{id}")

@@ -22,11 +22,18 @@ import {
 import Logo from "../../assets/img/vite.svg";
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../Notification/NotificationContext";
-import { fetchCategories } from "../../services/category/fetchCategories";
+import {
+  fetchCategories,
+  fetchCategoryById,
+} from "../../services/category/fetchCategories";
 import type { Category } from "../../services/category/fetchCategories";
 import { AxiosError } from "axios";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../../store/CartContext";
+import {
+  useRealtimeUpdate,
+  useRealtimeDelete,
+} from "../../api/useRealtimeUpdate";
 
 const MegaMenuComponent: React.FC = () => {
   const { isLoggedIn, user, logout } = useAuth();
@@ -60,6 +67,53 @@ const MegaMenuComponent: React.FC = () => {
     loadCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useRealtimeUpdate<Category, number, { categoryId: number; name: string }>(
+    "/topic/category/new",
+    fetchCategoryById,
+    async (newCategory) => {
+      // ✅ Cập nhật toàn bộ cây thay vì chèn 1 node
+      try {
+        const allCategories = await fetchCategories();
+        setCategories(allCategories);
+        notify("success", `Danh mục "${newCategory.name}" đã được thêm mới!`);
+      } catch (error) {
+        console.error("Failed to refresh categories after WS update", error);
+      }
+    },
+    (msg) => msg.categoryId
+  );
+
+  // 🔔 Khi cập nhật category (đổi tên, parent, mô tả...)
+  useRealtimeUpdate<Category, number, { categoryId: number; name: string }>(
+    "/topic/category/update",
+    fetchCategoryById,
+    async (updatedCategory) => {
+      try {
+        const allCategories = await fetchCategories();
+        setCategories(allCategories);
+        notify("info", `Danh mục "${updatedCategory.name}" đã được cập nhật!`);
+      } catch (error) {
+        console.error("Failed to refresh categories after update WS", error);
+      }
+    },
+    (msg) => msg.categoryId
+  );
+
+  // 🔔 Khi xóa category
+  useRealtimeDelete<{ categoryId: number }>(
+    "/topic/category/delete",
+    async (msg) => {
+      console.log("Received delete message:", msg);
+      try {
+        const allCategories = await fetchCategories();
+        setCategories(allCategories);
+        notify("warning", `Một danh mục đã bị xóa!`);
+      } catch (error) {
+        console.error("Failed to refresh categories after delete WS", error);
+      }
+    }
+  );
 
   /**
    * Kiểm tra xem đường dẫn hiện tại có khớp hoặc bắt đầu bằng đường dẫn được cung cấp không.
@@ -221,7 +275,7 @@ const MegaMenuComponent: React.FC = () => {
                   </div>
 
                   <ul className="space-y-2">
-                    {category.children.length > 0 ? (
+                    {category.children?.length > 0 ? (
                       category.children.map((child) => (
                         <li
                           key={child.id}
@@ -232,7 +286,7 @@ const MegaMenuComponent: React.FC = () => {
                             {child.name}
                           </div>
 
-                          {child.children.length > 0 && (
+                          {child.children?.length > 0 && (
                             // Sub-child (Món ăn cụ thể) - Link điều hướng
                             <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
                               {child.children.map((subChild) => (

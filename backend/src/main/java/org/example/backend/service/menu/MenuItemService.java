@@ -10,6 +10,7 @@ import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.review.Review;
 import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.review.ReviewRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +56,7 @@ public class MenuItemService {
     private final Cloudinary cloudinary;
     private final MenuItemMapper menuItemMapper;
     private final OrderItemRepository orderItemRepository;
+    private final WebSocketNotifier webSocketNotifier;
 
     // --- BASIC CRUD ---
     @Transactional(readOnly = true)
@@ -59,6 +64,8 @@ public class MenuItemService {
         // 1️⃣ Xác định kiểu sắp xếp
         Sort sortOption;
         String sortLower = sort.toLowerCase();
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
         if ("price-asc".equals(sortLower)) {
             sortOption = Sort.by(Sort.Direction.ASC, "m.price");
         } else if ("price-desc".equals(sortLower)) {
@@ -66,11 +73,10 @@ public class MenuItemService {
         } else if ("newest".equals(sortLower)) {
             sortOption = Sort.by(Sort.Direction.DESC, "m.createdAt");
         } else {
-            sortOption = Sort.unsorted(); // "popular" sẽ xử lý logic trong query
+            sortOption = Sort.unsorted(); // Sẽ sử dụng findAllWithDetailsOrdered cho sort=popular
         }
 
         Pageable pageable = PageRequest.of(page, size, sortOption);
-
         // 2️⃣ Gọi repository phù hợp với bộ lọc
         Page<Object[]> results;
 
@@ -83,6 +89,8 @@ public class MenuItemService {
             results = menuItemRepository.findAllWithDetailsByCategory(categorySlug, pageable);
         } else if (hasSearch) {
             results = menuItemRepository.findAllWithDetailsByNameContainingIgnoreCase("%" + search.trim() + "%", pageable);
+        } else if ("popular".equals(sortLower)) {
+            results = menuItemRepository.findAllWithDetailsOrdered(sevenDaysAgo, pageable);
         } else {
             results = menuItemRepository.findAllWithDetails(pageable);
         }
@@ -249,6 +257,7 @@ public class MenuItemService {
             System.out.println("✅ No foreign key constraints found. Proceeding with delete...");
             menuItemRepository.deleteById(id);
             System.out.println("🎉 Successfully deleted MenuItem with id: " + id);
+            webSocketNotifier.notifyDeletedMenuItem(id);
             
         } catch (Exception e) {
             System.err.println("❌ Error deleting MenuItem with id " + id + ": " + e.getMessage());
@@ -396,6 +405,14 @@ public class MenuItemService {
             }
         }
 
+        // Thông báo realtime cho client
+        webSocketNotifier.notifyNewMenuItem(
+                menuItem.getId(),
+                menuItem.getName(),
+                menuItem.getAvatarUrl(),
+                menuItem.getCategory().getId()
+        );
+
         return new MenuItemDto(menuItem);
     }
 
@@ -469,6 +486,13 @@ public class MenuItemService {
 
         // 7. Save MenuItem
         menuItem = menuItemRepository.save(menuItem);
+
+        webSocketNotifier.notifyUpdatedMenuItem(
+                menuItem.getId(),
+                menuItem.getName(),
+                menuItem.getAvatarUrl(),
+                menuItem.getCategory().getId()
+        );
         
         return new MenuItemDto(menuItem);
     }

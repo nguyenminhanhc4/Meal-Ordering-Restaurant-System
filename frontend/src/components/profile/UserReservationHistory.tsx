@@ -31,7 +31,7 @@ import Pagination from "../../components/common/PaginationClient";
 import BookingModal, {
   type BookingData,
 } from "../../pages/customer/table/BookingModal";
-import ConfirmDialog from "../../components/common/ConfirmDialogProps ";
+import ConfirmDialog from "../common/ConfirmDialogProps";
 import { useNotification } from "../Notification/NotificationContext";
 
 export default function UserReservationHistory() {
@@ -248,8 +248,8 @@ export default function UserReservationHistory() {
                     CONFIRMED: "text-green-700 bg-green-100",
                     PENDING: "text-yellow-700 bg-yellow-100",
                     CANCELLED: "text-red-700 bg-red-100",
-                    COMPLETED: "text-gray-700 bg-gray-200",
-                    DEFAULT: "text-blue-700 bg-blue-100",
+                    COMPLETED: "text-blue-700 bg-blue-200",
+                    DEFAULT: "text-gray-700 bg-gray-100",
                   };
                   const statusColorClass =
                     statusColorMap[res.statusName] || statusColorMap.DEFAULT;
@@ -282,8 +282,8 @@ export default function UserReservationHistory() {
                         {res.note && (
                           <p className="text-gray-500 italic flex items-center">
                             <HiOutlineClipboardDocumentList className="w-4 h-4 mr-1 text-purple-500" />
-                            {res.note.length > 50
-                              ? res.note.substring(0, 50) + "..."
+                            {res.note.length > 20
+                              ? res.note.substring(0, 20) + "..."
                               : res.note}
                           </p>
                         )}

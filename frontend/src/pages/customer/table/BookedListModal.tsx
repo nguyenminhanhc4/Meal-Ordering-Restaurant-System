@@ -106,7 +106,7 @@ export default function BookedListModal({
                     CONFIRMED: "text-green-700 bg-green-100",
                     PENDING: "text-yellow-700 bg-yellow-100",
                     CANCELLED: "text-red-700 bg-red-100",
-                    COMPLETED: "text-gray-700 bg-gray-200",
+                    COMPLETED: "text-blue-700 bg-blue-200",
                     DEFAULT: "text-blue-700 bg-blue-100",
                   };
                   const statusColorClass =
@@ -170,7 +170,8 @@ export default function BookedListModal({
                       {/* Cột Hành động */}
                       <TableCell className="min-w-[150px]">
                         <div className="flex gap-2 justify-center">
-                          {res.statusName !== "CANCELLED" ? (
+                          {res.statusName !== "CANCELLED" &&
+                          res.statusName !== "COMPLETED" ? (
                             <>
                               <Button
                                 size="sm"
@@ -192,7 +193,9 @@ export default function BookedListModal({
                             </>
                           ) : (
                             <span className="text-gray-400 italic text-sm">
-                              Đã hủy
+                              {res.statusName === "CANCELLED"
+                                ? "Đã hủy"
+                                : "Đã hoàn thành"}
                             </span>
                           )}
                         </div>

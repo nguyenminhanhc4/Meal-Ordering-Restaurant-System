@@ -8,19 +8,24 @@ import org.example.backend.dto.table.TableStatusUpdate;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.reservation.Reservation;
 import org.example.backend.entity.table.TableEntity;
+import org.example.backend.entity.user.User;
 import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.reservation.ReservationRepository;
+import org.example.backend.repository.reservation.ReservationSpecification;
 import org.example.backend.repository.table.TableRepository;
+import org.example.backend.repository.user.UserRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +42,13 @@ public class ReservationService {
     private ParamRepository paramRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private WebSocketNotifier webSocketNotifier;
 
     // ========================= CREATE =========================
     @Transactional
@@ -46,12 +57,14 @@ public class ReservationService {
             // 1. Tạo reservation mới
             Reservation reservation = new Reservation();
             reservation.setPublicId(UUID.randomUUID().toString());
-            reservation.setUserId(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            reservation.setUser(user);
             reservation.setReservationTime(dto.getReservationTime());
             reservation.setNumberOfPeople(dto.getNumberOfPeople());
             reservation.setNote(dto.getNote());
 
-            Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "CONFIRMED")
+            Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION", "PENDING")
                     .orElseThrow(() -> new ResourceNotFoundException("Status CONFIRMED not found"));
             reservation.setStatus(status);
 
@@ -92,8 +105,14 @@ public class ReservationService {
                         messagingTemplate.convertAndSend("/topic/tables",
                                 new TableStatusUpdate(table.getId(), occupiedStatus.getId()));
                     }
+
+                    messagingTemplate.convertAndSend("/topic/reservations", Map.of(
+                            "reservationPublicId", reservation.getPublicId(),
+                            "status", reservation.getStatus().getCode()
+                    ));
                 }
             });
+
 
             return new ReservationDto(reservation);
 
@@ -118,6 +137,43 @@ public class ReservationService {
         return page.map(ReservationDto::new);
     }
 
+    public Page<ReservationDto> getReservations(
+            String keyword,
+            Long statusId,
+            LocalDateTime from,
+            LocalDateTime to,
+            Integer numberOfPeople,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Reservation> reservations = reservationRepository.findAllWithCustomSort(
+                keyword,
+                statusId,
+                from,
+                to,
+                numberOfPeople,
+                pageable
+        );
+
+        return reservations.map(ReservationDto::new);
+    }
+
+
+    // 🎯 Helper function: xác định độ ưu tiên của status
+    private int getStatusPriority(String code) {
+        return switch (code) {
+            case "PENDING" -> 1;
+            case "CONFIRMED" -> 2;
+            case "COMPLETED" -> 3;
+            case "CANCELLED" -> 4;
+            default -> 5;
+        };
+    }
+
 
     @Transactional(readOnly = true)
     public ReservationDto getReservationByPublicId(String publicId) {
@@ -132,7 +188,6 @@ public class ReservationService {
                 .map(ReservationDto::new)
                 .collect(Collectors.toList());
     }
-
 
     // ========================= UPDATE =========================
     @Transactional
@@ -184,6 +239,52 @@ public class ReservationService {
         return new ReservationDto(updated);
     }
 
+    public ReservationDto updateStatus(String publicId, String newStatus) {
+        Reservation reservation = reservationRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+        Param status = paramRepository.findByTypeAndCode("STATUS_RESERVATION",newStatus)
+                .orElseThrow(() -> new RuntimeException("Status not found: " + newStatus));
+        reservation.setStatus(status);
+        reservation.setUpdatedAt(LocalDateTime.now());
+
+        Reservation updated = reservationRepository.save(reservation);
+
+        webSocketNotifier.notifyReservationStatus(publicId, newStatus);
+
+        return new ReservationDto(updated);
+    }
+
+    @Transactional
+    public ReservationDto markAsCompleted(String publicId) {
+        Reservation reservation = reservationRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        // 1️⃣ Cập nhật trạng thái đặt bàn
+        Param completedStatus = paramRepository.findByTypeAndCode("STATUS_RESERVATION","COMPLETED")
+                .orElseThrow(() -> new RuntimeException("Status COMPLETED not found"));
+        reservation.setStatus(completedStatus);
+
+        // 2️⃣ Cập nhật trạng thái các bàn về "AVAILABLE"
+        for (TableEntity table : reservation.getTables()) {
+            Param available = paramRepository.findByTypeAndCode("STATUS_TABLE","AVAILABLE")
+                    .orElseThrow(() -> new RuntimeException("Table status AVAILABLE not found"));
+            table.setStatus(available);
+            tableRepository.save(table);
+        }
+
+        Reservation saved = reservationRepository.save(reservation);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                webSocketNotifier.notifyReservationStatus(publicId, "COMPLETED");
+                reservation.getTables().forEach(table ->
+                        webSocketNotifier.notifyTableStatus(table.getId(), "AVAILABLE")
+                );
+            }
+        });
+        return new ReservationDto(saved);
+    }
 
     @Transactional
     public ReservationDto updateReservation(Long id, ReservationDto dto) {

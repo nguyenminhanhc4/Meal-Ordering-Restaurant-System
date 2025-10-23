@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import org.example.backend.entity.BaseEntity;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.table.TableEntity;
+import org.example.backend.entity.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -23,8 +24,9 @@ public class Reservation extends BaseEntity {
     @Column(name = "public_id", nullable = false, unique = true, length = 36)
     private String publicId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Column(name = "reservation_time", nullable = false)
     private LocalDateTime reservationTime;
