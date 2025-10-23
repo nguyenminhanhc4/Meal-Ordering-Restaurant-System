@@ -15,6 +15,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.payment.PaymentRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
 import org.example.backend.service.menu.MenuItemService;
+import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +38,7 @@ public class MockPaymentController {
     private final MenuItemRepository menuItemRepository;
     private final ShippingInfoRepository shippingInfoRepository;
     private final MenuItemService menuItemService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
     private final WebSocketNotifier webSocketNotifier;
 
     /**
@@ -110,6 +111,7 @@ public class MockPaymentController {
             webSocketNotifier.notifyMenuItemStock(id);
         }
         webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
+        notificationService.notifyNewOrder(order);
 
         // Chỉ trả redirectUrl
         return Map.of("redirectUrl", payment.getReturnUrl());

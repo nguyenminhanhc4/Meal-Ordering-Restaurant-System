@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from 'flowbite-react';
-import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
+import React from "react";
+import { Button } from "flowbite-react";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 interface PaginationProps {
   currentPage: number;
@@ -15,7 +15,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
   totalItems,
-  pageSize
+  pageSize,
 }) => {
   // Generate array of page numbers to show
   const getPageNumbers = () => {
@@ -34,14 +34,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       }
     }
 
-    for (let i of range) {
+    for (const i of range) {
       if (l) {
         if (i - l === 2) {
           // If there's just one number between, show it
           rangeWithDots.push(l + 1);
         } else if (i - l !== 1) {
           // If there's more than one number between, show dots
-          rangeWithDots.push('...');
+          rangeWithDots.push("...");
         }
       }
       rangeWithDots.push(i);
@@ -58,8 +58,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           size="sm"
           color="gray"
           disabled={currentPage <= 1}
-          onClick={() => onPageChange(currentPage - 1)}
-        >
+          onClick={() => onPageChange(currentPage - 1)}>
           <HiChevronLeft className="h-5 w-5" />
         </Button>
 
@@ -67,14 +66,13 @@ export const Pagination: React.FC<PaginationProps> = ({
           <Button
             key={index}
             size="sm"
-            color={pageNumber === currentPage ? 'info' : 'gray'}
-            disabled={pageNumber === '...'}
+            color={pageNumber === currentPage ? "info" : "gray"}
+            disabled={pageNumber === "..."}
             onClick={() => {
-              if (typeof pageNumber === 'number') {
+              if (typeof pageNumber === "number") {
                 onPageChange(pageNumber);
               }
-            }}
-          >
+            }}>
             {pageNumber}
           </Button>
         ))}
@@ -83,22 +81,21 @@ export const Pagination: React.FC<PaginationProps> = ({
           size="sm"
           color="gray"
           disabled={currentPage >= totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-        >
+          onClick={() => onPageChange(currentPage + 1)}>
           <HiChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
       {totalItems !== undefined && pageSize !== undefined && (
         <div className="text-sm text-gray-700">
-          Showing{' '}
+          Showing{" "}
           <span className="font-medium">
             {Math.min((currentPage - 1) * pageSize + 1, totalItems)}
-          </span>{' '}
-          to{' '}
+          </span>{" "}
+          to{" "}
           <span className="font-medium">
             {Math.min(currentPage * pageSize, totalItems)}
-          </span>{' '}
+          </span>{" "}
           of <span className="font-medium">{totalItems}</span> entries
         </div>
       )}

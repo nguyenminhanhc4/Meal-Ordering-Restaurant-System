@@ -17,6 +17,7 @@ import org.example.backend.repository.order.OrderSpecification;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.entity.user.User;
+import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
     private final WebSocketNotifier wsNotifier;
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderDto checkoutCart(CartDto cart) {
@@ -160,6 +162,24 @@ public class OrderService {
         // Lưu và trả về DTO
         order = orderRepository.save(order);
         wsNotifier.notifyOrderStatus(publicId, statusCode);
+        // --- Tạo notification cho user dựa theo status ---
+        switch (statusCode) {
+            case "APPROVED":
+                notificationService.notifyOrderApproved(order);
+                break;
+            case "CANCELLED":
+                notificationService.notifyOrderCancelled(order);
+                break;
+            case "DELIVERED":
+                notificationService.notifyOrderDelivered(order);
+                break;
+            case "DELIVERING":
+                notificationService.notifyOrderDelivering(order);
+                break;
+            default:
+                // Không gửi notification cho các trạng thái khác
+                break;
+        }
         return new OrderDto(order);
     }
 

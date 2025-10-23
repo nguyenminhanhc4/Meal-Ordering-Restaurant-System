@@ -71,6 +71,17 @@ public class DataInitializer implements CommandLineRunner {
         createParamIfNotExists("ORDER_STATUS", "DELIVERING", "Đang giao hàng", "Đang giao hàng");
         createParamIfNotExists("STATUS_RESERVATION", "COMPLETED", "Khách trả bản", "Khách trả bản");
 
+        // --- NOTIFICATION TYPES ---
+        createParamIfNotExists("NOTIFICATION", "ORDER_NEW", "Đơn hàng mới", "Khi khách hàng tạo đơn hàng mới");
+        createParamIfNotExists("NOTIFICATION", "ORDER_APPROVED", "Đơn hàng được duyệt", "Khi nhân viên duyệt đơn hàng");
+        createParamIfNotExists("NOTIFICATION", "ORDER_DELIVERING", "Đơn hàng đang giao", "Khi đơn hàng đang giao");
+        createParamIfNotExists("NOTIFICATION", "ORDER_DELIVERED", "Đơn hàng đã giao", "Khi giao hàng thành công");
+        createParamIfNotExists("NOTIFICATION", "ORDER_CANCELLED", "Đơn hàng bị hủy", "Khi đơn hàng bị hủy");
+
+        createParamIfNotExists("NOTIFICATION", "RESERVATION_NEW", "Đặt bàn mới", "Khi khách hàng đặt bàn mới");
+        createParamIfNotExists("NOTIFICATION", "RESERVATION_CONFIRMED", "Đặt bàn được duyệt", "Khi nhân viên duyệt đặt bàn");
+        createParamIfNotExists("NOTIFICATION", "RESERVATION_COMPLETED", "Hoàn tất đặt bàn", "Khi khách rời bàn");
+        createParamIfNotExists("NOTIFICATION", "RESERVATION_CANCELLED", "Đặt bàn bị hủy", "Khi đặt bàn bị hủy");
 //        // ==================== TABLES ====================
 //        createSampleTables();
 //

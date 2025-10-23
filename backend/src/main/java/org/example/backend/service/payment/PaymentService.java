@@ -11,6 +11,7 @@ import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
 import org.example.backend.service.menu.MenuItemService;
+import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class PaymentService {
     private final ParamRepository paramRepository;
     private final ShippingInfoRepository shippingInfoRepository;
     private final MenuItemService menuItemService;
+    private final NotificationService notificationService;
     private final WebSocketNotifier webSocketNotifier;
 
     @Transactional
@@ -84,6 +86,7 @@ public class PaymentService {
             webSocketNotifier.notifyMenuItemStock(id);
         }
         webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
+        notificationService.notifyNewOrder(order);
         return dto;
     }
 
