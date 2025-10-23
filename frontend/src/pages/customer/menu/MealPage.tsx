@@ -10,7 +10,10 @@ import { useNotification } from "../../../components/Notification/NotificationCo
 import ProductCard from "../../../components/card/ProductCard";
 import SearchBar from "../../../components/search_filter/SearchBar";
 import SortFilter from "../../../components/search_filter/SortFilter";
-import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate.ts";
+import {
+  useRealtimeUpdate,
+  useRealtimeDelete,
+} from "../../../api/useRealtimeUpdate.ts";
 
 /**
  * 🍽️ MealPage
@@ -120,6 +123,28 @@ const MealPage: React.FC = () => {
     },
     (msg: { menuItemId: number }) => msg.menuItemId
   );
+
+  // 🟡 Khi menu item được cập nhật
+  useRealtimeUpdate(
+    `/topic/menu/update`,
+    getMenuItemById,
+    (updatedProduct) => {
+      if (!updatedProduct) return;
+      setProducts((prev) =>
+        prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+      );
+      notify("info", `${updatedProduct.name} đã được cập nhật`);
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
+
+  type MenuItemDeleteMsg = {
+    menuItemId: number;
+  };
+  useRealtimeDelete<MenuItemDeleteMsg>("/topic/menu/delete", (msg) => {
+    setProducts((prev) => prev.filter((p) => p.id !== msg.menuItemId));
+    notify("warning", `Món ăn đã bị xóa khỏi hệ thống`);
+  });
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-100 py-12 px-4 sm:px-6 md:px-8">

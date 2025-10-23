@@ -257,6 +257,7 @@ public class MenuItemService {
             System.out.println("✅ No foreign key constraints found. Proceeding with delete...");
             menuItemRepository.deleteById(id);
             System.out.println("🎉 Successfully deleted MenuItem with id: " + id);
+            webSocketNotifier.notifyDeletedMenuItem(id);
             
         } catch (Exception e) {
             System.err.println("❌ Error deleting MenuItem with id " + id + ": " + e.getMessage());
@@ -485,6 +486,13 @@ public class MenuItemService {
 
         // 7. Save MenuItem
         menuItem = menuItemRepository.save(menuItem);
+
+        webSocketNotifier.notifyUpdatedMenuItem(
+                menuItem.getId(),
+                menuItem.getName(),
+                menuItem.getAvatarUrl(),
+                menuItem.getCategory().getId()
+        );
         
         return new MenuItemDto(menuItem);
     }

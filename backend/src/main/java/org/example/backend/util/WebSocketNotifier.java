@@ -86,5 +86,24 @@ public class WebSocketNotifier {
                 "categoryId", categoryId
         ));
     }
+    /**
+     * 🗑️ Gửi thông báo khi xóa MenuItem
+     */
+    public void notifyDeletedMenuItem(Long menuItemId) {
+        notify("/topic/menu/delete", Map.of(
+                "menuItemId", menuItemId
+        ));
+    }
 
+    /**
+     * ✏️ Gửi thông báo khi cập nhật MenuItem
+     */
+    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId) {
+        notify("/topic/menu/update", Map.of(
+                "menuItemId", menuItemId,
+                "name", name,
+                "avatarUrl", avatarUrl,
+                "categoryId", categoryId
+        ));
+    }
 }

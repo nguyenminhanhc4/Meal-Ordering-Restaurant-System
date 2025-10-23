@@ -29,3 +29,26 @@ export function useRealtimeUpdate<T, ID = unknown, Msg = unknown>(
   }, [topic, fetchFn, onUpdate, getIdFromMsg]);
 }
 
+/**
+ * 🎯 Dành riêng cho xử lý realtime delete (không cần fetch lại dữ liệu)
+ */
+export function useRealtimeDelete<Msg>(
+  topic: string,
+  onDelete: (msg: Msg) => void
+) {
+  useEffect(() => {
+    if (!topic) return;
+
+    const client = connectWebSocket<Msg>(topic, (msg) => {
+      try {
+        onDelete(msg);
+      } catch (err) {
+        console.error("Error handling realtime delete:", err);
+      }
+    });
+
+    return () => {
+      client.deactivate();
+    };
+  }, [topic, onDelete]);
+}
