@@ -104,6 +104,7 @@ const MegaMenuComponent: React.FC = () => {
   useRealtimeDelete<{ categoryId: number }>(
     "/topic/category/delete",
     async (msg) => {
+      console.log("Received delete message:", msg);
       try {
         const allCategories = await fetchCategories();
         setCategories(allCategories);
