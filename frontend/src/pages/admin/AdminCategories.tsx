@@ -161,7 +161,7 @@ function AdminCategories() {
     return () => {
       abortController.abort();
     };
-  }, [currentPage, searchTerm, selectedParent, notify]);
+  }, [currentPage, searchTerm, selectedParent, notify, refreshTrigger]);
 
   // Handlers để reset page về 1 khi tìm kiếm/lọc
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
