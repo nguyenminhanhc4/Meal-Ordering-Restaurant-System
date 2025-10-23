@@ -5,6 +5,7 @@ import org.example.backend.dto.category.CategoryDTO;
 import org.example.backend.dto.category.CategorySearchRequest;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.exception.ValidationException;
+import org.example.backend.util.WebSocketNotifier;
 import org.example.backend.validator.CategoryValidator;
 import org.example.backend.repository.category.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +26,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private WebSocketNotifier webSocketNotifier;
 
     // Convert Entity -> DTO
     private CategoryDTO toDTO(Categories category) {
@@ -78,6 +84,15 @@ public class CategoryService {
 
         Categories category = new Categories();
         updateEntity(category, dto);
+
+        Categories saved = categoryRepository.save(category);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                webSocketNotifier.notifyNewCategory(saved.getId(), saved.getName());
+            }
+        });
         return toDTO(categoryRepository.save(category));
     }
 
@@ -100,6 +115,9 @@ public class CategoryService {
         Categories category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Category not found"));
         updateEntity(category, dto);
+        Categories saved = categoryRepository.save(category);
+        // 🔔 Gửi notify cập nhật
+        webSocketNotifier.notifyCategoryUpdated(saved.getId(), saved.getName());
         return toDTO(categoryRepository.save(category));
     }
 
@@ -108,6 +126,10 @@ public class CategoryService {
         Categories category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Category not found"));
         categoryRepository.delete(category);
+        categoryRepository.delete(category);
+
+        // 🔔 Gửi notify xóa
+        webSocketNotifier.notifyCategoryDeleted(id);
     }
 
     // Get children by parentId

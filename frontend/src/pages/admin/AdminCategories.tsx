@@ -12,7 +12,13 @@ import {
   TextInput,
   Select,
 } from "flowbite-react";
-import { HiSearch, HiPlus, HiPencil, HiTrash, HiCollection } from "react-icons/hi";
+import {
+  HiSearch,
+  HiPlus,
+  HiPencil,
+  HiTrash,
+  HiCollection,
+} from "react-icons/hi";
 import api from "../../api/axios";
 import { useNotification } from "../../components/Notification";
 import { Pagination } from "../../components/common/Pagination";
@@ -41,20 +47,20 @@ function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedParent, setSelectedParent] = useState("");
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
-  
+
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = useState<
+    Category | undefined
+  >(undefined);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const pageSize = 15;
   const { notify } = useNotification();
-
-
 
   // useEffect để fetch data khi component mount và khi có thay đổi
   useEffect(() => {
@@ -63,7 +69,9 @@ function AdminCategories() {
     // Function để load parent categories
     const loadParentCategories = async () => {
       try {
-        const response = await api.get('/categories', { signal: abortController.signal });
+        const response = await api.get("/categories", {
+          signal: abortController.signal,
+        });
         if (response.data) {
           setParentCategories(response.data);
         }
@@ -77,7 +85,7 @@ function AdminCategories() {
 
     // Load parent categories khi có refreshTrigger
     void loadParentCategories();
-    
+
     return () => {
       abortController.abort();
     };
@@ -93,7 +101,7 @@ function AdminCategories() {
         const searchRequest: CategorySearchRequest = {
           name: searchTerm.trim() || undefined,
           sortBy: "id",
-          sortDirection: "desc"
+          sortDirection: "desc",
         };
 
         // Handle parent filter logic
@@ -116,7 +124,12 @@ function AdminCategories() {
         } catch (searchError) {
           console.warn("Search endpoint failed, trying fallback:", searchError);
           // Fallback to basic endpoint
-          response = await api.get(`/categories/paginated?page=${currentPage - 1}&size=${pageSize}&sortBy=id&sortDirection=desc`, { signal: abortController.signal });
+          response = await api.get(
+            `/categories/paginated?page=${
+              currentPage - 1
+            }&size=${pageSize}&sortBy=id&sortDirection=desc`,
+            { signal: abortController.signal }
+          );
         }
 
         if (response.data) {
@@ -128,7 +141,10 @@ function AdminCategories() {
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Fetch categories error:", error);
-          notify("error", "Could not load categories. Please check if backend is running.");
+          notify(
+            "error",
+            "Could not load categories. Please check if backend is running."
+          );
           setCategories([]);
           setTotalPages(1);
           setTotalItems(0);
@@ -147,7 +163,6 @@ function AdminCategories() {
     };
   }, [currentPage, searchTerm, selectedParent, notify]);
 
-  
   // Handlers để reset page về 1 khi tìm kiếm/lọc
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -166,7 +181,7 @@ function AdminCategories() {
   // Handler để refresh list sau khi tạo/sửa
   const handleSuccess = () => {
     setShowModal(false);
-    setRefreshTrigger(prev => prev + 1); // Trigger refresh cho parent categories
+    setRefreshTrigger((prev) => prev + 1); // Trigger refresh cho parent categories
   };
 
   // Handler sau khi xóa
@@ -175,10 +190,13 @@ function AdminCategories() {
       try {
         await api.delete(`/categories/${categoryToDelete}`);
         notify("success", "Category deleted successfully");
-        setRefreshTrigger(prev => prev + 1); // Trigger refresh cho parent categories
+        setRefreshTrigger((prev) => prev + 1); // Trigger refresh cho parent categories
       } catch (error: unknown) {
         console.error("Error deleting category:", error);
-        notify("error", `Failed to delete category: ${(error as Error).message}`);
+        notify(
+          "error",
+          `Failed to delete category: ${(error as Error).message}`
+        );
       } finally {
         setCategoryToDelete(null);
         setShowConfirmDialog(false);
@@ -200,7 +218,9 @@ function AdminCategories() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center border-none">
-        <h1 className="text-2xl font-bold text-gray-800">Category Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Category Management
+        </h1>
         <Button
           color="cyan"
           size="md"
@@ -312,10 +332,9 @@ function AdminCategories() {
                       </span>
                     </TableCell>
                     <TableCell className="p-3 bg-white text-gray-700">
-                      <Badge 
+                      <Badge
                         color={category.parentId ? "info" : "success"}
-                        className="text-xs"
-                      >
+                        className="text-xs">
                         {getParentName(category.parentId)}
                       </Badge>
                     </TableCell>

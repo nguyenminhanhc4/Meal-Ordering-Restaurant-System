@@ -106,4 +106,24 @@ public class WebSocketNotifier {
                 "categoryId", categoryId
         ));
     }
+
+    public void notifyNewCategory(Long categoryId, String name) {
+        notify("/topic/category/new", Map.of(
+                "categoryId", categoryId,
+                "name", name
+        ));
+    }
+
+    public void notifyCategoryUpdated(Long categoryId, String name) {
+        notify("/topic/category/update", Map.of(
+                "categoryId", categoryId,
+                "name", name
+        ));
+    }
+
+    public void notifyCategoryDeleted(Long categoryId) {
+        notify("/topic/category/delete", Map.of(
+                "categoryId", categoryId
+        ));
+    }
 }

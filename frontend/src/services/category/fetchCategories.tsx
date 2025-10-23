@@ -18,3 +18,8 @@ export const fetchCategories = async (): Promise<Category[]> => {
     return []; // Trả về mảng rỗng nếu có lỗi
   }
 };
+
+export async function fetchCategoryById(id: number): Promise<Category> {
+  const response = await api.get(`/categories/${id}`);
+  return response.data;
+}
