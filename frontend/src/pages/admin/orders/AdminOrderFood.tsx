@@ -262,7 +262,7 @@ export const AdminOrderFood = () => {
     "/topic/admin/orders",
     async (publicId) => {
       const res = await api.get(`/orders/admin/${publicId}`);
-      console.log(res);
+      console.log(res.data);
       return res.data;
     },
     (newOrder) => {

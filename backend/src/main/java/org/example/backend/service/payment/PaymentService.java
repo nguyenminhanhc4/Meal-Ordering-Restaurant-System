@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.backend.dto.payment.PaymentDto;
 import org.example.backend.repository.payment.PaymentRepository;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Map;
@@ -85,7 +87,12 @@ public class PaymentService {
         for (Long id : affectedMenuIds) {
             webSocketNotifier.notifyMenuItemStock(id);
         }
-        webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                webSocketNotifier.notifyNewOrderForAdmin(OrderMapper.toDto(order));
+            }
+        });
         notificationService.notifyNewOrder(order);
         return dto;
     }
