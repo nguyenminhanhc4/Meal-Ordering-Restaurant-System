@@ -186,7 +186,7 @@ export default function OrderHistoryPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-200">
+    <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-blue-800">
       <h2 className="text-2xl font-bold text-blue-800 mb-6 flex items-center">
         <MdFastfood className="mr-2 text-yellow-600" /> Lịch sử đặt món
       </h2>
