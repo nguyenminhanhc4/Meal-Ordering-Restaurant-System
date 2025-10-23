@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     LEFT JOIN p.paymentMethod m
     LEFT JOIN p.shippingInfo s
     LEFT JOIN o.user u
-    WHERE (:keyword IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    WHERE (:keyword IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%')) or LOWER(o.publicId) LIKE LOWER(CONCAT('%', :keyword, '%')))
       AND (:status IS NULL OR o.status.code = :status)
       AND (:paymentStatus IS NULL OR p.status.code = :paymentStatus)
     ORDER BY 

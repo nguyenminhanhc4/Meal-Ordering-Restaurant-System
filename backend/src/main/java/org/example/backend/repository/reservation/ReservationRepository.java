@@ -27,7 +27,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @Query("""
     SELECT r FROM Reservation r
-    WHERE (:keyword IS NULL OR LOWER(r.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    WHERE (:keyword IS NULL OR LOWER(r.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) or LOWER(r.publicId) LIKE LOWER(CONCAT('%', :keyword, '%')) )
       AND (:statusId IS NULL OR r.status.id = :statusId)
       AND (:from IS NULL OR r.reservationTime >= :from)
       AND (:to IS NULL OR r.reservationTime <= :to)
