@@ -31,8 +31,8 @@ public class NotificationService {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_NEW")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_CREATED"));
 
-        String message = String.format("Khách hàng %s vừa tạo đơn hàng #%d, chờ xác nhận.",
-                order.getUser().getName(), order.getId());
+        String message = String.format("Khách hàng %s vừa tạo đơn hàng #%s, chờ xác nhận.",
+                order.getUser().getName(), order.getPublicId());
 
         sendToAdmins(message, type, order, null);
     }
@@ -44,7 +44,7 @@ public class NotificationService {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_APPROVED")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_APPROVED"));
 
-        String message = String.format("Đơn hàng #%d của bạn đã được duyệt!", order.getId());
+        String message = String.format("Đơn hàng #%s của bạn đã được duyệt!", order.getPublicId());
         sendToUser(order.getUser(), message, type, order, null);
     }
 
@@ -52,7 +52,7 @@ public class NotificationService {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_DELIVERED")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_DELIVERED"));
 
-        String message = String.format("Đơn hàng #%d của bạn đã được giao!", order.getId());
+        String message = String.format("Đơn hàng #%s của bạn đã được giao!", order.getPublicId());
         sendToUser(order.getUser(), message, type, order, null);
     }
 
@@ -60,7 +60,7 @@ public class NotificationService {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_DELIVERING")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_DELIVERING"));
 
-        String message = String.format("Đơn hàng #%d của bạn đang được giao!", order.getId());
+        String message = String.format("Đơn hàng #%s của bạn đang được giao!", order.getPublicId());
         sendToUser(order.getUser(), message, type, order, null);
     }
 

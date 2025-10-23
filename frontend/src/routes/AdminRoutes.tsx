@@ -7,6 +7,7 @@ import AdminCategories from "../pages/admin/AdminCategories";
 import AdminMenuItems from "../pages/admin/AdminMenuItems";
 import { AdminOrderFood } from "../pages/admin/orders/AdminOrderFood.tsx";
 import { AdminTableOrders } from "../pages/admin/orders/AdminTableOrders.tsx";
+import NotificationList from "../components/Notification/NotificationList.tsx";
 
 // import AdminDashboard from "./pages/AdminDashboard";
 
@@ -23,6 +24,7 @@ export default (
       <Route path="/admin/menu-items" element={<AdminMenuItems />} />
       <Route path="/admin/orders/food" element={<AdminOrderFood />} />
       <Route path="/admin/orders/tables" element={<AdminTableOrders />} />
+      <Route path="/admin/notifications" element={<NotificationList />} />
       {/* sau này thêm các trang khác ở đây */}
     </Route>
   </>
