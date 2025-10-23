@@ -12,8 +12,10 @@ import org.example.backend.entity.param.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final ParamRepository paramRepository;
     private final UserRepository userRepository;
-
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     /**
      * Gửi thông báo đến ADMIN/STAFF khi có đơn hàng mới
      */
@@ -71,7 +73,7 @@ public class NotificationService {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_CANCELLED")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_CANCELLED"));
 
-        String message = String.format("Đơn hàng #%d của bạn đã bị hủy.", order.getId());
+        String message = String.format("Đơn hàng #%s của bạn đã bị hủy.", order.getPublicId());
         sendToUser(order.getUser(), message, type, order, null);
     }
 
@@ -79,13 +81,50 @@ public class NotificationService {
      * Gửi thông báo khi có đặt bàn mới
      */
     public void notifyNewReservation(Reservation reservation) {
-        Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "RESERVATION_CREATED")
-                .orElseThrow(() -> new RuntimeException("Missing notification type RESERVATION_CREATED"));
+        Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "RESERVATION_NEW")
+                .orElseThrow(() -> new RuntimeException("Missing notification type RESERVATION_NEW"));
 
-        String message = String.format("Khách hàng %s vừa đặt bàn #%d, chờ xác nhận.",
-                reservation.getUser().getName(), reservation.getId());
+        String tableNames = reservation.getTables().stream()
+                .map(t -> t.getName())       // hoặc getCode() tùy bạn lưu tên bàn ở đâu
+                .collect(Collectors.joining(", "));
+
+        String message = String.format("Khách hàng %s vừa đặt bàn #%s, chờ xác nhận.",
+                reservation.getUser().getName(),tableNames);
 
         sendToAdmins(message, type, null, reservation);
+    }
+
+    public void notifyReservationApproved(Reservation reservation) {
+        Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "RESERVATION_CONFIRMED")
+                .orElseThrow(() -> new RuntimeException("Missing notification type RESERVATION_CONFIRMED"));
+
+        String tableNames = reservation.getTables().stream()
+                .map(t -> t.getName())       // hoặc getCode() tùy bạn lưu tên bàn ở đâu
+                .collect(Collectors.joining(", "));
+        String formattedTime = reservation.getReservationTime().format(formatter);
+        String message = String.format("Đơn đặt bàn #%s của bạn vào lúc %s đã được xác nhận. Xin vui lòng đến đúng giờ!", tableNames,formattedTime);
+        sendToUser(reservation.getUser(), message, type,null, reservation);
+    }
+
+    public void notifyReservationCompleted(Reservation reservation) {
+        Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "RESERVATION_COMPLETED")
+                .orElseThrow(() -> new RuntimeException("Missing notification type RESERVATION_COMPLETED"));
+
+        String tableNames = reservation.getTables().stream()
+                .map(t -> t.getName())       // hoặc getCode() tùy bạn lưu tên bàn ở đâu
+                .collect(Collectors.joining(", "));
+        String message = String.format("Cảm ơn bạn đã sử dụng bàn #%s! Chúng tôi hy vọng bạn có trải nghiệm tuyệt vời. Hãy đánh giá dịch vụ của chúng tôi nhé!", tableNames);
+        sendToUser(reservation.getUser(), message, type,null, reservation);
+    }
+
+    public void notifyReservationCancelled(Reservation reservation) {
+        Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "RESERVATION_CANCELLED")
+                .orElseThrow(() -> new RuntimeException("Missing notification type RESERVATION_CANCELLED"));
+        String tableNames = reservation.getTables().stream()
+                .map(t -> t.getName())       // hoặc getCode() tùy bạn lưu tên bàn ở đâu
+                .collect(Collectors.joining(", "));
+        String message = String.format("Đơn đặt bàn #%s của bạn đã bị hủy!", tableNames);
+        sendToUser(reservation.getUser(), message, type,null, reservation);
     }
 
     // --- Helper methods ---
