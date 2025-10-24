@@ -52,3 +52,21 @@ export function useRealtimeDelete<Msg>(
     };
   }, [topic, onDelete]);
 }
+
+export function useRealtimeMessage<Msg>(
+  topic: string,
+  onMessage: (msg: Msg) => void
+) {
+  useEffect(() => {
+    if (!topic) return;
+
+    const client = connectWebSocket<Msg>(topic, onMessage);
+    return () => {
+      try {
+        client.deactivate(); // Nếu trả Promise, không await
+      } catch (e) {
+        console.error("Error deactivating WebSocket:", e);
+      }
+    };
+  }, [topic, onMessage]);
+}

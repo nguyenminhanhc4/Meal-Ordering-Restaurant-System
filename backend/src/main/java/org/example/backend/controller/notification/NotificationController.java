@@ -7,6 +7,7 @@ import org.example.backend.repository.notification.NotificationRepository;
 import org.example.backend.repository.user.UserRepository;
 import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.JwtUtil;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final WebSocketNotifier webSocketNotifier;
     private final JwtUtil jwtUtil;
 
     /**
@@ -67,7 +69,8 @@ public class NotificationController {
 
         notification.setIsRead(true);
         notificationRepository.save(notification);
-
-        return ResponseEntity.ok(NotificationDto.fromEntity(notification));
+        NotificationDto dto = NotificationDto.fromEntity(notification);
+        webSocketNotifier.notifyNotificationRead(user.getPublicId(), dto);
+        return ResponseEntity.ok(dto);
     }
 }

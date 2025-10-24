@@ -15,6 +15,7 @@ import org.example.backend.repository.reservation.ReservationRepository;
 import org.example.backend.repository.reservation.ReservationSpecification;
 import org.example.backend.repository.table.TableRepository;
 import org.example.backend.repository.user.UserRepository;
+import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -49,6 +50,9 @@ public class ReservationService {
 
     @Autowired
     private WebSocketNotifier webSocketNotifier;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // ========================= CREATE =========================
     @Transactional
@@ -113,6 +117,7 @@ public class ReservationService {
                 }
             });
 
+            notificationService.notifyNewReservation(reservation);
 
             return new ReservationDto(reservation);
 
@@ -250,7 +255,17 @@ public class ReservationService {
         Reservation updated = reservationRepository.save(reservation);
 
         webSocketNotifier.notifyReservationStatus(publicId, newStatus);
-
+        switch (newStatus) {
+            case "CONFIRMED":
+                notificationService.notifyReservationApproved(updated);
+                break;
+            case "CANCELLED":
+                notificationService.notifyReservationCancelled(updated);
+                break;
+            default:
+                // Không gửi notification cho các trạng thái khác
+                break;
+        }
         return new ReservationDto(updated);
     }
 
@@ -283,6 +298,7 @@ public class ReservationService {
                 );
             }
         });
+        notificationService.notifyReservationCompleted(saved);
         return new ReservationDto(saved);
     }
 

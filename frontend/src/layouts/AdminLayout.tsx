@@ -36,6 +36,7 @@ import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
 import type { NotificationDto } from "../services/types/notification";
 import { fetchMyNotifications } from "../services/notification/notificationService";
+import { useRealtimeMessage } from "../api/useRealtimeUpdate";
 
 interface SidebarItemButtonProps {
   path: string;
@@ -95,23 +96,44 @@ function AdminLayout() {
       fetchMyNotifications()
         .then((data: NotificationDto[]) => {
           setNotifications(data);
-          setUnreadCount(data.filter((n) => !n.isRead).length);
+          // ✅ Đếm số thông báo chưa đọc
+          const unread = data.filter((n) => !n.isRead).length;
+          setUnreadCount(unread);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => console.error("Error loading notifications:", err));
     }
   }, [user]);
 
-  // const markNotificationAsRead = async (id: number) => {
-  //   try {
-  //     await api.put(`/notifications/${id}/read`);
-  //     setNotifications((prev) =>
-  //       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-  //     );
-  //     setUnreadCount((prev) => prev - 1);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
+  useRealtimeMessage<{ type: string; data: NotificationDto }>(
+    user ? `/topic/notifications/${user.publicId}` : "",
+    (msg) => {
+      if (msg.type === "NEW_NOTIFICATION") {
+        const newNoti = msg.data;
+        setNotifications((prev) => [newNoti, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+      }
+    }
+  );
+
+  useRealtimeMessage<{ type: string; data: NotificationDto }>(
+    user ? `/topic/notifications/${user.publicId}` : "",
+    (msg) => {
+      if (msg.type === "NEW_NOTIFICATION") {
+        const newNoti = msg.data;
+        setNotifications((prev) => [newNoti, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+      }
+
+      // ✅ Khi thông báo được đánh dấu là đã đọc
+      else if (msg.type === "NOTIFICATION_READ") {
+        const updated = msg.data;
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === updated.id ? { ...n, isRead: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(prev - 1, 0));
+      }
+    }
+  );
 
   // 🔹 Menu riêng cho ADMIN
   const adminMenu = [
@@ -410,15 +432,28 @@ function AdminLayout() {
             <div className="flex items-center gap-3 md:order-2">
               {/* 🔔 Notification */}
               <div className="relative">
-                <HiBell
-                  className="w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800"
-                  onClick={() => navigate("/admin/notifications")}
-                />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 text-xs w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
+                <Tooltip content="Thông báo" placement="bottom">
+                  <button
+                    onClick={() => {
+                      navigate("/admin/notifications");
+                      // ✅ Reset badge nếu bạn muốn "xem" là đã đọc
+                      // markAllAsRead(); // bật nếu muốn
+                    }}
+                    className="relative p-1 rounded hover:bg-gray-100">
+                    <HiBell className="w-6 h-6 text-yellow-400 hover:text-yellow-600" />
+                    {unreadCount > 0 && (
+                      <span
+                        className="
+            absolute -top-1 -right-1 
+            text-[11px] font-semibold w-4 h-4 
+            bg-red-500 text-white rounded-full 
+            flex items-center justify-center
+          ">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
               </div>
 
               <Dropdown

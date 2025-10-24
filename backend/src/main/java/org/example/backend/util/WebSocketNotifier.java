@@ -1,6 +1,7 @@
 package org.example.backend.util;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.notification.NotificationDto;
 import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -125,5 +126,37 @@ public class WebSocketNotifier {
         notify("/topic/category/delete", Map.of(
                 "categoryId", categoryId
         ));
+    }
+
+    /**
+     * 🔔 Gửi thông báo mới đến user cụ thể (qua topic riêng)
+     * Client sẽ subscribe /topic/notifications/{userPublicId}
+     */
+    public void notifyNewNotification(String userPublicId, Object notificationDto) {
+        notify("/topic/notifications/" + userPublicId, Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
+    /**
+     * 🔔 Gửi thông báo realtime cho ADMIN/STAF (ví dụ có đơn hàng hoặc đặt bàn mới)
+     * Client ADMIN sẽ subscribe /topic/notifications/admin
+     */
+    public void notifyAdminNotification(Object notificationDto) {
+        notify("/topic/notifications/admin", Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
+    public void notifyNotificationRead(String userPublicId, NotificationDto dto) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_READ",
+                        "data", dto
+                )
+        );
     }
 }

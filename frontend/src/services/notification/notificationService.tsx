@@ -6,6 +6,7 @@ import type { NotificationDto } from "../types/notification";
 export const fetchMyNotifications = async (): Promise<NotificationDto[]> => {
   try {
     const response = await api.get("/notifications"); // endpoint backend
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching notifications:", error);
