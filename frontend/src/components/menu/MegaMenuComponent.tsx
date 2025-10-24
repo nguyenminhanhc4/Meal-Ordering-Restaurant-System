@@ -43,6 +43,13 @@ const MegaMenuComponent: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { cartItemCount, isLoading } = useCart();
+  const [openChildIds, setOpenChildIds] = useState<number[]>([]);
+
+  const toggleChild = (id: number) => {
+    setOpenChildIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -244,6 +251,17 @@ const MegaMenuComponent: React.FC = () => {
           inline
           className="w-screen !bg-stone-800 border-none shadow-lg !left-0 !right-0 !ml-0 !pl-0 dropdown-fullwidth">
           <div className="py-8 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+            <div className="px-3 py-2 rounded-lg bg-stone-800/50 border border-stone-700 hover:bg-stone-700/40 transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer col-span-full md:col-span-2 lg:col-span-4">
+              <a
+                href="/menu"
+                className="text-sm font-semibold text-amber-300 hover:text-amber-400">
+                Xem tất cả menu
+              </a>
+              <span className="text-xs text-stone-300">
+                Tất cả món ăn, đồ uống
+              </span>
+            </div>
+
             {categories.length > 0 ? (
               categories.map((category) => (
                 <div
@@ -255,41 +273,47 @@ const MegaMenuComponent: React.FC = () => {
                   </div>
 
                   <ul className="space-y-2">
-                    {category.children?.length > 0 ? (
-                      category.children.map((child) => (
-                        <li
-                          key={child.id}
-                          className="group relative cursor-default select-none">
-                          <div className="py-1.5 px-2 rounded-lg text-gray-200 font-medium flex items-center transition-colors duration-200 group-hover:bg-yellow-400/10">
-                            <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></span>
-                            {child.name}
-                          </div>
+                    {category.children?.length > 0 &&
+                      category.children.map((child) => {
+                        const isOpen = openChildIds.includes(child.id);
 
-                          {child.children?.length > 0 && (
-                            <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
-                              {child.children.map((subChild) => (
-                                <li key={subChild.id}>
-                                  <a
-                                    href={`/menu/${subChild.name
-                                      .toLowerCase()
-                                      .replace(/\s+/g, "-")}`}
-                                    className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
-                                    {subChild.name}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))
-                    ) : (
-                      <li className="py-1 px-2 rounded-md">
-                        <div className="text-gray-200 font-medium flex items-center">
-                          <span className="w-1 h-1 bg-yellow-400 rounded-full mr-2"></span>
-                          {category.name}
-                        </div>
-                      </li>
-                    )}
+                        return (
+                          <li
+                            key={child.id}
+                            className="group relative cursor-pointer select-none">
+                            <div
+                              className="py-1.5 px-2 rounded-lg text-gray-200 font-medium flex items-center justify-between transition-colors duration-200 hover:bg-yellow-400/10"
+                              onClick={() => toggleChild(child.id)}>
+                              <div className="flex items-center">
+                                <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></span>
+                                {child.name}
+                              </div>
+                              {child.children?.length > 0 && (
+                                <span className="ml-2 text-gray-400">
+                                  {isOpen ? "▾" : "▸"}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Sub-child */}
+                            {child.children?.length > 0 && isOpen && (
+                              <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
+                                {child.children.map((subChild) => (
+                                  <li key={subChild.id}>
+                                    <a
+                                      href={`/menu/${subChild.name
+                                        .toLowerCase()
+                                        .replace(/\s+/g, "-")}`}
+                                      className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
+                                      {subChild.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })}
                   </ul>
                 </div>
               ))
