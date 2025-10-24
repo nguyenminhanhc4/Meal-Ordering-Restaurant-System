@@ -186,14 +186,6 @@ const MegaMenuComponent: React.FC = () => {
                     user.name ? user.name.charAt(0).toUpperCase() : "?"
                   }
                 />
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-base font-semibold text-yellow-400 truncate max-w-[180px]">
-                    {user.name}
-                  </span>
-                  <span className="text-xs text-gray-300 truncate max-w-[180px]">
-                    {user.email}
-                  </span>
-                </div>
               </div>
             }
             className="!bg-stone-800 shadow-lg rounded-lg">
