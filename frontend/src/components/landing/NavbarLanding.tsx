@@ -20,6 +20,7 @@ import Logo from "../../assets/img/vite.svg";
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useEffect, useState } from "react";
+import NotificationBell from "../../components/bell/NotificationBell";
 
 export default function NavbarLanding() {
   const { isLoggedIn, user, logout } = useAuth();
@@ -91,6 +92,7 @@ export default function NavbarLanding() {
 
         {/* Bên phải */}
         <div className="flex items-center gap-3">
+          {isLoggedIn && user && <NotificationBell />}
           {isLoggedIn && user ? (
             <Dropdown
               arrowIcon={false}

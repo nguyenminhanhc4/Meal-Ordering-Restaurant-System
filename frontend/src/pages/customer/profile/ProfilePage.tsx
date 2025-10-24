@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import UserProfileContent from "../../../components/profile/UserProfileContent";
 import UserReservationHistory from "../../../components/profile/UserReservationHistory";
 import UserSecuritySettings from "../../../components/profile/UserSecuritySettings";
@@ -10,6 +10,7 @@ import {
   HiOutlineLockClosed,
   HiOutlineBell,
 } from "react-icons/hi";
+import { useLocation } from "react-router-dom";
 
 interface SidebarLinkProps {
   label: string;
@@ -40,7 +41,14 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
 );
 
 export default function ProfilePage() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("profile");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [location.search]);
 
   const profileTabs = [
     {

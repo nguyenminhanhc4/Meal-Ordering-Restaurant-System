@@ -1,6 +1,7 @@
 package org.example.backend.util;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.notification.NotificationDto;
 import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -149,4 +150,13 @@ public class WebSocketNotifier {
         ));
     }
 
+    public void notifyNotificationRead(String userPublicId, NotificationDto dto) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_READ",
+                        "data", dto
+                )
+        );
+    }
 }
