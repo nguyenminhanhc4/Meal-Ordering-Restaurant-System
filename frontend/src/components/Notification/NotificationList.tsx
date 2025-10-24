@@ -15,6 +15,8 @@ import {
   HiSparkles,
   HiArchive,
 } from "react-icons/hi";
+import { useRealtimeMessage } from "../../api/useRealtimeUpdate";
+import { useAuth } from "../../store/AuthContext";
 
 interface NotificationListProps {
   onUnreadCountChange?: (count: number) => void;
@@ -23,6 +25,7 @@ interface NotificationListProps {
 const NotificationList: React.FC<NotificationListProps> = ({
   onUnreadCountChange,
 }) => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +57,29 @@ const NotificationList: React.FC<NotificationListProps> = ({
       console.error("Failed to mark notification as read:", err);
     }
   };
+
+  useRealtimeMessage<{ type: string; data: NotificationDto }>(
+    user ? `/topic/notifications/${user.publicId}` : "",
+    (msg) => {
+      if (msg.type === "NEW_NOTIFICATION") {
+        const newNoti = msg.data;
+        setNotifications((prev) => [newNoti, ...prev]);
+        onUnreadCountChange?.(
+          (notifications.filter((n) => !n.isRead).length ?? 0) + 1
+        );
+      }
+    }
+  );
+
+  useRealtimeMessage<{ type: string; data: NotificationDto }>(
+    "/topic/admin/notifications",
+    (msg) => {
+      if (msg.type === "NEW_NOTIFICATION") {
+        const newNoti = msg.data;
+        setNotifications((prev) => [newNoti, ...prev]);
+      }
+    }
+  );
 
   // 🎨 Style và icon cho từng loại typeName (tiếng Việt)
   const typeStyles: Record<

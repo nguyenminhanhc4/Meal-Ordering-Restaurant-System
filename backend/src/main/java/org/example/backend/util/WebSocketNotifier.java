@@ -126,4 +126,27 @@ public class WebSocketNotifier {
                 "categoryId", categoryId
         ));
     }
+
+    /**
+     * 🔔 Gửi thông báo mới đến user cụ thể (qua topic riêng)
+     * Client sẽ subscribe /topic/notifications/{userPublicId}
+     */
+    public void notifyNewNotification(String userPublicId, Object notificationDto) {
+        notify("/topic/notifications/" + userPublicId, Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
+    /**
+     * 🔔 Gửi thông báo realtime cho ADMIN/STAF (ví dụ có đơn hàng hoặc đặt bàn mới)
+     * Client ADMIN sẽ subscribe /topic/notifications/admin
+     */
+    public void notifyAdminNotification(Object notificationDto) {
+        notify("/topic/notifications/admin", Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
 }
