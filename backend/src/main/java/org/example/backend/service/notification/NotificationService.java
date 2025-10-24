@@ -45,24 +45,27 @@ public class NotificationService {
     public void notifyOrderApproved(Order order) {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_APPROVED")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_APPROVED"));
-
-        String message = String.format("Đơn hàng #%s của bạn đã được duyệt!", order.getPublicId());
+        String publicId = order.getPublicId();
+        String shortId = publicId.length() > 8 ? publicId.substring(0, 8) : publicId;
+        String message = String.format("Đơn hàng #%s của bạn đã được duyệt!", shortId);
         sendToUser(order.getUser(), message, type, order, null);
     }
 
     public void notifyOrderDelivered(Order order) {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_DELIVERED")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_DELIVERED"));
-
-        String message = String.format("Đơn hàng #%s của bạn đã được giao!", order.getPublicId());
+        String publicId = order.getPublicId();
+        String shortId = publicId.length() > 8 ? publicId.substring(0, 8) : publicId;
+        String message = String.format("Đơn hàng #%s của bạn đã được giao!", shortId);
         sendToUser(order.getUser(), message, type, order, null);
     }
 
     public void notifyOrderDelivering(Order order) {
         Param type = paramRepository.findByTypeAndCode("NOTIFICATION", "ORDER_DELIVERING")
                 .orElseThrow(() -> new RuntimeException("Missing notification type ORDER_DELIVERING"));
-
-        String message = String.format("Đơn hàng #%s của bạn đang được giao!", order.getPublicId());
+        String publicId = order.getPublicId();
+        String shortId = publicId.length() > 8 ? publicId.substring(0, 8) : publicId;
+        String message = String.format("Đơn hàng #%s của bạn đang được giao!", shortId);
         sendToUser(order.getUser(), message, type, order, null);
     }
 
