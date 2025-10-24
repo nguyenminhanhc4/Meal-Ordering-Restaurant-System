@@ -98,4 +98,38 @@ public class NotificationController {
         return ResponseEntity.ok(Map.of("count", count));
     }
 
+    @DeleteMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteNotifications(
+            @CookieValue("token") String token,
+            @RequestBody List<Long> ids) {
+
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Lấy danh sách notification của user để check quyền
+        List<Long> userNotificationIds = notificationRepository
+                .findByIdIn(ids).stream()
+                .filter(n -> n.getUser().getId().equals(user.getId()))
+                .map(n -> n.getId())
+                .collect(Collectors.toList());
+
+        if (userNotificationIds.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Xóa các notification hợp lệ
+        notificationRepository.deleteAllById(userNotificationIds);
+
+        // 🔔 Gửi WS tận dụng cả 2 loại
+        if (userNotificationIds.size() == 1) {
+            webSocketNotifier.notifyNotificationDeleted(user.getPublicId(), userNotificationIds.get(0));
+        } else {
+            webSocketNotifier.notifyNotificationDeleted(user.getPublicId(), userNotificationIds);
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

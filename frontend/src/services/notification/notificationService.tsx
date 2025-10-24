@@ -19,7 +19,6 @@ export const fetchMyNotifications = async (
     const response = await api.get<Page<NotificationDto>>(
       `/notifications?${params.toString()}`
     );
-    console.log("Noti", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching notifications:", error);
@@ -45,4 +44,21 @@ export const fetchUnreadNotificationCount = async (): Promise<number> => {
     "/notifications/unread-count"
   );
   return response.data.count;
+};
+
+// Xóa 1 hoặc nhiều notification
+export const deleteNotifications = async (
+  ids: number[] | number
+): Promise<void> => {
+  try {
+    // Nếu truyền 1 số, chuyển thành mảng
+    const idsArray = Array.isArray(ids) ? ids : [ids];
+
+    await api.delete("/notifications", {
+      data: idsArray,
+    });
+  } catch (error) {
+    console.error("Error deleting notifications:", error);
+    throw error;
+  }
 };

@@ -13,5 +13,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Page<Notification> findByUserId(Long userId, Pageable pageable);
 
     long countByUserIdAndIsReadFalse(Long userId);
+    // 🔹 Lấy danh sách notification theo ids
+    List<Notification> findByIdIn(List<Long> ids);
 
+    // 🔹 Xóa nhiều notification theo ids
+    void deleteAllByIdIn(List<Long> ids);
 }

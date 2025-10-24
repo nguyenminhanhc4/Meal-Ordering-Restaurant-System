@@ -9,6 +9,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -159,4 +160,30 @@ public class WebSocketNotifier {
                 )
         );
     }
+
+    /**
+     * 🗑️ Gửi thông báo realtime khi 1 hoặc nhiều notification bị xóa
+     */
+    public void notifyNotificationDeleted(String userPublicId, Long deletedId) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_DELETED",
+                        "data", deletedId
+                )
+        );
+    }
+    /**
+     * Overload cho nhiều id
+     */
+    public void notifyNotificationDeleted(String userPublicId, List<Long> deletedIds) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_DELETED",
+                        "data", deletedIds
+                )
+        );
+    }
+
 }
