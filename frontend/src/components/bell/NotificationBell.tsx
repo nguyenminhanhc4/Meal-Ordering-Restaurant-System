@@ -2,34 +2,39 @@ import React, { useEffect, useState } from "react";
 import { Button, Badge } from "flowbite-react";
 import { HiOutlineBell } from "react-icons/hi";
 import { useAuth } from "../../store/AuthContext";
-import { useNotification } from "../Notification/NotificationContext";
-import { fetchMyNotifications } from "../../services/notification/notificationService";
+import { fetchUnreadNotificationCount } from "../../services/notification/notificationService";
 import type { NotificationDto } from "../../services/types/notification";
 import { useRealtimeMessage } from "../../api/useRealtimeUpdate";
 import { useNavigate } from "react-router-dom";
 
-const NotificationBell: React.FC = () => {
+interface NotificationBellProps {
+  bgColor?: string;
+  hoverColor?: string;
+  iconColor?: string;
+  badgeColor?: "failure" | "success" | "warning" | "info" | "indigo";
+  redirectTo?: string; // 👈 Thêm prop này
+}
+
+const NotificationBell: React.FC<NotificationBellProps> = ({
+  bgColor = "!bg-stone-700",
+  hoverColor = "hover:!bg-stone-600",
+  iconColor = "text-yellow-400",
+  badgeColor = "failure",
+  redirectTo = "/profile?tab=notifications", // 👈 Giá trị mặc định
+}) => {
   const { user } = useAuth();
-  const { notify } = useNotification();
   const navigate = useNavigate();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // ✅ Lấy danh sách noti ban đầu
   useEffect(() => {
     if (user) {
-      fetchMyNotifications()
-        .then((data) => {
-          setNotifications(data);
-          setUnreadCount(data.filter((n) => !n.isRead).length);
-        })
-        .catch((err) => {
-          console.error("Error loading notifications:", err);
-          notify("error", "Không thể tải danh sách thông báo!");
-        });
+      fetchUnreadNotificationCount()
+        .then(setUnreadCount)
+        .catch(() => setUnreadCount(0));
     }
-  }, [user, notify]);
+  }, [user]);
 
   // ✅ Nhận realtime từ BE
   useRealtimeMessage<{ type: string; data: NotificationDto }>(
@@ -54,20 +59,20 @@ const NotificationBell: React.FC = () => {
     }
   );
 
-  // ✅ Khi bấm chuông → chuyển sang trang profile tab thông báo
+  // ✅ Khi bấm chuông → chuyển hướng linh động
   const handleClick = () => {
-    navigate("/profile?tab=notifications");
+    navigate(redirectTo);
   };
 
   return (
     <Button
       color="gray"
-      className="!bg-stone-700 hover:!bg-stone-600 rounded-full p-2 relative"
+      className={`${bgColor} ${hoverColor} rounded-full p-2 relative`}
       onClick={handleClick}>
-      <HiOutlineBell className="w-6 h-6 text-yellow-400" />
+      <HiOutlineBell className={`w-6 h-6 ${iconColor}`} />
       {unreadCount > 0 && (
         <Badge
-          color="failure"
+          color={badgeColor}
           size="sm"
           className="absolute -top-1 -right-1 !p-0.5 !h-4 !w-4 flex items-center justify-center text-xs">
           {unreadCount}

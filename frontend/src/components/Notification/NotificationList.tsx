@@ -17,6 +17,7 @@ import {
 } from "react-icons/hi";
 import { useRealtimeMessage } from "../../api/useRealtimeUpdate";
 import { useAuth } from "../../store/AuthContext";
+import Pagination from "../../components/common/PaginationClient";
 
 interface NotificationListProps {
   onUnreadCountChange?: (count: number) => void;
@@ -29,16 +30,24 @@ const NotificationList: React.FC<NotificationListProps> = ({
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
+  // 🧭 Paging
+  const [page, setPage] = useState(0);
+  const [size] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const loadNotifications = async () => {
+  useEffect(() => {
+    if (user) loadNotifications(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, page]);
+
+  const loadNotifications = async (pageNum: number) => {
     try {
       setLoading(true);
-      const data = await fetchMyNotifications();
-      setNotifications(data);
-      onUnreadCountChange?.(data.filter((n) => !n.isRead).length);
+      const pageData = await fetchMyNotifications(pageNum, size);
+      const list = pageData?.content ?? [];
+      setNotifications(list);
+      setTotalPages(pageData?.totalPages ?? 0);
+      onUnreadCountChange?.(list.filter((n) => !n.isRead).length);
     } catch (err) {
       console.error("Failed to load notifications:", err);
     } finally {
@@ -58,6 +67,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
     }
   };
 
+  // 🔔 Realtime cập nhật
   useRealtimeMessage<{ type: string; data: NotificationDto }>(
     user ? `/topic/notifications/${user.publicId}` : "",
     (msg) => {
@@ -81,12 +91,11 @@ const NotificationList: React.FC<NotificationListProps> = ({
     }
   );
 
-  // 🎨 Style và icon cho từng loại typeName (tiếng Việt)
+  // 🎨 Style và icon cho từng loại typeName
   const typeStyles: Record<
     string,
     { bg: string; border: string; icon: React.ReactNode }
   > = {
-    // --- ORDER ---
     "Đơn hàng mới": {
       bg: "bg-blue-50",
       border: "border-blue-500",
@@ -112,8 +121,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
       border: "border-rose-600",
       icon: <HiXCircle className="text-rose-700" />,
     },
-
-    // --- RESERVATION ---
     "Đặt bàn mới": {
       bg: "bg-purple-50",
       border: "border-purple-500",
@@ -138,7 +145,12 @@ const NotificationList: React.FC<NotificationListProps> = ({
 
   if (loading)
     return <div className="text-gray-600">Đang tải thông báo...</div>;
-  if (!notifications.length) return <div>Không có thông báo nào</div>;
+  if (!notifications.length)
+    return (
+      <div className="text-center text-gray-500 py-10">
+        Không có thông báo nào
+      </div>
+    );
 
   return (
     <div className="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-blue-800">
@@ -183,7 +195,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
                 </div>
               </div>
 
-              {/* 🔴 Chấm đỏ hiển thị rõ cho chưa đọc */}
               {isUnread && (
                 <span className="absolute top-3 right-3 w-3 h-3 rounded-full bg-red-600 animate-pulse" />
               )}
@@ -191,6 +202,14 @@ const NotificationList: React.FC<NotificationListProps> = ({
           );
         })}
       </div>
+
+      {/* 🔽 Phân trang */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPageChange={setPage}
+      />
     </div>
   );
 };

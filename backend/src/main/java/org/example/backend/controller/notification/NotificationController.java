@@ -8,11 +8,16 @@ import org.example.backend.repository.user.UserRepository;
 import org.example.backend.service.notification.NotificationService;
 import org.example.backend.util.JwtUtil;
 import org.example.backend.util.WebSocketNotifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,21 +36,27 @@ public class NotificationController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NotificationDto>> getMyNotifications(
-            @CookieValue("token") String token) {
+    public ResponseEntity<Page<NotificationDto>> getMyNotifications(
+            @CookieValue("token") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         String publicId = jwtUtil.getPublicIdFromToken(token);
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<NotificationDto> notifications = notificationRepository
-                .findByUserIdOrderByCreatedAtDesc(user.getId())
-                .stream()
-                .map(NotificationDto::fromEntity)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(
+                Sort.Order.asc("isRead"),
+                Sort.Order.desc("createdAt")
+        ));
+
+        Page<NotificationDto> notifications = notificationRepository
+                .findByUserId(user.getId(), pageable)
+                .map(NotificationDto::fromEntity);
 
         return ResponseEntity.ok(notifications);
     }
+
 
     /**
      * 🔹 Đánh dấu 1 thông báo là đã đọc
@@ -73,4 +84,18 @@ public class NotificationController {
         webSocketNotifier.notifyNotificationRead(user.getPublicId(), dto);
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/unread-count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Long>> getUnreadCount(
+            @CookieValue("token") String token) {
+
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+        User user = userRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        long count = notificationRepository.countByUserIdAndIsReadFalse(user.getId());
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
 }
