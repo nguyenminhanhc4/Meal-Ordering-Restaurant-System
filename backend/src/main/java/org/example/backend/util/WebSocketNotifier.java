@@ -186,4 +186,41 @@ public class WebSocketNotifier {
         );
     }
 
+    /**
+     * 🧾 Gửi thông báo khi tạo mới bàn (table)
+     */
+    public void notifyNewTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/new", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * ✏️ Gửi thông báo khi cập nhật bàn
+     */
+    public void notifyUpdatedTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/update", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * 🗑️ Gửi thông báo khi xóa bàn
+     */
+    public void notifyDeletedTable(Long tableId) {
+        notify("/topic/tables/delete", Map.of(
+                "tableId", tableId
+        ));
+    }
+
 }

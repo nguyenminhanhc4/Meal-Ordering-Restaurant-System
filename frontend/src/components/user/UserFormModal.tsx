@@ -400,7 +400,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
       className="shadow-lg z-[70]">
       {/* 2. Dùng Modal.Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
-        <h3 className="text-xl font-bold text-gray-800">
+        <h3 className="text-xl font-font-bold text-gray-800">
           {userData ? "Edit User Information" : "Create New User"}
         </h3>
       </ModalHeader>

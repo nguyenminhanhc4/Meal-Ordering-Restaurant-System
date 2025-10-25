@@ -1,5 +1,6 @@
 package org.example.backend.controller.table;
 
+import jakarta.validation.Valid;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.table.TableDto;
 import org.example.backend.service.table.TableService;
@@ -33,7 +34,7 @@ public class TableController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createTable(@RequestBody TableDto dto) {
+    public ResponseEntity<?> createTable(@Valid @RequestBody TableDto dto) {
         TableDto saved = tableService.save(dto);
         return ResponseEntity.ok(new Response<>("success", saved, "Table created successfully"));
     }

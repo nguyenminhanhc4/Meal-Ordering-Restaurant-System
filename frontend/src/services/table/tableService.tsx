@@ -5,7 +5,7 @@ import api from "../../api/axios";
 export interface TableEntity {
   id: number;
   name: string;
-  shortName: string;
+  shortName?: string;
   capacity: number;
   statusId: number;
   statusName: string;

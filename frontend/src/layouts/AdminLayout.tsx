@@ -28,6 +28,7 @@ import {
   HiFolder,
   HiFolderOpen,
   HiMenu,
+  HiOutlineViewGrid,
 } from "react-icons/hi";
 import { FaChair } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
@@ -73,6 +74,7 @@ function AdminLayout() {
   // 🔹 Menu chung cho cả ADMIN và STAFF
   const commonMenu = [
     { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
+    { path: "/admin/tables", label: "Tables", icon: HiOutlineViewGrid },
     {
       label: "Orders",
       icon: HiFolder,

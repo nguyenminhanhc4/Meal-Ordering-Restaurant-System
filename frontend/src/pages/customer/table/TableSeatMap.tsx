@@ -14,7 +14,10 @@ import type { Reservation } from "../../../services/reservation/reservationServi
 import BookedListModal from "./BookedListModal";
 import { useNotification } from "../../../components/Notification/NotificationContext";
 import { connectWebSocket } from "../../../api/websocketClient";
-import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
+import {
+  useRealtimeUpdate,
+  useRealtimeDelete,
+} from "../../../api/useRealtimeUpdate";
 
 /** ================================
  *  COMPONENT: TableBooking
@@ -131,6 +134,43 @@ export default function TableBooking() {
       return msg.reservationPublicId;
     }
   );
+
+  // 🧾 Realtime: khi có bàn mới được thêm
+  useRealtimeUpdate<TableEntity, number, { tableId: number }>(
+    "/topic/tables/new",
+    async (id) => {
+      const all = await getAllTables();
+      return all.find((t) => t.id === id)!;
+    },
+    (newTable) => {
+      setTables((prev) => {
+        // tránh thêm trùng
+        if (prev.some((t) => t.id === newTable.id)) return prev;
+        return [...prev, newTable];
+      });
+    },
+    (msg) => msg.tableId
+  );
+
+  // ✏️ Realtime: khi bàn được cập nhật
+  useRealtimeUpdate<TableEntity, number, { tableId: number }>(
+    "/topic/tables/update",
+    async (id) => {
+      const all = await getAllTables();
+      return all.find((t) => t.id === id)!;
+    },
+    (updatedTable) => {
+      setTables((prev) =>
+        prev.map((t) => (t.id === updatedTable.id ? updatedTable : t))
+      );
+    },
+    (msg) => msg.tableId
+  );
+
+  // 🗑️ Realtime: khi bàn bị xóa
+  useRealtimeDelete<{ tableId: number }>("/topic/tables/delete", (msg) => {
+    setTables((prev) => prev.filter((t) => t.id !== msg.tableId));
+  });
 
   /** Lấy danh sách bàn */
   const fetchTables = async () => {
