@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Navbar,
   Sidebar,
@@ -28,15 +28,14 @@ import {
   HiFolder,
   HiFolderOpen,
   HiMenu,
-  HiBell,
 } from "react-icons/hi";
 import { FaChair } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
 import logo from "../assets/img/vite.svg";
 import "./AdminLayout.css";
 import type { NotificationDto } from "../services/types/notification";
-import { fetchMyNotifications } from "../services/notification/notificationService";
 import { useRealtimeMessage } from "../api/useRealtimeUpdate";
+import NotificationBell from "../components/bell/NotificationBell";
 
 interface SidebarItemButtonProps {
   path: string;
@@ -54,6 +53,7 @@ function AdminLayout() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notifications, setNotifications] = useState<NotificationDto[]>([]); // danh sách noti
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [unreadCount, setUnreadCount] = useState(0); // số thông báo chưa đọc
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
@@ -90,19 +90,6 @@ function AdminLayout() {
       ],
     },
   ];
-
-  useEffect(() => {
-    if (user) {
-      fetchMyNotifications()
-        .then((data: NotificationDto[]) => {
-          setNotifications(data);
-          // ✅ Đếm số thông báo chưa đọc
-          const unread = data.filter((n) => !n.isRead).length;
-          setUnreadCount(unread);
-        })
-        .catch((err) => console.error("Error loading notifications:", err));
-    }
-  }, [user]);
 
   useRealtimeMessage<{ type: string; data: NotificationDto }>(
     user ? `/topic/notifications/${user.publicId}` : "",
@@ -432,28 +419,13 @@ function AdminLayout() {
             <div className="flex items-center gap-3 md:order-2">
               {/* 🔔 Notification */}
               <div className="relative">
-                <Tooltip content="Thông báo" placement="bottom">
-                  <button
-                    onClick={() => {
-                      navigate("/admin/notifications");
-                      // ✅ Reset badge nếu bạn muốn "xem" là đã đọc
-                      // markAllAsRead(); // bật nếu muốn
-                    }}
-                    className="relative p-1 rounded hover:bg-gray-100">
-                    <HiBell className="w-6 h-6 text-yellow-400 hover:text-yellow-600" />
-                    {unreadCount > 0 && (
-                      <span
-                        className="
-            absolute -top-1 -right-1 
-            text-[11px] font-semibold w-4 h-4 
-            bg-red-500 text-white rounded-full 
-            flex items-center justify-center
-          ">
-                        {unreadCount}
-                      </span>
-                    )}
-                  </button>
-                </Tooltip>
+                <NotificationBell
+                  bgColor="!bg-blue-600"
+                  hoverColor="hover:!bg-blue-500"
+                  iconColor="text-white"
+                  badgeColor="failure"
+                  redirectTo="/admin/notifications"
+                />
               </div>
 
               <Dropdown
