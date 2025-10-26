@@ -9,6 +9,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -186,4 +187,6 @@ public class WebSocketNotifier {
         );
     }
 
+//    public void notifyNewCombo(Long id, String name, BigDecimal price) {
+//    }
 }

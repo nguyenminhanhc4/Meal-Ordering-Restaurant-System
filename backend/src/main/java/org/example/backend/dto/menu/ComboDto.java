@@ -1,57 +1,100 @@
 package org.example.backend.dto.menu;
 
-import lombok.*;
+import lombok.Data;
+import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.menu.Combo;
+import org.example.backend.entity.menu.MenuItem;
+import org.example.backend.entity.param.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class ComboDto {
     private Long id;
     private String name;
     private String description;
     private BigDecimal price;
+    private double discountPercent;
+    private Boolean available;
 
-    private Long categoryId;
-    private String categoryName;
+    // === Combo Type (bundle category: Family, Couple, etc.) ===
+    private Long typeCategoryId;
+    private String typeCategoryName;
 
+    // === Combo Availability ===
+    private Long availabilityCategoryIds;
+    private String availabilityCategoryNames;
+
+    // === Combo People (serving size) ===
+    private Long peopleCategoryId;
+    private String peopleCategoryName;
+
+    // === Combo Status ===
     private Long statusId;
     private String statusName;
 
-    private String avatarUrl;
+    // === Items inside the combo ===
+    private List<Long> menuItemIds;
+    private List<String> menuItemNames;
 
-    private List<Long> itemIds; // only menu items
-
-    // Constructor to map from entity
+    // ✅ Constructor to map from entity
     public ComboDto(Combo combo) {
-        if (combo == null) return;
-
         this.id = combo.getId();
         this.name = combo.getName();
         this.description = combo.getDescription();
         this.price = combo.getPrice();
+        this.discountPercent = combo.getDiscountPercent();
+        this.available = combo.getAvailable();
 
-        if (combo.getCategory() != null) {
-            this.categoryId = combo.getCategory().getId();
-            this.categoryName = combo.getCategory().getName();
+        // 🔹 Type Category
+        Categories type = combo.getTypeCategory();
+        if (type != null) {
+            this.typeCategoryId = type.getId();
+            this.typeCategoryName = type.getName();
         }
 
-        if (combo.getStatus() != null) {
-            this.statusId = combo.getStatus().getId();
-            this.statusName = combo.getStatus().getName();
+        // 🔹 Multiple Availability Categories
+        if (combo.getAvailabilityCategories() != null) {
+            this.availabilityCategoryIds = combo.getAvailabilityCategories()
+                            .getId();
+//                    .stream()
+//                    .map(Categories::getId)
+//                    .collect(Collectors.toList());
+
+            this.availabilityCategoryNames = combo.getAvailabilityCategories()
+                            .getName();
+//                    .stream()
+//                    .map(Categories::getName)
+//                    .collect(Collectors.toList());
         }
 
-        this.avatarUrl = combo.getAvatarUrl();
+        // 🔹 People Category
+        Categories people = combo.getPeopleCategory();
+        if (people != null) {
+            this.peopleCategoryId = people.getId();
+            this.peopleCategoryName = people.getName();
+        }
 
-        if (combo.getItems() != null) {
-            this.itemIds = combo.getItems().stream()
-                    .map(i -> i.getId())
-                    .toList();
+        // 🔹 Status (Param)
+        Param status = combo.getStatus();
+        if (status != null) {
+            this.statusId = status.getId();
+            this.statusName = status.getName();
+        }
+
+        // 🔹 Combo Items
+        if (combo.getMenuItems() != null && !combo.getMenuItems().isEmpty()) {
+            this.menuItemIds = combo.getMenuItems()
+                    .stream()
+                    .map(MenuItem::getId)
+                    .collect(Collectors.toList());
+
+            this.menuItemNames = combo.getMenuItems()
+                    .stream()
+                    .map(MenuItem::getName)
+                    .collect(Collectors.toList());
         }
     }
 }

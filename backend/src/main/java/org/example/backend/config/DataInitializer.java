@@ -82,12 +82,84 @@ public class DataInitializer implements CommandLineRunner {
         createParamIfNotExists("NOTIFICATION", "RESERVATION_CONFIRMED", "Đặt bàn được duyệt", "Khi nhân viên duyệt đặt bàn");
         createParamIfNotExists("NOTIFICATION", "RESERVATION_COMPLETED", "Hoàn tất đặt bàn", "Khi khách rời bàn");
         createParamIfNotExists("NOTIFICATION", "RESERVATION_CANCELLED", "Đặt bàn bị hủy", "Khi đặt bàn bị hủy");
-//        // ==================== TABLES ====================
-//        createSampleTables();
-//
-//        // ==================== ADMIN USER ====================
-//        createAdminIfNotExists("admin@example.com", "Admin User", "admin123");
+
+        //createCombo();
+        createComboCategory();
     }
+
+    private void createComboCategory() {
+
+// Combo
+// ├── Combo Availability
+// │    ├── Morning Only
+// │    ├── Lunch Only
+// │    ├── Dinner Only
+// │    ├── Weekend Only
+// │    ├── Holiday Special
+// │    └── New Year Special
+// ├── Combo Type
+// │    ├── Family Combo
+// │    ├── Couple Combo
+// │    ├── Party Combo
+// │    ├── Student Combo
+// │    └── Office Lunch Combo
+// └── Combo People
+//      ├── Single
+//      ├── Couple
+//      ├── Family Small
+//      ├── Family Large
+//      └── Party Pack
+
+
+        // ====== Top-level Combo category ======
+        Categories combo = createCategoryIfNotExists(
+                "Combo",
+                "Tập hợp các chiến binh 1 nhóm",
+                null
+        );
+
+        // ====== COMBO AVAILABLE ======
+        Categories availableGroup = createCategoryIfNotExists(
+                "Combo Availability",
+                "Combo availability by time period",
+                combo
+        );
+
+        createCategoryIfNotExists("Morning Only", "Available from 6:00 AM to 10:30 AM", availableGroup);
+        createCategoryIfNotExists("Lunch Only", "Available from 11:00 AM to 2:00 PM", availableGroup);
+        createCategoryIfNotExists("Dinner Only", "Available from 5:00 PM to 9:00 PM", availableGroup);
+        createCategoryIfNotExists("Weekend Only", "Available on Saturdays and Sundays", availableGroup);
+        createCategoryIfNotExists("Holiday Special", "Available during public holidays", availableGroup);
+        createCategoryIfNotExists("New Year Special", "Available during New Year festival", availableGroup);
+
+        // ====== COMBO TYPE ======
+        Categories typeGroup = createCategoryIfNotExists(
+                "Combo Type",
+                "Combo type or bundle theme",
+                combo
+        );
+
+        createCategoryIfNotExists("Family Combo", "Bundle for 4–6 people, family sharing set", typeGroup);
+        createCategoryIfNotExists("Couple Combo", "Bundle for 2 people, perfect for dates", typeGroup);
+        createCategoryIfNotExists("Party Combo", "Large set for 8–10 people or celebrations", typeGroup);
+        createCategoryIfNotExists("Student Combo", "Budget-friendly meal for students", typeGroup);
+        createCategoryIfNotExists("Office Lunch Combo", "Quick lunch set for office workers", typeGroup);
+
+        // ====== COMBO PEOPLE ======
+        Categories peopleGroup = createCategoryIfNotExists(
+                "Combo People",
+                "Number of people the combo serves",
+                combo
+        );
+
+        createCategoryIfNotExists("Single", "Serves 1 person", peopleGroup);
+        createCategoryIfNotExists("Couple", "Serves 2 people", peopleGroup);
+        createCategoryIfNotExists("Family Small", "Serves around 4 people", peopleGroup);
+        createCategoryIfNotExists("Family Large", "Serves around 6 people", peopleGroup);
+        createCategoryIfNotExists("Party Pack", "Serves around 10 people", peopleGroup);
+    }
+
+
 
     // ==================== TẠO BÀN MẪU ====================
     private void createSampleTables() {
@@ -105,6 +177,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Private Room: PERSONAL & FAMILY
         createTablesByLocation("PRIVATE_ROOM", new String[]{"PERSONAL", "FAMILY"}, 2);
+
     }
 
     // ==================== HELPER ====================
@@ -115,7 +188,7 @@ public class DataInitializer implements CommandLineRunner {
                     param.setType(type);
                     param.setCode(code);
                     param.setName(name);
-                    param.setDescription(description); // lưu mô tả để hiển thị UI
+                    param.setDescription(description); // for UI
                     return paramRepository.save(param);
                 });
     }
@@ -163,13 +236,24 @@ public class DataInitializer implements CommandLineRunner {
                 });
     }
 
-    // ==================== CATEGORY ====================
-    private void createCategoryIfNotExists(String name, String description) {
-        categoriesRepository.findByName(name)
+//    // ==================== CATEGORY ====================
+//    private void createCategoryIfNotExists(String name, String description) {
+//        categoriesRepository.findByName(name)
+//                .orElseGet(() -> {
+//                    Categories category = new Categories();
+//                    category.setName(name);
+//                    category.setDescription(description);
+//                    return categoriesRepository.save(category);
+//                });
+//    }
+
+    private Categories createCategoryIfNotExists(String name, String description, Categories parent) {
+        return categoriesRepository.findByName(name)
                 .orElseGet(() -> {
                     Categories category = new Categories();
                     category.setName(name);
                     category.setDescription(description);
+                    category.setParent(parent);
                     return categoriesRepository.save(category);
                 });
     }

@@ -1,38 +1,101 @@
 package org.example.backend.repository.menu;
 
 import org.example.backend.entity.menu.Combo;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 public interface ComboRepository extends JpaRepository<Combo, Long> {
 
-    @Query("SELECT c, " +
-            "cat.name AS categoryName, " +
-            "LOWER(REPLACE(cat.name, ' ', '-')) AS categorySlug, " +
-            "p.code AS status, " +
-            "COALESCE(SUM(oi.quantity), 0) AS sold " +
-            "FROM Combo c " +
-            "LEFT JOIN c.category cat " +
-            "LEFT JOIN c.status p " +
-            "LEFT JOIN OrderItem oi ON c.id = oi.combo.id " +
-            "LEFT JOIN oi.order o ON o.status.code = 'DELIVERED' " +
-            "GROUP BY c.id, cat.name, p.code")
-    List<Object[]> findAllWithDetails();
+    // ============================================
+    // 🟢 Base Query: fetch all combos (paged)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.typeCategory tc
+        LEFT JOIN c.peopleCategory pc
+        LEFT JOIN c.availabilityCategories ac
+        LEFT JOIN c.status s
+    """)
+    Page<Combo> findAllWithDetails(Pageable pageable);
 
-    @Query("SELECT c, " +
-            "cat.name AS categoryName, " +
-            "LOWER(REPLACE(cat.name, ' ', '-')) AS categorySlug, " +
-            "p.code AS status, " +
-            "COALESCE(SUM(oi.quantity), 0) AS sold " +
-            "FROM Combo c " +
-            "LEFT JOIN c.category cat " +
-            "LEFT JOIN c.status p " +
-            "LEFT JOIN OrderItem oi ON c.id = oi.combo.id " +
-            "LEFT JOIN oi.order o ON o.status.code = 'DELIVERED' " +
-            "GROUP BY c.id, cat.name, p.code " +
-            "ORDER BY COALESCE(SUM(oi.quantity), 0) DESC")
-    List<Object[]> findTopPopular(Pageable pageable);
+    // ============================================
+    // 🔍 Search by name (paged)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.typeCategory tc
+        LEFT JOIN c.peopleCategory pc
+        LEFT JOIN c.availabilityCategories ac
+        LEFT JOIN c.status s
+        WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+    """)
+    Page<Combo> findAllWithDetailsByName(@Param("name") String name, Pageable pageable);
+
+    // ============================================
+    // 🔍 Filter by type category (paged)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.typeCategory tc
+        LEFT JOIN c.peopleCategory pc
+        LEFT JOIN c.availabilityCategories ac
+        LEFT JOIN c.status s
+        WHERE tc.id = :typeCategoryId
+    """)
+    Page<Combo> findByTypeCategory(@Param("typeCategoryId") Long typeCategoryId, Pageable pageable);
+
+    // ============================================
+    // 🔍 Filter by type category + search (paged)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.typeCategory tc
+        LEFT JOIN c.peopleCategory pc
+        LEFT JOIN c.availabilityCategories ac
+        LEFT JOIN c.status s
+        WHERE tc.id = :typeCategoryId
+          AND LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))
+    """)
+    Page<Combo> findByTypeCategoryAndName(
+            @Param("typeCategoryId") Long typeCategoryId,
+            @Param("name") String name,
+            Pageable pageable);
+
+    // ============================================
+    // 🏆 Popular combos (sorted by “popularity”)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.typeCategory tc
+        LEFT JOIN c.peopleCategory pc
+        LEFT JOIN c.availabilityCategories ac
+        LEFT JOIN c.status s
+        WHERE c.createdAt > :newThreshold OR c.discountPercent > 0
+        ORDER BY c.discountPercent DESC, c.createdAt DESC
+    """)
+    Page<Combo> findAllWithDetailsOrdered(
+            @Param("newThreshold") LocalDateTime newThreshold,
+            Pageable pageable);
+
+    // ============================================
+    // 🏅 Top popular (limited by Pageable)
+    // ============================================
+    @Query("""
+        SELECT c
+        FROM Combo c
+        LEFT JOIN c.menuItems mi
+        GROUP BY c.id
+        ORDER BY COUNT(mi) DESC, c.createdAt DESC
+    """)
+    Page<Combo> findTopPopular(Pageable pageable);
 }
