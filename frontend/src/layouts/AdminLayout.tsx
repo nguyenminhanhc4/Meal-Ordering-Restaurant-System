@@ -76,6 +76,11 @@ function AdminLayout() {
     { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
     { path: "/admin/tables", label: "Tables", icon: HiOutlineViewGrid },
     {
+      path: "/admin/ingredients",
+      label: "Ingredients",
+      icon: HiOutlineViewGrid,
+    },
+    {
       label: "Orders",
       icon: HiFolder,
       children: [
