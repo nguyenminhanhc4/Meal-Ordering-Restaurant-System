@@ -151,7 +151,7 @@ const OrderListPage: React.FC = () => {
               <option value="">{t("order.allStatuses")}</option>
               {orderStatuses.map((s) => (
                 <option key={s.code} value={s.code}>
-                  {s.name}
+                  {t(`order.statusLabel.${s.code}`, s.code)}
                 </option>
               ))}
             </select>

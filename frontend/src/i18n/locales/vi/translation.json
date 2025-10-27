@@ -644,6 +644,31 @@
       "status": "Trạng thái"
     }
   },
+  "tableTranslations": {
+    "location": {
+      "MAIN_HALL": "Sảnh chính",
+      "VIP_ROOM": "Phòng VIP",
+      "OUTDOOR": "Ngoài trời",
+      "GARDEN": "Khu vườn",
+      "PRIVATE_ROOM": "Phòng riêng",
+      "BAR_AREA": "Quầy bar"
+    },
+    "position": {
+      "CENTER": "Giữa sảnh",
+      "FAMILY": "Gia đình",
+      "GOOD_VIEW": "Cảnh đẹp",
+      "BAR": "Quầy bar",
+      "VIP": "Khu vực VIP",
+      "PERSONAL": "Cá nhân/riêng tư"
+    },
+    "status": {
+      "AVAILABLE": "Còn trống",
+      "OCCUPIED": "Đang sử dụng",
+      "CONFIRMED": "Đã duyệt",
+      "PENDING": "Đang chờ duyệt",
+      "CANCELLED": "Đã hủy"
+    }
+  },
   "userReservation": {
     "actions": "Hành động",
     "cancelButton": "Quay lại",

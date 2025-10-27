@@ -10,8 +10,8 @@ import {
   ModalFooter,
 } from "flowbite-react";
 import React, { useState, useEffect, useCallback } from "react";
-import { useNotification } from "../../components/Notification";
-import axios from "../../api/axios";
+import { useNotification } from "../../Notification";
+import axios from "../../../api/axios";
 
 interface FormData {
   name: string;

@@ -26,7 +26,7 @@ import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { Pagination } from "../../components/common/Pagination";
 
 import type { TableEntity } from "../../services/table/tableService";
-import { TableFormModal } from "../../components/table/TableFormModal";
+import { TableFormModal } from "../../components/modal/table/TableFormModal";
 
 function AdminTables() {
   const [tables, setTables] = useState<TableEntity[]>([]);

@@ -277,34 +277,14 @@ export default function TableBooking() {
   /** -------------------------------
    *  TRANSLATION HELPERS
    *  ------------------------------- */
-  const translateLocation = (location: string) =>
-    ({
-      MAIN_HALL: "Sảnh chính",
-      VIP_ROOM: "Phòng VIP",
-      OUTDOOR: "Ngoài trời",
-      GARDEN: "Khu vườn",
-      PRIVATE_ROOM: "Phòng riêng",
-      BAR_AREA: "Quầy bar",
-    }[location] || location);
+  const translateLocation = (location: string): string =>
+    t(`tableTranslations.location.${location}`, { defaultValue: location });
 
-  const translatePosition = (position: string) =>
-    ({
-      CENTER: "Giữa sảnh",
-      FAMILY: "Gia đình",
-      GOOD_VIEW: "Cảnh đẹp",
-      BAR: "Quầy bar",
-      VIP: "Khu vực VIP",
-      PERSONAL: "Cá nhân/riêng tư",
-    }[position] || position);
+  const translatePosition = (position: string): string =>
+    t(`tableTranslations.position.${position}`, { defaultValue: position });
 
-  const translateStatus = (status: string) =>
-    ({
-      AVAILABLE: "Còn trống",
-      OCCUPIED: "Đang sử dụng",
-      CONFIRMED: "Đã duyệt",
-      PENDING: "Đang chờ duyệt",
-      CANCELLED: "Đã hủy",
-    }[status] || status);
+  const translateStatus = (status: string): string =>
+    t(`tableTranslations.status.${status}`, { defaultValue: status });
 
   /** -------------------------------
    *  EVENT HANDLERS

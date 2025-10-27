@@ -10,9 +10,9 @@ import {
   ModalFooter,
 } from "flowbite-react";
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "../../api/axios";
-import { useNotification } from "../../components/Notification";
-import type { TableEntity } from "../../services/table/tableService";
+import axios from "../../../api/axios";
+import { useNotification } from "../../Notification";
+import type { TableEntity } from "../../../services/table/tableService";
 
 interface TableFormModalProps {
   show: boolean;

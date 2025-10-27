@@ -15,7 +15,7 @@ import {
 import { HiSearch, HiPlus, HiPencil, HiTrash } from "react-icons/hi";
 import api from "../../api/axios";
 import { useNotification } from "../../components/Notification";
-import { UserFormModal } from "../../components/user/UserFormModal";
+import { UserFormModal } from "../../components/modal/user/UserFormModal";
 import { Pagination } from "../../components/common/Pagination";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 

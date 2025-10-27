@@ -644,6 +644,31 @@
       "status": "Status"
     }
   },
+  "tableTranslations": {
+    "location": {
+      "MAIN_HALL": "Main Hall",
+      "VIP_ROOM": "VIP Room",
+      "OUTDOOR": "Outdoor",
+      "GARDEN": "Garden Area",
+      "PRIVATE_ROOM": "Private Room",
+      "BAR_AREA": "Bar Area"
+    },
+    "position": {
+      "CENTER": "Center of Hall",
+      "FAMILY": "Family",
+      "GOOD_VIEW": "Scenic View",
+      "BAR": "Bar",
+      "VIP": "VIP Area",
+      "PERSONAL": "Personal/Private"
+    },
+    "status": {
+      "AVAILABLE": "Available",
+      "OCCUPIED": "Occupied",
+      "CONFIRMED": "Confirmed",
+      "PENDING": "Pending Approval",
+      "CANCELLED": "Cancelled"
+    }
+  },
   "userReservation": {
     "actions": "Actions",
     "cancelButton": "Back",
