@@ -1,7 +1,7 @@
 import { Route } from "react-router-dom";
 import MealLayout from "../layouts/MealLayout";
 import MealPage from "../pages/customer/menu/MealPage";
-import ProductDetail from "../pages/customer/menu/ProductDetail";
+import ProductDetail from "../pages/productDetail/ProductDetail.tsx";
 import CartPage from "../pages/customer/cart/CartPage";
 import OrderListPage from "../pages/customer/order/OrderListPage";
 import OrderDetailPage from "../pages/customer/order/OrderDetailPage";

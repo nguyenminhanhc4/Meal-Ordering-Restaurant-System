@@ -18,6 +18,7 @@ import {
   useRealtimeUpdate,
   useRealtimeDelete,
 } from "../../../api/useRealtimeUpdate";
+import { useTranslation } from "react-i18next";
 
 /** ================================
  *  COMPONENT: TableBooking
@@ -27,6 +28,7 @@ export default function TableBooking() {
   /** -------------------------------
    *  STATE MANAGEMENT
    *  ------------------------------- */
+  const { t } = useTranslation();
   const [tables, setTables] = useState<TableEntity[]>([]);
   const [page] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -231,16 +233,16 @@ export default function TableBooking() {
       );
 
       if (updated) {
-        notify("success", "✅ Cập nhật đặt bàn thành công!");
+        notify("success", t("table.notify.updateSuccess"));
         await fetchMyReservations();
         setBookingModalState(null);
         setEditingReservation(null);
       } else {
-        notify("error", "Không thể cập nhật đặt bàn!");
+        notify("error", t("table.notify.updateFail"));
       }
     } catch (error) {
       console.error("❌ Lỗi khi cập nhật đặt bàn:", error);
-      notify("error", "Có lỗi xảy ra khi lưu thay đổi!");
+      notify("error", t("table.notify.updateFail"));
     } finally {
       setLoading(false);
     }
@@ -260,12 +262,12 @@ export default function TableBooking() {
       // 🔁 Cập nhật trạng thái thành CANCELLED
       await updateMyReservation(targetPublicId, { statusName: "CANCELLED" });
 
-      notify("success", "Đã hủy đặt bàn thành công!");
+      notify("success", t("table.notify.updateSuccess"));
       // 🔁 Làm mới dữ liệu
       await Promise.all([fetchTables(), fetchMyReservations()]);
     } catch (error) {
       console.error("❌ Lỗi khi hủy đặt bàn:", error);
-      notify("error", "Có lỗi xảy ra khi hủy đặt bàn!");
+      notify("error", t("table.notify.updateFail"));
     } finally {
       setLoading(false);
       setTargetPublicId(null);
@@ -332,16 +334,20 @@ export default function TableBooking() {
       if (response) {
         notify(
           "success",
-          `Đã đặt bàn ${selectedTable.name} thành công vào lúc ${data.reservationTime}!`
+          t("table.notify.bookingSuccess", {
+            table: selectedTable.name,
+            time: data.reservationTime,
+          })
         );
+
         setBookingModalState(null);
         await fetchMyReservations();
       } else {
-        notify("error", "Không thể đặt bàn, vui lòng thử lại!");
+        notify("error", t("table.notify.bookingFail"));
       }
     } catch (error) {
       console.error("❌ Lỗi khi gọi API đặt bàn:", error);
-      notify("error", "⚠️ Có lỗi xảy ra khi đặt bàn!");
+      notify("error", t("table.notify.bookingFail"));
     } finally {
       setLoading(false);
     }
@@ -369,6 +375,84 @@ export default function TableBooking() {
   const areas = ["ALL", ...new Set(tables.map((t) => t.locationName))];
 
   /** -------------------------------
+   *  SUB COMPONENTS & HELPERS
+   *  ------------------------------- */
+
+  /** Chú thích màu */
+  function Legend({ color, label }: { color: string; label: string }) {
+    const colorMap: Record<string, string> = {
+      green: "bg-green-100 border-green-300",
+      red: "bg-red-200 border-red-400",
+      blue: "bg-blue-200 border-blue-400",
+      yellow: "bg-yellow-200 border-yellow-400",
+    };
+    return (
+      <div className="flex items-center gap-1">
+        <span
+          className={`w-4 h-4 rounded-full border ${colorMap[color]}`}></span>
+        <span>{label}</span>
+      </div>
+    );
+  }
+
+  /** Helper xác định class & status text theo trạng thái bàn */
+  function getTableStatusClass(
+    table: TableEntity,
+    myStatus: string | undefined,
+    isOtherBooked: boolean,
+    translateStatus: (s: string) => string
+  ) {
+    if (myStatus === "CONFIRMED") {
+      return {
+        colorClass:
+          "bg-blue-100 border-blue-400 text-blue-800 cursor-not-allowed",
+        statusText: t("table.status.myConfirmed"),
+      };
+    }
+
+    if (myStatus === "PENDING") {
+      return {
+        colorClass:
+          "bg-yellow-200 border-yellow-400 text-yellow-800 cursor-not-allowed",
+        statusText: t("table.status.myPending"),
+      };
+    }
+
+    if (isOtherBooked) {
+      return {
+        colorClass:
+          "bg-red-200 border-red-400 text-gray-600 cursor-not-allowed",
+        statusText: t("table.status.booked"),
+      };
+    }
+
+    if (table.statusName === "AVAILABLE") {
+      return {
+        colorClass:
+          "bg-green-100 border-green-300 hover:bg-green-200 text-green-800 hover:shadow-md",
+        statusText: t("table.status.available"),
+      };
+    }
+
+    return {
+      colorClass:
+        "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed",
+      statusText: translateStatus(table.statusName),
+    };
+  }
+
+  function getStatusNameFromId(statusId: number) {
+    switch (statusId) {
+      case 11:
+        return "AVAILABLE";
+      case 12:
+        return "OCCUPIED";
+      default:
+        return "AVAILABLE";
+    }
+  }
+
+  /** -------------------------------
    *  RENDER UI
    *  ------------------------------- */
   return (
@@ -376,7 +460,9 @@ export default function TableBooking() {
       <div className="max-w-screen-xl mx-auto bg-white p-8 md:p-10 shadow-lg rounded-xl">
         {/* === HEADER === */}
         <header className="mb-8 border-b pb-3">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">Đặt bàn</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">
+            {t("table.header.title")}
+          </h1>
 
           {loading ? (
             <div className="flex justify-center items-center min-h-[50vh]">
@@ -395,7 +481,7 @@ export default function TableBooking() {
                       size="sm"
                       onClick={() => setSelectedArea(area)}>
                       {area === "ALL"
-                        ? "Tất cả khu vực"
+                        ? t("table.filter.allAreas")
                         : translateLocation(area)}
                     </Button>
                   ))}
@@ -405,19 +491,20 @@ export default function TableBooking() {
                 <div className="flex gap-4 items-center">
                   <div className="text-sm flex gap-4 p-2 rounded-lg bg-gray-50 border">
                     <p>
-                      Trống:{" "}
+                      {t("table.count.available")}:{" "}
                       <span className="font-bold text-green-600">
                         {availableCount}
                       </span>
                     </p>
                     <p>
-                      Đã đặt:{" "}
+                      {t("table.count.booked")}:{" "}
                       <span className="font-bold text-red-600">
                         {bookedCount}
                       </span>
                     </p>
                     <p>
-                      Tổng: <span className="font-bold">{tables.length}</span>
+                      {t("table.count.total")}:{" "}
+                      <span className="font-bold">{tables.length}</span>
                     </p>
                   </div>
                   <Button
@@ -427,18 +514,20 @@ export default function TableBooking() {
                       setShowBookedList(true);
                       fetchMyReservations();
                     }}>
-                    Xem bàn đã đặt
+                    {t("table.button.viewBooked")}
                   </Button>
                 </div>
               </div>
 
               {/* Chú thích */}
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-700 items-center">
-                <span className="font-semibold mr-2">Chú thích:</span>
-                <Legend color="green" label="Còn trống" />
-                <Legend color="red" label="Đã được đặt" />
-                <Legend color="yellow" label="Bàn đang chờ duyệt" />
-                <Legend color="blue" label="Bàn của tôi" />
+                <span className="font-semibold mr-2">
+                  {t("table.legend.title")}:
+                </span>
+                <Legend color="green" label={t("table.legend.available")} />
+                <Legend color="red" label={t("table.legend.booked")} />
+                <Legend color="yellow" label={t("table.legend.pending")} />
+                <Legend color="blue" label={t("table.legend.myTable")} />
               </div>
             </>
           )}
@@ -467,14 +556,20 @@ export default function TableBooking() {
                   content={
                     <div className="text-left space-y-1 p-1">
                       <p className="font-bold">{table.name}</p>
-                      <p className="text-sm">Sức chứa: {table.capacity}</p>
                       <p className="text-sm">
-                        Khu vực: {translateLocation(table.locationName)}
+                        {t("table.tooltip.capacity")}: {table.capacity}
                       </p>
                       <p className="text-sm">
-                        Vị trí: {translatePosition(table.positionName)}
+                        {t("table.tooltip.location")}:{" "}
+                        {translateLocation(table.locationName)}
                       </p>
-                      <p className="text-sm">Trạng thái: {statusText}</p>
+                      <p className="text-sm">
+                        {t("table.tooltip.position")}:{" "}
+                        {translatePosition(table.positionName)}
+                      </p>
+                      <p className="text-sm">
+                        {t("table.tooltip.status")}: {statusText}
+                      </p>
                     </div>
                   }>
                   <button
@@ -486,7 +581,9 @@ export default function TableBooking() {
                     onClick={() => handleBookTable(table)}
                     className={`p-4 rounded-lg border-2 text-center shadow-md transition transform hover:scale-105 ${colorClass}`}>
                     <p className="font-bold text-lg">{table.shortName}</p>
-                    <p className="text-sm font-medium">{table.capacity} chỗ</p>
+                    <p className="text-sm font-medium">
+                      {table.capacity} {t("table.tooltip.seats")}
+                    </p>
                     <p className="text-xs mt-1 opacity-80">
                       {translateLocation(table.locationName)}
                     </p>
@@ -527,88 +624,13 @@ export default function TableBooking() {
       {/* === CONFIRM DIALOG === */}
       <ConfirmDialog
         open={showConfirm}
-        title="Xác nhận hủy đặt bàn"
-        message="Bạn có chắc chắn muốn hủy đặt bàn này không?"
-        confirmText="Đồng ý"
-        cancelText="Thoát"
+        title={t("table.confirm.cancelTitle")}
+        message={t("table.confirm.cancelMessage")}
+        confirmText={t("table.confirm.confirm")}
+        cancelText={t("table.confirm.cancel")}
         onConfirm={handleConfirmCancel}
         onCancel={() => setShowConfirm(false)}
       />
     </section>
   );
-}
-
-/** -------------------------------
- *  SUB COMPONENTS & HELPERS
- *  ------------------------------- */
-
-/** Chú thích màu */
-function Legend({ color, label }: { color: string; label: string }) {
-  const colorMap: Record<string, string> = {
-    green: "bg-green-100 border-green-300",
-    red: "bg-red-200 border-red-400",
-    blue: "bg-blue-200 border-blue-400",
-    yellow: "bg-yellow-200 border-yellow-400",
-  };
-  return (
-    <div className="flex items-center gap-1">
-      <span className={`w-4 h-4 rounded-full border ${colorMap[color]}`}></span>
-      <span>{label}</span>
-    </div>
-  );
-}
-
-/** Helper xác định class & status text theo trạng thái bàn */
-function getTableStatusClass(
-  table: TableEntity,
-  myStatus: string | undefined, // PENDING / CONFIRMED / undefined
-  isOtherBooked: boolean,
-  translateStatus: (s: string) => string
-) {
-  if (myStatus === "CONFIRMED") {
-    return {
-      colorClass:
-        "bg-blue-100 border-blue-400 text-blue-800 cursor-not-allowed",
-      statusText: "Bạn đã đặt bàn (Đã duyệt)",
-    };
-  }
-
-  if (myStatus === "PENDING") {
-    return {
-      colorClass:
-        "bg-yellow-200 border-yellow-400 text-yellow-800 cursor-not-allowed",
-      statusText: "Bạn đã đặt bàn (Đang chờ duyệt)",
-    };
-  }
-
-  if (isOtherBooked) {
-    return {
-      colorClass: "bg-red-200 border-red-400 text-gray-600 cursor-not-allowed",
-      statusText: "Đã có người đặt",
-    };
-  }
-
-  if (table.statusName === "AVAILABLE") {
-    return {
-      colorClass:
-        "bg-green-100 border-green-300 hover:bg-green-200 text-green-800 hover:shadow-md",
-      statusText: "Còn trống",
-    };
-  }
-
-  return {
-    colorClass: "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed",
-    statusText: translateStatus(table.statusName),
-  };
-}
-
-function getStatusNameFromId(statusId: number) {
-  switch (statusId) {
-    case 11:
-      return "AVAILABLE";
-    case 12:
-      return "OCCUPIED";
-    default:
-      return "AVAILABLE";
-  }
 }

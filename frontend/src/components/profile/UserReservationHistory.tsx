@@ -33,31 +33,27 @@ import BookingModal, {
 } from "../../pages/customer/table/BookingModal";
 import ConfirmDialog from "../common/ConfirmDialogProps";
 import { useNotification } from "../Notification/NotificationContext";
+import { useTranslation } from "react-i18next";
 
 export default function UserReservationHistory() {
+  const { t } = useTranslation();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [tables, setTables] = useState<TableEntity[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
   const [selectedTable, setSelectedTable] = useState<TableEntity | null>(null);
-
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
-
-  // ✅ Xác nhận hủy
   const [showConfirm, setShowConfirm] = useState(false);
   const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
-
   const [filterStatus, setFilterStatus] = useState("");
   const [sort, setSort] = useState("createdAt,desc");
 
   const { notify } = useNotification();
 
-  // ✅ Fetch dữ liệu
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -72,26 +68,25 @@ export default function UserReservationHistory() {
         }
         setTables(tableData);
       } catch (error) {
-        console.error("❌ Lỗi khi tải lịch sử đặt bàn:", error);
-        notify("error", "Lỗi khi tải lịch sử đặt bàn");
+        console.error("❌", error);
+        notify("error", t("userReservation.errorFetching"));
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [currentPage, sort, filterStatus]);
+  }, [currentPage, sort, filterStatus, notify, t]);
 
   const handleFilterChange = (status: string) => {
     setFilterStatus(status);
-    setCurrentPage(0); // reset page
+    setCurrentPage(0);
   };
 
   const handleSortChange = (newSort: string) => {
     setSort(newSort);
-    setCurrentPage(0); // reset page
+    setCurrentPage(0);
   };
 
-  // ✅ Mở modal chỉnh sửa
   const handleEdit = (reservation: Reservation) => {
     const table =
       tables.find((t) => reservation.tableIds?.includes(t.id)) || null;
@@ -100,7 +95,6 @@ export default function UserReservationHistory() {
     setShowModal(true);
   };
 
-  // ✅ Xác nhận cập nhật
   const handleConfirmEdit = async (data: BookingData) => {
     if (!selectedReservation) return;
     try {
@@ -114,91 +108,99 @@ export default function UserReservationHistory() {
 
       const refreshedPage = await getMyReservations(currentPage, pageSize);
       setReservations(refreshedPage?.content || []);
-      notify("success", "Cập nhật đặt bàn thành công");
+      notify("success", t("userReservation.updateSuccess"));
     } catch (error) {
-      console.error("❌ Lỗi khi cập nhật đặt bàn:", error);
-      notify("error", "Lỗi khi cập nhật đặt bàn");
+      console.error("❌", error);
+      notify("error", t("userReservation.updateFail"));
     }
   };
 
-  // ✅ Khi bấm “Hủy”
   const handleCancel = (publicId: string) => {
     setCancelTargetId(publicId);
     setShowConfirm(true);
   };
 
-  // ✅ Xác nhận “Đồng ý hủy”
   const confirmCancel = async () => {
     if (!cancelTargetId) return;
     try {
       await updateMyReservation(cancelTargetId, { statusName: "CANCELLED" });
       const refreshedPage = await getMyReservations(currentPage, pageSize);
       setReservations(refreshedPage?.content || []);
-      notify("success", "Hủy đặt bàn thành công");
+      notify("success", t("userReservation.cancelSuccess"));
     } catch (error) {
-      console.error("❌ Lỗi khi hủy đặt bàn:", error);
-      notify("error", "Lỗi khi hủy đặt bàn");
+      console.error("❌", error);
+      notify("error", t("userReservation.cancelFail"));
     } finally {
       setShowConfirm(false);
       setCancelTargetId(null);
     }
   };
 
-  // ✅ Dịch trạng thái
   const translateStatus = (status: string) => {
     const map: Record<string, string> = {
-      CONFIRMED: "Đã xác nhận",
-      PENDING: "Chờ xác nhận",
-      CANCELLED: "Đã hủy",
-      COMPLETED: "Hoàn tất",
+      CONFIRMED: t("userReservation.status.confirmed"),
+      PENDING: t("userReservation.status.pending"),
+      CANCELLED: t("userReservation.status.cancelled"),
+      COMPLETED: t("userReservation.status.completed"),
     };
-    return map[status] || "Không rõ";
+    return map[status] || t("userReservation.status.unknown");
   };
 
   return (
     <div className="p-8 w-full bg-white rounded-3xl shadow-2xl border border-blue-800">
-      <h2 className="text-2xl font-bold text-blue-800 mb-6  ">
-        <FaChair className="mr-2 text-yellow-600" /> Lịch sử đặt bàn
+      <h2 className="text-2xl font-bold text-blue-800 mb-6">
+        <FaChair className="mr-2 text-yellow-600" />{" "}
+        {t("userReservation.title")}
       </h2>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        {/* Bộ lọc trạng thái */}
         <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 shadow-sm">
           <span className="font-medium text-blue-800 flex items-center gap-1">
-            <FaFilter className="w-4 h-4 text-blue-600" /> Lọc:
+            <FaFilter className="w-4 h-4 text-blue-600" />{" "}
+            {t("userReservation.filterLabel")}
           </span>
           <select
             className="border border-blue-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
             value={filterStatus}
             onChange={(e) => handleFilterChange(e.target.value)}>
-            <option value="">Tất cả</option>
-            <option value="PENDING">Chờ xác nhận</option>
-            <option value="CONFIRMED">Đã xác nhận</option>
-            <option value="CANCELLED">Đã hủy</option>
+            <option value="">{t("userReservation.status.all")}</option>
+            <option value="PENDING">
+              {t("userReservation.status.pending")}
+            </option>
+            <option value="CONFIRMED">
+              {t("userReservation.status.confirmed")}
+            </option>
+            <option value="CANCELLED">
+              {t("userReservation.status.cancelled")}
+            </option>
           </select>
         </div>
 
-        {/* Bộ sắp xếp */}
         <div className="flex items-center gap-3 bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-200 shadow-sm">
           <span className="font-medium text-yellow-800 flex items-center gap-1">
-            <HiOutlineArrowsUpDown className="w-4 h-4 text-yellow-600" /> Sắp
-            xếp:
+            <HiOutlineArrowsUpDown className="w-4 h-4 text-yellow-600" />{" "}
+            {t("userReservation.sortLabel")}
           </span>
           <select
             className="border border-yellow-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-yellow-400"
             value={sort}
             onChange={(e) => handleSortChange(e.target.value)}>
-            <option value="createdAt,desc">Mới nhất</option>
-            <option value="createdAt,asc">Cũ nhất</option>
+            <option value="createdAt,desc">
+              {t("userReservation.sort.newest")}
+            </option>
+            <option value="createdAt,asc">
+              {t("userReservation.sort.oldest")}
+            </option>
             <option value="reservationTime,asc">
-              Thời gian đặt (sớm nhất)
+              {t("userReservation.sort.timeAsc")}
             </option>
             <option value="reservationTime,desc">
-              Thời gian đặt (muộn nhất)
+              {t("userReservation.sort.timeDesc")}
             </option>
           </select>
         </div>
       </div>
+
       {loading ? (
         <div className="flex justify-center py-12">
           <Spinner size="xl" color="warning" />
@@ -206,10 +208,10 @@ export default function UserReservationHistory() {
       ) : reservations.length === 0 ? (
         <div className="text-center py-10 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-gray-500 text-lg font-medium">
-            ☕ Bạn chưa có lịch sử đặt bàn nào.
+            {t("userReservation.noReservations")}
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            Hãy thử đặt bàn để trải nghiệm dịch vụ nhé!
+            {t("userReservation.noReservationsTip")}
           </p>
         </div>
       ) : (
@@ -221,16 +223,16 @@ export default function UserReservationHistory() {
                   #
                 </TableHeadCell>
                 <TableHeadCell className="!bg-stone-100 text-black">
-                  Bàn & Thời gian
+                  {t("userReservation.tableTime")}
                 </TableHeadCell>
                 <TableHeadCell className="!bg-stone-100 text-black">
-                  Chi tiết
+                  {t("userReservation.details")}
                 </TableHeadCell>
                 <TableHeadCell className="!bg-stone-100 text-black">
-                  Trạng thái
+                  {t("userReservation.statusLabel")}
                 </TableHeadCell>
                 <TableHeadCell className="!bg-stone-100 text-black text-center">
-                  Hành động
+                  {t("userReservation.actions")}
                 </TableHeadCell>
               </TableHead>
 
@@ -242,7 +244,7 @@ export default function UserReservationHistory() {
                         (id) =>
                           tables.find((t) => t.id === id)?.name || `(ID ${id})`
                       )
-                      .join(", ") || "(Không rõ)";
+                      .join(", ") || t("userReservation.unknownTable");
 
                   const statusColorMap: Record<string, string> = {
                     CONFIRMED: "text-green-700 bg-green-100",
@@ -259,7 +261,6 @@ export default function UserReservationHistory() {
                       <TableCell className="p-4 font-bold text-center text-gray-500">
                         {index + 1 + currentPage * pageSize}
                       </TableCell>
-
                       <TableCell className="whitespace-nowrap text-gray-900">
                         <p className="font-semibold text-lg flex items-center mb-1">
                           <FaChair className="w-4 h-4 mr-2 text-yellow-600" />
@@ -276,7 +277,9 @@ export default function UserReservationHistory() {
                       <TableCell className="text-sm text-gray-700">
                         <p className="flex items-center mb-1">
                           <HiOutlineUserGroup className="w-4 h-4 mr-1 text-green-500" />
-                          <span className="font-medium mr-1">Số người:</span>
+                          <span className="font-medium mr-1">
+                            {t("userReservation.numberOfPeople")}:
+                          </span>
                           {res.numberOfPeople}
                         </p>
                         {res.note && (
@@ -320,8 +323,8 @@ export default function UserReservationHistory() {
                           ) : (
                             <span className="text-gray-400 italic text-sm">
                               {res.statusName === "CANCELLED"
-                                ? "Đã hủy"
-                                : "Hoàn tất"}
+                                ? t("userReservation.status.cancelled")
+                                : t("userReservation.status.completed")}
                             </span>
                           )}
                         </div>
@@ -339,7 +342,6 @@ export default function UserReservationHistory() {
             onPageChange={(page) => setCurrentPage(page)}
           />
 
-          {/* Modal chỉnh sửa */}
           <BookingModal
             show={showModal}
             table={selectedTable}
@@ -351,13 +353,12 @@ export default function UserReservationHistory() {
             mode="edit"
           />
 
-          {/* Modal xác nhận hủy */}
           <ConfirmDialog
             open={showConfirm}
-            title="Xác nhận hủy đặt bàn"
-            message="Bạn có chắc chắn muốn hủy đặt bàn này không?"
-            confirmText="Xác nhận hủy"
-            cancelText="Quay lại"
+            title={t("userReservation.confirmCancelTitle")}
+            message={t("userReservation.confirmCancelMessage")}
+            confirmText={t("userReservation.confirmCancelButton")}
+            cancelText={t("userReservation.cancelButton")}
             onConfirm={confirmCancel}
             onCancel={() => setShowConfirm(false)}
           />

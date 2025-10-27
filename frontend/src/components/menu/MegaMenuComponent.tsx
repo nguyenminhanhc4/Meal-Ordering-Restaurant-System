@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Navbar,
   Dropdown,
@@ -35,8 +35,11 @@ import {
   useRealtimeDelete,
 } from "../../api/useRealtimeUpdate";
 import NotificationBell from "../../components/bell/NotificationBell";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "../../components/LanguageSelector";
 
 const MegaMenuComponent: React.FC = () => {
+  const { t } = useTranslation();
   const { isLoggedIn, user, logout } = useAuth();
   const { notify } = useNotification();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -51,6 +54,10 @@ const MegaMenuComponent: React.FC = () => {
     );
   };
 
+  const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -60,20 +67,20 @@ const MegaMenuComponent: React.FC = () => {
         if (err instanceof AxiosError) {
           notify(
             "error",
-            err.response?.data.message || "Lỗi tải danh mục. Vui lòng thử lại."
+            err.response?.data.message ||
+              t("component.megaMenu.loadCategoriesError")
           );
           console.error("Categories retrieve failed:", err.response?.data);
         } else {
-          notify("error", "Đã xảy ra lỗi không mong muốn.");
+          notify("error", t("component.megaMenu.unexpectedError"));
           console.error("Unexpected error:", err);
         }
       }
     };
     loadCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [notify, t]);
 
-  // ✅ WS cho category (giữ nguyên)
+  // WS logic giữ nguyên
   useRealtimeUpdate<Category, number, { categoryId: number; name: string }>(
     "/topic/category/new",
     fetchCategoryById,
@@ -81,7 +88,10 @@ const MegaMenuComponent: React.FC = () => {
       try {
         const allCategories = await fetchCategories();
         setCategories(allCategories);
-        notify("success", `Danh mục "${newCategory.name}" đã được thêm mới!`);
+        notify(
+          "success",
+          t("component.megaMenu.newCategoryAdded", { name: newCategory.name })
+        );
       } catch (error) {
         console.error("Failed to refresh categories after WS update", error);
       }
@@ -96,7 +106,12 @@ const MegaMenuComponent: React.FC = () => {
       try {
         const allCategories = await fetchCategories();
         setCategories(allCategories);
-        notify("info", `Danh mục "${updatedCategory.name}" đã được cập nhật!`);
+        notify(
+          "info",
+          t("component.megaMenu.categoryUpdated", {
+            name: updatedCategory.name,
+          })
+        );
       } catch (error) {
         console.error("Failed to refresh categories after update WS", error);
       }
@@ -111,7 +126,7 @@ const MegaMenuComponent: React.FC = () => {
       try {
         const allCategories = await fetchCategories();
         setCategories(allCategories);
-        notify("warning", `Một danh mục đã bị xóa!`);
+        notify("warning", t("component.megaMenu.categoryDeleted"));
       } catch (error) {
         console.error("Failed to refresh categories after delete WS", error);
       }
@@ -141,20 +156,25 @@ const MegaMenuComponent: React.FC = () => {
       fluid
       className="fixed top-0 left-0 w-full z-50 shadow-lg !bg-stone-800 text-white h-16">
       <NavbarBrand href="/">
-        <img src={Logo} className="mr-3 h-8 sm:h-10" alt="Restaurant Logo" />
+        <img
+          src={Logo}
+          className="mr-3 h-8 sm:h-10"
+          alt={t("component.megaMenu.logoAlt")}
+        />
         <span className="self-center whitespace-nowrap text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
           XYZ Restaurant
         </span>
       </NavbarBrand>
 
       <div className="flex items-center gap-6 md:order-2">
-        {/* 🛒 Cart */}
         {isLoggedIn && user && (
           <a
             href="/cart"
             className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 transition text-white shadow">
             <HiOutlineShoppingCart className="h-5 w-5 text-yellow-400" />
-            <span className="hidden sm:inline font-medium">Giỏ hàng</span>
+            <span className="hidden sm:inline font-medium">
+              {t("component.megaMenu.cart")}
+            </span>
 
             {!isLoading && cartItemCount > 0 && (
               <Badge
@@ -167,10 +187,8 @@ const MegaMenuComponent: React.FC = () => {
           </a>
         )}
 
-        {/* 🔔 Notification Bell */}
         {isLoggedIn && user && <NotificationBell />}
 
-        {/* 👤 User Dropdown */}
         {isLoggedIn && user ? (
           <Dropdown
             arrowIcon={false}
@@ -178,7 +196,7 @@ const MegaMenuComponent: React.FC = () => {
             label={
               <div className="flex items-center gap-4">
                 <Avatar
-                  alt="User avatar"
+                  alt={t("component.megaMenu.userAvatarAlt")}
                   img={user.avatarUrl || undefined}
                   rounded
                   size="md"
@@ -197,30 +215,35 @@ const MegaMenuComponent: React.FC = () => {
               className="flex items-center gap-3 hover:!text-yellow-400"
               href="/profile">
               <HiOutlineUser className="text-yellow-400" />
-              Hồ sơ
+              {t("component.megaMenu.profile")}
             </DropdownItem>
             <DropdownItem
               className="flex items-center gap-3 hover:!text-yellow-400"
               href="/order">
               <HiOutlineShoppingCart className="text-yellow-400" />
-              Đơn hàng
+              {t("component.megaMenu.orders")}
+            </DropdownItem>
+            <DropdownItem
+              className="flex flex-col items-start gap-2 hover:!bg-stone-700"
+              onClick={handleLangClick as unknown as () => void}>
+              <LanguageSelector compact />
             </DropdownItem>
             <DropdownDivider />
             <DropdownItem
               className="flex items-center gap-3 hover:!text-yellow-400"
               onClick={async () => {
                 await logout();
-                notify("success", "Đăng xuất thành công!");
+                notify("success", t("component.megaMenu.logoutSuccess"));
               }}>
               <HiOutlineLogout className="text-yellow-400" />
-              Đăng xuất
+              {t("component.megaMenu.logout")}
             </DropdownItem>
           </Dropdown>
         ) : (
           <Button
             className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 font-semibold shadow-md"
             href="/login">
-            Đăng nhập
+            {t("component.megaMenu.login")}
           </Button>
         )}
 
@@ -233,13 +256,17 @@ const MegaMenuComponent: React.FC = () => {
           className={`text-lg transition-colors duration-200 ${getActiveClass(
             "/"
           )}`}>
-          Trang chủ
+          {t("component.megaMenu.home")}
         </NavbarLink>
 
         <Dropdown
           onMouseEnter={() => setIsMenuOpen(true)}
           onMouseLeave={() => setIsMenuOpen(false)}
-          label={<span className={menuLinkClasses}>Thực đơn</span>}
+          label={
+            <span className={menuLinkClasses}>
+              {t("component.megaMenu.menu")}
+            </span>
+          }
           inline
           className="w-screen !bg-stone-800 border-none shadow-lg !left-0 !right-0 !ml-0 !pl-0 dropdown-fullwidth">
           <div className="py-8 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
@@ -247,10 +274,10 @@ const MegaMenuComponent: React.FC = () => {
               <a
                 href="/menu"
                 className="text-sm font-semibold text-amber-300 hover:text-amber-400">
-                Xem tất cả menu
+                {t("component.megaMenu.viewAllMenu")}
               </a>
               <span className="text-xs text-stone-300">
-                Tất cả món ăn, đồ uống
+                {t("component.megaMenu.allDishes")}
               </span>
             </div>
 
@@ -287,7 +314,6 @@ const MegaMenuComponent: React.FC = () => {
                               )}
                             </div>
 
-                            {/* Sub-child */}
                             {child.children?.length > 0 && isOpen && (
                               <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
                                 {child.children.map((subChild) => (
@@ -311,7 +337,7 @@ const MegaMenuComponent: React.FC = () => {
               ))
             ) : (
               <div className="text-gray-400 text-center col-span-full">
-                Không có danh mục
+                {t("component.megaMenu.noCategory")}
               </div>
             )}
           </div>
@@ -322,7 +348,7 @@ const MegaMenuComponent: React.FC = () => {
           className={`text-lg transition-colors duration-200 ${getActiveClass(
             "/table"
           )}`}>
-          Đặt bàn
+          {t("component.megaMenu.tableBooking")}
         </NavbarLink>
       </NavbarCollapse>
     </Navbar>

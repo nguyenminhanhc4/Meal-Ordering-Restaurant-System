@@ -1,0 +1,683 @@
+{
+  "auth": {
+    "common": {
+      "unexpectedError": "Đã xảy ra lỗi không xác định!"
+    },
+    "forgot": {
+      "emailPlaceholder": "Nhập email của bạn",
+      "error": {
+        "emptyEmail": "Vui lòng nhập email của bạn."
+      },
+      "failure": "Không thể gửi yêu cầu vào lúc này. Vui lòng thử lại sau.",
+      "success": "Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.",
+      "title": "Quên mật khẩu"
+    },
+    "login": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Nhập email của bạn",
+      "error": {
+        "invalidEmail": "Vui lòng nhập email hợp lệ.",
+        "invalidEmailFormat": "Định dạng email không hợp lệ.",
+        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự."
+      },
+      "passwordLabel": "Mật khẩu",
+      "failure": "Đăng nhập thất bại. Vui lòng thử lại.",
+      "forgotPassword": "Quên mật khẩu?",
+      "loading": "Đang đăng nhập...",
+      "noAccount": "Chưa có tài khoản?",
+      "registerLink": "Đăng ký mới",
+      "submit": "Đăng nhập",
+      "success": "Đăng nhập thành công!",
+      "title": "Đăng nhập"
+    },
+    "register": {
+      "confirmPassword": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu của bạn",
+      "email": "Email",
+      "emailPlaceholder": "Nhập email của bạn",
+      "error": {
+        "invalidEmailFormat": "Định dạng email không hợp lệ.",
+        "passwordMismatch": "Mật khẩu xác nhận không khớp.",
+        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự."
+      },
+      "failure": "Đăng ký thất bại. Vui lòng thử lại.",
+      "fullName": "Họ và tên",
+      "fullNamePlaceholder": "Nhập họ và tên của bạn",
+      "gender": "Giới tính",
+      "haveAccount": "Đã có tài khoản?",
+      "loading": "Đang đăng ký...",
+      "loginLink": "Đăng nhập",
+      "male": "Nam",
+      "female": "Nữ",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu của bạn",
+      "submit": "Đăng ký",
+      "success": "Đăng ký thành công!",
+      "title": "Đăng ký"
+    },
+    "reset": {
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Xác nhận mật khẩu",
+      "error": {
+        "invalidToken": "Token không hợp lệ",
+        "passwordMismatch": "Mật khẩu xác nhận không khớp",
+        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự",
+        "uppercase": "Mật khẩu phải chứa ít nhất 1 chữ hoa",
+        "lowercase": "Mật khẩu phải chứa ít nhất 1 chữ thường",
+        "number": "Mật khẩu phải chứa ít nhất 1 số",
+        "specialChar": "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt"
+      },
+      "failure": "Lỗi khi đặt lại mật khẩu",
+      "loading": "Đang xử lý...",
+      "newPasswordLabel": "Mật khẩu mới",
+      "newPasswordPlaceholder": "Nhập mật khẩu mới",
+      "success": "Đổi mật khẩu thành công!",
+      "submit": "Đặt lại mật khẩu",
+      "title": "Đặt lại mật khẩu"
+    }
+  },
+  "bookedList": {
+    "actions": "Hành động",
+    "cancel": "Hủy đặt bàn",
+    "details": "Chi tiết",
+    "edit": "Chỉnh sửa",
+    "empty": {
+      "message": "Hãy đặt bàn ngay để thưởng thức món ngon nhé!",
+      "title": "Chưa có bàn nào được đặt."
+    },
+    "people": "Số người",
+    "status": {
+      "cancelled": "Đã hủy",
+      "completed": "Đã hoàn thành",
+      "processing": "Đang xử lý"
+    },
+    "statusHeader": "Trạng thái",
+    "tableTime": "Bàn & Thời gian",
+    "title": "Danh sách bàn đã đặt",
+    "unknownTable": "(Không rõ)"
+  },
+  "bookingModal": {
+    "cancelButton": "Hủy",
+    "capacity": "Sức chứa tối đa",
+    "capacityUnit": "chỗ",
+    "confirmButton": "Xác nhận đặt bàn",
+    "createBooking": "Đặt bàn",
+    "customerName": "Tên khách hàng",
+    "customerNamePlaceholder": "Nhập tên khách",
+    "errorTime": "⚠️ Giờ đặt bàn phải trong khoảng từ {{min}}:00 đến {{max}}:00.",
+    "note": "Ghi chú thêm (nếu có)",
+    "notePlaceholder": "Sinh nhật, họp mặt, ...",
+    "numberOfPeople": "Số lượng khách",
+    "phone": "Số điện thoại",
+    "phonePlaceholder": "0123456789",
+    "reservationTime": "Thời gian đặt bàn (Ngày & Giờ)",
+    "tableCapacity": "Bàn này có sức chứa tối đa là {{capacity}} người.",
+    "updateBooking": "Cập nhật đặt bàn",
+    "updateButton": "Cập nhật thông tin",
+    "workingHours": "Giờ làm việc: {{min}}:00 sáng - {{max}}:00 tối"
+  },
+  "cart": {
+    "actions": "Hành động",
+    "backToMenu": "Quay lại menu",
+    "cancel":"Hủy",
+    "checkout": "Đặt hàng",
+    "checkoutFail": "Đặt hàng thất bại. Vui lòng thử lại.",
+    "checkoutSuccess": "Đặt hàng thành công! Mã đơn: {{publicId}}",
+    "clearAll": "Xóa tất cả",
+    "clearFail": "Xóa toàn bộ thất bại. Vui lòng thử lại.",
+    "clearSuccess": "Đã xóa toàn bộ giỏ hàng",
+    "collapseList": "Thu gọn danh sách",
+    "confirm": "Xóa",
+    "confirmClear": "Bạn có chắc muốn xóa toàn bộ giỏ hàng?",
+    "confirmRemoveItem": "Bạn có chắc muốn xóa \"{{name}}\" khỏi giỏ hàng?",
+    "confirmRemoveSelected": "Bạn có chắc muốn xóa {{count}} món đã chọn?",
+    "confirmTitle": "Xác nhận xóa",
+    "empty": "Giỏ hàng của bạn đang trống",
+    "fetchError": "Không thể tải giỏ hàng. Vui lòng thử lại.",
+    "image": "Hình ảnh",
+    "itemName": "Tên món",
+    "noCategory": "Không xác định",
+    "noDescription": "Không có mô tả",
+    "outOfStock": "Hết hàng",
+    "price": "Giá",
+    "quantity": "Số lượng",
+    "quantityMax": "Số lượng tối đa cho món này là {{qty}}.",
+    "quantityMin": "Số lượng phải lớn hơn 0.",
+    "realtimeError": "Lỗi cập nhật realtime trong giỏ:",
+    "realtimeUpdate": "Cập nhật realtime trong giỏ:",
+    "removeFail": "Xóa món thất bại. Vui lòng thử lại.",
+    "removeSelected": "Xóa đã chọn",
+    "removeSuccess": "Đã xóa khỏi giỏ hàng",
+    "title":"Giỏ hàng",
+    "totalItems": "Tổng số món",
+    "totalPrice": "Tổng cộng",
+    "updateFail": "Cập nhật số lượng thất bại. Vui lòng thử lại.",
+    "updateSuccess": "Cập nhật số lượng thành công!",
+    "viewMenu": "Xem thực đơn",
+    "viewMore": "Xem thêm {{count}} món"
+  },
+  "cartBTN": {
+    "addToCart": "Thêm {{quantity}} {{name}} vào giỏ hàng",
+    "addToCartButton": "Thêm vào giỏ hàng",
+    "added": "Đã thêm {{qty}} {{name}} vào giỏ hàng",
+    "adding": "Đang thêm...",
+    "decreaseQuantity": "Giảm số lượng",
+    "increaseQuantity": "Tăng số lượng",
+    "unknownError": "Lỗi không xác định khi thêm vào giỏ hàng"
+  },
+  "common": {
+    "cancel": "Hủy",
+    "currency": "Đồng",
+    "loading": "Đang tải...",
+    "send": "Gửi",
+    "sending": "Đang gửi..."
+  },
+  "component": {
+    "megaMenu": {
+      "allDishes": "Tất cả món ăn, đồ uống",
+      "cart": "Giỏ hàng",
+      "categoryDeleted": "Một danh mục đã bị xóa!",
+      "categoryUpdated": "Danh mục \"{{name}}\" đã được cập nhật!",
+      "home": "Trang chủ",
+      "loadCategoriesError": "Lỗi tải danh mục. Vui lòng thử lại.",
+      "login": "Đăng nhập",
+      "logoAlt": "Restaurant Logo",
+      "logout": "Đăng xuất",
+      "logoutSuccess": "Đăng xuất thành công!",
+      "menu": "Thực đơn",
+      "newCategoryAdded": "Danh mục \"{{name}}\" đã được thêm mới!",
+      "noCategory": "Không có danh mục",
+      "orders": "Đơn hàng",
+      "profile": "Hồ sơ",
+      "tableBooking": "Đặt bàn",
+      "unexpectedError": "Đã xảy ra lỗi không mong muốn.",
+      "userAvatarAlt": "User avatar",
+      "viewAllMenu": "Xem tất cả menu"
+    },
+    "searchBar": {
+      "ariaLabel": "Tìm kiếm món ăn",
+      "clearLabel": "Xoá nội dung tìm kiếm",
+      "placeholder": "Tìm kiếm món ăn..."
+    },
+    "sortFilter": {
+      "ariaLabel": "Chọn phương thức sắp xếp",
+      "newest": "Mới nhất",
+      "popular": "Phổ biến",
+      "priceAsc": "Giá thấp đến cao",
+      "priceDesc": "Giá cao đến thấp"
+    }
+  },
+  "footer": {
+    "address": "123 Đường ABC, Quận 1, TP.HCM",
+    "connectWithUs": "Kết nối với chúng tôi",
+    "copyright": "Tất cả quyền được bảo lưu.",
+    "email": "contact@xyzrestaurant.com",
+    "home": "Trang chủ",
+    "menu": "Thực đơn",
+    "openingHours": "Giờ mở cửa",
+    "phone": "+84 123 456 789",
+    "quickLinks": "Liên kết nhanh",
+    "reserveTable": "Đặt bàn",
+    "workingTime": "Thứ 2 – Chủ nhật: 9:00 – 22:00"
+  },
+  "heroSection": {
+    "button": {
+      "bookTable": "Đặt bàn ngay",
+      "orderNow": "Đặt món ngay"
+    },
+    "subtitle": "Không gian ấm cúng, sang trọng – nơi trải nghiệm ẩm thực tinh tế và đẳng cấp.",
+    "title": {
+      "highlight": "XYZ Restaurant",
+      "prefix": "Chào mừng đến với"
+    }
+  },
+  "home": {
+    "about": {
+      "bookTable": "Đặt bàn ngay",
+      "description": "XYZ Restaurant cam kết mang đến trải nghiệm ẩm thực tinh tế, với không gian sang trọng và dịch vụ tận tâm.",
+      "features": {
+        "freshFood": {
+          "description": "Nguyên liệu chất lượng cao, chế biến tinh tế, đảm bảo hương vị tuyệt vời.",
+          "title": "Đồ ăn tươi ngon"
+        },
+        "luxurySpace": {
+          "description": "Thiết kế hiện đại, ánh sáng ấm cúng, tạo cảm giác thoải mái cho thực khách.",
+          "title": "Không gian sang trọng"
+        },
+        "professionalService": {
+          "description": "Đội ngũ nhân viên thân thiện, tận tâm, mang đến trải nghiệm tuyệt vời.",
+          "title": "Dịch vụ chuyên nghiệp"
+        }
+      },
+      "orderNow": "Đặt món ngay",
+      "title": "Về chúng tôi"
+    },
+    "menu": {
+      "orderNow": "Đặt món ngay",
+      "soldCount": "Đã bán {{count}}+ suất",
+      "title": "Món nổi bật",
+      "viewMore": "Xem thêm"
+    }
+  },
+  "mealPage": {
+    "actions": {
+      "loadMore": "Xem thêm",
+      "viewAll": "Xem tất cả"
+    },
+    "description": "Khám phá các món ăn ngon nhất trong danh mục",
+    "loadingMore": "Đang tải...",
+    "noItems": "Không có món ăn nào trong danh mục này",
+    "notification": {
+      "fetchError": "Không thể tải danh sách món ăn",
+      "itemDeleted": "Món ăn đã bị xóa khỏi hệ thống",
+      "itemUpdated": "{{name}} đã được cập nhật",
+      "itemUpdatedOrAdded": "{{name}} đã được cập nhật hoặc thêm mới"
+    },
+    "title": {
+      "default": "Danh sách món ăn"
+    }
+  },
+  "navbarLanding": {
+    "brand": {
+      "name": "XYZ Restaurant"
+    },
+    "dropdown": {
+      "lang":"Ngôn ngữ",
+      "logout": "Đăng xuất",
+      "logoutSuccess": "Đăng xuất thành công!",
+      "orders": "Đơn hàng",
+      "profile": "Hồ sơ"
+    },
+    "login": "Đăng nhập",
+    "menu": {
+      "about": "Giới thiệu",
+      "booking": "Đặt bàn",
+      "home": "Trang chủ",
+      "menu": "Thực đơn"
+    }
+  },
+  "notification": {
+    "cancel": "Hủy",
+    "cancelSelect": "Hủy xóa",
+    "confirmDelete": "Bạn có chắc muốn xóa {{count}} thông báo?",
+    "delete": "Xóa",
+    "deleteFail": "Xóa thất bại!",
+    "deleted": "Đã xóa thông báo!",
+    "errorLoad": "Lỗi khi tải thông báo",
+    "errorMarkRead": "Lỗi khi đánh dấu đã đọc",
+    "loading": "Đang tải thông báo...",
+    "noNotification": "Không có thông báo nào",
+    "selectMultiple": "Xóa nhiều",
+    "title": "Thông báo"
+  },
+  "order": {
+    "backToMenu": "Quay lại Menu",
+    "header": "Đơn hàng",
+    "detail": {
+      "back": "Quay lại",
+      "createdAt": "Ngày tạo:",
+      "customer": "Người đặt:",
+      "itemsTitle": "Danh sách món",
+      "pay": "Thanh toán",
+      "table": {
+        "name": "Tên món",
+        "price": "Đơn giá",
+        "quantity": "Số lượng",
+        "total": "Thành tiền"
+      },
+      "title": "Đơn hàng #{{id}}",
+      "total": "Tổng tiền:"
+    },
+    "errorLoadOrders": "Không thể tải danh sách đơn hàng. Vui lòng thử lại.",
+    "errorLoadOrdersNotify": "Tải đơn hàng thất bại",
+    "errorLoadStatus": "Không thể tải danh sách trạng thái.",
+    "errorNotFound": "Không tìm thấy đơn hàng.",
+    "items": "món",
+    "itemsPreview": "Món",
+    "noOrders": "Bạn chưa có đơn hàng nào.",
+    "orderNumber": "Order #{{id}}",
+    "statusLabel": {
+      "APPROVED": "Đã duyệt",
+      "CANCELLED": "Đã hủy",
+      "DELIVERED": "Đã giao",
+      "DELIVERING": "Đang giao",
+      "PENDING": "Chờ duyệt"
+    },
+    "statusSelectAria": "Chọn trạng thái đơn hàng",
+    "allStatuses": "Tất cả",
+    "viewDetails": "Xem chi tiết"
+  },
+  "orderHistory": {
+    "collapse": "Thu gọn",
+    "filters": {
+      "searchPlaceholder": "Tìm món...",
+      "status": {
+        "all": "Tất cả"
+      }
+    },
+    "moreItems": "món khác",
+    "noOrders": "Không có đơn hàng nào phù hợp.",
+    "notifications": {
+      "addToCartFail": "Lỗi không xác định khi thêm vào giỏ hàng",
+      "addToCartSuccess": "Đã thêm món vào giỏ hàng!"
+    },
+    "orderId": "Mã đơn",
+    "quantity": "SL",
+    "outOfStock": "Hết hàng",
+    "reorder": "Đặt hàng lại",
+    "status": {
+      "approved": "Đã xác nhận",
+      "cancelled": "Đã hủy",
+      "delivered": "Đã giao",
+      "delivering": "Đang giao",
+      "pending": "Chờ xác nhận"
+    },
+    "title": "Lịch sử đặt món",
+    "viewAll": "Xem tất cả"
+  },
+  "payment": {
+    "backToOrders": "Quay lại danh sách đơn hàng",
+    "error": {
+      "backHome": "Về trang chủ",
+      "notFound": "Không tìm thấy thông tin đơn hàng hoặc đơn hàng không khả dụng.",
+      "title": "Lỗi thanh toán"
+    },
+    "failed": {
+      "description": "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại hoặc chọn phương thức khác.",
+      "retry": "Quay lại thanh toán",
+      "title": "Thanh toán thất bại"
+    },
+    "loading": {
+      "message": "Đang tải thông tin đơn hàng..."
+    },
+    "method": {
+      "cod": {
+        "desc": "Bạn sẽ thanh toán tiền mặt khi nhận được hàng.",
+        "label": "Thanh toán khi nhận hàng (COD)"
+      },
+      "title": "Phương thức thanh toán",
+      "online": {
+        "desc": "Thanh toán nhanh chóng và an toàn qua cổng thanh toán điện tử.",
+        "label": "Thanh toán trực tuyến"
+      }
+    },
+    "mockTitle": "Cổng thanh toán giả lập",
+    "notify": {
+      "failed": "Thanh toán thất bại. Vui lòng thử lại sau.",
+      "missingFields": "Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ giao hàng.",
+      "success": "Thanh toán thành công!"
+    },
+    "shipping": {
+      "desc": "Vui lòng kiểm tra thông tin giao hàng trước khi xác nhận thanh toán.",
+      "fields": {
+        "address": "Địa chỉ",
+        "email": "Email",
+        "fullName": "Họ và tên",
+        "note": "Ghi chú (tuỳ chọn)",
+        "phone": "Số điện thoại"
+      },
+      "title": "Thông tin giao hàng"
+    },
+    "success": {
+      "description": "Cảm ơn bạn đã thanh toán. Đơn hàng của bạn đang được xử lý và sẽ được giao sớm nhất.",
+      "title": "Thanh toán thành công!"
+    },
+    "summary": {
+      "button": {
+        "pay": "Xác nhận thanh toán",
+        "processing": "Đang xử lý..."
+      },
+      "items": {
+        "x": "x{{count}}"
+      },
+      "terms": "Bằng việc thanh toán, bạn đồng ý với các điều khoản mua hàng của chúng tôi.",
+      "totalLabel": "Tổng cộng",
+      "title": "Tóm tắt đơn hàng #{{id}}"
+    },
+    "amount": "Số tiền",
+    "approveBtn": "Xác nhận",
+    "approveFailed": "Xác nhận thanh toán thất bại: ",
+    "cancelBtn": "Hủy bỏ",
+    "cancelFailed": "Hủy thanh toán thất bại: ",
+    "cancelled": "Đã hủy thanh toán",
+    "approved": "Đã xác nhận thanh toán!",
+    "loading": "Đang tải thông tin thanh toán...",
+    "missingShipping": "Thiếu thông tin giao hàng!",
+    "notFound": "Không tìm thấy thanh toán",
+    "orderId": "Mã đơn hàng",
+    "title": "Thanh toán đơn hàng"
+  },
+  "product": {
+    "availableQuantity": "Sản phẩm còn",
+    "backToMenu": "Quay lại menu",
+    "category": "Phân loại",
+    "defaultDescription": "Món ăn ngon, đang chờ bạn khám phá! Vui lòng liên hệ để biết thêm chi tiết.",
+    "inStock": "Còn hàng",
+    "invalidQuantity": "Số lượng không hợp lệ, tối đa {{qty}}",
+    "loadError": "Lỗi khi tải sản phẩm",
+    "new": "MÓN MỚI",
+    "noImage": "Không có hình ảnh",
+    "notFound": "Không tìm thấy sản phẩm",
+    "outOfStock": "Hết hàng",
+    "reviewsCount": "({{count}} đánh giá)",
+    "sold": "Đã bán",
+    "status": "Tình trạng",
+    "unavailable": "Sản phẩm {{name}} hiện không có sẵn",
+    "unit": "phần",
+    "updated": "Sản phẩm đã được cập nhật"
+  },
+  "productCard": {
+    "add": "Thêm",
+    "addToCartError": "Lỗi khi thêm vào giỏ hàng",
+    "addedToCart": "Đã thêm {{name}} vào giỏ hàng",
+    "available": "Có sẵn",
+    "comingSoon": "Sắp ra mắt",
+    "currency": "Đồng",
+    "defaultDescription": "Món ăn ngon, đang chờ bạn khám phá!",
+    "new": "Mới",
+    "noImage": "Không có hình ảnh",
+    "outOfStock": "Hết hàng",
+    "sold": "Đã bán {{count}}+",
+    "updated": "{{name}} đã được cập nhật",
+    "view": "Xem"
+  },
+  "profile": {
+    "actions": {
+      "cancel": "Hủy",
+      "editProfile": "Chỉnh sửa hồ sơ",
+      "save": "Lưu thay đổi"
+    },
+    "avatarAlt": "Ảnh đại diện người dùng",
+    "changeAvatar": "Thay đổi",
+    "fields": {
+      "address": "Địa chỉ",
+      "gender": "Giới tính",
+      "genderPlaceholder": "-- Chọn giới tính --",
+      "name": "Tên",
+      "phone": "Số điện thoại"
+    },
+    "gender": {
+      "female": "Nữ",
+      "male": "Nam",
+      "notUpdated": "Chưa cập nhật"
+    },
+    "loading": "Đang tải thông tin...",
+    "notifications": {
+      "avatarUpdateFail": "Không thể cập nhật ảnh đại diện.",
+      "avatarUpdateSuccess": "Cập nhật ảnh đại diện thành công!",
+      "updateFail": "Cập nhật thông tin thất bại.",
+      "updateSuccess": "Cập nhật thông tin thành công!"
+    },
+    "sidebar": {
+      "tabs": {
+        "notifications": "Thông báo",
+        "orders": "Lịch sử đặt món",
+        "profile": "Thông tin cá nhân",
+        "reservations": "Lịch sử đặt bàn",
+        "security": "Bảo mật & Mật khẩu"
+      },
+      "title": "Hồ sơ người dùng"
+    }
+  },
+  "review": {
+    "alreadyReviewed": "Bạn đã đánh giá món này vào {{date}}",
+    "cancel": "Hủy",
+    "characters": "ký tự",
+    "comment": "Nhận xét",
+    "customerReviews": "Đánh giá của khách hàng",
+    "delete": "Xóa",
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa đánh giá này không?",
+    "deleteConfirmTitle": "Xóa đánh giá",
+    "deleteFailed": "Không thể xóa đánh giá",
+    "deleted": "Đã xóa đánh giá",
+    "edit": "Sửa",
+    "error": {
+      "emptyComment": "Vui lòng nhập nội dung đánh giá",
+      "noRating": "Vui lòng chọn số sao để đánh giá",
+      "submitFailed": "Gửi đánh giá thất bại",
+      "tooLong": "Nội dung đánh giá quá dài, tối đa {{max}} ký tự"
+    },
+    "filter": {
+      "all": "Tất cả",
+      "negative": "Tiêu cực (≤2★)",
+      "neutral": "Trung lập (3★)",
+      "positive": "Tích cực (≥4★)"
+    },
+    "loginToReview": "Vui lòng đăng nhập để viết đánh giá",
+    "noReviews": "Không có đánh giá nào phù hợp với bộ lọc hiện tại",
+    "placeholder": "Hãy chia sẻ cảm nhận của bạn về món ăn này...",
+    "rating": "Xếp hạng",
+    "sending": "Đang gửi...",
+    "submit": "Gửi đánh giá",
+    "submitFailed": "Gửi đánh giá thất bại",
+    "submitted": "Đã gửi đánh giá",
+    "summary": "Tổng hợp",
+    "title": "Viết đánh giá của bạn",
+    "updateFailed": "Không thể cập nhật đánh giá",
+    "updated": "Cập nhật đánh giá thành công",
+    "aria": {
+      "cancel": "Hủy đánh giá",
+      "rateStar": "Đánh giá {{star}} sao",
+      "ratingGroup": "Chọn số sao đánh giá",
+      "submit": "Gửi đánh giá"
+    }
+  },
+  "security": {
+    "changePasswordBtn": "Đổi mật khẩu",
+    "changePasswordTitle": "Thay đổi mật khẩu tài khoản",
+    "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+    "currentPasswordLabel": "Mật khẩu hiện tại",
+    "currentPasswordPlaceholder": "Nhập mật khẩu hiện tại của bạn",
+    "currentPasswordRequired": "Vui lòng nhập mật khẩu hiện tại",
+    "emailLabel": "Email đăng ký",
+    "emailPlaceholder": "Nhập email của bạn",
+    "enterEmail": "Vui lòng nhập email của bạn.",
+    "forgotPasswordDesc": "Nhập email của bạn để nhận liên kết đặt lại mật khẩu.",
+    "forgotPasswordFailed": "Không thể gửi yêu cầu, vui lòng thử lại.",
+    "forgotPasswordSent": "Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.",
+    "forgotPasswordTitle": "Yêu cầu đặt lại mật khẩu",
+    "newPasswordLabel": "Mật khẩu mới",
+    "newPasswordPlaceholder": "Nhập mật khẩu mới",
+    "passwordChanged": "Đổi mật khẩu thành công!",
+    "passwordChangeFailed": "Lỗi khi đổi mật khẩu!",
+    "passwordLowercase": "Mật khẩu mới phải chứa ít nhất 1 chữ thường",
+    "passwordMinLength": "Mật khẩu mới phải có ít nhất 8 ký tự",
+    "passwordNumber": "Mật khẩu mới phải chứa ít nhất 1 chữ số",
+    "passwordSpecialChar": "Mật khẩu mới phải chứa ít nhất 1 ký tự đặc biệt",
+    "passwordUppercase": "Mật khẩu mới phải chứa ít nhất 1 chữ hoa",
+    "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp",
+    "sendRequest": "Gửi yêu cầu đặt lại mật khẩu",
+    "sending": "Đang gửi...",
+    "tabChangePassword": "Đổi mật khẩu",
+    "tabForgotPassword": "Quên mật khẩu",
+    "title": "Cài đặt Bảo mật",
+    "unknownError": "Đã xảy ra lỗi không xác định!",
+    "updating": "Đang cập nhật..."
+  },
+  "table": {
+    "button": {
+      "viewBooked": "Xem bàn đã đặt"
+    },
+    "confirm": {
+      "cancel": "Thoát",
+      "cancelMessage": "Bạn có chắc chắn muốn hủy đặt bàn này không?",
+      "cancelTitle": "Xác nhận hủy đặt bàn",
+      "confirm": "Đồng ý"
+    },
+    "count": {
+      "available": "Trống",
+      "booked": "Đã đặt",
+      "total": "Tổng"
+    },
+    "filter": {
+      "allAreas": "Tất cả khu vực"
+    },
+    "header": {
+      "title": "Đặt bàn"
+    },
+    "legend": {
+      "available": "Còn trống",
+      "booked": "Đã được đặt",
+      "myTable": "Bàn của tôi",
+      "pending": "Bàn đang chờ duyệt",
+      "title": "Chú thích"
+    },
+    "notify": {
+      "bookingFail": "Không thể đặt bàn, vui lòng thử lại!",
+      "bookingSuccess": "Đã đặt bàn {{table}} thành công vào lúc {{time}}!",
+      "generalError": "Có lỗi xảy ra!",
+      "updateFail": "Không thể cập nhật đặt bàn!",
+      "updateSuccess": "Cập nhật đặt bàn thành công!"
+    },
+    "status": {
+      "available": "Còn trống",
+      "booked": "Đã có người đặt",
+      "myConfirmed": "Bạn đã đặt bàn (Đã duyệt)",
+      "myPending": "Bạn đã đặt bàn (Đang chờ duyệt)"
+    },
+    "tooltip": {
+      "capacity": "Sức chứa",
+      "location": "Khu vực",
+      "position": "Vị trí",
+      "seats": "chỗ",
+      "status": "Trạng thái"
+    }
+  },
+  "userReservation": {
+    "actions": "Hành động",
+    "cancelButton": "Quay lại",
+    "cancelFail": "Lỗi khi hủy đặt bàn",
+    "cancelSuccess": "Hủy đặt bàn thành công",
+    "confirmCancelButton": "Xác nhận hủy",
+    "confirmCancelTitle": "Xác nhận hủy đặt bàn",
+    "confirmCancelMessage": "Bạn có chắc chắn muốn hủy đặt bàn này không?",
+    "details": "Chi tiết",
+    "errorFetching": "Lỗi khi tải lịch sử đặt bàn",
+    "filterLabel": "Lọc:",
+    "noReservations": "☕ Bạn chưa có lịch sử đặt bàn nào.",
+    "noReservationsTip": "Hãy thử đặt bàn để trải nghiệm dịch vụ nhé!",
+    "numberOfPeople": "Số người",
+    "sort": {
+      "newest": "Mới nhất",
+      "oldest": "Cũ nhất",
+      "timeAsc": "Thời gian đặt (sớm nhất)",
+      "timeDesc": "Thời gian đặt (muộn nhất)"
+    },
+    "sortLabel": "Sắp xếp:",
+    "status": {
+      "all": "Tất cả",
+      "cancelled": "Đã hủy",
+      "completed": "Hoàn tất",
+      "confirmed": "Đã xác nhận",
+      "pending": "Chờ xác nhận",
+      "unknown": "Không rõ"
+    },
+    "statusLabel": "Trạng thái",
+    "tableTime": "Bàn & Thời gian",
+    "title": "Lịch sử đặt bàn",
+    "unknownTable": "(Không rõ)",
+    "updateFail": "Lỗi khi cập nhật đặt bàn",
+    "updateSuccess": "Cập nhật đặt bàn thành công"
+  }
+}

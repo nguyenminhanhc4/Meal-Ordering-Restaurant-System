@@ -22,6 +22,7 @@ import Pagination from "../../components/common/PaginationClient";
 import { Checkbox, Button } from "flowbite-react";
 import { useNotification } from "../Notification/NotificationContext";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { useTranslation } from "react-i18next";
 
 interface NotificationListProps {
   onUnreadCountChange?: (count: number) => void;
@@ -30,24 +31,18 @@ interface NotificationListProps {
 const NotificationList: React.FC<NotificationListProps> = ({
   onUnreadCountChange,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // 🧭 Paging
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
-
-  // 🗑️ Checkbox chọn xóa
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-
-  // ✅ Modal confirm
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteTargetIds, setDeleteTargetIds] = useState<number[]>([]);
-
   const { notify } = useNotification();
 
   useEffect(() => {
@@ -64,7 +59,8 @@ const NotificationList: React.FC<NotificationListProps> = ({
       setTotalPages(pageData?.totalPages ?? 0);
       onUnreadCountChange?.(list.filter((n) => !n.isRead).length);
     } catch (err) {
-      console.error("Failed to load notifications:", err);
+      console.error(t("notification.errorLoad"), err);
+      notify("error", t("notification.errorLoad"));
     } finally {
       setLoading(false);
     }
@@ -78,11 +74,11 @@ const NotificationList: React.FC<NotificationListProps> = ({
         notifications.filter((n) => n.id !== id && !n.isRead).length
       );
     } catch (err) {
-      console.error("Failed to mark notification as read:", err);
+      console.error(t("notification.errorMarkRead"), err);
+      notify("error", t("notification.errorMarkRead"));
     }
   };
 
-  // 🔔 Realtime cập nhật
   useRealtimeMessage<
     | { type: "NEW_NOTIFICATION" | "NOTIFICATION_READ"; data: NotificationDto }
     | { type: "NOTIFICATION_DELETED"; data: number | number[] }
@@ -169,7 +165,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
     setSelectAll(!selectAll);
   };
 
-  // Mở modal confirm xóa
   const showDeleteConfirm = (ids: number[]) => {
     setDeleteTargetIds(ids);
     setConfirmOpen(true);
@@ -184,14 +179,14 @@ const NotificationList: React.FC<NotificationListProps> = ({
       setSelectedIds((prev) =>
         prev.filter((id) => !deleteTargetIds.includes(id))
       );
-      notify("success", "Đã xóa thông báo!");
+      notify("success", t("notification.deleted"));
 
       if (notifications.length === deleteTargetIds.length && page > 0) {
         setPage(0);
       }
     } catch (err) {
-      console.error("Xóa thất bại", err);
-      notify("error", "Xóa thất bại!");
+      console.error(t("notification.deleteFail"), err);
+      notify("error", t("notification.deleteFail"));
     } finally {
       setConfirmOpen(false);
       setDeleteTargetIds([]);
@@ -199,22 +194,21 @@ const NotificationList: React.FC<NotificationListProps> = ({
   };
 
   if (loading)
-    return <div className="text-gray-600">Đang tải thông báo...</div>;
+    return <div className="text-gray-600">{t("notification.loading")}</div>;
   if (!notifications.length)
     return (
       <div className="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-blue-800">
         <div className="text-center text-gray-500 py-10">
-          Không có thông báo nào
+          {t("notification.noNotification")}
         </div>
       </div>
     );
 
   return (
     <div className="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-blue-800">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-blue-800 flex items-center">
-          <HiBell className="mr-2 text-yellow-600" /> Thông báo
+          <HiBell className="mr-2 text-yellow-600" /> {t("notification.title")}
         </h2>
         <div className="flex items-center gap-2">
           {selectMode && (
@@ -228,7 +222,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                 size="sm"
                 color="red"
                 onClick={() => showDeleteConfirm(selectedIds)}>
-                Xóa
+                {t("notification.delete")}
               </Button>
             </>
           )}
@@ -236,12 +230,13 @@ const NotificationList: React.FC<NotificationListProps> = ({
             size="sm"
             color="red"
             onClick={() => setSelectMode(!selectMode)}>
-            {selectMode ? "Hủy chọn" : "Xóa nhiều"}
+            {selectMode
+              ? t("notification.cancelSelect")
+              : t("notification.selectMultiple")}
           </Button>
         </div>
       </div>
 
-      {/* List notification */}
       <div className="space-y-3">
         {notifications.map((n) => {
           const style = typeStyles[n.typeName] || {
@@ -261,8 +256,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
                   ? `border-l-4 ${style.border} ${style.bg}`
                   : "border border-gray-200 bg-gray-50"
               }
-              ${isSelected ? "ring-2 ring-red-400" : ""}
-              group`}>
+              ${isSelected ? "ring-2 ring-red-400" : ""} group`}>
               <div className="flex items-center gap-3">
                 {selectMode && (
                   <Checkbox
@@ -289,7 +283,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
                 </div>
               </div>
 
-              {/* Nút xóa hover */}
               {!selectMode && !isUnread && (
                 <button
                   className="absolute top-2 right-2 flex items-center justify-center
@@ -309,7 +302,6 @@ const NotificationList: React.FC<NotificationListProps> = ({
         })}
       </div>
 
-      {/* Pagination */}
       <Pagination
         currentPage={page}
         totalPages={totalPages}
@@ -317,14 +309,15 @@ const NotificationList: React.FC<NotificationListProps> = ({
         onPageChange={setPage}
       />
 
-      {/* Modal confirm */}
       <ConfirmDialog
         show={confirmOpen}
-        message={`Bạn có chắc muốn xóa ${deleteTargetIds.length} thông báo?`}
+        message={t("notification.confirmDelete", {
+          count: deleteTargetIds.length,
+        })}
         onConfirm={handleConfirmDelete}
         onClose={() => setConfirmOpen(false)}
-        confirmText="Xóa"
-        cancelText="Hủy"
+        confirmText={t("notification.delete")}
+        cancelText={t("notification.cancel")}
       />
     </div>
   );

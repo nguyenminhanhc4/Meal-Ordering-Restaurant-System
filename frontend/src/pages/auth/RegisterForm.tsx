@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Spinner, Button, Label, TextInput, Radio } from "flowbite-react";
-import { Link } from "react-router-dom";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { useNotification } from "../../components/Notification/NotificationContext";
+import { useTranslation } from "react-i18next";
 
 export default function RegisterForm() {
-  // State cho các input
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,16 +30,14 @@ export default function RegisterForm() {
 
     const newErrors: typeof errors = {};
 
-    // validation
     if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters.";
+      newErrors.password = t("auth.register.error.shortPassword");
     }
     if (confirmPassword !== password) {
-      newErrors.confirm = "Passwords do not match.";
+      newErrors.confirm = t("auth.register.error.passwordMismatch");
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Invalid email format.";
+      newErrors.email = t("auth.register.error.invalidEmailFormat");
     }
 
     setErrors(newErrors);
@@ -54,18 +52,21 @@ export default function RegisterForm() {
           gender,
         });
         console.log("Register success:", response.data);
-        notify("success", "Register successful! Please login.");
+        notify("success", t("auth.register.success"));
         navigate("/login");
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           console.error("Register failed:", error.response?.data);
-          notify("error", error.response?.data?.message || "Register failed.");
+          notify(
+            "error",
+            error.response?.data?.message || t("auth.register.failure")
+          );
         } else {
           console.error("Unexpected error:", error);
-          notify("error", "Unexpected error occurred.");
+          notify("error", t("auth.common.unexpectedError"));
         }
       } finally {
-        setLoading(false); // tắt loading
+        setLoading(false);
       }
     }
   };
@@ -73,18 +74,19 @@ export default function RegisterForm() {
   return (
     <div className="w-full h-full flex flex-col justify-center px-8">
       <h2 className="text-3xl font-bold text-white text-center mb-8">
-        Đăng ký
+        {t("auth.register.title")}
       </h2>
+
       <form className="flex flex-col gap-6 w-full" onSubmit={handleSubmit}>
         {/* Full Name */}
         <div>
           <Label htmlFor="name" className="text-gray-100">
-            Họ và tên
+            {t("auth.register.fullName")}
           </Label>
           <TextInput
             id="name"
             type="text"
-            placeholder="John Doe"
+            placeholder={t("auth.register.fullNamePlaceholder")}
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -101,12 +103,12 @@ export default function RegisterForm() {
         {/* Email */}
         <div>
           <Label htmlFor="email" className="!text-gray-100">
-            Email
+            {t("auth.register.email")}
           </Label>
           <TextInput
             id="email"
             type="text"
-            placeholder="Enter your email"
+            placeholder={t("auth.register.emailPlaceholder")}
             required
             color={errors.email ? "failure" : "gray"}
             value={email}
@@ -127,12 +129,12 @@ export default function RegisterForm() {
         {/* Password */}
         <div className="relative">
           <Label htmlFor="password" className="!text-gray-100">
-            Mật khẩu
+            {t("auth.register.password")}
           </Label>
           <TextInput
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
+            placeholder={t("auth.register.passwordPlaceholder")}
             required
             maxLength={20}
             color={errors.password ? "failure" : "gray"}
@@ -160,15 +162,15 @@ export default function RegisterForm() {
         {/* Confirm Password */}
         <div className="relative">
           <Label htmlFor="confirmPassword" className="!text-gray-100">
-            Nhập lại mật khẩu
+            {t("auth.register.confirmPassword")}
           </Label>
           <TextInput
             id="confirmPassword"
             type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
+            placeholder={t("auth.register.confirmPasswordPlaceholder")}
             required
             maxLength={20}
-            color={errors.password ? "failure" : "gray"}
+            color={errors.confirm ? "failure" : "gray"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             theme={{
@@ -192,7 +194,9 @@ export default function RegisterForm() {
 
         {/* Gender */}
         <div>
-          <Label className="!text-gray-100 mb-2">Giới tính</Label>
+          <Label className="!text-gray-100 mb-2">
+            {t("auth.register.gender")}
+          </Label>
           <div className="flex gap-6 mt-2">
             <div className="flex items-center gap-2">
               <Radio
@@ -204,7 +208,7 @@ export default function RegisterForm() {
                 className="!bg-stone-700 !border-stone-600"
               />
               <Label htmlFor="male" className="!text-gray-200">
-                Nam
+                {t("auth.register.male")}
               </Label>
             </div>
             <div className="flex items-center gap-2">
@@ -217,7 +221,7 @@ export default function RegisterForm() {
                 className="!bg-stone-700 !border-stone-600"
               />
               <Label htmlFor="female" className="!text-gray-200">
-                Nữ
+                {t("auth.register.female")}
               </Label>
             </div>
           </div>
@@ -230,14 +234,14 @@ export default function RegisterForm() {
           disabled={loading}
           fullSized>
           {loading && <Spinner size="sm" light={true} />}
-          {loading ? "Đăng ký..." : "Đăng ký"}
+          {loading ? t("auth.register.loading") : t("auth.register.submit")}
         </Button>
       </form>
 
       <p className="text-sm text-gray-300 text-center mt-6">
-        Đã có tài khoản?{" "}
+        {t("auth.register.haveAccount")}{" "}
         <Link to="/login" className="text-yellow-300 hover:text-yellow-400">
-          Đăng nhập
+          {t("auth.register.loginLink")}
         </Link>
       </p>
     </div>

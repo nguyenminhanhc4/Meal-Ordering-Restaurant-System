@@ -1,5 +1,6 @@
 import React from "react";
 import { FaFilter } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 interface SortFilterProps {
   sort: string;
@@ -12,11 +13,13 @@ const SortFilter: React.FC<SortFilterProps> = ({
   setSort,
   resetPage,
 }) => {
+  const { t } = useTranslation();
+
   const sortOptions = [
-    { key: "popular", label: "Phổ biến" },
-    { key: "price-asc", label: "Giá thấp đến cao" },
-    { key: "price-desc", label: "Giá cao đến thấp" },
-    { key: "newest", label: "Mới nhất" },
+    { key: "popular", label: t("component.sortFilter.popular") },
+    { key: "price-asc", label: t("component.sortFilter.priceAsc") },
+    { key: "price-desc", label: t("component.sortFilter.priceDesc") },
+    { key: "newest", label: t("component.sortFilter.newest") },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -32,7 +35,7 @@ const SortFilter: React.FC<SortFilterProps> = ({
         className="flex-1 border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
         value={sort}
         onChange={handleChange}
-        aria-label="Chọn phương thức sắp xếp">
+        aria-label={t("component.sortFilter.ariaLabel")}>
         {sortOptions.map((option) => (
           <option key={option.key} value={option.key}>
             {option.label}

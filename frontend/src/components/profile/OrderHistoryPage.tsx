@@ -24,8 +24,10 @@ import { format } from "date-fns";
 import { useCart } from "../../store/CartContext";
 import axios from "axios";
 import { connectWebSocket } from "../../api/websocketClient";
+import { useTranslation } from "react-i18next";
 
 export default function OrderHistoryPage() {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
@@ -33,7 +35,6 @@ export default function OrderHistoryPage() {
   const { notify } = useNotification();
   const { fetchCart } = useCart();
 
-  // Bộ lọc
   const [filters, setFilters] = useState({
     keyword: "",
     status: "",
@@ -57,14 +58,14 @@ export default function OrderHistoryPage() {
         });
       }
 
-      notify("success", "Đã thêm món vào giỏ hàng!");
+      notify("success", t("orderHistory.notifications.addToCartSuccess"));
       await fetchCart();
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const msg = error.response?.data?.message ?? error.message;
         notify("error", msg);
       } else {
-        notify("error", "Lỗi không xác định khi thêm vào giỏ hàng");
+        notify("error", t("orderHistory.notifications.addToCartFail"));
       }
     }
   };
@@ -74,8 +75,6 @@ export default function OrderHistoryPage() {
   );
 
   const loadOrders = async (pageNumber = 0) => {
-    console.log("🚀 [loadOrders] page =", pageNumber);
-    console.log("🧩 [loadOrders] filters:", filters);
     setLoading(true);
     try {
       const data = await fetchOrderHistory({
@@ -91,15 +90,13 @@ export default function OrderHistoryPage() {
     }
   };
 
-  // Chỉ useEffect gọi loadOrders, không gọi handleSearch trong onChange
   useEffect(() => {
     loadOrders(0);
   }, [filters]);
 
-  /** WebSocket realtime cho từng món */
+  // WebSocket realtime menu items
   useEffect(() => {
     if (!orders?.length) return;
-
     const itemIds = orders.flatMap((o) => o.items.map((i) => i.menuItemId));
     const clients = itemIds.map((id) =>
       connectWebSocket<{ menuItemId: number; status: string }>(
@@ -118,16 +115,12 @@ export default function OrderHistoryPage() {
         }
       )
     );
-
-    return () => {
-      clients.forEach((c) => c.deactivate());
-    };
+    return () => clients.forEach((c) => c.deactivate());
   }, [orders]);
 
-  // === WebSocket realtime cho trạng thái đơn hàng ===
+  // WebSocket realtime order status
   useEffect(() => {
     if (!orders?.length) return;
-
     const client = connectWebSocket<{ orderPublicId: string; status: string }>(
       "/topic/order",
       (data) => {
@@ -145,41 +138,38 @@ export default function OrderHistoryPage() {
   }, [orders]);
 
   const toggleExpand = (orderId: string) => {
-    setExpandedOrders((prev) => ({
-      ...prev,
-      [orderId]: !prev[orderId],
-    }));
+    setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "warning"; // vàng
+        return "warning";
       case "APPROVED":
-        return "info"; // xanh dương nhạt
+        return "info";
       case "DELIVERING":
-        return "purple"; // tím
+        return "purple";
       case "DELIVERED":
-        return "success"; // xanh lá
+        return "success";
       case "CANCELLED":
-        return "failure"; // đỏ
+        return "failure";
       default:
-        return "gray"; // fallback
+        return "gray";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "Chờ duyệt";
+        return t("orderHistory.status.pending");
       case "APPROVED":
-        return "Đã duyệt";
+        return t("orderHistory.status.approved");
       case "DELIVERING":
-        return "Đang giao";
+        return t("orderHistory.status.delivering");
       case "DELIVERED":
-        return "Đã giao";
+        return t("orderHistory.status.delivered");
       case "CANCELLED":
-        return "Đã hủy";
+        return t("orderHistory.status.cancelled");
       default:
         return status;
     }
@@ -188,17 +178,17 @@ export default function OrderHistoryPage() {
   return (
     <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-blue-800">
       <h2 className="text-2xl font-bold text-blue-800 mb-6 flex items-center">
-        <MdFastfood className="mr-2 text-yellow-600" /> Lịch sử đặt món
+        <MdFastfood className="mr-2 text-yellow-600" />{" "}
+        {t("orderHistory.title")}
       </h2>
 
-      {/* === Bộ lọc === */}
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        {/* Keyword search */}
         <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200 shadow-sm">
           <FaSearch className="w-5 h-5 text-green-600" />
           <input
             type="text"
-            placeholder="Tìm món..."
+            placeholder={t("orderHistory.filters.searchPlaceholder")}
             className="border border-green-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-green-400 outline-none"
             value={filters.keyword}
             onChange={(e) =>
@@ -207,7 +197,6 @@ export default function OrderHistoryPage() {
           />
         </div>
 
-        {/* Status filter */}
         <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl border border-blue-200 shadow-sm">
           <FaFilter className="w-5 h-5 text-blue-600" />
           <select
@@ -216,16 +205,23 @@ export default function OrderHistoryPage() {
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, status: e.target.value }))
             }>
-            <option value="">Tất cả</option>
-            <option value="DELIVERED">Đã giao</option>
-            <option value="PENDING">Chờ xác nhận</option>
-            <option value="DELIVERING">Đang giao</option>
-            <option value="APPROVED">Đã xác nhận</option>
-            <option value="CANCELLED">Đã hủy</option>
+            <option value="">{t("orderHistory.filters.status.all")}</option>
+            <option value="DELIVERED">
+              {t("orderHistory.status.delivered")}
+            </option>
+            <option value="PENDING">{t("orderHistory.status.pending")}</option>
+            <option value="DELIVERING">
+              {t("orderHistory.status.delivering")}
+            </option>
+            <option value="APPROVED">
+              {t("orderHistory.status.approved")}
+            </option>
+            <option value="CANCELLED">
+              {t("orderHistory.status.cancelled")}
+            </option>
           </select>
         </div>
 
-        {/* From - To date */}
         <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-200 shadow-sm">
           <FaCalendar className="w-5 h-5 text-yellow-600" />
           <input
@@ -250,14 +246,13 @@ export default function OrderHistoryPage() {
         </div>
       </div>
 
-      {/* === Danh sách đơn hàng === */}
       {loading ? (
         <div className="flex justify-center items-center py-10">
           <Spinner size="xl" />
         </div>
       ) : orders.length === 0 ? (
         <p className="text-gray-600 text-center py-10">
-          Không có đơn hàng nào phù hợp.
+          {t("orderHistory.noOrders")}
         </p>
       ) : (
         <div className="space-y-6">
@@ -278,7 +273,7 @@ export default function OrderHistoryPage() {
                 <div className="flex justify-between items-center mb-3">
                   <div>
                     <p className="text-sm text-gray-500">
-                      Mã đơn: #{order.id.slice(0, 8)} •{" "}
+                      {t("orderHistory.orderId")}: #{order.id.slice(0, 8)} •{" "}
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                     </p>
                     <Badge
@@ -307,11 +302,12 @@ export default function OrderHistoryPage() {
                       <div className="flex flex-col">
                         <span className="font-medium">{item.menuItemName}</span>
                         <span className="text-sm text-gray-600">
-                          SL: {item.quantity} • {item.price.toLocaleString()} ₫
+                          {t("orderHistory.quantity")}: {item.quantity} •{" "}
+                          {item.price.toLocaleString()} ₫
                         </span>
                         {item.status === "OUT_OF_STOCK" && (
                           <Badge color="failure" size="sm" className="mt-1">
-                            Hết hàng
+                            {t("orderHistory.outOfStock")}
                           </Badge>
                         )}
                       </div>
@@ -322,7 +318,7 @@ export default function OrderHistoryPage() {
                     <div
                       className="flex items-center justify-center bg-gray-100 p-3 rounded-lg text-gray-500 font-medium cursor-pointer"
                       onClick={() => toggleExpand(order.id)}>
-                      +{remainingCount} món khác
+                      +{remainingCount} {t("orderHistory.moreItems")}
                     </div>
                   )}
                 </div>
@@ -333,8 +329,8 @@ export default function OrderHistoryPage() {
                       className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-800 transition rounded px-2 py-1 bg-blue-50 hover:bg-blue-100"
                       onClick={() => toggleExpand(order.id)}>
                       {isExpanded
-                        ? "Thu gọn"
-                        : `Xem tất cả (+${remainingCount})`}
+                        ? t("orderHistory.collapse")
+                        : `${t("orderHistory.viewAll")} (+${remainingCount})`}
                       {isExpanded ? (
                         <FaChevronUp className="w-4 h-4" />
                       ) : (
@@ -342,13 +338,11 @@ export default function OrderHistoryPage() {
                       )}
                     </button>
                   )}
-
                   <div className="flex-grow" />
-
                   <button
                     className="text-sm text-white font-medium rounded px-3 py-1 bg-amber-600 hover:bg-amber-700 transition"
                     onClick={() => handleReorder(order.id)}>
-                    Đặt hàng lại
+                    {t("orderHistory.reorder")}
                   </button>
                 </div>
               </div>
@@ -357,7 +351,6 @@ export default function OrderHistoryPage() {
         </div>
       )}
 
-      {/* === Phân trang === */}
       <Pagination
         currentPage={page}
         totalPages={totalPages}

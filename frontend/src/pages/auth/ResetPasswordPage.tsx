@@ -3,8 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { AxiosError } from "axios";
 import { useNotification } from "../../components/Notification/";
+import { useTranslation } from "react-i18next";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const { notify } = useNotification();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -20,21 +22,20 @@ export default function ResetPasswordPage() {
     const newErrors: { password?: string; confirm?: string } = {};
 
     if (password.length < 8)
-      newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
+      newErrors.password = t("auth.reset.error.shortPassword");
     else if (!/[A-Z]/.test(password))
-      newErrors.password = "Mật khẩu phải chứa ít nhất 1 chữ hoa";
+      newErrors.password = t("auth.reset.error.uppercase");
     else if (!/[a-z]/.test(password))
-      newErrors.password = "Mật khẩu phải chứa ít nhất 1 chữ thường";
+      newErrors.password = t("auth.reset.error.lowercase");
     else if (!/[0-9]/.test(password))
-      newErrors.password = "Mật khẩu phải chứa ít nhất 1 số";
+      newErrors.password = t("auth.reset.error.number");
     else if (!/[!@#$%^&*()_+\-={}[\]|;:'",.<>/?]/.test(password))
-      newErrors.password = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt";
+      newErrors.password = t("auth.reset.error.specialChar");
 
     if (password !== confirmPassword)
-      newErrors.confirm = "Mật khẩu xác nhận không khớp";
+      newErrors.confirm = t("auth.reset.error.passwordMismatch");
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -42,7 +43,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     if (!validate()) return;
     if (!token) {
-      notify("error", "Token không hợp lệ");
+      notify("error", t("auth.reset.error.invalidToken"));
       return;
     }
 
@@ -52,18 +53,15 @@ export default function ResetPasswordPage() {
         token,
         newPassword: password,
       });
-      notify("success", "Đổi mật khẩu thành công!");
+      notify("success", t("auth.reset.success"));
       setPassword("");
       setConfirmPassword("");
       setErrors({});
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
-        notify(
-          "error",
-          err.response?.data?.message || "Lỗi khi đặt lại mật khẩu"
-        );
+        notify("error", err.response?.data?.message || t("auth.reset.failure"));
       } else {
-        notify("error", "Đã xảy ra lỗi không xác định!");
+        notify("error", t("auth.common.unexpectedError"));
       }
     } finally {
       setLoading(false);
@@ -73,25 +71,25 @@ export default function ResetPasswordPage() {
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-100 flex items-center justify-center py-12 px-4 sm:px-6 md:px-8">
       <div className="w-full max-w-lg p-10 bg-white rounded-2xl shadow-xl relative">
-        {/* Overlay loading */}
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center rounded-2xl z-10">
             <span className="text-blue-600 font-semibold text-lg">
-              Đang xử lý...
+              {t("auth.reset.loading")}
             </span>
           </div>
         )}
 
         <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
-          Đặt lại mật khẩu
+          {t("auth.reset.title")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-5 relative z-0">
-          {/* Mật khẩu mới */}
           <div>
-            <label className="block text-gray-700 mb-1">Mật khẩu mới</label>
+            <label className="block text-gray-700 mb-1">
+              {t("auth.reset.newPasswordLabel")}
+            </label>
             <input
               type="password"
-              placeholder="Nhập mật khẩu mới"
+              placeholder={t("auth.reset.newPasswordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={`w-full p-3 border rounded-xl focus:ring-2 ${
@@ -105,14 +103,13 @@ export default function ResetPasswordPage() {
             )}
           </div>
 
-          {/* Xác nhận mật khẩu */}
           <div>
             <label className="block text-gray-700 mb-1">
-              Xác nhận mật khẩu
+              {t("auth.reset.confirmPasswordLabel")}
             </label>
             <input
               type="password"
-              placeholder="Xác nhận mật khẩu"
+              placeholder={t("auth.reset.confirmPasswordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={`w-full p-3 border rounded-xl focus:ring-2 ${
@@ -130,7 +127,7 @@ export default function ResetPasswordPage() {
             type="submit"
             disabled={loading}
             className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 transition">
-            Đặt lại mật khẩu
+            {t("auth.reset.submit")}
           </button>
         </form>
       </div>

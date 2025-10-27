@@ -1,0 +1,683 @@
+{
+  "auth": {
+    "common": {
+      "unexpectedError": "An unexpected error occurred!"
+    },
+    "forgot": {
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "emptyEmail": "Please enter your email."
+      },
+      "failure": "Unable to send request at this time. Please try again later.",
+      "success": "Password reset request sent. Please check your email.",
+      "title": "Forgot Password"
+    },
+    "login": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "invalidEmail": "Please enter a valid email.",
+        "invalidEmailFormat": "Invalid email format.",
+        "shortPassword": "Password must be at least 8 characters."
+      },
+      "passwordLabel": "Password",
+      "failure": "Login failed. Please try again.",
+      "forgotPassword": "Forgot password?",
+      "loading": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "submit": "Log In",
+      "success": "Login successful!",
+      "title": "Log In"
+    },
+    "register": {
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "invalidEmailFormat": "Invalid email format.",
+        "passwordMismatch": "Passwords do not match.",
+        "shortPassword": "Password must be at least 8 characters."
+      },
+      "failure": "Registration failed. Please try again.",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "gender": "Gender",
+      "haveAccount": "Already have an account?",
+      "loading": "Registering...",
+      "loginLink": "Log In",
+      "male": "Male",
+      "female": "Female",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign Up",
+      "success": "Registration successful!",
+      "title": "Sign Up"
+    },
+    "reset": {
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "error": {
+        "invalidToken": "Invalid token",
+        "passwordMismatch": "Passwords do not match",
+        "shortPassword": "Password must be at least 8 characters",
+        "uppercase": "Password must contain at least 1 uppercase letter",
+        "lowercase": "Password must contain at least 1 lowercase letter",
+        "number": "Password must contain at least 1 number",
+        "specialChar": "Password must contain at least 1 special character"
+      },
+      "failure": "Error resetting password",
+      "loading": "Processing...",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "success": "Password reset successful!",
+      "submit": "Reset Password",
+      "title": "Reset Password"
+    }
+  },
+  "bookedList": {
+    "actions": "Actions",
+    "cancel": "Cancel Reservation",
+    "details": "Details",
+    "edit": "Edit",
+    "empty": {
+      "message": "Book a table now to enjoy delicious meals!",
+      "title": "No tables have been reserved."
+    },
+    "people": "Number of People",
+    "status": {
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "processing": "Processing"
+    },
+    "statusHeader": "Status",
+    "tableTime": "Table & Time",
+    "title": "List of Reserved Tables",
+    "unknownTable": "(Unknown)"
+  },
+  "bookingModal": {
+    "cancelButton": "Cancel",
+    "capacity": "Maximum Capacity",
+    "capacityUnit": "seats",
+    "confirmButton": "Confirm Reservation",
+    "createBooking": "Book Table",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Enter customer name",
+    "errorTime": "⚠️ Reservation time must be between {{min}}:00 and {{max}}:00.",
+    "note": "Additional Notes (if any)",
+    "notePlaceholder": "Birthday, gathering, ...",
+    "numberOfPeople": "Number of Guests",
+    "phone": "Phone Number",
+    "phonePlaceholder": "0123456789",
+    "reservationTime": "Reservation Time (Date & Time)",
+    "tableCapacity": "This table has a maximum capacity of {{capacity}} people.",
+    "updateBooking": "Update Reservation",
+    "updateButton": "Update Information",
+    "workingHours": "Operating Hours: {{min}}:00 AM - {{max}}:00 PM"
+  },
+  "cart": {
+    "actions": "Actions",
+    "backToMenu": "Back to Menu",
+    "cancel": "Cancel",
+    "checkout": "Place Order",
+    "checkoutFail": "Order placement failed. Please try again.",
+    "checkoutSuccess": "Order placed successfully! Order ID: {{publicId}}",
+    "clearAll": "Clear All",
+    "clearFail": "Failed to clear cart. Please try again.",
+    "clearSuccess": "Cart cleared successfully",
+    "collapseList": "Collapse List",
+    "confirm": "Delete",
+    "confirmClear": "Are you sure you want to clear the entire cart?",
+    "confirmRemoveItem": "Are you sure you want to remove \"{{name}}\" from the cart?",
+    "confirmRemoveSelected": "Are you sure you want to remove {{count}} selected items?",
+    "confirmTitle": "Confirm Deletion",
+    "empty": "Your cart is empty",
+    "fetchError": "Unable to load cart. Please try again.",
+    "image": "Image",
+    "itemName": "Item Name",
+    "noCategory": "Not specified",
+    "noDescription": "No description",
+    "outOfStock": "Out of Stock",
+    "price": "Price",
+    "quantity": "Quantity",
+    "quantityMax": "Maximum quantity for this item is {{qty}}.",
+    "quantityMin": "Quantity must be greater than 0.",
+    "realtimeError": "Error updating cart in real-time:",
+    "realtimeUpdate": "Real-time cart update:",
+    "removeFail": "Failed to remove item. Please try again.",
+    "removeSelected": "Remove Selected",
+    "removeSuccess": "Removed from cart",
+    "title": "Cart",
+    "totalItems": "Total Items",
+    "totalPrice": "Total",
+    "updateFail": "Failed to update quantity. Please try again.",
+    "updateSuccess": "Quantity updated successfully!",
+    "viewMenu": "View Menu",
+    "viewMore": "View {{count}} more items"
+  },
+  "cartBTN": {
+    "addToCart": "Add {{quantity}} {{name}} to cart",
+    "addToCartButton": "Add to Cart",
+    "added": "Added {{qty}} {{name}} to cart",
+    "adding": "Adding...",
+    "decreaseQuantity": "Decrease Quantity",
+    "increaseQuantity": "Increase Quantity",
+    "unknownError": "Unknown error when adding to cart"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "currency": "VND",
+    "loading": "Loading...",
+    "send": "Send",
+    "sending": "Sending..."
+  },
+  "component": {
+    "megaMenu": {
+      "allDishes": "All Dishes & Drinks",
+      "cart": "Cart",
+      "categoryDeleted": "A category has been deleted!",
+      "categoryUpdated": "Category \"{{name}}\" has been updated!",
+      "home": "Home",
+      "loadCategoriesError": "Error loading categories. Please try again.",
+      "login": "Log In",
+      "logoAlt": "Restaurant Logo",
+      "logout": "Log Out",
+      "logoutSuccess": "Logged out successfully!",
+      "menu": "Menu",
+      "newCategoryAdded": "Category \"{{name}}\" has been added!",
+      "noCategory": "No categories",
+      "orders": "Orders",
+      "profile": "Profile",
+      "tableBooking": "Table Booking",
+      "unexpectedError": "An unexpected error occurred.",
+      "userAvatarAlt": "User Avatar",
+      "viewAllMenu": "View Full Menu"
+    },
+    "searchBar": {
+      "ariaLabel": "Search for dishes",
+      "clearLabel": "Clear search input",
+      "placeholder": "Search for dishes..."
+    },
+    "sortFilter": {
+      "ariaLabel": "Select sorting method",
+      "newest": "Newest",
+      "popular": "Popular",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low"
+    }
+  },
+  "footer": {
+    "address": "123 ABC Street, District 1, Ho Chi Minh City",
+    "connectWithUs": "Connect with Us",
+    "copyright": "All rights reserved.",
+    "email": "contact@xyzrestaurant.com",
+    "home": "Home",
+    "menu": "Menu",
+    "openingHours": "Opening Hours",
+    "phone": "+84 123 456 789",
+    "quickLinks": "Quick Links",
+    "reserveTable": "Reserve Table",
+    "workingTime": "Monday – Sunday: 9:00 AM – 10:00 PM"
+  },
+  "heroSection": {
+    "button": {
+      "bookTable": "Book a Table Now",
+      "orderNow": "Order Now"
+    },
+    "subtitle": "Cozy, elegant ambiance – your destination for refined dining experiences.",
+    "title": {
+      "highlight": "XYZ Restaurant",
+      "prefix": "Welcome to"
+    }
+  },
+  "home": {
+    "about": {
+      "bookTable": "Book a Table Now",
+      "description": "XYZ Restaurant is committed to delivering exquisite dining experiences with elegant ambiance and dedicated service.",
+      "features": {
+        "freshFood": {
+          "description": "High-quality ingredients, expertly prepared to ensure exceptional flavors.",
+          "title": "Fresh Food"
+        },
+        "luxurySpace": {
+          "description": "Modern design with warm lighting, creating a comfortable atmosphere for diners.",
+          "title": "Luxurious Ambiance"
+        },
+        "professionalService": {
+          "description": "Friendly, dedicated staff delivering outstanding experiences.",
+          "title": "Professional Service"
+        }
+      },
+      "orderNow": "Order Now",
+      "title": "About Us"
+    },
+    "menu": {
+      "orderNow": "Order Now",
+      "soldCount": "Sold {{count}}+ servings",
+      "title": "Featured Dishes",
+      "viewMore": "View More"
+    }
+  },
+  "mealPage": {
+    "actions": {
+      "loadMore": "Load More",
+      "viewAll": "View All"
+    },
+    "description": "Explore the most delicious dishes in the category",
+    "loadingMore": "Loading...",
+    "noItems": "No dishes available in this category",
+    "notification": {
+      "fetchError": "Unable to load dish list",
+      "itemDeleted": "Dish has been removed from the system",
+      "itemUpdated": "{{name}} has been updated",
+      "itemUpdatedOrAdded": "{{name}} has been updated or added"
+    },
+    "title": {
+      "default": "Dish List"
+    }
+  },
+  "navbarLanding": {
+    "brand": {
+      "name": "XYZ Restaurant"
+    },
+    "dropdown": {
+      "lang":"Languages",
+      "logout": "Log Out",
+      "logoutSuccess": "Logged out successfully!",
+      "orders": "Orders",
+      "profile": "Profile"
+    },
+    "login": "Log In",
+    "menu": {
+      "about": "About",
+      "booking": "Table Booking",
+      "home": "Home",
+      "menu": "Menu"
+    }
+  },
+  "notification": {
+    "cancel": "Cancel",
+    "cancelSelect": "Cancel Delete",
+    "confirmDelete": "Are you sure you want to delete {{count}} notifications?",
+    "delete": "Delete",
+    "deleteFail": "Deletion failed!",
+    "deleted": "Notification deleted!",
+    "errorLoad": "Error loading notifications",
+    "errorMarkRead": "Error marking as read",
+    "loading": "Loading notifications...",
+    "noNotification": "No notifications available",
+    "selectMultiple": "Delete Multiple",
+    "title": "Notifications"
+  },
+  "order": {
+    "backToMenu": "Back to Menu",
+    "header": "Orders",
+    "detail": {
+      "back": "Back",
+      "createdAt": "Created At:",
+      "customer": "Ordered By:",
+      "itemsTitle": "Item List",
+      "pay": "Pay",
+      "table": {
+        "name": "Item Name",
+        "price": "Unit Price",
+        "quantity": "Quantity",
+        "total": "Total"
+      },
+      "title": "Order #{{id}}",
+      "total": "Total Amount:"
+    },
+    "errorLoadOrders": "Unable to load order list. Please try again.",
+    "errorLoadOrdersNotify": "Failed to load orders",
+    "errorLoadStatus": "Unable to load status list.",
+    "errorNotFound": "Order not found.",
+    "items": "items",
+    "itemsPreview": "Items",
+    "noOrders": "You have no orders.",
+    "orderNumber": "Order #{{id}}",
+    "statusLabel": {
+      "APPROVED": "Approved",
+      "CANCELLED": "Cancelled",
+      "DELIVERED": "Delivered",
+      "DELIVERING": "Delivering",
+      "PENDING": "Pending"
+    },
+    "statusSelectAria": "Select order status",
+    "allStatuses": "All",
+    "viewDetails": "View Details"
+  },
+  "orderHistory": {
+    "collapse": "Collapse",
+    "filters": {
+      "searchPlaceholder": "Search for dishes...",
+      "status": {
+        "all": "All"
+      }
+    },
+    "moreItems": "more items",
+    "noOrders": "No matching orders found.",
+    "notifications": {
+      "addToCartFail": "Unknown error when adding to cart",
+      "addToCartSuccess": "Item added to cart!"
+    },
+    "orderId": "Order ID",
+    "quantity": "Qty",
+    "outOfStock": "Out of Stock",
+    "reorder": "Reorder",
+    "status": {
+      "approved": "Confirmed",
+      "cancelled": "Cancelled",
+      "delivered": "Delivered",
+      "delivering": "Delivering",
+      "pending": "Pending"
+    },
+    "title": "Order History",
+    "viewAll": "View All"
+  },
+  "payment": {
+    "backToOrders": "Back to Order List",
+    "error": {
+      "backHome": "Back to Home",
+      "notFound": "Order information not found or unavailable.",
+      "title": "Payment Error"
+    },
+    "failed": {
+      "description": "An error occurred during payment. Please try again or choose another method.",
+      "retry": "Retry Payment",
+      "title": "Payment Failed"
+    },
+    "loading": {
+      "message": "Loading order information..."
+    },
+    "method": {
+      "cod": {
+        "desc": "You will pay in cash upon delivery.",
+        "label": "Cash on Delivery (COD)"
+      },
+      "title": "Payment Method",
+      "online": {
+        "desc": "Fast and secure payment via online payment gateway.",
+        "label": "Online Payment"
+      }
+    },
+    "mockTitle": "Mock Payment Gateway",
+    "notify": {
+      "failed": "Payment failed. Please try again later.",
+      "missingFields": "Please fill in full name, phone number, and delivery address.",
+      "success": "Payment successful!"
+    },
+    "shipping": {
+      "desc": "Please review your delivery information before confirming payment.",
+      "fields": {
+        "address": "Address",
+        "email": "Email",
+        "fullName": "Full Name",
+        "note": "Note (optional)",
+        "phone": "Phone Number"
+      },
+      "title": "Delivery Information"
+    },
+    "success": {
+      "description": "Thank you for your payment. Your order is being processed and will be delivered soon.",
+      "title": "Payment Successful!"
+    },
+    "summary": {
+      "button": {
+        "pay": "Confirm Payment",
+        "processing": "Processing..."
+      },
+      "items": {
+        "x": "x{{count}}"
+      },
+      "terms": "By proceeding with payment, you agree to our purchase terms.",
+      "totalLabel": "Total",
+      "title": "Order Summary #{{id}}"
+    },
+    "amount": "Amount",
+    "approveBtn": "Approve",
+    "approveFailed": "Payment approval failed: ",
+    "cancelBtn": "Cancel",
+    "cancelFailed": "Payment cancellation failed: ",
+    "cancelled": "Payment cancelled",
+    "approved": "Payment approved!",
+    "loading": "Loading payment information...",
+    "missingShipping": "Missing shipping information!",
+    "notFound": "Payment not found",
+    "orderId": "Order ID",
+    "title": "Order Payment"
+  },
+  "product": {
+    "availableQuantity": "Available Quantity",
+    "backToMenu": "Back to Menu",
+    "category": "Category",
+    "defaultDescription": "Delicious dish waiting for you to explore! Contact us for more details.",
+    "inStock": "In Stock",
+    "invalidQuantity": "Invalid quantity, maximum {{qty}}",
+    "loadError": "Error loading product",
+    "new": "NEW DISH",
+    "noImage": "No image available",
+    "notFound": "Product not found",
+    "outOfStock": "Out of Stock",
+    "reviewsCount": "({{count}} reviews)",
+    "sold": "Sold",
+    "status": "Status",
+    "unavailable": "Product {{name}} is currently unavailable",
+    "unit": "serving",
+    "updated": "Product updated"
+  },
+  "productCard": {
+    "add": "Add",
+    "addToCartError": "Error adding to cart",
+    "addedToCart": "Added {{name}} to cart",
+    "available": "Available",
+    "comingSoon": "Coming Soon",
+    "currency": "VND",
+    "defaultDescription": "Delicious dish waiting for you to explore!",
+    "new": "New",
+    "noImage": "No image available",
+    "outOfStock": "Out of Stock",
+    "sold": "Sold {{count}}+",
+    "updated": "{{name}} has been updated",
+    "view": "View"
+  },
+  "profile": {
+    "actions": {
+      "cancel": "Cancel",
+      "editProfile": "Edit Profile",
+      "save": "Save Changes"
+    },
+    "avatarAlt": "User Avatar",
+    "changeAvatar": "Change",
+    "fields": {
+      "address": "Address",
+      "gender": "Gender",
+      "genderPlaceholder": "-- Select Gender --",
+      "name": "Name",
+      "phone": "Phone Number"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male",
+      "notUpdated": "Not updated"
+    },
+    "loading": "Loading information...",
+    "notifications": {
+      "avatarUpdateFail": "Unable to update avatar.",
+      "avatarUpdateSuccess": "Avatar updated successfully!",
+      "updateFail": "Profile update failed.",
+      "updateSuccess": "Profile updated successfully!"
+    },
+    "sidebar": {
+      "tabs": {
+        "notifications": "Notifications",
+        "orders": "Order History",
+        "profile": "Personal Information",
+        "reservations": "Reservation History",
+        "security": "Security & Password"
+      },
+      "title": "User Profile"
+    }
+  },
+  "review": {
+    "alreadyReviewed": "You reviewed this dish on {{date}}",
+    "cancel": "Cancel",
+    "characters": "characters",
+    "comment": "Comment",
+    "customerReviews": "Customer Reviews",
+    "delete": "Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete this review?",
+    "deleteConfirmTitle": "Delete Review",
+    "deleteFailed": "Unable to delete review",
+    "deleted": "Review deleted",
+    "edit": "Edit",
+    "error": {
+      "emptyComment": "Please enter review content",
+      "noRating": "Please select a star rating",
+      "submitFailed": "Failed to submit review",
+      "tooLong": "Review content is too long, maximum {{max}} characters"
+    },
+    "filter": {
+      "all": "All",
+      "negative": "Negative (≤2★)",
+      "neutral": "Neutral (3★)",
+      "positive": "Positive (≥4★)"
+    },
+    "loginToReview": "Please log in to write a review",
+    "noReviews": "No reviews match the current filter",
+    "placeholder": "Share your thoughts about this dish...",
+    "rating": "Rating",
+    "sending": "Sending...",
+    "submit": "Submit Review",
+    "submitFailed": "Failed to submit review",
+    "submitted": "Review submitted",
+    "summary": "Summary",
+    "title": "Write Your Review",
+    "updateFailed": "Unable to update review",
+    "updated": "Review updated successfully",
+    "aria": {
+      "cancel": "Cancel review",
+      "rateStar": "Rate {{star}} stars",
+      "ratingGroup": "Select star rating",
+      "submit": "Submit review"
+    }
+  },
+  "security": {
+    "changePasswordBtn": "Change Password",
+    "changePasswordTitle": "Change Account Password",
+    "confirmPasswordLabel": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "currentPasswordLabel": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "currentPasswordRequired": "Please enter your current password",
+    "emailLabel": "Registered Email",
+    "emailPlaceholder": "Enter your email",
+    "enterEmail": "Please enter your email.",
+    "forgotPasswordDesc": "Enter your email to receive a password reset link.",
+    "forgotPasswordFailed": "Unable to send request, please try again.",
+    "forgotPasswordSent": "Password reset request sent. Please check your email.",
+    "forgotPasswordTitle": "Request Password Reset",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "passwordChanged": "Password changed successfully!",
+    "passwordChangeFailed": "Error changing password!",
+    "passwordLowercase": "New password must contain at least 1 lowercase letter",
+    "passwordMinLength": "New password must be at least 8 characters",
+    "passwordNumber": "New password must contain at least 1 number",
+    "passwordSpecialChar": "New password must contain at least 1 special character",
+    "passwordUppercase": "New password must contain at least 1 uppercase letter",
+    "confirmPasswordMismatch": "Passwords do not match",
+    "sendRequest": "Send Password Reset Request",
+    "sending": "Sending...",
+    "tabChangePassword": "Change Password",
+    "tabForgotPassword": "Forgot Password",
+    "title": "Security Settings",
+    "unknownError": "An unexpected error occurred!",
+    "updating": "Updating..."
+  },
+  "table": {
+    "button": {
+      "viewBooked": "View Reserved Tables"
+    },
+    "confirm": {
+      "cancel": "Exit",
+      "cancelMessage": "Are you sure you want to cancel this reservation?",
+      "cancelTitle": "Confirm Reservation Cancellation",
+      "confirm": "Confirm"
+    },
+    "count": {
+      "available": "Available",
+      "booked": "Reserved",
+      "total": "Total"
+    },
+    "filter": {
+      "allAreas": "All Areas"
+    },
+    "header": {
+      "title": "Book Table"
+    },
+    "legend": {
+      "available": "Available",
+      "booked": "Reserved",
+      "myTable": "My Table",
+      "pending": "Pending Approval",
+      "title": "Legend"
+    },
+    "notify": {
+      "bookingFail": "Unable to book table, please try again!",
+      "bookingSuccess": "Successfully booked table {{table}} at {{time}}!",
+      "generalError": "An error occurred!",
+      "updateFail": "Unable to update reservation!",
+      "updateSuccess": "Reservation updated successfully!"
+    },
+    "status": {
+      "available": "Available",
+      "booked": "Reserved",
+      "myConfirmed": "Your reserved table (Confirmed)",
+      "myPending": "Your reserved table (Pending)"
+    },
+    "tooltip": {
+      "capacity": "Capacity",
+      "location": "Area",
+      "position": "Position",
+      "seats": "seats",
+      "status": "Status"
+    }
+  },
+  "userReservation": {
+    "actions": "Actions",
+    "cancelButton": "Back",
+    "cancelFail": "Error cancelling reservation",
+    "cancelSuccess": "Reservation cancelled successfully",
+    "confirmCancelButton": "Confirm Cancellation",
+    "confirmCancelTitle": "Confirm Reservation Cancellation",
+    "confirmCancelMessage": "Are you sure you want to cancel this reservation?",
+    "details": "Details",
+    "errorFetching": "Error loading reservation history",
+    "filterLabel": "Filter:",
+    "noReservations": "☕ You have no reservation history.",
+    "noReservationsTip": "Try booking a table to experience our services!",
+    "numberOfPeople": "Number of People",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "timeAsc": "Reservation Time (Earliest)",
+      "timeDesc": "Reservation Time (Latest)"
+    },
+    "sortLabel": "Sort:",
+    "status": {
+      "all": "All",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "unknown": "Unknown"
+    },
+    "statusLabel": "Status",
+    "tableTime": "Table & Time",
+    "title": "Reservation History",
+    "unknownTable": "(Unknown)",
+    "updateFail": "Error updating reservation",
+    "updateSuccess": "Reservation updated successfully"
+  }
+}

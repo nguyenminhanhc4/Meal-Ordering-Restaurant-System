@@ -11,10 +11,10 @@ import React, { useState, useEffect } from "react";
 import type { TableEntity } from "../../../services/table/tableService";
 import type { Reservation } from "../../../services/reservation/reservationService";
 import { useAuth } from "../../../store/AuthContext";
+import { useTranslation } from "react-i18next";
 
-// ✅ Khai báo Giờ mở cửa/đóng cửa (Tùy chỉnh theo nhu cầu)
-const MIN_HOUR = 9; // 9:00 sáng
-const MAX_HOUR = 22; // 22:00 tối
+const MIN_HOUR = 9;
+const MAX_HOUR = 22;
 
 interface BookingModalProps {
   table?: TableEntity | null;
@@ -27,7 +27,6 @@ interface BookingModalProps {
   mode?: "create" | "edit";
 }
 
-// ✅ Định nghĩa kiểu dữ liệu form mới (giúp TypeScript an toàn hơn)
 export interface BookingData {
   name: string;
   phone: string;
@@ -40,7 +39,7 @@ const initialFormData: BookingData = {
   name: "",
   phone: "",
   reservationTime: "",
-  numberOfPeople: "1", // Mặc định là 1 người
+  numberOfPeople: "1",
 };
 
 export default function BookingModal({
@@ -56,12 +55,12 @@ export default function BookingModal({
   const [formData, setFormData] = useState<BookingData>(initialFormData);
   const [formError, setFormError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!show) return;
 
     if (mode === "edit" && existingReservation) {
-      // Đổ dữ liệu từ reservation API vào form
       setFormData({
         name: user?.name || "",
         phone: user?.phone || "",
@@ -71,7 +70,6 @@ export default function BookingModal({
         note: existingReservation.note || "",
       });
     } else if (mode === "create" && user) {
-      // Reset form khi tạo mới
       setFormData({
         ...initialFormData,
         name: user.name || "",
@@ -96,9 +94,8 @@ export default function BookingModal({
 
     if (selectedDateTime) {
       const selectedHour = parseInt(selectedDateTime.substring(11, 13));
-
       if (selectedHour < MIN_HOUR || selectedHour > MAX_HOUR) {
-        error = `⚠️ Giờ đặt bàn phải trong khoảng từ ${MIN_HOUR}:00 đến ${MAX_HOUR}:00.`;
+        error = t("bookingModal.errorTime", { min: MIN_HOUR, max: MAX_HOUR });
       }
     }
 
@@ -107,25 +104,24 @@ export default function BookingModal({
   };
 
   const handleClose = () => {
-    setFormData(initialFormData); // Reset form khi đóng
+    setFormData(initialFormData);
     setFormError(null);
     onClose();
   };
 
   return (
     <Modal show={show} onClose={handleClose} popup>
-      {/* ✅ ĐIỀU CHỈNH 1: Header (Màu sắc thương hiệu) */}
       <ModalHeader className="border-b-8 !border-yellow-800 !bg-stone-800 text-xl font-bol">
         <div className="text-xl font-normal text-yellow-500 mt-1">
           {mode === "edit"
-            ? `Cập nhật đặt bàn   ${table?.name || ""}`
-            : `Đặt bàn ${table?.name || ""}`}
+            ? `${t("bookingModal.updateBooking")} ${table?.name || ""}`
+            : `${t("bookingModal.createBooking")} ${table?.name || ""}`}
         </div>
         {table && (
           <div className="text-base font-normal text-yellow-500 mt-1">
-            Sức chứa tối đa:{" "}
+            {t("bookingModal.capacity")}:{" "}
             <span className="font-semibold text-yellow-300">
-              {table.capacity} chỗ
+              {table.capacity} {t("bookingModal.capacityUnit")}
             </span>
           </div>
         )}
@@ -133,16 +129,17 @@ export default function BookingModal({
 
       <ModalBody className="space-y-5 py-4 bg-white">
         <div className="space-y-5 py-4">
-          {/* 1. Tên khách hàng */}
+          {/* Tên khách hàng */}
           <div>
             <Label
               htmlFor="name"
               className="mb-1 block text-base font-medium !text-gray-700">
-              Tên khách hàng <span className="text-red-500">*</span>
+              {t("bookingModal.customerName")}{" "}
+              <span className="text-red-500">*</span>
             </Label>
             <TextInput
               id="name"
-              placeholder="Nhập tên khách"
+              placeholder={t("bookingModal.customerNamePlaceholder")}
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -159,16 +156,17 @@ export default function BookingModal({
               }}
             />
           </div>
-          {/* 2. Số điện thoại */}
+
+          {/* Số điện thoại */}
           <div>
             <Label
               htmlFor="phone"
               className="mb-1 block text-base font-medium !text-gray-700">
-              Số điện thoại <span className="text-red-500">*</span>
+              {t("bookingModal.phone")} <span className="text-red-500">*</span>
             </Label>
             <TextInput
               id="phone"
-              placeholder="0123456789"
+              placeholder={t("bookingModal.phonePlaceholder")}
               value={formData.phone}
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
@@ -187,12 +185,12 @@ export default function BookingModal({
             />
           </div>
 
-          {/* 3. THỜI GIAN ĐẶT BÀN */}
+          {/* Thời gian đặt bàn */}
           <div>
             <Label
               htmlFor="reservationTime"
               className="mb-1 block text-base font-medium !text-gray-700">
-              Thời gian đặt bàn (Ngày & Giờ){" "}
+              {t("bookingModal.reservationTime")}{" "}
               <span className="text-red-500">*</span>
             </Label>
             <TextInput
@@ -213,12 +211,10 @@ export default function BookingModal({
             />
             {formError && (
               <p className="mt-2 text-sm font-medium text-red-600 flex items-center">
-                {/* ✅ Thêm icon (giả định có thể dùng icon nếu setup) */}
                 <svg
                   className="w-4 h-4 mr-1"
                   fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg">
+                  viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -227,26 +223,28 @@ export default function BookingModal({
                 {formError}
               </p>
             )}
-            {/* ✅ Chú thích giờ làm việc */}
             {!formError && (
               <p className="mt-2 text-xs !text-gray-500">
-                *Giờ làm việc: 9:00 sáng - 22:00 tối
+                {t("bookingModal.workingHours", {
+                  min: MIN_HOUR,
+                  max: MAX_HOUR,
+                })}
               </p>
             )}
           </div>
 
-          {/* 4. SỐ LƯỢNG NGƯỜI */}
+          {/* Số lượng khách */}
           <div>
             <Label
               htmlFor="numberOfPeople"
               className="mb-1 block text-base font-medium !text-gray-700">
-              Số lượng khách <span className="text-red-500">*</span>
+              {t("bookingModal.numberOfPeople")}{" "}
+              <span className="text-red-500">*</span>
             </Label>
             <TextInput
               id="numberOfPeople"
               type="number"
               min="1"
-              // ✅ Cải tiến: Thêm thuộc tính max dựa trên sức chứa bàn
               max={table?.capacity.toString()}
               placeholder="1"
               value={formData.numberOfPeople}
@@ -263,21 +261,21 @@ export default function BookingModal({
                 },
               }}
             />
-            {/* ✅ Cải tiến: Thêm chú thích sức chứa */}
             <p className="mt-2 text-xs text-gray-500">
-              *Bàn này có sức chứa tối đa là {table?.capacity} người.
+              {t("bookingModal.tableCapacity", { capacity: table?.capacity })}
             </p>
           </div>
 
+          {/* Ghi chú */}
           <div>
             <Label
               htmlFor="note"
               className="mb-1 block text-base font-medium !text-gray-700">
-              Ghi chú thêm (nếu có)
+              {t("bookingModal.note")}
             </Label>
             <TextInput
               id="note"
-              placeholder="Sinh nhật, họp mặt, ..."
+              placeholder={t("bookingModal.notePlaceholder")}
               value={formData.note || ""}
               onChange={(e) =>
                 setFormData({ ...formData, note: e.target.value })
@@ -294,10 +292,9 @@ export default function BookingModal({
           </div>
         </div>
       </ModalBody>
-      {/* ✅ ĐIỀU CHỈNH 2: Footer (Viền phân cách rõ ràng hơn) */}
+
       <ModalFooter className="justify-end border-t-8 !border-yellow-800 !bg-stone-800">
         <Button
-          // ✅ Đổi màu success sang màu vàng (brand color)
           color="yellow"
           onClick={handleConfirm}
           disabled={
@@ -308,10 +305,12 @@ export default function BookingModal({
             !!formError
           }
           size="lg">
-          {mode === "edit" ? "Cập nhật thông tin" : "Xác nhận đặt bàn"}
+          {mode === "edit"
+            ? t("bookingModal.updateButton")
+            : t("bookingModal.confirmButton")}
         </Button>
         <Button color="red" onClick={handleClose} size="lg">
-          Hủy
+          {t("bookingModal.cancelButton")}
         </Button>
       </ModalFooter>
     </Modal>
