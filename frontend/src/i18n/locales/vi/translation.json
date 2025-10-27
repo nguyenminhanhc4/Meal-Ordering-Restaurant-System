@@ -28,7 +28,11 @@
       "registerLink": "Đăng ký mới",
       "submit": "Đăng nhập",
       "success": "Đăng nhập thành công!",
-      "title": "Đăng nhập"
+      "title": "Đăng nhập",
+      "adminTitle": "Đăng nhập Admin",
+      "adminEmailPlaceholder": "admin@example.com", 
+      "adminPasswordPlaceholder": "********",
+      "accessDenied": "Bạn không có quyền!"
     },
     "register": {
       "confirmPassword": "Xác nhận mật khẩu",
@@ -170,7 +174,14 @@
     "currency": "Đồng",
     "loading": "Đang tải...",
     "send": "Gửi",
-    "sending": "Đang gửi..."
+    "sending": "Đang gửi...",
+    "pagination": {
+      "showing": "Hiển thị từ {{start}} đến {{end}} trong số {{total}} mục"
+    },
+    "confirmDialog": {
+      "confirm": "Xóa",
+      "cancel": "Hủy"
+    }
   },
   "component": {
     "megaMenu": {
@@ -704,5 +715,189 @@
     "unknownTable": "(Không rõ)",
     "updateFail": "Lỗi khi cập nhật đặt bàn",
     "updateSuccess": "Cập nhật đặt bàn thành công"
+  },
+  "admin": {
+    "checkingSession": "Đang kiểm tra phiên...",
+    "sidebar": {
+      "logo": "Admin Panel",
+      "commonGroup": "Chung",
+      "adminGroup": "Quản trị hệ thống",
+      "staffGroup": "Tác vụ nhân viên",
+      "menu": {
+        "dashboard": "Dashboard",
+        "tables": "Bàn",
+        "ingredients": "Nguyên liệu",
+        "orders": "Đơn hàng",
+        "foodOrders": "Đơn món ăn",
+        "tableOrders": "Đơn đặt bàn",
+        "users": "Người dùng",
+        "categories": "Danh mục",
+        "menuItems": "Món ăn",
+        "settings": "Cài đặt",
+        "myTasks": "Tác vụ của tôi"
+      }
+    },
+    "navbar": {
+      "defaultName": "Admin"
+    },
+    "dashboard": {
+      "error": {
+        "fetchFailed": "Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.",
+        "alertTitle": "Lỗi!"
+      },
+      "header": {
+        "title": "Thống kê Dashboard",
+        "description": "Tổng quan thống kê và báo cáo kinh doanh",
+        "liveBadge": "Trực tiếp"
+      },
+      "refreshButton": {
+        "loading": "Đang tải...",
+        "refresh": "Làm mới"
+      },
+      "stats": {
+        "totalRevenue": "Tổng doanh thu tháng này",
+        "totalOrders": "Tổng đơn hàng",
+        "avgOrderValue": "Giá trị đơn trung bình",
+        "growth": "Tăng trưởng",
+        "comparison": "so với tháng trước"
+      },
+      "tabs": {
+        "overview": "Tổng quan",
+        "month": "Theo tháng",
+        "year": "Theo năm"
+      },
+      "charts": {
+        "bestSellingItems": "Món ăn bán chạy nhất",
+        "worstSellingItems": "Món ăn cần cải thiện",
+        "monthRevenue": "📊 Doanh thu theo ngày (Tháng hiện tại)",
+        "yearRevenue": "📈 Doanh thu theo tháng (Năm hiện tại)",
+        "noData": "Không có dữ liệu",
+        "topItems": "Top {{count}}",
+        "needsImprovement": "Cần cải thiện",
+        "sold": "Đã bán:",
+        "revenue": "Doanh thu:",
+        "noImage": "No img",
+        "revenueLabel": "Doanh thu (₫)",
+        "ordersLabel": "Số đơn hàng",
+        "revenueUnit": "₫",
+        "ordersUnit": "đơn"
+      }
+    },
+    "tables": {
+      "title": "Quản lý bàn",
+      "addNewTable": "Thêm bàn mới",
+      "searchPlaceholder": "Tìm kiếm bàn...",
+      "filters": {
+        "allLocations": "Tất cả vị trí",
+        "allPositions": "Tất cả vị trí bàn",
+        "allStatus": "Tất cả trạng thái"
+      },
+      "tableHeaders": {
+        "name": "Tên",
+        "location": "Vị trí",
+        "position": "Vị trí bàn",
+        "capacity": "Sức chứa",
+        "status": "Trạng thái",
+        "actions": "Hành động"
+      },
+      "tableMessages": {
+        "loading": "Đang tải...",
+        "noTablesFound": "Không tìm thấy bàn nào"
+      },
+      "notifications": {
+        "loadFilterError": "Không thể tải dữ liệu bộ lọc",
+        "loadTablesError": "Không thể tải danh sách bàn",
+        "deleteSuccess": "Xóa bàn thành công",
+        "deleteError": "Không thể xóa bàn",
+        "loadFormOptionsError": "Không thể tải tùy chọn biểu mẫu",
+        "nameRequiredError": "Tên bàn là bắt buộc",
+        "capacityInvalidError": "Sức chứa phải là số dương",
+        "updateSuccess": "Cập nhật bàn thành công",
+        "createSuccess": "Tạo bàn thành công",
+        "saveError": "Không thể lưu bàn"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Bạn có chắc chắn muốn xóa bàn này không?"
+      },
+      "status": {
+        "AVAILABLE": "Có sẵn",
+        "OCCUPIED": "Đã sử dụng",
+        "MAINTENANCE": "Bảo trì"
+      },
+      "form": {
+        "editTitle": "Chỉnh sửa bàn",
+        "createTitle": "Tạo bàn",
+        "labels": {
+          "name": "Tên bàn",
+          "capacity": "Sức chứa",
+          "status": "Trạng thái",
+          "location": "Vị trí",
+          "position": "Vị trí bàn"
+        },
+        "placeholders": {
+          "name": "Bàn A1",
+          "selectStatus": "Chọn trạng thái",
+          "selectLocation": "Chọn vị trí",
+          "selectPosition": "Chọn vị trí bàn"
+        },
+        "buttons": {
+          "cancel": "Hủy",
+          "saving": "Đang lưu...",
+          "update": "Cập nhật bàn",
+          "create": "Tạo bàn"
+        }
+      }
+    },
+    "ingredients": {
+      "title": "Quản lý nguyên liệu",
+      "addNewIngredient": "Thêm nguyên liệu mới",
+      "searchPlaceholder": "Tìm kiếm nguyên liệu...",
+      "tableHeaders": {
+        "name": "Tên",
+        "quantity": "Số lượng",
+        "unit": "Đơn vị",
+        "minStock": "Tồn kho tối thiểu",
+        "status": "Trạng thái",
+        "actions": "Hành động"
+      },
+      "tableMessages": {
+        "loading": "Đang tải...",
+        "noIngredientsFound": "Không tìm thấy nguyên liệu"
+      },
+      "status": {
+        "lowStock": "Tồn kho thấp",
+        "ok": "Đủ"
+      },
+      "notifications": {
+        "loadError": "Không thể tải danh sách nguyên liệu",
+        "deleteSuccess": "Đã xóa nguyên liệu",
+        "deleteError": "Xóa nguyên liệu thất bại",
+        "updateSuccess": "Cập nhật nguyên liệu thành công",
+        "createSuccess": "Thêm nguyên liệu mới thành công",
+        "saveError": "Lưu nguyên liệu thất bại",
+        "nameRequiredError": "Tên nguyên liệu không được để trống"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Bạn có chắc chắn muốn xóa nguyên liệu này không?"
+      },
+      "form": {
+        "editTitle": "Cập nhật nguyên liệu",
+        "createTitle": "Thêm nguyên liệu mới",
+        "labels": {
+          "name": "Tên nguyên liệu",
+          "quantity": "Số lượng",
+          "unit": "Đơn vị",
+          "minimumStock": "Tồn kho tối thiểu"
+        },
+        "placeholders": {
+          "unit": "VD: KG, L, G..."
+        },
+        "buttons": {
+          "save": "Lưu thay đổi",
+          "create": "Thêm mới",
+          "cancel": "Hủy"
+        }
+      }
+    }
   }
 }

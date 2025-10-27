@@ -23,7 +23,7 @@ import type {
 } from "../../../services/reservation/reservationService";
 import { AxiosError } from "axios";
 import api from "../../../api/axios";
-import { ReservationDetailModal } from "../../../components/order/ReservationDetailModal";
+import { ReservationDetailModal } from "../../../components/modal/order/ReservationDetailModal";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 export const AdminTableOrders = () => {

@@ -22,7 +22,7 @@ import { useNotification } from "../../../components/Notification";
 import { Pagination } from "../../../components/common/Pagination";
 // import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
 import { format } from "date-fns";
-import { OrderDetailModal } from "../../../components/order/OrderDetailModal";
+import { OrderDetailModal } from "../../../components/modal/order/OrderDetailModal";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 export interface OrderItem {

@@ -11,8 +11,8 @@ import {
   Textarea,
 } from "flowbite-react";
 import React, { useState, useEffect } from "react";
-import { useNotification } from "../Notification";
-import api from "../../api/axios";
+import { useNotification } from "../../Notification";
+import api from "../../../api/axios";
 import { AxiosError } from "axios";
 
 interface CategoryFormData {

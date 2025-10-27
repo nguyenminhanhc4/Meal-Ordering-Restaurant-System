@@ -10,12 +10,13 @@ import type {
   MenuItemSalesDto,
   DashboardStats,
 } from "../../services/types/statistics.types";
+import { useTranslation } from "react-i18next"; // Thêm useTranslation
 
 function AdminDashboard() {
+  const { t } = useTranslation(); // Thêm hook useTranslation
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dashboard statistics
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
     totalRevenue: 0,
     totalOrders: 0,
@@ -23,7 +24,6 @@ function AdminDashboard() {
     growthRate: 0,
   });
 
-  // Revenue data
   const [currentMonthRevenue, setCurrentMonthRevenue] = useState<
     RevenueStatisticsDto[]
   >([]);
@@ -31,12 +31,10 @@ function AdminDashboard() {
     RevenueStatisticsDto[]
   >([]);
 
-  // Active tab
   const [activeTab, setActiveTab] = useState<"overview" | "month" | "year">(
     "overview"
   );
 
-  // Menu items data
   const [bestSellingItems, setBestSellingItems] = useState<MenuItemSalesDto[]>(
     []
   );
@@ -53,7 +51,6 @@ function AdminDashboard() {
       setLoading(true);
       setError(null);
 
-      // Fetch all data in parallel
       const [monthRevenue, yearRevenue, bestSelling, worstSelling] =
         await Promise.all([
           StatisticsService.getCurrentMonthRevenue(),
@@ -67,7 +64,6 @@ function AdminDashboard() {
       setBestSellingItems(bestSelling);
       setWorstSellingItems(worstSelling);
 
-      // Calculate dashboard stats from current month data
       if (monthRevenue.length > 0) {
         const totalRevenue = monthRevenue.reduce(
           (sum, item) => sum + item.totalRevenue,
@@ -79,7 +75,6 @@ function AdminDashboard() {
         );
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-        // Calculate growth rate (compare with previous month if available)
         let growthRate = 0;
         if (yearRevenue.length >= 2) {
           const currentMonth = yearRevenue[yearRevenue.length - 1];
@@ -101,7 +96,7 @@ function AdminDashboard() {
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      setError("Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.");
+      setError(t("admin.dashboard.error.fetchFailed")); // Sử dụng i18n
     } finally {
       setLoading(false);
     }
@@ -111,7 +106,10 @@ function AdminDashboard() {
     return (
       <div className="p-4">
         <Alert color="failure" onDismiss={() => setError(null)}>
-          <span className="font-medium">Lỗi!</span> {error}
+          <span className="font-medium">
+            {t("admin.dashboard.error.alertTitle")}
+          </span>{" "}
+          {error}
         </Alert>
       </div>
     );
@@ -119,18 +117,17 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 space-y-6">
-      {/* Header with gradient */}
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Dashboard Analytics
+              {t("admin.dashboard.header.title")} {/* Sử dụng i18n */}
             </h1>
             <p className="mt-2 text-sm text-gray-600 flex items-center gap-2">
               <Badge color="success" className="animate-pulse">
-                Live
+                {t("admin.dashboard.header.liveBadge")} {/* Sử dụng i18n */}
               </Badge>
-              Tổng quan thống kê và báo cáo kinh doanh
+              {t("admin.dashboard.header.description")} {/* Sử dụng i18n */}
             </p>
           </div>
           <button
@@ -140,40 +137,43 @@ function AdminDashboard() {
             {loading ? (
               <>
                 <Spinner size="sm" />
-                <span>Đang tải...</span>
+                <span>{t("admin.dashboard.refreshButton.loading")}</span>{" "}
+                {/* Sử dụng i18n */}
               </>
             ) : (
               <>
                 <HiChartPie className="w-5 h-5" />
-                <span className="font-semibold">Làm mới</span>
+                <span className="font-semibold">
+                  {t("admin.dashboard.refreshButton.refresh")}
+                </span>{" "}
+                {/* Sử dụng i18n */}
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Stats Cards with gradient backgrounds */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Tổng doanh thu tháng này"
+          title={t("admin.dashboard.stats.totalRevenue")} // Sử dụng i18n
           value={dashboardStats.totalRevenue}
           icon="revenue"
           loading={loading}
         />
         <StatCard
-          title="Tổng đơn hàng"
+          title={t("admin.dashboard.stats.totalOrders")} // Sử dụng i18n
           value={dashboardStats.totalOrders}
           icon="orders"
           loading={loading}
         />
         <StatCard
-          title="Giá trị đơn trung bình"
+          title={t("admin.dashboard.stats.avgOrderValue")} // Sử dụng i18n
           value={dashboardStats.avgOrderValue}
           icon="avg"
           loading={loading}
         />
         <StatCard
-          title="Tăng trưởng"
+          title={t("admin.dashboard.stats.growth")} // Sử dụng i18n
           value={`${dashboardStats.growthRate.toFixed(1)}%`}
           change={dashboardStats.growthRate}
           icon="growth"
@@ -181,7 +181,6 @@ function AdminDashboard() {
         />
       </div>
 
-      {/* Navigation Tabs */}
       <div className="bg-white rounded-2xl shadow-lg p-2 border border-gray-100">
         <div className="flex gap-2">
           <button
@@ -192,7 +191,7 @@ function AdminDashboard() {
                 : "text-gray-600 hover:bg-gray-100"
             }`}>
             <HiChartPie className="w-5 h-5" />
-            Tổng quan
+            {t("admin.dashboard.tabs.overview")} {/* Sử dụng i18n */}
           </button>
           <button
             onClick={() => setActiveTab("month")}
@@ -202,7 +201,7 @@ function AdminDashboard() {
                 : "text-gray-600 hover:bg-gray-100"
             }`}>
             <HiTrendingUp className="w-5 h-5" />
-            Theo tháng
+            {t("admin.dashboard.tabs.month")} {/* Sử dụng i18n */}
           </button>
           <button
             onClick={() => setActiveTab("year")}
@@ -212,29 +211,26 @@ function AdminDashboard() {
                 : "text-gray-600 hover:bg-gray-100"
             }`}>
             <HiCalendar className="w-5 h-5" />
-            Theo năm
+            {t("admin.dashboard.tabs.year")} {/* Sử dụng i18n */}
           </button>
         </div>
       </div>
 
-      {/* Content based on active tab */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Best Selling Items */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <TopSellingItems
               items={bestSellingItems}
-              title="Món ăn bán chạy nhất"
+              title={t("admin.dashboard.charts.bestSellingItems")} // Sử dụng i18n
               type="best"
               loading={loading}
             />
           </div>
 
-          {/* Worst Selling Items */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <TopSellingItems
               items={worstSellingItems}
-              title="Món ăn cần cải thiện"
+              title={t("admin.dashboard.charts.worstSellingItems")} // Sử dụng i18n
               type="worst"
               loading={loading}
             />
@@ -246,7 +242,7 @@ function AdminDashboard() {
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <RevenueChart
             data={currentMonthRevenue}
-            title="📊 Doanh thu theo ngày (Tháng hiện tại)"
+            title={t("admin.dashboard.charts.monthRevenue")} // Sử dụng i18n
             type="bar"
             loading={loading}
           />
@@ -257,7 +253,7 @@ function AdminDashboard() {
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <RevenueChart
             data={currentYearRevenue}
-            title="📈 Doanh thu theo tháng (Năm hiện tại)"
+            title={t("admin.dashboard.charts.yearRevenue")} // Sử dụng i18n
             type="line"
             loading={loading}
           />

@@ -8,7 +8,9 @@ import {
   ModalFooter,
 } from "flowbite-react";
 import { useState, useEffect } from "react";
-import type { Ingredient } from "../../services/ingredient/ingredientService";
+import { useTranslation } from "react-i18next"; // Add useTranslation
+import { useNotification } from "../../../components/Notification"; // Add useNotification
+import type { Ingredient } from "../../../services/ingredient/ingredientService";
 
 interface Props {
   show: boolean;
@@ -23,6 +25,8 @@ export default function IngredientFormModal({
   onSuccess,
   existingIngredient,
 }: Props) {
+  const { t } = useTranslation(); // Add hook useTranslation
+  const { notify } = useNotification(); // Add hook useNotification
   const [form, setForm] = useState<Ingredient>({
     name: "",
     quantity: 0,
@@ -56,7 +60,10 @@ export default function IngredientFormModal({
   };
 
   const handleSubmit = () => {
-    if (!form.name.trim()) return alert("Tên nguyên liệu không được để trống!");
+    if (!form.name.trim()) {
+      notify("error", t("admin.ingredients.notifications.nameRequiredError")); // Use i18n and notify
+      return;
+    }
     onSuccess(form);
   };
 
@@ -64,7 +71,9 @@ export default function IngredientFormModal({
     <Modal show={show} onClose={onClose}>
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-lg font-bold text-gray-800">
-          {existingIngredient ? "Cập nhật nguyên liệu" : "Thêm nguyên liệu mới"}
+          {existingIngredient
+            ? t("admin.ingredients.form.editTitle") // Use i18n
+            : t("admin.ingredients.form.createTitle")}{" "}
         </h3>
       </ModalHeader>
       <ModalBody className="space-y-6 p-6 bg-gray-50">
@@ -73,7 +82,7 @@ export default function IngredientFormModal({
             <Label
               htmlFor="name"
               className="mb-2 block text-sm font-medium !text-gray-700">
-              Tên nguyên liệu
+              {t("admin.ingredients.form.labels.name")} {/* Use i18n */}
             </Label>
             <TextInput
               id="name"
@@ -93,7 +102,7 @@ export default function IngredientFormModal({
             <Label
               htmlFor="quantity"
               className="mb-2 block text-sm font-medium !text-gray-700">
-              Số lượng
+              {t("admin.ingredients.form.labels.quantity")} {/* Use i18n */}
             </Label>
             <TextInput
               id="quantity"
@@ -114,14 +123,14 @@ export default function IngredientFormModal({
             <Label
               htmlFor="unit"
               className="mb-2 block text-sm font-medium !text-gray-700">
-              Đơn vị
+              {t("admin.ingredients.form.labels.unit")} {/* Use i18n */}
             </Label>
             <TextInput
               id="unit"
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              placeholder="VD: KG, L, G..."
+              placeholder={t("admin.ingredients.form.placeholders.unit")} // Use i18n
               theme={{
                 field: {
                   input: {
@@ -135,7 +144,7 @@ export default function IngredientFormModal({
             <Label
               htmlFor="minimumStock"
               className="mb-2 block text-sm font-medium !text-gray-700">
-              Tồn kho tối thiểu
+              {t("admin.ingredients.form.labels.minimumStock")} {/* Use i18n */}
             </Label>
             <TextInput
               id="minimumStock"
@@ -156,10 +165,12 @@ export default function IngredientFormModal({
       </ModalBody>
       <ModalFooter className="flex justify-end space-x-2 p-4 border-t bg-gray-50">
         <Button color="blue" onClick={handleSubmit}>
-          {existingIngredient ? "Lưu thay đổi" : "Thêm mới"}
+          {existingIngredient
+            ? t("admin.ingredients.form.buttons.save") // Use i18n
+            : t("admin.ingredients.form.buttons.create")}{" "}
         </Button>
         <Button color="red" onClick={onClose}>
-          Hủy
+          {t("admin.ingredients.form.buttons.cancel")} {/* Use i18n */}
         </Button>
       </ModalFooter>
     </Modal>

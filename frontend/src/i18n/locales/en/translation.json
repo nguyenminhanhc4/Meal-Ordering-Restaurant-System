@@ -28,7 +28,11 @@
       "registerLink": "Sign up",
       "submit": "Log In",
       "success": "Login successful!",
-      "title": "Log In"
+      "title": "Log In",
+      "adminTitle": "Admin Login", 
+      "adminEmailPlaceholder": "admin@example.com",
+      "adminPasswordPlaceholder": "********",
+      "accessDenied": "You don't have permission!"
     },
     "register": {
       "confirmPassword": "Confirm Password",
@@ -170,7 +174,14 @@
     "currency": "VND",
     "loading": "Loading...",
     "send": "Send",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "pagination": {
+      "showing": "Showing {{start}} to {{end}} of {{total}} entries"
+    },
+    "confirmDialog": {
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
   },
   "component": {
     "megaMenu": {
@@ -704,5 +715,189 @@
     "unknownTable": "(Unknown)",
     "updateFail": "Error updating reservation",
     "updateSuccess": "Reservation updated successfully"
+  },
+  "admin": {
+    "checkingSession": "Checking session...",
+    "sidebar": {
+      "logo": "Admin Panel",
+      "commonGroup": "General",
+      "adminGroup": "System Administration",
+      "staffGroup": "Staff Tasks",
+      "menu": {
+        "dashboard": "Dashboard",
+        "tables": "Tables",
+        "ingredients": "Ingredients",
+        "orders": "Orders",
+        "foodOrders": "Food Orders",
+        "tableOrders": "Table Orders",
+        "users": "Users",
+        "categories": "Categories",
+        "menuItems": "Menu Items",
+        "settings": "Settings",
+        "myTasks": "My Tasks"
+      }
+    },
+    "navbar": {
+      "defaultName": "Admin"
+    },
+    "dashboard": {
+      "error": {
+        "fetchFailed": "Unable to load statistics data. Please try again later.",
+        "alertTitle": "Error!"
+      },
+      "header": {
+        "title": "Dashboard Analytics",
+        "description": "Overview of statistics and business reports",
+        "liveBadge": "Live"
+      },
+      "refreshButton": {
+        "loading": "Loading...",
+        "refresh": "Refresh"
+      },
+      "stats": {
+        "totalRevenue": "Total Revenue This Month",
+        "totalOrders": "Total Orders",
+        "avgOrderValue": "Average Order Value",
+        "growth": "Growth",
+        "comparison": "compared to last month"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "month": "By Month",
+        "year": "By Year"
+      },
+      "charts": {
+        "bestSellingItems": "Best Selling Items",
+        "worstSellingItems": "Needing Improvement",
+        "monthRevenue": "📊 Revenue by Day (Current Month)",
+        "yearRevenue": "📈 Revenue by Month (Current Year)",
+        "noData": "No data available",
+        "topItems": "Top {{count}}",
+        "needsImprovement": "Needs Improvement",
+        "sold": "Sold:",
+        "revenue": "Revenue:",
+        "noImage": "No image",
+        "revenueLabel": "Revenue (VND)",
+        "ordersLabel": "Number of Orders",
+        "revenueUnit": "VND",
+        "ordersUnit": "orders"
+      }
+    },
+    "tables": {
+      "title": "Table Management",
+      "addNewTable": "Add New Table",
+      "searchPlaceholder": "Search table...",
+      "filters": {
+        "allLocations": "All Locations",
+        "allPositions": "All Positions",
+        "allStatus": "All Status"
+      },
+      "tableHeaders": {
+        "name": "Name",
+        "location": "Location",
+        "position": "Position",
+        "capacity": "Capacity",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "tableMessages": {
+        "loading": "Loading...",
+        "noTablesFound": "No tables found"
+      },
+      "notifications": {
+        "loadFilterError": "Could not load filter data",
+        "loadTablesError": "Could not load tables",
+        "deleteSuccess": "Table deleted successfully",
+        "deleteError": "Could not delete table",
+        "loadFormOptionsError": "Failed to load form options",
+        "nameRequiredError": "Table name is required",
+        "capacityInvalidError": "Capacity must be a positive number",
+        "updateSuccess": "Table updated successfully",
+        "createSuccess": "Table created successfully",
+        "saveError": "Failed to save table"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Are you sure you want to delete this table?"
+      },
+      "status": {
+        "AVAILABLE": "Available",
+        "OCCUPIED": "Occupied",
+        "MAINTENANCE": "Maintenance"
+      },
+      "form": {
+        "editTitle": "Edit Table",
+        "createTitle": "Create Table",
+        "labels": {
+          "name": "Table Name",
+          "capacity": "Capacity",
+          "status": "Status",
+          "location": "Location",
+          "position": "Position"
+        },
+        "placeholders": {
+          "name": "Table A1",
+          "selectStatus": "Select status",
+          "selectLocation": "Select location",
+          "selectPosition": "Select position"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "saving": "Saving...",
+          "update": "Update Table",
+          "create": "Create Table" 
+        }
+      }
+    },
+    "ingredients": {
+      "title": "Ingredient Management",
+      "addNewIngredient": "Add New Ingredient",
+      "searchPlaceholder": "Search ingredient...",
+      "tableHeaders": {
+        "name": "Name",
+        "quantity": "Quantity",
+        "unit": "Unit",
+        "minStock": "Min Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "tableMessages": {
+        "loading": "Loading...",
+        "noIngredientsFound": "No ingredients found"
+      },
+      "status": {
+        "lowStock": "Low Stock",
+        "ok": "OK"
+      },
+      "notifications": {
+        "loadError": "Could not load ingredients",
+        "deleteSuccess": "Ingredient deleted successfully",
+        "deleteError": "Failed to delete ingredient",
+        "updateSuccess": "Ingredient updated successfully",
+        "createSuccess": "Ingredient created successfully",
+        "saveError": "Failed to save ingredient",
+        "nameRequiredError": "Ingredient name is required"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Are you sure you want to delete this ingredient?"
+      },
+      "form": {
+        "editTitle": "Update Ingredient",
+        "createTitle": "Add New Ingredient",
+        "labels": {
+          "name": "Ingredient Name",
+          "quantity": "Quantity",
+          "unit": "Unit",
+          "minimumStock": "Minimum Stock"
+        },
+        "placeholders": {
+          "unit": "E.g., KG, L, G..."
+        },
+        "buttons": {
+          "save": "Save Changes",
+          "create": "Add New",
+          "cancel": "Cancel"
+        }
+      }
+    }
   }
 }

@@ -37,6 +37,8 @@ import "./AdminLayout.css";
 import type { NotificationDto } from "../services/types/notification";
 import { useRealtimeMessage } from "../api/useRealtimeUpdate";
 import NotificationBell from "../components/bell/NotificationBell";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "../components/LanguageSelector";
 
 interface SidebarItemButtonProps {
   path: string;
@@ -45,24 +47,25 @@ interface SidebarItemButtonProps {
 }
 
 function AdminLayout() {
+  const { t } = useTranslation(); // Đã có useTranslation
   const { user, logout, isChecking, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]); // danh sách noti
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [unreadCount, setUnreadCount] = useState(0); // số thông báo chưa đọc
+  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
 
-  // ✅ Dùng 1 state tổng để quản lý các menu expand/close
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    Orders: true, // mặc định mở "Orders"
+    Orders: true, // Mặc định mở "Orders"
   });
+
+  const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
 
   const toggleExpand = (label: string) => {
     setExpandedMenus((prev) => ({
@@ -71,27 +74,35 @@ function AdminLayout() {
     }));
   };
 
-  // 🔹 Menu chung cho cả ADMIN và STAFF
+  // Menu chung
   const commonMenu = [
-    { path: "/admin/dashboard", label: "Dashboard", icon: HiChartPie },
-    { path: "/admin/tables", label: "Tables", icon: HiOutlineViewGrid },
     {
-      path: "/admin/ingredients",
-      label: "Ingredients",
+      path: "/admin/dashboard",
+      label: t("admin.sidebar.menu.dashboard"),
+      icon: HiChartPie,
+    },
+    {
+      path: "/admin/tables",
+      label: t("admin.sidebar.menu.tables"),
       icon: HiOutlineViewGrid,
     },
     {
-      label: "Orders",
+      path: "/admin/ingredients",
+      label: t("admin.sidebar.menu.ingredients"),
+      icon: HiOutlineViewGrid,
+    },
+    {
+      label: t("admin.sidebar.menu.orders"),
       icon: HiFolder,
       children: [
         {
           path: "/admin/orders/food",
-          label: "Food Orders",
+          label: t("admin.sidebar.menu.foodOrders"),
           icon: MdFastfood,
         },
         {
           path: "/admin/orders/tables",
-          label: "Table Orders",
+          label: t("admin.sidebar.menu.tableOrders"),
           icon: FaChair,
         },
       ],
@@ -116,10 +127,7 @@ function AdminLayout() {
         const newNoti = msg.data;
         setNotifications((prev) => [newNoti, ...prev]);
         setUnreadCount((prev) => prev + 1);
-      }
-
-      // ✅ Khi thông báo được đánh dấu là đã đọc
-      else if (msg.type === "NOTIFICATION_READ") {
+      } else if (msg.type === "NOTIFICATION_READ") {
         const updated = msg.data;
         setNotifications((prev) =>
           prev.map((n) => (n.id === updated.id ? { ...n, isRead: true } : n))
@@ -129,23 +137,43 @@ function AdminLayout() {
     }
   );
 
-  // 🔹 Menu riêng cho ADMIN
+  // Menu admin
   const adminMenu = [
-    { path: "/admin/users", label: "Users", icon: HiUser },
-    { path: "/admin/categories", label: "Categories", icon: HiCollection },
-    { path: "/admin/menu-items", label: "Menu Items", icon: HiMenuAlt1 },
-    { path: "/admin/settings", label: "Settings", icon: HiCog },
+    {
+      path: "/admin/users",
+      label: t("admin.sidebar.menu.users"),
+      icon: HiUser,
+    },
+    {
+      path: "/admin/categories",
+      label: t("admin.sidebar.menu.categories"),
+      icon: HiCollection,
+    },
+    {
+      path: "/admin/menu-items",
+      label: t("admin.sidebar.menu.menuItems"),
+      icon: HiMenuAlt1,
+    },
+    {
+      path: "/admin/settings",
+      label: t("admin.sidebar.menu.settings"),
+      icon: HiCog,
+    },
   ];
 
-  // 🔹 Menu riêng cho STAFF
+  // Menu staff
   const staffMenu = [
-    { path: "/admin/my-tasks", label: "My Tasks", icon: HiCollection },
+    {
+      path: "/admin/my-tasks",
+      label: t("admin.sidebar.menu.myTasks"),
+      icon: HiCollection,
+    },
   ];
 
   if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
-        Đang kiểm tra phiên...
+        {t("admin.checkingSession")} {/* Sử dụng i18n */}
       </div>
     );
   }
@@ -160,7 +188,6 @@ function AdminLayout() {
     return null;
   }
 
-  // Component render menu item (để tránh lặp code)
   const SidebarItemButton: React.FC<SidebarItemButtonProps> = ({
     path,
     label,
@@ -249,7 +276,6 @@ function AdminLayout() {
               base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
             },
           }}>
-          {/* Nút đóng Sidebar (mobile) */}
           <div className="flex justify-end p-2 md:hidden">
             <Button
               color="gray"
@@ -259,125 +285,113 @@ function AdminLayout() {
             </Button>
           </div>
 
-          {/* Logo */}
           <SidebarLogo
             href="/admin/dashboard"
             img={`${logo}`}
-            imgAlt="Logo"
+            imgAlt={t("component.megaMenu.logoAlt")} // Sử dụng i18n
             className={`!text-white flex items-center py-3 ${
               isSidebarOpen ? "px-4" : "justify-center"
             }`}>
             {isSidebarOpen && (
               <span className="ml-2 text-lg font-semibold tracking-wide">
-                Admin Panel
+                {t("admin.sidebar.logo")} {/* Sử dụng i18n */}
               </span>
             )}
           </SidebarLogo>
 
-          {/* Sidebar content */}
           <SidebarItems>
-            {/* 🔹 Menu chung */}
             <SidebarItemGroup>
               <h6
                 className={`${
                   isSidebarOpen ? "px-3 mb-1" : "hidden"
                 } text-xs uppercase tracking-wide text-gray-400`}>
-                Chung
+                {t("admin.sidebar.commonGroup")} {/* Sử dụng i18n */}
               </h6>
 
-              {(() => {
-                return commonMenu.map((item) => {
-                  // Nếu có children (ví dụ: Orders)
-                  if (item.children) {
-                    const isExpanded = expandedMenus[item.label];
+              {commonMenu.map((item) => {
+                if (item.children) {
+                  const isExpanded = expandedMenus[item.label];
 
-                    return (
-                      <div key={item.label}>
-                        {/* Nút nhóm cha */}
-                        <SidebarItem
-                          onClick={() => {
-                            if (isSidebarOpen) toggleExpand(item.label);
-                          }}
-                          className={`relative transition-all duration-200 cursor-pointer select-none text-gray-300 ${
-                            isExpanded
-                              ? "!text-white"
-                              : "hover:!bg-gray-800 hover:!text-white"
+                  return (
+                    <div key={item.label}>
+                      <SidebarItem
+                        onClick={() => {
+                          if (isSidebarOpen) toggleExpand(item.label);
+                        }}
+                        className={`relative transition-all duration-200 cursor-pointer select-none text-gray-300 ${
+                          isExpanded
+                            ? "!text-white"
+                            : "hover:!bg-gray-800 hover:!text-white"
+                        }`}>
+                        <div
+                          className={`flex items-center justify-between ${
+                            isSidebarOpen
+                              ? "gap-3 px-3 py-2 justify-start"
+                              : "justify-center py-3"
                           }`}>
-                          <div
-                            className={`flex items-center justify-between ${
-                              isSidebarOpen
-                                ? "gap-3 px-3 py-2 justify-start"
-                                : "justify-center py-3"
-                            }`}>
-                            {!isSidebarOpen ? (
-                              <Tooltip
-                                content={item.label}
-                                placement="right"
-                                trigger="hover"
-                                animation="duration-300"
-                                theme={{
-                                  target: "inline-flex",
-                                  base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                          {!isSidebarOpen ? (
+                            <Tooltip
+                              content={item.label}
+                              placement="right"
+                              trigger="hover"
+                              animation="duration-300"
+                              theme={{
+                                target: "inline-flex",
+                                base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                                style: {
+                                  dark: "!bg-blue-600 !text-white",
+                                  light: "!bg-blue-600 !text-white",
+                                },
+                                arrow: {
                                   style: {
-                                    dark: "!bg-blue-600 !text-white",
-                                    light: "!bg-blue-600 !text-white",
+                                    dark: "!bg-blue-600",
+                                    light: "!bg-blue-600",
                                   },
-                                  arrow: {
-                                    style: {
-                                      dark: "!bg-blue-600",
-                                      light: "!bg-blue-600",
-                                    },
-                                  },
-                                }}>
-                                <div>
-                                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                                </div>
-                              </Tooltip>
-                            ) : (
-                              <>
-                                <div className="flex items-center gap-3">
-                                  {isExpanded ? (
-                                    <HiFolderOpen className="w-5 h-5 flex-shrink-0 text-blue-400" />
-                                  ) : (
-                                    <HiFolder className="w-5 h-5 flex-shrink-0" />
-                                  )}
-                                  <span className="truncate text-sm leading-none">
-                                    {item.label}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </SidebarItem>
+                                },
+                              }}>
+                              <div>
+                                <item.icon className="w-5 h-5 flex-shrink-0" />
+                              </div>
+                            </Tooltip>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <HiFolderOpen className="w-5 h-5 flex-shrink-0 text-blue-400" />
+                                ) : (
+                                  <HiFolder className="w-5 h-5 flex-shrink-0" />
+                                )}
+                                <span className="truncate text-sm leading-none">
+                                  {item.label}
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </SidebarItem>
 
-                        {/* Các mục con */}
-                        {isSidebarOpen && isExpanded && (
-                          <div className="ml-4 border-l border-gray-700">
-                            {item.children.map((sub) => (
-                              <SidebarItemButton key={sub.path} {...sub} />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
+                      {isSidebarOpen && isExpanded && (
+                        <div className="ml-4 border-l border-gray-700">
+                          {item.children.map((sub) => (
+                            <SidebarItemButton key={sub.path} {...sub} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
 
-                  // Nếu là menu đơn
-                  return <SidebarItemButton key={item.path} {...item} />;
-                });
-              })()}
+                return <SidebarItemButton key={item.path} {...item} />;
+              })}
             </SidebarItemGroup>
 
-            {/* <hr className="my-2 border-gray-700" /> */}
-
-            {/* 🔹 Menu riêng ADMIN */}
             {user?.role === "ADMIN" && (
               <SidebarItemGroup>
                 <h6
                   className={`${
                     isSidebarOpen ? "px-3 mb-1" : "hidden"
                   } text-xs uppercase tracking-wide text-gray-400`}>
-                  Quản trị hệ thống
+                  {t("admin.sidebar.adminGroup")} {/* Sử dụng i18n */}
                 </h6>
                 {adminMenu.map((item) => (
                   <SidebarItemButton key={item.path} {...item} />
@@ -385,14 +399,13 @@ function AdminLayout() {
               </SidebarItemGroup>
             )}
 
-            {/* 🔹 Menu riêng STAFF */}
             {user?.role === "STAFF" && (
               <SidebarItemGroup>
                 <h6
                   className={`${
                     isSidebarOpen ? "px-3 mb-1" : "hidden"
                   } text-xs uppercase tracking-wide text-gray-400`}>
-                  Tác vụ nhân viên
+                  {t("admin.sidebar.staffGroup")} {/* Sử dụng i18n */}
                 </h6>
                 {staffMenu.map((item) => (
                   <SidebarItemButton key={item.path} {...item} />
@@ -402,9 +415,7 @@ function AdminLayout() {
           </SidebarItems>
         </Sidebar>
 
-        {/* Content area */}
         <div className="flex flex-col flex-1">
-          {/* Navbar */}
           <Navbar
             fluid
             className="border-b !border-gray-200 !bg-white shadow-sm">
@@ -418,13 +429,13 @@ function AdminLayout() {
 
               <NavbarBrand>
                 <span className="self-center whitespace-nowrap text-xl font-semibold text-gray-800">
-                  {user?.name || "Admin"}
+                  {user?.name || t("admin.navbar.defaultName")}{" "}
+                  {/* Sử dụng i18n */}
                 </span>
               </NavbarBrand>
             </div>
 
             <div className="flex items-center gap-3 md:order-2">
-              {/* 🔔 Notification */}
               <div className="relative">
                 <NotificationBell
                   bgColor="!bg-blue-600"
@@ -439,7 +450,7 @@ function AdminLayout() {
                 inline
                 label={
                   <Avatar
-                    alt="Admin avatar"
+                    alt={t("component.megaMenu.userAvatarAlt")} // Sử dụng i18n
                     img={user?.avatarUrl || logo}
                     rounded
                   />
@@ -450,8 +461,10 @@ function AdminLayout() {
                     {user?.email}
                   </span>
                 </DropdownHeader>
-                <DropdownItem as={Link} to="/admin/settings">
-                  Cài đặt
+                <DropdownItem
+                  className="flex flex-col items-start gap-2 hover:!bg-stone-700"
+                  onClick={handleLangClick as unknown as () => void}>
+                  <LanguageSelector compact />
                 </DropdownItem>
                 <DropdownDivider />
                 <DropdownItem
@@ -460,13 +473,12 @@ function AdminLayout() {
                     await logout();
                     navigate("/admin/login");
                   }}>
-                  Đăng xuất
+                  {t("component.megaMenu.logout")} {/* Sử dụng i18n */}
                 </DropdownItem>
               </Dropdown>
             </div>
           </Navbar>
 
-          {/* Main content */}
           <main className="admin-content">
             <Outlet />
           </main>

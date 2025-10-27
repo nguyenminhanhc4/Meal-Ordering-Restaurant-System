@@ -25,13 +25,14 @@ import {
   updateIngredient,
   type Ingredient,
 } from "../../services/ingredient/ingredientService";
-
+import { useTranslation } from "react-i18next"; // Add useTranslation
 import { useNotification } from "../../components/Notification";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { Pagination } from "../../components/common/Pagination";
-import IngredientFormModal from "../../components/ingredient/IngredientFormModal";
+import IngredientFormModal from "../../components/modal/ingredient/IngredientFormModal";
 
 function AdminIngredients() {
+  const { t } = useTranslation(); // Add hook useTranslation
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,14 +83,14 @@ function AdminIngredients() {
         setIngredients(filtered.slice(start, end));
       } catch (error) {
         console.error("❌ Error fetching ingredients:", error);
-        notify("error", "Không thể tải danh sách nguyên liệu");
+        notify("error", t("admin.ingredients.notifications.loadError")); // Use i18n
       } finally {
         setLoading(false);
       }
     };
 
     void loadIngredients();
-  }, [filterParams, currentPage, pageSize, refreshTrigger, notify]);
+  }, [filterParams, currentPage, pageSize, refreshTrigger, notify, t]); // Add t to dependencies
 
   // ✅ Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,23 +107,23 @@ function AdminIngredients() {
     if (!ingredientToDelete) return;
     try {
       await deleteIngredient(ingredientToDelete);
-      notify("success", "Đã xóa nguyên liệu");
+      notify("success", t("admin.ingredients.notifications.deleteSuccess")); // Use i18n
       setRefreshTrigger((p) => p + 1);
     } catch (error) {
       console.log(error);
-      notify("error", "Xóa nguyên liệu thất bại");
+      notify("error", t("admin.ingredients.notifications.deleteError")); // Use i18n
     } finally {
       setShowConfirmDialog(false);
       setIngredientToDelete(null);
     }
-  }, [ingredientToDelete, notify]);
+  }, [ingredientToDelete, notify, t]); // Add t to dependencies
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">
-          Ingredient Management
+          {t("admin.ingredients.title")} {/* Use i18n */}
         </h1>
         <Button
           color="cyan"
@@ -131,7 +132,7 @@ function AdminIngredients() {
             setShowFormModal(true);
           }}>
           <HiPlus className="mr-2 h-5 w-5" />
-          Add New Ingredient
+          {t("admin.ingredients.addNewIngredient")} {/* Use i18n */}
         </Button>
       </div>
 
@@ -143,7 +144,7 @@ function AdminIngredients() {
               <HiSearch className="h-5 w-5 text-gray-400" />
             </div>
             <TextInput
-              placeholder="Search ingredient..."
+              placeholder={t("admin.ingredients.searchPlaceholder")} // Use i18n
               value={searchTerm}
               onChange={handleSearchChange}
               className="pl-10"
@@ -171,22 +172,23 @@ function AdminIngredients() {
           <Table hoverable>
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                <HiOutlineCube className="inline mr-2" /> Name
+                <HiOutlineCube className="inline mr-2" />{" "}
+                {t("admin.ingredients.tableHeaders.name")} {/* Use i18n */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Quantity
+                {t("admin.ingredients.tableHeaders.quantity")} {/* Use i18n */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Unit
+                {t("admin.ingredients.tableHeaders.unit")} {/* Use i18n */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Min Stock
+                {t("admin.ingredients.tableHeaders.minStock")} {/* Use i18n */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Status
+                {t("admin.ingredients.tableHeaders.status")} {/* Use i18n */}
               </TableHeadCell>
               <TableHeadCell className="text-center p-3 !bg-gray-50 text-gray-700">
-                Actions
+                {t("admin.ingredients.tableHeaders.actions")} {/* Use i18n */}
               </TableHeadCell>
             </TableHead>
             <TableBody className="divide-y">
@@ -195,7 +197,8 @@ function AdminIngredients() {
                   <TableCell
                     colSpan={6}
                     className="text-center bg-white text-gray-700 py-4">
-                    Loading...
+                    {t("admin.ingredients.tableMessages.loading")}{" "}
+                    {/* Use i18n */}
                   </TableCell>
                 </TableRow>
               ) : ingredients.length === 0 ? (
@@ -203,7 +206,8 @@ function AdminIngredients() {
                   <TableCell
                     colSpan={6}
                     className="text-center bg-white text-gray-700 py-4">
-                    No ingredients found
+                    {t("admin.ingredients.tableMessages.noIngredientsFound")}{" "}
+                    {/* Use i18n */}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -227,7 +231,12 @@ function AdminIngredients() {
                       </TableCell>
                       <TableCell className="p-3 bg-white text-gray-700">
                         <Badge color={isLow ? "failure" : "success"}>
-                          {isLow ? "Low Stock" : "OK"}
+                          {t(
+                            `admin.ingredients.status.${
+                              isLow ? "lowStock" : "ok"
+                            }`
+                          )}{" "}
+                          {/* Use i18n */}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center p-3 bg-white text-gray-700">
@@ -273,7 +282,8 @@ function AdminIngredients() {
         show={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={confirmDelete}
-        message="Bạn có chắc chắn muốn xóa nguyên liệu này không?"
+        message={t("admin.ingredients.confirmDialog.deleteMessage")} // Use i18n
+        confirmText={t("common.confirmDialog.delete")} // Use i18n
       />
 
       <IngredientFormModal
@@ -284,16 +294,22 @@ function AdminIngredients() {
           try {
             if (editingIngredient) {
               await updateIngredient(editingIngredient.id!, data);
-              notify("success", "Cập nhật nguyên liệu thành công");
+              notify(
+                "success",
+                t("admin.ingredients.notifications.updateSuccess")
+              ); // Use i18n
             } else {
               await createIngredient(data);
-              notify("success", "Thêm nguyên liệu mới thành công");
+              notify(
+                "success",
+                t("admin.ingredients.notifications.createSuccess")
+              ); // Use i18n
             }
             setShowFormModal(false);
             setRefreshTrigger((p) => p + 1);
           } catch (err) {
             console.error(err);
-            notify("error", "Lưu nguyên liệu thất bại");
+            notify("error", t("admin.ingredients.notifications.saveError")); // Use i18n
           }
         }}
       />

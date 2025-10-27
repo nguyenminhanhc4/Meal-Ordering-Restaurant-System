@@ -21,14 +21,15 @@ import {
 } from "react-icons/hi";
 import { getAllTables, deleteTable } from "../../services/table/tableService";
 import api from "../../api/axios";
+import { useTranslation } from "react-i18next";
 import { useNotification } from "../../components/Notification";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { Pagination } from "../../components/common/Pagination";
-
 import type { TableEntity } from "../../services/table/tableService";
 import { TableFormModal } from "../../components/modal/table/TableFormModal";
 
 function AdminTables() {
+  const { t: translate } = useTranslation(); // Rename t to translate
   const [tables, setTables] = useState<TableEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +58,7 @@ function AdminTables() {
 
   const { notify } = useNotification();
 
-  // ✅ Filter params
+  // Filter params
   const filterParams = useMemo(
     () => ({
       search: searchTerm.trim() || undefined,
@@ -68,7 +69,7 @@ function AdminTables() {
     [searchTerm, selectedLocation, selectedStatus, selectedPosition]
   );
 
-  // ✅ Load dropdown: location + status + position
+  // Load dropdown: location + status + position
   useEffect(() => {
     const loadParams = async () => {
       try {
@@ -83,14 +84,17 @@ function AdminTables() {
         setPositions(posRes.data.data || posRes.data || []);
       } catch (error) {
         console.error("❌ Error loading filter params:", error);
-        notify("error", "Could not load filter data");
+        notify(
+          "error",
+          translate("admin.tables.notifications.loadFilterError")
+        ); // Use translate
       }
     };
 
     void loadParams();
-  }, [notify]);
+  }, [notify, translate]); // Update dependency
 
-  // ✅ Load tables + FE filter
+  // Load tables + FE filter
   useEffect(() => {
     const loadTables = async () => {
       setLoading(true);
@@ -128,14 +132,17 @@ function AdminTables() {
         setTables(filtered.slice(start, end));
       } catch (error) {
         console.error("❌ Error fetching tables:", error);
-        notify("error", "Could not load tables");
+        notify(
+          "error",
+          translate("admin.tables.notifications.loadTablesError")
+        ); // Use translate
       } finally {
         setLoading(false);
       }
     };
 
     void loadTables();
-  }, [filterParams, currentPage, pageSize, refreshTrigger, notify]);
+  }, [filterParams, currentPage, pageSize, refreshTrigger, notify, translate]); // Update dependency
 
   // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,22 +160,27 @@ function AdminTables() {
     try {
       const ok = await deleteTable(tableToDelete);
       if (ok) {
-        notify("success", "Table deleted successfully");
+        notify(
+          "success",
+          translate("admin.tables.notifications.deleteSuccess")
+        ); // Use translate
         setRefreshTrigger((p) => p + 1);
       }
     } catch (error) {
       console.error("Delete error:", error);
-      notify("error", "Could not delete table");
+      notify("error", translate("admin.tables.notifications.deleteError")); // Use translate
     } finally {
       setShowConfirmDialog(false);
       setTableToDelete(null);
     }
-  }, [tableToDelete, notify]);
+  }, [tableToDelete, notify, translate]); // Update dependency
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Table Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {translate("admin.tables.title")} {/* Use translate */}
+        </h1>
         <Button
           color="cyan"
           onClick={() => {
@@ -176,7 +188,7 @@ function AdminTables() {
             setShowFormModal(true);
           }}>
           <HiPlus className="mr-2 h-5 w-5" />
-          Add New Table
+          {translate("admin.tables.addNewTable")} {/* Use translate */}
         </Button>
       </div>
 
@@ -188,7 +200,7 @@ function AdminTables() {
               <HiSearch className="h-5 w-5 text-gray-400" />
             </div>
             <TextInput
-              placeholder="Search table..."
+              placeholder={translate("admin.tables.searchPlaceholder")} // Use translate
               value={searchTerm}
               onChange={handleSearchChange}
               className="pl-10"
@@ -224,7 +236,10 @@ function AdminTables() {
                 },
               },
             }}>
-            <option value="">All Locations</option>
+            <option value="">
+              {translate("admin.tables.filters.allLocations")}
+            </option>{" "}
+            {/* Use translate */}
             {locations.map((l) => (
               <option key={l.id} value={l.id}>
                 {l.code}
@@ -243,7 +258,10 @@ function AdminTables() {
                 },
               },
             }}>
-            <option value="">All Positions</option>
+            <option value="">
+              {translate("admin.tables.filters.allPositions")}
+            </option>{" "}
+            {/* Use translate */}
             {positions.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.code}
@@ -262,7 +280,10 @@ function AdminTables() {
                 },
               },
             }}>
-            <option value="">All Status</option>
+            <option value="">
+              {translate("admin.tables.filters.allStatus")}
+            </option>{" "}
+            {/* Use translate */}
             {statuses.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.code}
@@ -276,22 +297,29 @@ function AdminTables() {
           <Table hoverable>
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-400">
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                <HiOutlineViewGrid className="inline mr-2" /> Name
+                <HiOutlineViewGrid className="inline mr-2" />{" "}
+                {translate("admin.tables.tableHeaders.name")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Location
+                {translate("admin.tables.tableHeaders.location")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Position
+                {translate("admin.tables.tableHeaders.position")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Capacity
+                {translate("admin.tables.tableHeaders.capacity")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
               <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                Status
+                {translate("admin.tables.tableHeaders.status")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
               <TableHeadCell className="text-center p-3 !bg-gray-50 text-gray-700">
-                Actions
+                {translate("admin.tables.tableHeaders.actions")}{" "}
+                {/* Use translate */}
               </TableHeadCell>
             </TableHead>
             <TableBody className="divide-y">
@@ -300,7 +328,8 @@ function AdminTables() {
                   <TableCell
                     colSpan={6}
                     className="text-center bg-white text-gray-700 py-4">
-                    Loading...
+                    {translate("admin.tables.tableMessages.loading")}{" "}
+                    {/* Use translate */}
                   </TableCell>
                 </TableRow>
               ) : tables.length === 0 ? (
@@ -308,7 +337,8 @@ function AdminTables() {
                   <TableCell
                     colSpan={6}
                     className="text-center bg-white text-gray-700 py-4">
-                    No tables found
+                    {translate("admin.tables.tableMessages.noTablesFound")}{" "}
+                    {/* Use translate */}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -337,7 +367,8 @@ function AdminTables() {
                             ? "red"
                             : "gray"
                         }>
-                        {t.statusName}
+                        {translate(`admin.tables.status.${t.statusName}`)}{" "}
+                        {/* Use translate */}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center p-3 bg-white text-gray-700">
@@ -382,7 +413,7 @@ function AdminTables() {
         show={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={confirmDelete}
-        message="Are you sure you want to delete this table?"
+        message={translate("admin.tables.confirmDialog.deleteMessage")} // Use translate
       />
 
       <TableFormModal

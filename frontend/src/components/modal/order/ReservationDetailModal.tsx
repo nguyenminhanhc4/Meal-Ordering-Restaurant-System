@@ -14,7 +14,7 @@ import {
   ModalHeader,
 } from "flowbite-react";
 import { format } from "date-fns";
-import type { ReservationDTO } from "../../services/reservation/reservationService";
+import type { ReservationDTO } from "../../../services/reservation/reservationService";
 
 interface ReservationDetailModalProps {
   show: boolean;

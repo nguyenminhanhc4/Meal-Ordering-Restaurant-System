@@ -14,7 +14,7 @@ import {
 } from "flowbite-react";
 
 import { format } from "date-fns";
-import type { Order } from "../../pages/admin/orders/AdminOrderFood";
+import type { Order } from "../../../pages/admin/orders/AdminOrderFood";
 
 interface OrderDetailModalProps {
   show: boolean;

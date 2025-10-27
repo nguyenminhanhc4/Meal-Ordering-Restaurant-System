@@ -23,7 +23,7 @@ import api from "../../api/axios";
 import { useNotification } from "../../components/Notification";
 import { Pagination } from "../../components/common/Pagination";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
-import { CategoryFormModal } from "../../components/category/CategoryFormModal";
+import { CategoryFormModal } from "../../components/modal/category/CategoryFormModal";
 
 interface Category {
   id: number;
