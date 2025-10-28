@@ -13,7 +13,7 @@ i18n
       en: { translation: en },
       vi: { translation: vi },
     },
-    fallbackLng: "vi", // mặc định là tiếng Anh nếu không xác định được
+    fallbackLng: "vi",
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator", "htmlTag"],
