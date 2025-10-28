@@ -24,7 +24,8 @@ import { useNotification } from "../../components/Notification";
 import { Pagination } from "../../components/common/Pagination";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { CategoryFormModal } from "../../components/modal/category/CategoryFormModal";
-import { useTranslation } from "react-i18next"; // <-- added
+import { useTranslation } from "react-i18next";
+import { AxiosError } from "axios";
 
 interface Category {
   id: number;
@@ -165,8 +166,13 @@ function AdminCategories() {
       await api.delete(`/categories/${categoryToDelete}`);
       notify("success", t("admin.categories.notifications.deleteSuccess"));
       setRefreshTrigger((prev) => prev + 1);
-    } catch (error: any) {
-      const msg = error.message || "Unknown error";
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      const msg =
+        axiosError.response?.data?.message ??
+        axiosError.message ??
+        "Unknown error";
+
       notify(
         "error",
         t("admin.categories.notifications.deleteError", { error: msg })

@@ -31,6 +31,7 @@ import type {
   StatusParam,
 } from "../../services/types/menuItem";
 import { useTranslation } from "react-i18next";
+import { AxiosError, isAxiosError } from "axios";
 
 function AdminMenuItems() {
   const { t } = useTranslation();
@@ -177,15 +178,27 @@ function AdminMenuItems() {
       const remaining = totalItems - 1;
       const maxPage = Math.ceil(remaining / pageSize) || 1;
       if (currentPage > maxPage) setCurrentPage(1);
-    } catch (error: any) {
-      const msg = error.response?.data?.message || error.message;
-      if (error.response?.status === 400 && msg?.includes("foreign key")) {
-        notify("error", t("admin.menuItems.notifications.deleteForeignKey"));
-      } else if (error.response?.status === 404) {
-        notify("error", t("admin.menuItems.notifications.deleteNotFound"));
-      } else if (error.response?.status === 403) {
-        notify("error", t("admin.menuItems.notifications.deleteForbidden"));
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+        const msg = axiosError.response?.data?.message ?? axiosError.message;
+        const status = axiosError.response?.status;
+
+        if (status === 400 && msg?.includes("foreign key")) {
+          notify("error", t("admin.menuItems.notifications.deleteForeignKey"));
+        } else if (status === 404) {
+          notify("error", t("admin.menuItems.notifications.deleteNotFound"));
+        } else if (status === 403) {
+          notify("error", t("admin.menuItems.notifications.deleteForbidden"));
+        } else {
+          notify(
+            "error",
+            t("admin.menuItems.notifications.deleteError", { error: msg })
+          );
+        }
       } else {
+        // Lỗi không phải từ Axios (rất hiếm)
+        const msg = error instanceof Error ? error.message : "Unknown error";
         notify(
           "error",
           t("admin.menuItems.notifications.deleteError", { error: msg })

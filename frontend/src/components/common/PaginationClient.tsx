@@ -31,8 +31,7 @@ const Pagination: React.FC<PaginationProps> = ({
   loading = false,
   onPageChange,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const [inputPage, setInputPage] = useState<string>("");
 
   // Khi đổi trang → cập nhật URL + gọi callback

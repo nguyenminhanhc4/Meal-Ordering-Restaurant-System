@@ -24,7 +24,7 @@ const OrderListPage: React.FC = () => {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingNext, setLoadingNext] = useState(false);
+  const [, setLoadingNext] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);

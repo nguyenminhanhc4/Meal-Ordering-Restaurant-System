@@ -12,7 +12,8 @@ import {
 import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../Notification";
 import axios from "../../../api/axios";
-import { useTranslation } from "react-i18next"; // <-- added
+import { useTranslation } from "react-i18next";
+import { isAxiosError } from "axios";
 
 interface FormData {
   name: string;
@@ -133,9 +134,31 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           if (fetchedRoles.length > 0) setRoles(fetchedRoles);
           if (fetchedStatuses.length > 0) setStatuses(fetchedStatuses);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         if (mounted && !abortController.signal.aborted) {
-          notify("error", t("admin.users.form.notifications.saveFailed"));
+          if (isAxiosError(error)) {
+            // Lỗi từ Axios (mạng, server, 500, 404, v.v.)
+            const msg = error.response?.data?.message ?? error.message;
+            notify(
+              "error",
+              t("admin.users.form.notifications.loadFailed", { error: msg })
+            );
+          } else if (
+            error instanceof DOMException &&
+            error.name === "AbortError"
+          ) {
+            // Lỗi do hủy request (người dùng thoát trang)
+            console.log("Request bị hủy do component unmount");
+            // → Không notify, vì người dùng không cần biết
+          } else {
+            // Lỗi khác (rất hiếm)
+            notify(
+              "error",
+              t("admin.users.form.notifications.loadFailed", {
+                error: "Lỗi không xác định",
+              })
+            );
+          }
         }
       }
     };
@@ -242,6 +265,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         ...payload,
         avatarUrl: avatarUrl || userData?.avatarUrl,
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { avatar: _, ...finalPayload } = userPayload;
 
       if (userData) {

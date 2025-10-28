@@ -47,7 +47,7 @@ export default function UserProfileContent() {
 
   const [form, setForm] = useState(initialForm);
 
-  useEffect(() => setForm(initialForm), [user]);
+  useEffect(() => setForm(initialForm), [user, initialForm]);
 
   if (!user) return <p className="p-8 text-center">{t("profile.loading")}</p>;
 

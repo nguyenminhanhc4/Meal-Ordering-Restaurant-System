@@ -24,6 +24,7 @@ import type {
   MenuItemIngredientUpdateDTO,
 } from "../../../services/types/menuItem";
 import { useTranslation } from "react-i18next";
+import { isAxiosError } from "axios";
 
 interface MenuItemFormModalProps {
   show: boolean;
@@ -67,7 +68,7 @@ export function MenuItemFormModal({
   >([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [, setSelectedFile] = useState<File | null>(null);
 
   const isEditMode = !!menuItemData;
 
@@ -240,18 +241,29 @@ export function MenuItemFormModal({
           t("admin.menuItems.form.notifications.uploadSuccess")
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Upload error:", error);
-      if (error.response?.status === 500) {
-        notify(
-          "warning",
-          t("admin.menuItems.form.notifications.uploadWarning")
-        );
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        const msg = error.response?.data?.message ?? error.message;
+
+        if (status === 500) {
+          notify(
+            "warning",
+            t("admin.menuItems.form.notifications.uploadWarning")
+          );
+        } else {
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.uploadError", { error: msg })
+          );
+        }
       } else {
-        const msg = error.response?.data?.message || error.message;
         notify(
           "error",
-          t("admin.menuItems.form.notifications.uploadError", { error: msg })
+          t("admin.menuItems.form.notifications.uploadError", {
+            error: "Lỗi không xác định",
+          })
         );
       }
     } finally {
@@ -315,14 +327,27 @@ export function MenuItemFormModal({
       }
 
       onSuccess();
-    } catch (error: any) {
-      const msg = error.response?.data?.message || error.message;
-      if (msg?.includes("getInventory")) {
-        notify("error", t("admin.menuItems.form.notifications.inventoryError"));
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const msg = error.response?.data?.message ?? error.message;
+
+        if (msg?.includes("getInventory")) {
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.inventoryError")
+          );
+        } else {
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.saveError", { error: msg })
+          );
+        }
       } else {
         notify(
           "error",
-          t("admin.menuItems.form.notifications.saveError", { error: msg })
+          t("admin.menuItems.form.notifications.saveError", {
+            error: "Lỗi không xác định",
+          })
         );
       }
     } finally {

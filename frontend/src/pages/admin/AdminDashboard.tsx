@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Spinner, Alert, Badge } from "flowbite-react";
 import { HiChartPie, HiTrendingUp, HiCalendar } from "react-icons/hi";
 import StatCard from "../../components/dashboard/StatCard";
@@ -42,11 +42,7 @@ function AdminDashboard() {
     MenuItemSalesDto[]
   >([]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -100,7 +96,11 @@ function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (error) {
     return (

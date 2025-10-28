@@ -24,8 +24,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [, setNotifications] = useState<NotificationDto[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {

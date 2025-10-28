@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Button, Spinner, Tooltip } from "flowbite-react";
 import { getAllTables } from "../../../services/table/tableService";
 import type { TableEntity } from "../../../services/table/tableService";
@@ -31,8 +31,7 @@ export default function TableBooking() {
   const { t } = useTranslation();
   const [tables, setTables] = useState<TableEntity[]>([]);
   const [page] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [totalPages, setTotalPages] = useState(0);
+  const [, setTotalPages] = useState(0);
   const [selectedTable, setSelectedTable] = useState<TableEntity | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBookedList, setShowBookedList] = useState(false);
@@ -83,15 +82,6 @@ export default function TableBooking() {
   /** -------------------------------
    *  DATA FETCHING
    *  ------------------------------- */
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await Promise.all([fetchTables(), fetchMyReservations()]);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
-
   useEffect(() => {
     const client = connectWebSocket<{ tableId: number; statusId: number }>(
       "/topic/tables",
@@ -175,7 +165,7 @@ export default function TableBooking() {
   });
 
   /** Lấy danh sách bàn */
-  const fetchTables = async () => {
+  const fetchTables = useCallback(async () => {
     try {
       const data = await getAllTables();
       setTables(data);
@@ -183,10 +173,10 @@ export default function TableBooking() {
       console.error("❌ Lỗi tải danh sách bàn:", error);
       notify("error", "Không thể tải danh sách bàn!");
     }
-  };
+  }, [notify]);
 
   /** Lấy danh sách bàn đã đặt của user */
-  const fetchMyReservations = async () => {
+  const fetchMyReservations = useCallback(async () => {
     setLoadingReservations(true);
     try {
       const data = await getMyReservations(page, 10);
@@ -198,7 +188,16 @@ export default function TableBooking() {
     } finally {
       setLoadingReservations(false);
     }
-  };
+  }, [notify, page]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([fetchTables(), fetchMyReservations()]);
+      setLoading(false);
+    };
+    fetchData();
+  }, [fetchMyReservations, fetchTables]);
 
   const handleEditReservation = async (res: Reservation) => {
     const fullReservation = await getMyReservationByPublicId(res.publicId);

@@ -54,8 +54,8 @@ function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [, setNotifications] = useState<NotificationDto[]>([]);
+  const [, setUnreadCount] = useState(0);
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
 
@@ -183,6 +183,9 @@ function AdminLayout() {
     navigate("/");
     return null;
   }
+  const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
 
   const SidebarItemButton: React.FC<SidebarItemButtonProps> = ({
     path,
@@ -459,7 +462,7 @@ function AdminLayout() {
                 </DropdownHeader>
                 <DropdownItem
                   className="flex flex-col items-start gap-2 hover:!bg-stone-700"
-                  onClick={(e) => e.stopPropagation()}>
+                  onClick={handleLangClick as unknown as () => void}>
                   <LanguageSelector compact />
                 </DropdownItem>
                 <DropdownDivider />
