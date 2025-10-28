@@ -206,31 +206,49 @@ const MegaMenuComponent: React.FC = () => {
                 />
               </div>
             }
-            className="!bg-stone-800 shadow-lg rounded-lg">
-            <DropdownHeader className="bg-stone-700 !text-yellow-400 flex flex-col items-start">
+            className="!bg-stone-800 shadow-lg rounded-lg"
+            theme={{
+              floating: {
+                base: "!bg-stone-800 !text-gray-200 border border-stone-700 shadow-xl rounded-xl overflow-hidden",
+                item: {
+                  base: "flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:!bg-stone-700 hover:!text-yellow-400 transition-colors rounded-md mx-1",
+                },
+                header:
+                  "!bg-stone-700 text-yellow-400 px-4 py-3 border-b border-stone-600 text-sm font-semibold",
+                divider: "border-stone-700 mx-2",
+              },
+            }}>
+            <DropdownHeader className="bg-stone-700 text-yellow-400 px-4 py-3">
               <span className="block text-sm font-semibold">{user.name}</span>
               <span className="block truncate text-xs">{user.email}</span>
             </DropdownHeader>
             <DropdownItem
-              className="flex items-center gap-3 hover:!text-yellow-400"
+              className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
               href="/profile">
               <HiOutlineUser className="text-yellow-400" />
               {t("component.megaMenu.profile")}
             </DropdownItem>
             <DropdownItem
-              className="flex items-center gap-3 hover:!text-yellow-400"
+              className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
               href="/order">
               <HiOutlineShoppingCart className="text-yellow-400" />
               {t("component.megaMenu.orders")}
             </DropdownItem>
             <DropdownItem
-              className="flex flex-col items-start gap-2 hover:!bg-stone-700"
+              className="flex flex-col items-start gap-2 px-4 py-2 hover:!bg-stone-700"
               onClick={handleLangClick as unknown as () => void}>
-              <LanguageSelector compact />
+              <LanguageSelector
+                compact
+                accentColor="text-yellow-400"
+                hoverColor="hover:text-yellow-400"
+                activeBg="bg-stone-800 border-yellow-400"
+                inactiveText="text-gray-400"
+                labelColor="text-gray-200"
+              />
             </DropdownItem>
             <DropdownDivider />
             <DropdownItem
-              className="flex items-center gap-3 hover:!text-yellow-400"
+              className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
               onClick={async () => {
                 await logout();
                 notify("success", t("component.megaMenu.logoutSuccess"));

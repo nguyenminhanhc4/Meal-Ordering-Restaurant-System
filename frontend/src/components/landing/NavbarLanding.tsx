@@ -112,7 +112,7 @@ export default function NavbarLanding() {
                     img={user.avatarUrl || undefined}
                     rounded
                     size="md"
-                    className="w-10 h-10"
+                    className="w-10 h-10 ring-1 ring-yellow-400/40"
                     placeholderInitials={
                       user.name ? user.name.charAt(0).toUpperCase() : "?"
                     }
@@ -127,31 +127,61 @@ export default function NavbarLanding() {
                   </div>
                 </div>
               }
-              className="!bg-stone-800 shadow-lg rounded-lg">
-              <DropdownHeader className="bg-stone-700 !text-yellow-400">
+              className="!bg-stone-800 shadow-xl rounded-xl border border-stone-700 min-w-[240px]"
+              theme={{
+                floating: {
+                  base: "!bg-stone-800 !text-gray-200 border border-stone-700 shadow-xl rounded-xl overflow-hidden",
+                  item: {
+                    base: "flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:!bg-stone-700 hover:!text-yellow-400 transition-colors rounded-md mx-1",
+                  },
+                  header:
+                    "!bg-stone-700 text-yellow-400 px-4 py-3 border-b border-stone-600 text-sm font-semibold",
+                  divider: "border-stone-700 mx-2",
+                },
+              }}>
+              {/* Header */}
+              <DropdownHeader className="bg-stone-700 text-yellow-400 px-4 py-3">
                 <span className="block text-sm font-semibold">{user.name}</span>
-                <span className="block truncate text-xs">{user.email}</span>
+                <span className="block truncate text-xs text-gray-300">
+                  {user.email}
+                </span>
               </DropdownHeader>
+
+              {/* Profile */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 href="/profile">
                 <HiOutlineUser className="text-yellow-400" />
                 {t("navbarLanding.dropdown.profile")}
               </DropdownItem>
+
+              {/* Orders */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 href="/order">
                 <HiOutlineShoppingCart className="text-yellow-400" />
                 {t("navbarLanding.dropdown.orders")}
               </DropdownItem>
+
+              {/* Language */}
               <DropdownItem
-                className="flex flex-col items-start gap-2 hover:!bg-stone-700"
+                className="flex flex-col items-start gap-2 px-4 py-2 hover:!bg-stone-700"
                 onClick={handleLangClick as unknown as () => void}>
-                <LanguageSelector compact />
+                <LanguageSelector
+                  compact
+                  accentColor="text-yellow-400"
+                  hoverColor="hover:text-yellow-400"
+                  activeBg="bg-stone-800 border-yellow-400"
+                  inactiveText="text-gray-400"
+                  labelColor="text-gray-200"
+                />
               </DropdownItem>
+
               <DropdownDivider />
+
+              {/* Logout */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 onClick={async () => {
                   await logout();
                   notify("success", t("navbarLanding.dropdown.logoutSuccess"));

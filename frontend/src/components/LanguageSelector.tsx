@@ -4,8 +4,13 @@ import { useTranslation } from "react-i18next";
 import { HiOutlineGlobe } from "react-icons/hi";
 
 interface LanguageSelectorProps {
-  compact?: boolean; // hiển thị gọn khi trong dropdown
+  compact?: boolean;
   onChange?: (lang: string) => void;
+  accentColor?: string;
+  hoverColor?: string;
+  activeBg?: string;
+  inactiveText?: string;
+  labelColor?: string;
 }
 
 const languages = [
@@ -16,6 +21,11 @@ const languages = [
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   compact = false,
   onChange,
+  accentColor = "text-yellow-400",
+  hoverColor = "hover:text-yellow-400",
+  activeBg = "bg-yellow-400 text-black",
+  inactiveText = "text-gray-300",
+  labelColor = "text-gray-200",
 }) => {
   const { i18n, t } = useTranslation();
 
@@ -26,30 +36,36 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-start w-full">
-      {!compact && (
-        <div className="flex items-center gap-2 mb-2 text-gray-200">
-          <HiOutlineGlobe className="text-yellow-400" />
-          <span>{t("navbarLanding.dropdown.lang")}</span>
+    <div className="flex flex-col w-full">
+      {/* Header */}
+      <div
+        className={`flex items-center justify-between w-full mb-2 px-1 ${labelColor}`}>
+        <div className="flex items-center gap-2">
+          <HiOutlineGlobe className={`${accentColor} text-lg`} />
+          <span className="font-semibold text-sm tracking-wide">
+            {t("navbarLanding.dropdown.lang")}
+          </span>
         </div>
-      )}
+      </div>
 
-      <div className="flex gap-3">
-        {languages.map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
-            className={`text-sm rounded px-2 py-1 transition ${
-              i18n.language === lang.code
-                ? "bg-yellow-400 text-black"
-                : "text-gray-300 hover:text-yellow-400"
-            }`}>
-            {lang.flag} {compact ? "" : lang.label}
-          </button>
-        ))}
+      {/* Buttons */}
+      <div className="flex gap-2 w-full">
+        {languages.map((lang) => {
+          const isActive = i18n.language === lang.code;
+          return (
+            <button
+              key={lang.code}
+              onClick={() => changeLanguage(lang.code)}
+              className={`flex items-center justify-center gap-1 w-full rounded-md border border-stone-600 px-2 py-1.5 text-xs font-medium transition-all duration-200 ${
+                isActive ? `${activeBg}` : `${inactiveText} ${hoverColor}`
+              }`}>
+              <span className="text-base">{lang.flag}</span>
+              {!compact && <span>{lang.label}</span>}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 };
-
 export default LanguageSelector;
