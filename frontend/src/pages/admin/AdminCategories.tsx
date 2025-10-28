@@ -26,6 +26,7 @@ import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { CategoryFormModal } from "../../components/modal/category/CategoryFormModal";
 import { useTranslation } from "react-i18next";
 import { AxiosError } from "axios";
+import { useAuth } from "../../store/AuthContext";
 
 interface Category {
   id: number;
@@ -46,6 +47,7 @@ interface CategorySearchRequest {
 function AdminCategories() {
   const { t } = useTranslation(); // <-- i18n hook
   const { notify } = useNotification();
+  const { user } = useAuth();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -201,16 +203,18 @@ function AdminCategories() {
         <h1 className="text-2xl font-bold text-gray-800">
           {t("admin.categories.title")}
         </h1>
-        <Button
-          color="cyan"
-          size="md"
-          onClick={() => {
-            setSelectedCategory(undefined);
-            setShowModal(true);
-          }}>
-          <HiPlus className="mr-2 h-5 w-5" />
-          {t("admin.categories.addButton")}
-        </Button>
+        {user?.role === "ADMIN" && (
+          <Button
+            color="cyan"
+            size="md"
+            onClick={() => {
+              setSelectedCategory(undefined);
+              setShowModal(true);
+            }}>
+            <HiPlus className="mr-2 h-5 w-5" />
+            {t("admin.categories.addButton")}
+          </Button>
+        )}
       </div>
 
       <Card className="!bg-white shadow-lg border-none">
@@ -328,25 +332,29 @@ function AdminCategories() {
 
                     <TableCell className="p-3 bg-white text-gray-700 text-center">
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          size="xs"
-                          color="blue"
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setShowModal(true);
-                          }}
-                          aria-label={t("admin.categories.editTooltip")}
-                          title={t("admin.categories.editTooltip")}>
-                          <HiPencil className="h-4 w-4 text-white" />
-                        </Button>
-                        <Button
-                          size="xs"
-                          color="red"
-                          onClick={() => handleDeleteCategory(category.id)}
-                          aria-label={t("admin.categories.deleteTooltip")}
-                          title={t("admin.categories.deleteTooltip")}>
-                          <HiTrash className="h-4 w-4 text-white" />
-                        </Button>
+                        {user?.role === "ADMIN" && (
+                          <>
+                            <Button
+                              size="xs"
+                              color="blue"
+                              onClick={() => {
+                                setSelectedCategory(category);
+                                setShowModal(true);
+                              }}
+                              aria-label={t("admin.categories.editTooltip")}
+                              title={t("admin.categories.editTooltip")}>
+                              <HiPencil className="h-4 w-4 text-white" />
+                            </Button>
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={() => handleDeleteCategory(category.id)}
+                              aria-label={t("admin.categories.deleteTooltip")}
+                              title={t("admin.categories.deleteTooltip")}>
+                              <HiTrash className="h-4 w-4 text-white" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

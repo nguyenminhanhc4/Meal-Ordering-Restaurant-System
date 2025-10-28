@@ -32,11 +32,13 @@ import type {
 } from "../../services/types/menuItem";
 import { useTranslation } from "react-i18next";
 import { AxiosError, isAxiosError } from "axios";
+import { useAuth } from "../../store/AuthContext";
 
 function AdminMenuItems() {
   const { t } = useTranslation();
   const { notify } = useNotification();
 
+  const { user } = useAuth();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -437,14 +439,16 @@ function AdminMenuItems() {
                           title={t("common.edit")}>
                           <HiPencil className="h-4 w-4 text-white" />
                         </Button>
-                        <Button
-                          size="xs"
-                          color="red"
-                          onClick={() => handleDeleteMenuItem(item.id)}
-                          aria-label={t("common.delete")}
-                          title={t("common.delete")}>
-                          <HiTrash className="h-4 w-4 text-white" />
-                        </Button>
+                        {user?.role === "ADMIN" && (
+                          <Button
+                            size="xs"
+                            color="red"
+                            onClick={() => handleDeleteMenuItem(item.id)}
+                            aria-label={t("common.delete")}
+                            title={t("common.delete")}>
+                            <HiTrash className="h-4 w-4 text-white" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

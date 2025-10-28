@@ -176,9 +176,24 @@ function AdminLayout() {
 
   const staffMenu = [
     {
-      path: "/admin/my-tasks",
-      label: t("admin.sidebar.menu.myTasks"),
+      path: "/admin/categories",
+      label: t("admin.sidebar.menu.categories"),
       icon: HiCollection,
+    },
+    {
+      path: "/admin/menu-items",
+      label: t("admin.sidebar.menu.menuItems"),
+      icon: HiMenuAlt1,
+    },
+    {
+      path: "/admin/tables",
+      label: t("admin.sidebar.menu.tables"),
+      icon: HiOutlineViewGrid,
+    },
+    {
+      path: "/admin/settings",
+      label: t("admin.sidebar.menu.settings"),
+      icon: HiCog,
     },
   ];
 

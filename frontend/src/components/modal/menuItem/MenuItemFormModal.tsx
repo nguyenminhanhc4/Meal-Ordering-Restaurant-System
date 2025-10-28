@@ -472,9 +472,6 @@ export function MenuItemFormModal({
                     },
                   },
                 }}>
-                <option value={0}>
-                  {t("common.select")} {t("admin.menuItems.form.categoryLabel")}
-                </option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
