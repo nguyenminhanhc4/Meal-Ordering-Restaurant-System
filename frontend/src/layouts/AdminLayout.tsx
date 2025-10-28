@@ -29,6 +29,7 @@ import {
   HiFolderOpen,
   HiMenu,
   HiOutlineViewGrid,
+  HiOutlineCube,
 } from "react-icons/hi";
 import { FaChair } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
@@ -123,14 +124,9 @@ function AdminLayout() {
       icon: HiChartPie,
     },
     {
-      path: "/admin/tables",
-      label: t("admin.sidebar.menu.tables"),
-      icon: HiOutlineViewGrid,
-    },
-    {
       path: "/admin/ingredients",
       label: t("admin.sidebar.menu.ingredients"),
-      icon: HiOutlineViewGrid,
+      icon: HiOutlineCube,
     },
     {
       label: t("admin.sidebar.menu.orders"),
@@ -165,6 +161,11 @@ function AdminLayout() {
       path: "/admin/menu-items",
       label: t("admin.sidebar.menu.menuItems"),
       icon: HiMenuAlt1,
+    },
+    {
+      path: "/admin/tables",
+      label: t("admin.sidebar.menu.tables"),
+      icon: HiOutlineViewGrid,
     },
     {
       path: "/admin/settings",

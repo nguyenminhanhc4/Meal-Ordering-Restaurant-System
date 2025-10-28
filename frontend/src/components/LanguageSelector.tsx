@@ -40,7 +40,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       {/* Header */}
       <div
         className={`flex items-center justify-between w-full mb-2 px-1 ${labelColor}`}>
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${hoverColor}`}>
           <HiOutlineGlobe className={`${accentColor} text-lg`} />
           <span className="font-semibold text-sm tracking-wide">
             {t("navbarLanding.dropdown.lang")}
