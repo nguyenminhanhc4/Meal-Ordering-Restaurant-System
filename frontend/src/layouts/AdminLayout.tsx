@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import {
   Navbar,
@@ -62,10 +62,6 @@ function AdminLayout() {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     Orders: true, // Mặc định mở "Orders"
   });
-
-  const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-  };
 
   const toggleExpand = (label: string) => {
     setExpandedMenus((prev) => ({
@@ -463,7 +459,7 @@ function AdminLayout() {
                 </DropdownHeader>
                 <DropdownItem
                   className="flex flex-col items-start gap-2 hover:!bg-stone-700"
-                  onClick={handleLangClick as unknown as () => void}>
+                  onClick={(e) => e.stopPropagation()}>
                   <LanguageSelector compact />
                 </DropdownItem>
                 <DropdownDivider />

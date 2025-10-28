@@ -10,10 +10,11 @@ import {
   ModalFooter,
   Textarea,
 } from "flowbite-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNotification } from "../../Notification";
 import api from "../../../api/axios";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 interface CategoryFormData {
   name: string;
@@ -44,6 +45,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   onSuccess,
   categoryData,
 }) => {
+  const { t } = useTranslation();
+  const { notify } = useNotification();
+
   const [formData, setFormData] = useState<CategoryFormData>({
     name: "",
     description: "",
@@ -55,53 +59,48 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<CategoryFormData>>({});
-  const { notify } = useNotification();
 
   const isEditMode = !!categoryData;
 
-  // Load form data when editing
+  // Reset form khi mở modal hoặc thay đổi categoryData
   useEffect(() => {
-    if (categoryData) {
-      setFormData({
-        name: categoryData.name || "",
-        description: categoryData.description || "",
-        parentId: categoryData.parentId?.toString() || "",
-      });
-    } else {
-      setFormData({
-        name: "",
-        description: "",
-        parentId: "",
-      });
+    if (show) {
+      if (categoryData) {
+        setFormData({
+          name: categoryData.name || "",
+          description: categoryData.description || "",
+          parentId: categoryData.parentId?.toString() || "",
+        });
+      } else {
+        setFormData({ name: "", description: "", parentId: "" });
+      }
+      setErrors({});
     }
-    setErrors({});
   }, [categoryData, show]);
 
-  // Load parent categories for dropdown
-  const loadParentCategories = async () => {
+  // Load danh mục cha
+  const loadParentCategories = useCallback(async () => {
     try {
-      const response = await api.get("/categories");
-      if (response.data) {
-        // Filter out current category if editing to prevent self-reference
-        let categories = response.data;
-        if (categoryData) {
-          categories = categories.filter(
-            (cat: ParentCategoryOption) => cat.id !== categoryData.id
-          );
-        }
-        setParentCategories(categories);
+      const response = await api.get<ParentCategoryOption[]>("/categories");
+      let categories = response.data || [];
+      if (categoryData) {
+        categories = categories.filter((cat) => cat.id !== categoryData.id);
       }
+      setParentCategories(categories);
     } catch (error) {
       console.error("Error loading parent categories:", error);
-      notify("error", "Failed to load parent categories");
+      notify(
+        "error",
+        t("admin.categories.form.notifications.loadParentsError")
+      );
     }
-  };
+  }, [categoryData, notify, t]);
 
   useEffect(() => {
     if (show) {
       void loadParentCategories();
     }
-  }, [show, categoryData]);
+  }, [show, loadParentCategories]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -110,7 +109,6 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (errors[name as keyof CategoryFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -120,11 +118,12 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     const newErrors: Partial<CategoryFormData> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Category name is required";
+      newErrors.name = t("admin.categories.form.validation.nameRequired");
     }
-
     if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = t(
+        "admin.categories.form.validation.descriptionRequired"
+      );
     }
 
     setErrors(newErrors);
@@ -133,13 +132,9 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-
     try {
       const payload = {
         name: formData.name.trim(),
@@ -148,27 +143,27 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
       };
 
       if (isEditMode && categoryData) {
-        // Update existing category
         await api.put(`/categories/${categoryData.id}`, payload);
-        notify("success", "Category updated successfully!");
+        notify(
+          "success",
+          t("admin.categories.form.notifications.updateSuccess")
+        );
       } else {
-        // Create new category
         await api.post("/categories", payload);
-        notify("success", "Category created successfully!");
+        notify(
+          "success",
+          t("admin.categories.form.notifications.createSuccess")
+        );
       }
 
       onSuccess();
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        notify(
-          "error",
-          error.response?.data.message || "Lỗi tải danh mục. Vui lòng thử lại."
-        );
-        console.error("Categories retrieve failed:", error.response?.data);
-      } else {
-        notify("error", "Đã xảy ra lỗi không mong muốn.");
-        console.error("Unexpected error:", error);
-      }
+      const err = error as AxiosError<{ message?: string }>;
+      const msg = err.response?.data?.message || err.message || "Unknown error";
+      const key = isEditMode
+        ? "admin.categories.form.notifications.updateError"
+        : "admin.categories.form.notifications.createError";
+      notify("error", t(key, { error: msg }));
     } finally {
       setIsSubmitting(false);
     }
@@ -182,62 +177,65 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     }
   };
 
+  const getParentName = (id: string) => {
+    if (!id) return t("admin.categories.form.previewRoot");
+    const parent = parentCategories.find((p) => p.id.toString() === id);
+    return parent?.name || "Unknown";
+  };
+
   return (
-    <Modal
-      show={show}
-      onClose={handleClose}
-      size="4xl"
-      className="shadow-lg z-[70]">
-      {/* Modal Header */}
+    <Modal show={show} onClose={handleClose} size="4xl" className="z-[70]">
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
-          {isEditMode ? "Edit Category" : "Create New Category"}
+          {isEditMode
+            ? t("admin.categories.form.titleEdit")
+            : t("admin.categories.form.titleCreate")}
         </h3>
       </ModalHeader>
 
-      <form onSubmit={handleSubmit} className="flex flex-col">
-        {/* Modal Body */}
+      <form onSubmit={handleSubmit}>
         <ModalBody className="p-6 space-y-6 bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Left Column */}
+            {/* Cột trái */}
             <div className="space-y-6">
-              {/* Category Name */}
+              {/* Tên */}
               <div>
                 <Label
                   htmlFor="name"
                   className="mb-2 block text-sm font-medium !text-gray-700">
-                  Category Name *
+                  {t("admin.categories.form.nameLabel")}
                 </Label>
                 <TextInput
                   id="name"
                   name="name"
-                  type="text"
-                  placeholder="Enter category name"
+                  placeholder={t("admin.categories.form.namePlaceholder")}
                   value={formData.name}
                   onChange={handleInputChange}
                   color={errors.name ? "failure" : "gray"}
                   disabled={isSubmitting}
                   required
-                  className="w-full"
+                  aria-describedby={errors.name ? "name-error" : undefined}
                   theme={{
                     field: {
                       input: {
-                        base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                        base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                       },
                     },
                   }}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                  <p id="name-error" className="text-red-500 text-sm mt-1">
+                    {errors.name}
+                  </p>
                 )}
               </div>
 
-              {/* Parent Category */}
+              {/* Danh mục cha */}
               <div>
                 <Label
                   htmlFor="parentId"
                   className="mb-2 block text-sm font-medium !text-gray-700">
-                  Parent Category (Optional)
+                  {t("admin.categories.form.parentLabel")}
                 </Label>
                 <Select
                   id="parentId"
@@ -245,15 +243,16 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   value={formData.parentId}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
-                  className="w-full"
                   theme={{
                     field: {
                       select: {
-                        base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                        base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
                       },
                     },
                   }}>
-                  <option value="">-- No Parent (Root Category) --</option>
+                  <option value="">
+                    {t("admin.categories.form.parentPlaceholder")}
+                  </option>
                   {parentCategories.map((parent) => (
                     <option key={parent.id} value={parent.id}>
                       {parent.name}
@@ -261,74 +260,76 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   ))}
                 </Select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Leave empty to create a root category
+                  {t("admin.categories.form.parentHint")}
                 </p>
               </div>
             </div>
 
-            {/* Right Column */}
+            {/* Cột phải */}
             <div className="space-y-6">
-              {/* Description */}
+              {/* Mô tả */}
               <div>
                 <Label
                   htmlFor="description"
                   className="mb-2 block text-sm font-medium !text-gray-700">
-                  Description *
+                  {t("admin.categories.form.descriptionLabel")}
                 </Label>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Enter category description"
+                  placeholder={t(
+                    "admin.categories.form.descriptionPlaceholder"
+                  )}
                   value={formData.description}
                   onChange={handleInputChange}
                   color={errors.description ? "failure" : "gray"}
                   disabled={isSubmitting}
                   rows={6}
                   required
-                  className="w-full resize-none"
+                  aria-describedby={
+                    errors.description ? "desc-error" : undefined
+                  }
                   theme={{
-                    base: "!text-gray-700 !bg-white border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                    base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                   }}
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p id="desc-error" className="text-red-500 text-sm mt-1">
                     {errors.description}
                   </p>
                 )}
               </div>
 
-              {/* Preview/Info Section */}
+              {/* Xem trước */}
               <div className="bg-white p-4 rounded-lg border border-gray-300">
                 <Label className="mb-3 block text-lg font-medium !text-gray-700">
-                  Category Preview
+                  {t("admin.categories.form.previewTitle")}
                 </Label>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-600">
-                      Name:
+                <div className="space-y-2 text-sm">
+                  <div className="flex">
+                    <span className="font-medium text-gray-600 w-20">
+                      {t("admin.categories.form.previewName")}
                     </span>
-                    <span className="text-sm text-gray-800">
-                      {formData.name || "Not specified"}
-                    </span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-medium text-gray-600">
-                      Parent:
-                    </span>
-                    <span className="text-sm text-gray-800">
-                      {formData.parentId
-                        ? parentCategories.find(
-                            (p) => p.id.toString() === formData.parentId
-                          )?.name || "Unknown"
-                        : "Root Category"}
+                    <span className="text-gray-800">
+                      {formData.name ||
+                        t("admin.categories.form.previewNotSpecified")}
                     </span>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-medium text-gray-600">
-                      Description:
+                  <div className="flex">
+                    <span className="font-medium text-gray-600 w-20">
+                      {t("admin.categories.form.previewParent")}
                     </span>
-                    <span className="text-sm text-gray-800 flex-1">
-                      {formData.description || "Not specified"}
+                    <span className="text-gray-800">
+                      {getParentName(formData.parentId)}
+                    </span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-medium text-gray-600 w-20">
+                      {t("admin.categories.form.previewDescription")}
+                    </span>
+                    <span className="text-gray-800 flex-1">
+                      {formData.description ||
+                        t("admin.categories.form.previewNotSpecified")}
                     </span>
                   </div>
                 </div>
@@ -337,26 +338,31 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
           </div>
         </ModalBody>
 
-        {/* Modal Footer */}
-        <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
+        <ModalFooter className="p-4 border-t bg-gray-50 flex justify-end space-x-2">
           <Button
-            color="red"
+            color="gray"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="text-gray-50">
-            Cancel
+            type="button">
+            {t("admin.categories.form.buttonCancel")}
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white disabled:bg-cyan-400">
+            className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-400">
             {isSubmitting ? (
               <div className="flex items-center gap-2">
-                <Spinner size="sm" light={true} />
-                {isEditMode ? "Updating..." : "Creating..."}
+                <Spinner size="sm" light />
+                {isEditMode
+                  ? t("admin.categories.form.buttonUpdating")
+                  : t("admin.categories.form.buttonCreating")}
               </div>
             ) : (
-              <>{isEditMode ? "Update Category" : "Create Category"}</>
+              <>
+                {isEditMode
+                  ? t("admin.categories.form.buttonUpdate")
+                  : t("admin.categories.form.buttonCreate")}
+              </>
             )}
           </Button>
         </ModalFooter>

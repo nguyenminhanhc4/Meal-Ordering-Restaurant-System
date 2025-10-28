@@ -12,9 +12,9 @@ import {
   ModalFooter,
   ModalHeader,
 } from "flowbite-react";
-
 import { format } from "date-fns";
 import type { Order } from "../../../pages/admin/orders/AdminOrderFood";
+import { useTranslation } from "react-i18next"; // <-- added
 
 interface OrderDetailModalProps {
   show: boolean;
@@ -29,7 +29,7 @@ interface OrderDetailModalProps {
 }
 
 interface OrderAction {
-  label: string;
+  labelKey: string; // <-- now a translation key
   color: string;
   onClick: (publicId: string) => void;
   visible: (status: string) => boolean;
@@ -46,9 +46,11 @@ export const OrderDetailModal = ({
   onMarkPaid,
   formatPrice,
 }: OrderDetailModalProps) => {
+  const { t } = useTranslation(); // <-- i18n hook
+
   if (!order) return null;
 
-  // 🎨 Badge màu theo trạng thái
+  // Badge color (unchanged – backend codes)
   const getStatusBadgeColor = (status: string) => {
     const colors: Record<string, string> = {
       PENDING: "warning",
@@ -60,28 +62,28 @@ export const OrderDetailModal = ({
     return colors[status] || "gray";
   };
 
-  // 🧭 Nút hành động chính
+  // Action buttons – now using translation keys
   const actions: OrderAction[] = [
     {
-      label: "Approve",
+      labelKey: "admin.orders.detail.actions.approve",
       color: "green",
       onClick: onApprove!,
       visible: (status) => status === "PENDING" && !!onApprove,
     },
     {
-      label: "Start Delivery",
+      labelKey: "admin.orders.detail.actions.startDelivery",
       color: "cyan",
       onClick: onStartDelivery!,
       visible: (status) => status === "APPROVED" && !!onStartDelivery,
     },
     {
-      label: "Mark Delivered",
+      labelKey: "admin.orders.detail.actions.markDelivered",
       color: "purple",
       onClick: onMarkDelivered!,
       visible: (status) => status === "DELIVERING" && !!onMarkDelivered,
     },
     {
-      label: "Cancel",
+      labelKey: "admin.orders.detail.actions.cancel",
       color: "red",
       onClick: onCancel!,
       visible: (status) =>
@@ -89,11 +91,12 @@ export const OrderDetailModal = ({
     },
   ];
 
-  // 💵 Nút xác nhận thanh toán (chỉ dành cho COD)
   const showMarkPaid =
     order.paymentMethod === "COD" &&
     order.paymentStatus === "PENDING" &&
     order.status !== "CANCELLED";
+
+  const orderCode = order.orderCode || order.publicId.slice(0, 8);
 
   return (
     <Modal
@@ -104,10 +107,7 @@ export const OrderDetailModal = ({
       {/* Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
-          Order #{order.orderCode || order.publicId.slice(0, 8)} -
-          <Badge color={getStatusBadgeColor(order.status)}>
-            {order.status}
-          </Badge>
+          {t("admin.orders.detail.header", { code: orderCode })}
         </h3>
       </ModalHeader>
 
@@ -117,26 +117,30 @@ export const OrderDetailModal = ({
           {/* Left: Customer info */}
           <div className="space-y-6">
             <p>
-              <strong>Customer:</strong> {order.userName} ({order.userEmail})
+              <strong>{t("admin.orders.detail.customer")}:</strong>{" "}
+              {order.userName} ({order.userEmail})
             </p>
             <p>
-              <strong>Phone:</strong> {order.shippingPhone}
+              <strong>{t("admin.orders.detail.phone")}:</strong>{" "}
+              {order.shippingPhone}
             </p>
             <p>
-              <strong>Address:</strong> {order.shippingAddress}
+              <strong>{t("admin.orders.detail.address")}:</strong>{" "}
+              {order.shippingAddress}
             </p>
             <p>
-              <strong>Note:</strong> {order.shippingNote?.slice(0, 20)}
+              <strong>{t("admin.orders.detail.note")}:</strong>{" "}
+              {order.shippingNote?.slice(0, 20) || "-"}
             </p>
           </div>
 
           {/* Right: Payment + Status info */}
           <div className="space-y-6">
             <p>
-              <strong>Payment:</strong>{" "}
+              <strong>{t("admin.orders.detail.payment")}:</strong>{" "}
               {order.paymentMethod === "COD"
-                ? "Cash on Delivery"
-                : "Online Payment"}{" "}
+                ? t("admin.orders.detail.paymentCod")
+                : t("admin.orders.detail.paymentOnline")}{" "}
               -{" "}
               <Badge
                 color={
@@ -147,17 +151,20 @@ export const OrderDetailModal = ({
             </p>
 
             <p>
-              <strong>Status:</strong>{" "}
+              <strong>{t("admin.orders.detail.status")}:</strong>{" "}
               <Badge color={getStatusBadgeColor(order.status)}>
                 {order.status}
               </Badge>
             </p>
+
             <p>
-              <strong>Created At:</strong>{" "}
+              <strong>{t("admin.orders.detail.createdAt")}:</strong>{" "}
               {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
             </p>
+
             <p>
-              <strong>Total:</strong> {formatPrice(order.totalAmount)}
+              <strong>{t("admin.orders.detail.total")}:</strong>{" "}
+              {formatPrice(order.totalAmount)}
             </p>
           </div>
         </div>
@@ -168,26 +175,25 @@ export const OrderDetailModal = ({
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="text-left !bg-gray-50 text-gray-700 px-3 py-2">
-                  Item Name
+                  {t("admin.orders.detail.items.itemName")}
                 </TableHeadCell>
                 <TableHeadCell className="text-center !bg-gray-50 text-gray-700 px-3 py-2">
-                  Quantity
+                  {t("admin.orders.detail.items.quantity")}
                 </TableHeadCell>
                 <TableHeadCell className="text-right !bg-gray-50 text-gray-700 px-3 py-2">
-                  Price
+                  {t("admin.orders.detail.items.price")}
                 </TableHeadCell>
                 <TableHeadCell className="text-right !bg-gray-50 text-gray-700 px-3 py-2">
-                  Subtotal
+                  {t("admin.orders.detail.items.subtotal")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
+
             <TableBody className="bg-white divide-y divide-gray-200">
               {order.items.map((item, idx) => (
                 <TableRow
                   key={idx}
-                  className={`${
-                    idx % 2 === 0 ? "bg-gray-50" : ""
-                  } hover:!bg-gray-200`}>
+                  className={idx % 2 === 0 ? "bg-gray-50" : ""}>
                   <TableCell className="text-sm text-gray-700 px-3 py-2 text-left">
                     {item.menuItemName}
                   </TableCell>
@@ -204,15 +210,17 @@ export const OrderDetailModal = ({
               ))}
             </TableBody>
           </Table>
+
           <div className="text-right font-semibold mt-2">
-            Total: {formatPrice(order.totalAmount)}
+            {t("admin.orders.detail.totalFooter")}:{" "}
+            {formatPrice(order.totalAmount)}
           </div>
         </div>
       </ModalBody>
 
       {/* Footer */}
       <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end flex-wrap gap-2">
-        {/* Nút hành động chính */}
+        {/* Main action buttons */}
         {actions
           .filter((a) => a.visible(order.status))
           .map((a, idx) => (
@@ -220,21 +228,21 @@ export const OrderDetailModal = ({
               key={idx}
               color={a.color}
               onClick={() => a.onClick(order.publicId)}>
-              {a.label}
+              {t(a.labelKey)}
             </Button>
           ))}
 
-        {/* Nút riêng cho COD */}
+        {/* COD payment button */}
         {showMarkPaid && (
           <Button
             color="green"
             onClick={() => onMarkPaid?.(order.id, order.publicId)}>
-            Mark as Paid
+            {t("admin.orders.detail.actions.markPaid")}
           </Button>
         )}
 
         <Button color="gray" onClick={onClose}>
-          Close
+          {t("admin.orders.detail.actions.close")}
         </Button>
       </ModalFooter>
     </Modal>

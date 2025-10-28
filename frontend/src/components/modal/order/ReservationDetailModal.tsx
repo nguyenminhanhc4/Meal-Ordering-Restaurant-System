@@ -15,6 +15,7 @@ import {
 } from "flowbite-react";
 import { format } from "date-fns";
 import type { ReservationDTO } from "../../../services/reservation/reservationService";
+import { useTranslation } from "react-i18next"; // <-- added
 
 interface ReservationDetailModalProps {
   show: boolean;
@@ -33,6 +34,8 @@ export const ReservationDetailModal = ({
   onComplete,
   onCancel,
 }: ReservationDetailModalProps) => {
+  const { t } = useTranslation(); // <-- i18n hook
+
   if (!reservation) return null;
 
   const getStatusBadgeColor = (status: string) => {
@@ -48,15 +51,14 @@ export const ReservationDetailModal = ({
   const formatDateTime = (iso: string) =>
     format(new Date(iso), "dd/MM/yyyy HH:mm");
 
+  const shortCode = reservation.publicId.slice(0, 8);
+
   return (
     <Modal show={show} onClose={onClose} size="4xl" className="z-[70]">
       {/* Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
-          Reservation #{reservation.publicId.slice(0, 8)} -{" "}
-          <Badge color={getStatusBadgeColor(reservation.statusName)}>
-            {reservation.statusName}
-          </Badge>
+          {t("admin.reservations.detail.header", { code: shortCode })}
         </h3>
       </ModalHeader>
 
@@ -66,28 +68,31 @@ export const ReservationDetailModal = ({
           {/* Left: Customer info */}
           <div className="space-y-4">
             <p>
-              <strong>Customer:</strong> {reservation.userName}
+              <strong>{t("admin.reservations.detail.customer")}:</strong>{" "}
+              {reservation.userName}
             </p>
             <p>
-              <strong>Phone:</strong> {reservation.userPhone ?? "N/A"}
+              <strong>{t("admin.reservations.detail.phone")}:</strong>{" "}
+              {reservation.userPhone ?? "N/A"}
             </p>
             <p>
-              <strong>Number of People:</strong> {reservation.numberOfPeople}
+              <strong>{t("admin.reservations.detail.numberOfPeople")}:</strong>{" "}
+              {reservation.numberOfPeople}
             </p>
           </div>
 
           {/* Right: Time + Status info */}
           <div className="space-y-4">
             <p>
-              <strong>Reservation Time:</strong>{" "}
+              <strong>{t("admin.reservations.detail.reservationTime")}:</strong>{" "}
               {formatDateTime(reservation.reservationTime)}
             </p>
             <p>
-              <strong>Created At:</strong>{" "}
+              <strong>{t("admin.reservations.detail.createdAt")}:</strong>{" "}
               {formatDateTime(reservation.createdAt)}
             </p>
             <p>
-              <strong>Status:</strong>{" "}
+              <strong>{t("admin.reservations.detail.status")}:</strong>{" "}
               <Badge color={getStatusBadgeColor(reservation.statusName)}>
                 {reservation.statusName}
               </Badge>
@@ -101,7 +106,7 @@ export const ReservationDetailModal = ({
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="text-left !bg-gray-50 text-gray-700 px-3 py-2">
-                  Table Name
+                  {t("admin.reservations.detail.tablesTitle")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
@@ -120,23 +125,42 @@ export const ReservationDetailModal = ({
 
       {/* Footer */}
       <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end gap-2 flex-wrap">
+        {/* Approve */}
         {reservation.statusName === "PENDING" && onApprove && (
-          <Button color="green" onClick={() => onApprove(reservation.publicId)}>
-            Approve
+          <Button
+            color="green"
+            onClick={() => onApprove(reservation.publicId)}
+            aria-label={t("admin.reservations.detail.actions.approve")}>
+            {t("admin.reservations.detail.actions.approve")}
           </Button>
         )}
+
+        {/* Complete */}
         {reservation.statusName === "CONFIRMED" && onComplete && (
-          <Button color="blue" onClick={() => onComplete(reservation.publicId)}>
-            Mark as Completed
+          <Button
+            color="blue"
+            onClick={() => onComplete(reservation.publicId)}
+            aria-label={t("admin.reservations.detail.actions.complete")}>
+            {t("admin.reservations.detail.actions.complete")}
           </Button>
         )}
+
+        {/* Cancel */}
         {reservation.statusName === "PENDING" && onCancel && (
-          <Button color="red" onClick={() => onCancel(reservation.publicId)}>
-            Cancel
+          <Button
+            color="red"
+            onClick={() => onCancel(reservation.publicId)}
+            aria-label={t("admin.reservations.detail.actions.cancel")}>
+            {t("admin.reservations.detail.actions.cancel")}
           </Button>
         )}
-        <Button color="gray" onClick={onClose}>
-          Close
+
+        {/* Close */}
+        <Button
+          color="gray"
+          onClick={onClose}
+          aria-label={t("admin.reservations.detail.actions.close")}>
+          {t("admin.reservations.detail.actions.close")}
         </Button>
       </ModalFooter>
     </Modal>

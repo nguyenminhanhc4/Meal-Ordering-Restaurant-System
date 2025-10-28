@@ -898,6 +898,323 @@
           "cancel": "Cancel"
         }
       }
+    },
+    "orders": {
+      "title": "Order Management",
+      "searchPlaceholder": "Search by customer or code...",
+      "statusAll": "All Statuses",
+      "paymentAll": "All Payment Statuses",
+      "table": {
+        "orderCode": "Order Code",
+        "customer": "Customer",
+        "payment": "Payment",
+        "total": "Total",
+        "status": "Status",
+        "createdAt": "Created At",
+        "action": "Action"
+      },
+      "loading": "Loading...",
+      "noOrders": "No orders found",
+      "viewDetails": "View Details",
+      "notifications": {
+        "loadError": "Could not load orders. Please try again later.",
+        "loadStatusesError": "Could not load order statuses.",
+        "loadPaymentStatusesError": "Could not load payment statuses.",
+        "approveSuccess": "Order approved successfully!",
+        "approveError": "Failed to approve order.",
+        "deliveryStartSuccess": "Order is now delivering.",
+        "deliveryStartError": "Failed to update delivery status.",
+        "deliveredSuccess": "Order delivered successfully!",
+        "deliveredError": "Failed to mark delivered.",
+        "cancelSuccess": "Order cancelled successfully.",
+        "cancelError": "Failed to cancel order.",
+        "paidSuccess": "Payment marked as paid successfully!",
+        "paidError": "Failed to mark payment as paid.",
+        "detailError": "Failed to load order details.",
+        "realtimeNew": "New order: {{publicId}}"
+      },
+      "detail": {
+        "header": "Order #{{code}}",
+        "customer": "Customer",
+        "phone": "Phone",
+        "address": "Address",
+        "note": "Note",
+        "payment": "Payment",
+        "paymentCod": "Cash on Delivery",
+        "paymentOnline": "Online Payment",
+        "status": "Status",
+        "createdAt": "Created At",
+        "total": "Total",
+        "items": {
+          "itemName": "Item Name",
+          "quantity": "Quantity",
+          "price": "Price",
+          "subtotal": "Subtotal"
+        },
+        "totalFooter": "Total",
+        "actions": {
+          "approve": "Approve",
+          "startDelivery": "Start Delivery",
+          "markDelivered": "Mark Delivered",
+          "cancel": "Cancel",
+          "markPaid": "Mark as Paid",
+          "close": "Close"
+        }
+      }
+    },
+    "reservations": {
+      "title": "Table Reservations",
+      "searchPlaceholder": "Search by customer or reservation code...",
+      "statusAll": "All Statuses",
+      "fromDateLabel": "From Date",
+      "toDateLabel": "To Date",
+      "table": {
+        "reservationId": "Reservation ID",
+        "customer": "Customer",
+        "tables": "Tables",
+        "time": "Time",
+        "people": "People",
+        "status": "Status",
+        "action": "Action"
+      },
+      "loading": "Loading...",
+      "noReservations": "No reservations found",
+      "reviewButton": "Review",
+      "notifications": {
+        "loadError": "Failed to load reservations",
+        "loadStatusesError": "Could not load reservation statuses",
+        "approveSuccess": "Reservation approved successfully!",
+        "completeSuccess": "Reservation completed successfully!",
+        "cancelSuccess": "Reservation cancelled successfully!"
+      },
+      "tableCount": "{{count}} tables",
+      "tableList": "{{tables}}",
+      "detail": {
+        "header": "Reservation #{{code}}",
+        "statusBadge": "{{status}}",
+        "customer": "Customer",
+        "phone": "Phone",
+        "numberOfPeople": "Number of People",
+        "reservationTime": "Reservation Time",
+        "createdAt": "Created At",
+        "status": "Status",
+        "tablesTitle": "Table List",
+        "tableName": "Table Name",
+        "actions": {
+          "approve": "Approve",
+          "complete": "Mark as Completed",
+          "cancel": "Cancel",
+          "close": "Close"
+        }
+      }
+    },
+    "users": {
+      "title": "Users Management",
+      "addButton": "Add New User",
+      "searchPlaceholder": "Search by name or email...",
+      "roleAll": "All Roles",
+      "table": {
+        "avatar": "Avatar",
+        "userInfo": "User Info",
+        "email": "Email",
+        "role": "Role",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noUsers": "No users found",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "notifications": {
+        "loadError": "Could not load users. Please try again later.",
+        "loadRolesError": "Could not load roles.",
+        "deleteSuccess": "User deleted successfully",
+        "deleteError": "Failed to delete user: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this user?"
+      },
+      "form": {
+        "headerCreate": "Create New User",
+        "headerEdit": "Edit User Information",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "John Doe",
+        "emailLabel": "Email",
+        "emailPlaceholder": "john.doe@example.com",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+84 901 234 567",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter a secure password",
+        "roleLabel": "Role",
+        "rolePlaceholder": "Select role",
+        "statusLabel": "Status",
+        "statusPlaceholder": "Select status",
+        "avatarLabel": "Avatar Image",
+        "avatarHint": "Max size: 5MB. Formats: JPG, PNG, GIF.",
+        "uploading": "Uploading avatar...",
+        "cancelButton": "Cancel",
+        "saveButton": "Save",
+        "saving": "Saving...",
+        "notifications": {
+          "fileTooLarge": "File size must be less than 5MB",
+          "invalidFileType": "Only JPG, PNG and GIF files are allowed",
+          "invalidEmail": "Please enter a valid email address",
+          "invalidPhone": "Please enter a valid phone number",
+          "passwordTooShort": "Password must be at least 6 characters",
+          "uploadFailed": "Failed to upload avatar: {{error}}",
+          "saveFailed": "Failed to save user",
+          "createSuccess": "User created successfully",
+          "updateSuccess": "User updated successfully"
+        }
+      }
+    },
+    "categories": {
+      "title": "Category Management",
+      "addButton": "Add New Category",
+      "searchPlaceholder": "Search by name or description...",
+      "parentAll": "All Categories",
+      "parentRoot": "Root Categories Only",
+      "parentUnder": "Under: {{name}}",
+      "table": {
+        "name": "Category Name",
+        "description": "Description",
+        "parent": "Parent Category",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noItems": "No categories found",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "rootBadge": "Root Category",
+      "noDescription": "No description",
+      "notifications": {
+        "loadError": "Could not load categories. Please check if backend is running.",
+        "loadParentsError": "Could not load parent categories",
+        "deleteSuccess": "Category deleted successfully",
+        "deleteError": "Failed to delete category: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this category?"
+      },
+      "form": {
+        "titleCreate": "Create New Category",
+        "titleEdit": "Edit Category",
+        "nameLabel": "Category Name *",
+        "namePlaceholder": "Enter category name",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Enter category description",
+        "parentLabel": "Parent Category (Optional)",
+        "parentPlaceholder": "-- No Parent (Root Category) --",
+        "parentHint": "Leave empty to create a root category",
+        "previewTitle": "Category Preview",
+        "previewName": "Name:",
+        "previewParent": "Parent:",
+        "previewDescription": "Description:",
+        "previewRoot": "Root Category",
+        "previewNotSpecified": "Not specified",
+        "buttonCancel": "Cancel",
+        "buttonCreate": "Create Category",
+        "buttonUpdate": "Update Category",
+        "buttonCreating": "Creating...",
+        "buttonUpdating": "Updating...",
+        "validation": {
+          "nameRequired": "Category name is required",
+          "descriptionRequired": "Description is required"
+        },
+        "notifications": {
+          "loadParentsError": "Failed to load parent categories",
+          "createSuccess": "Category created successfully!",
+          "updateSuccess": "Category updated successfully!",
+          "createError": "Failed to create category: {{error}}",
+          "updateError": "Failed to update category: {{error}}"
+        }
+      }
+    },
+    "menuItems": {
+      "title": "Menu Items Management",
+      "addButton": "Add New Menu Item",
+      "searchPlaceholder": "Search by name or description...",
+      "categoryAll": "All Categories",
+      "statusAll": "All Status",
+      "table": {
+        "image": "Image",
+        "name": "Menu Item",
+        "category": "Category",
+        "price": "Price",
+        "status": "Status",
+        "stock": "Stock",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noItems": "No menu items found",
+      "noDescription": "No description",
+      "status": {
+        "AVAILABLE": "Available",
+        "OUT_OF_STOCK": "Out of Stock"
+      },
+      "notifications": {
+        "loadError": "Could not load menu items. Please check if backend is running.",
+        "loadRefError": "Could not load categories or statuses",
+        "deleteSuccess": "Menu item deleted successfully",
+        "deleteForeignKey": "Cannot delete this item because it's used in orders.",
+        "deleteNotFound": "Menu item not found or already deleted.",
+        "deleteForbidden": "You don't have permission to delete this item.",
+        "deleteError": "Failed to delete menu item: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this menu item?"
+      },
+      "form": {
+        "titleCreate": "Create New Menu Item",
+        "titleEdit": "Edit Menu Item",
+        "nameLabel": "Name *",
+        "namePlaceholder": "Enter menu item name",
+        "priceLabel": "Price (VND) *",
+        "pricePlaceholder": "Enter price",
+        "quantityLabel": "Available Quantity",
+        "quantityPlaceholder": "Enter available quantity",
+        "categoryLabel": "Category *",
+        "statusLabel": "Status *",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter menu item description",
+        "imageSection": "Image Upload",
+        "uploadLabel": "Upload Image File:",
+        "uploadHint": "Max 5MB. Formats: JPG, PNG, GIF",
+        "urlLabel": "Or enter image URL manually:",
+        "urlPlaceholder": "https://example.com/image.jpg",
+        "uploading": "Uploading image...",
+        "previewTitle": "Current image:",
+        "ingredientsSection": "Ingredients",
+        "addButton": "Add Ingredient",
+        "noIngredients": "No ingredients added yet",
+        "ingredientSelect": "Select Ingredient",
+        "quantityInput": "Quantity",
+        "buttonCancel": "Cancel",
+        "buttonCreate": "Create Menu Item",
+        "buttonUpdate": "Update Menu Item",
+        "buttonSaving": "Saving...",
+        "validation": {
+          "nameRequired": "Menu item name is required",
+          "priceRequired": "Price must be greater than 0",
+          "categoryRequired": "Category is required",
+          "statusRequired": "Status is required",
+          "statusInvalid": "Selected status is invalid",
+          "imageInvalid": "Please select a valid image file",
+          "imageSize": "Image size must be less than 5MB"
+        },
+        "notifications": {
+          "loadIngredientsError": "Could not load ingredients",
+          "uploadSuccess": "Image uploaded successfully",
+          "uploadWarning": "Upload feature requires backend restart. Please enter image URL manually for now.",
+          "uploadError": "Upload failed: {{error}}",
+          "createSuccess": "Menu item created successfully",
+          "updateSuccess": "Menu item updated successfully",
+          "saveError": "Failed to save menu item: {{error}}",
+          "inventoryError": "Inventory error. Please check if inventory table exists."
+        }
+      }
     }
   }
 }

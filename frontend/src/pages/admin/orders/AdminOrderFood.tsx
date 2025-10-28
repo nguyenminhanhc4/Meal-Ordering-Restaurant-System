@@ -24,6 +24,7 @@ import { Pagination } from "../../../components/common/Pagination";
 import { format } from "date-fns";
 import { OrderDetailModal } from "../../../components/modal/order/OrderDetailModal";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
+import { useTranslation } from "react-i18next";
 
 export interface OrderItem {
   menuItemId: number;
@@ -52,6 +53,7 @@ export interface Order {
 }
 
 export const AdminOrderFood = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,11 +78,11 @@ export const AdminOrderFood = () => {
   const handleApproveOrder = async (publicId: string) => {
     try {
       await updateOrderStatus(publicId, "APPROVED");
-      notify("success", "Order approved successfully!");
+      notify("success", t("admin.orders.notifications.approveSuccess"));
       fetchOrderDetail(publicId);
       refreshOrders(); // reload list
     } catch {
-      notify("error", "Failed to approve order.");
+      notify("error", t("admin.orders.notifications.approveError"));
     }
   };
 
@@ -88,11 +90,11 @@ export const AdminOrderFood = () => {
   const handleStartDelivery = async (publicId: string) => {
     try {
       await updateOrderStatus(publicId, "DELIVERING");
-      notify("success", "Order is now delivering.");
+      notify("success", t("admin.orders.notifications.deliveryStartSuccess"));
       fetchOrderDetail(publicId);
       refreshOrders();
     } catch {
-      notify("error", "Failed to update delivery status.");
+      notify("error", t("admin.orders.notifications.deliveryStartError"));
     }
   };
 
@@ -100,34 +102,33 @@ export const AdminOrderFood = () => {
   const handleMarkDelivered = async (publicId: string) => {
     try {
       await updateOrderStatus(publicId, "DELIVERED");
-      notify("success", "Order delivered successfully!");
+      notify("success", t("admin.orders.notifications.deliveredSuccess"));
       fetchOrderDetail(publicId);
       refreshOrders();
     } catch {
-      notify("error", "Failed to mark delivered.");
+      notify("error", t("admin.orders.notifications.deliveredError"));
     }
   };
 
-  // ❌ Hủy đơn
   const handleCancelOrder = async (publicId: string) => {
     try {
       await updateOrderStatus(publicId, "CANCELLED");
-      notify("success", "Order cancelled successfully.");
+      notify("success", t("admin.orders.notifications.cancelSuccess"));
       fetchOrderDetail(publicId);
       refreshOrders();
     } catch {
-      notify("error", "Failed to cancel order.");
+      notify("error", t("admin.orders.notifications.cancelError"));
     }
   };
 
   const handleMarkPaid = async (id: number, publicId: string) => {
     try {
       await updatePaymentStatusByOrder(id, "COMPLETED");
-      notify("success", "Payment marked as paid successfully!");
+      notify("success", t("admin.orders.notifications.paidSuccess"));
       fetchOrderDetail(publicId);
       refreshOrders();
     } catch {
-      notify("error", "Failed to mark payment as paid.");
+      notify("error", t("admin.orders.notifications.paidError"));
     }
   };
 
@@ -170,7 +171,7 @@ export const AdminOrderFood = () => {
       } catch (error) {
         if (!signal.aborted) {
           console.error("Fetch orders error:", error);
-          notify("error", "Could not load orders. Please try again later.");
+          notify("error", t("admin.orders.notifications.loadError"));
         }
       } finally {
         if (!signal.aborted) {
@@ -178,7 +179,7 @@ export const AdminOrderFood = () => {
         }
       }
     },
-    [notify]
+    [notify, t]
   );
 
   const refreshOrders = useCallback(() => {
@@ -204,12 +205,11 @@ export const AdminOrderFood = () => {
   const fetchOrderDetail = async (publicId: string) => {
     try {
       const res = await api.get(`/orders/admin/${publicId}`);
-      console.log("Order detail response:", res.data);
       setOrderDetail({ ...res.data }); // data là OrderResponseDTO từ backend
       setShowDetailModal(true);
     } catch (error) {
       console.error(error);
-      notify("error", "Failed to load order details.");
+      notify("error", t("admin.orders.notifications.detailError"));
     }
   };
 
@@ -223,7 +223,8 @@ export const AdminOrderFood = () => {
         console.log("Order statuses response:", res.data.data);
         if (res.data?.data) setStatuses(res.data.data);
       } catch {
-        if (!signal.aborted) notify("error", "Could not load order statuses.");
+        if (!signal.aborted)
+          notify("error", t("admin.orders.notifications.loadStatusesError"));
       }
     };
 
@@ -233,7 +234,10 @@ export const AdminOrderFood = () => {
         if (res.data?.data) setPaymentStatuses(res.data.data);
       } catch {
         if (!signal.aborted)
-          notify("error", "Could not load payment statuses.");
+          notify(
+            "error",
+            t("admin.orders.notifications.loadPaymentStatusesError")
+          );
       }
     };
 
@@ -256,6 +260,7 @@ export const AdminOrderFood = () => {
     selectedStatus,
     selectedPaymentStatus,
     fetchOrders,
+    t,
   ]);
 
   useRealtimeUpdate<Order, string, { publicId: string }>(
@@ -274,7 +279,12 @@ export const AdminOrderFood = () => {
         }
         return [newOrder, ...prev];
       });
-      notify("info", `New order received: ${newOrder.publicId.slice(0, 8)}`);
+      notify(
+        "info",
+        t("admin.orders.notifications.realtimeNew", {
+          publicId: newOrder.publicId.slice(0, 8),
+        })
+      );
     },
     (msg) => msg.publicId
   );
@@ -329,19 +339,24 @@ export const AdminOrderFood = () => {
     }
   };
 
+  /* ────── Render ────── */
   return (
     <div className="space-y-6">
+      {/* Page title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Order Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {t("admin.orders.title")}
+        </h1>
       </div>
 
       <Card className="!bg-white shadow-lg border-none">
         {/* Filters */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-4">
+            {/* Search */}
             <div className="relative w-64">
               <TextInput
-                placeholder="Search by customer or code..."
+                placeholder={t("admin.orders.searchPlaceholder")}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 icon={HiSearch}
@@ -354,6 +369,8 @@ export const AdminOrderFood = () => {
                 }}
               />
             </div>
+
+            {/* Order status filter */}
             <div className="w-48">
               <Select
                 value={selectedStatus}
@@ -365,7 +382,7 @@ export const AdminOrderFood = () => {
                     },
                   },
                 }}>
-                <option value="">All Statuses</option>
+                <option value="">{t("admin.orders.statusAll")}</option>
                 {statuses.map((s) => (
                   <option key={s.id} value={s.code}>
                     {s.code}
@@ -373,6 +390,8 @@ export const AdminOrderFood = () => {
                 ))}
               </Select>
             </div>
+
+            {/* Payment status filter */}
             <div className="w-48">
               <Select
                 value={selectedPaymentStatus}
@@ -384,7 +403,7 @@ export const AdminOrderFood = () => {
                     },
                   },
                 }}>
-                <option value="">All Payment Statuses</option>
+                <option value="">{t("admin.orders.paymentAll")}</option>
                 {paymentStatuses.map((p) => (
                   <option key={p.id} value={p.code}>
                     {p.code}
@@ -395,41 +414,42 @@ export const AdminOrderFood = () => {
           </div>
         </div>
 
-        {/* Orders Table */}
+        {/* Table */}
         <div className="overflow-x-auto shadow-sm rounded-md">
           <Table hoverable>
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Order Code
+                  {t("admin.orders.table.orderCode")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Customer
+                  {t("admin.orders.table.customer")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Payment
+                  {t("admin.orders.table.payment")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Total
+                  {t("admin.orders.table.total")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Status
+                  {t("admin.orders.table.status")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Created At
+                  {t("admin.orders.table.createdAt")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Action
+                  {t("admin.orders.table.action")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
+
             <TableBody className="divide-y">
               {loading ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
                     className="text-center bg-white text-gray-700 py-4">
-                    Loading...
+                    {t("admin.orders.loading")}
                   </TableCell>
                 </TableRow>
               ) : orders.length === 0 ? (
@@ -437,7 +457,7 @@ export const AdminOrderFood = () => {
                   <TableCell
                     colSpan={7}
                     className="text-center !bg-white text-gray-700 py-4">
-                    No orders found
+                    {t("admin.orders.noOrders")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -448,35 +468,41 @@ export const AdminOrderFood = () => {
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center truncate">
                       {order.publicId.slice(0, 8)}
                     </TableCell>
+
                     <TableCell
                       className="text-sm text-gray-700 px-3 py-2 text-left truncate"
                       title={order.userName}>
                       {order.userName}
                     </TableCell>
+
                     <TableCell
                       className="text-sm text-gray-700 px-3 py-2 text-left truncate"
                       title={`${order.paymentMethod} - ${order.paymentStatus}`}>
                       {order.paymentMethod} - {order.paymentStatus}
                     </TableCell>
+
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
                       <span className="font-semibold text-green-600">
                         {formatPrice(order.totalAmount)}
                       </span>
                     </TableCell>
+
                     <TableCell className="px-3 py-2 text-center">
                       <Badge color={getStatusBadgeColor(order.status)}>
                         {order.status}
                       </Badge>
                     </TableCell>
+
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                     </TableCell>
+
                     <TableCell className="px-3 py-2 text-center">
                       <Button
                         size="xs"
                         color="blue"
                         onClick={() => fetchOrderDetail(order.publicId)}>
-                        View Details
+                        {t("admin.orders.viewDetails")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -498,6 +524,7 @@ export const AdminOrderFood = () => {
         </div>
       </Card>
 
+      {/* Detail modal */}
       <OrderDetailModal
         show={showDetailModal}
         onClose={() => setShowDetailModal(false)}
