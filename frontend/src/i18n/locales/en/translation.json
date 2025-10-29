@@ -82,7 +82,9 @@
         "uppercase": "Password must contain at least 1 uppercase letter",
         "lowercase": "Password must contain at least 1 lowercase letter",
         "number": "Password must contain at least 1 number",
-        "specialChar": "Password must contain at least 1 special character"
+        "specialChar": "Password must contain at least 1 special character",
+        "requiredPassword": "Please enter password.",
+        "requiredConfirm": "Please re-enter password."
       },
       "failure": "Error resetting password",
       "loading": "Processing...",

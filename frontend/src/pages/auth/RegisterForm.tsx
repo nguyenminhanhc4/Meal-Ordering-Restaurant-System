@@ -6,6 +6,7 @@ import api from "../../api/axios";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 export default function RegisterForm() {
   const { t } = useTranslation();
@@ -69,12 +70,20 @@ export default function RegisterForm() {
     if (Object.keys(newErrors).length === 0) {
       try {
         setLoading(true);
-        const response = await api.post("/auth/register", {
-          name,
-          email,
-          password,
-          gender,
-        });
+        const response = await api.post(
+          "/auth/register",
+          {
+            name,
+            email,
+            password,
+            gender,
+          },
+          {
+            headers: {
+              "Accept-Language": i18n.language,
+            },
+          }
+        );
         console.log("Register success:", response.data);
         notify("success", t("auth.register.success"));
         navigate("/login");

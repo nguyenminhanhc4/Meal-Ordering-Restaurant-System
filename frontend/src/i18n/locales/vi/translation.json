@@ -82,7 +82,9 @@
         "uppercase": "Mật khẩu phải chứa ít nhất 1 chữ hoa",
         "lowercase": "Mật khẩu phải chứa ít nhất 1 chữ thường",
         "number": "Mật khẩu phải chứa ít nhất 1 số",
-        "specialChar": "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt"
+        "specialChar": "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt",
+        "requiredPassword": "Vui lòng nhập mật khẩu.",
+        "requiredConfirm": "Vui lòng nhập lại mật khẩu."
       },
       "failure": "Lỗi khi đặt lại mật khẩu",
       "loading": "Đang xử lý...",

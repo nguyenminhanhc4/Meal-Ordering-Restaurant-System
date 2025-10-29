@@ -4,6 +4,7 @@ import api from "../../api/axios";
 import { AxiosError } from "axios";
 import { useNotification } from "../../components/Notification/";
 import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation();
@@ -20,6 +21,14 @@ export default function ResetPasswordPage() {
 
   const validate = () => {
     const newErrors: { password?: string; confirm?: string } = {};
+
+    if (!password.trim()) {
+      newErrors.password = t("auth.reset.error.requiredPassword");
+    }
+
+    if (!confirmPassword.trim()) {
+      newErrors.confirm = t("auth.reset.error.requiredConfirm");
+    }
 
     if (password.length < 8)
       newErrors.password = t("auth.reset.error.shortPassword");
@@ -49,10 +58,18 @@ export default function ResetPasswordPage() {
 
     try {
       setLoading(true);
-      await api.post("/auth/reset-password", {
-        token,
-        newPassword: password,
-      });
+      await api.post(
+        "/auth/reset-password",
+        {
+          token,
+          newPassword: password,
+        },
+        {
+          headers: {
+            "Accept-Language": i18n.language,
+          },
+        }
+      );
       notify("success", t("auth.reset.success"));
       setPassword("");
       setConfirmPassword("");
