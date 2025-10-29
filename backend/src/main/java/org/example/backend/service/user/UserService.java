@@ -14,6 +14,7 @@ import org.example.backend.validator.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,11 +43,21 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final MessageSource messageSource;
+
     private final JwtUtil jwtUtil;
 
     private final Cloudinary cloudinary;
 
     private final Map<String, ResetToken> resetTokens = new HashMap<>();
+
+    private String getMessage(String code, Object[] args, Locale locale) {
+        return messageSource.getMessage(code, args, locale);
+    }
+
+    private String getMessage(String code, Locale locale) {
+        return messageSource.getMessage(code, null, locale);
+    }
 
     private boolean isValidImageType(String contentType) {
         return contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase());
@@ -306,43 +317,43 @@ public class UserService {
     }
 
     @Transactional
-    public void changePassword(String email, String currentPassword, String newPassword) {
+    public void changePassword(String email, String currentPassword, String newPassword,Locale locale) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new RuntimeException(getMessage("user.error.notFound", new Object[]{email}, locale)));
 
         // ✅ 1. Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+            throw new RuntimeException(getMessage("password.error.currentIncorrect", null, locale));
         }
 
         // ✅ 2. Không cho phép trùng mật khẩu cũ
         if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Mật khẩu mới không được trùng mật khẩu cũ");
+            throw new RuntimeException(getMessage("password.error.sameAsOld", null, locale));
         }
 
         // ✅ 3. Kiểm tra độ mạnh mật khẩu
-        validatePasswordStrength(newPassword);
+        validatePasswordStrength(newPassword, locale);
 
         // ✅ 4. Cập nhật mật khẩu mới (hash)
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
-    private void validatePasswordStrength(String password) {
+    private void validatePasswordStrength(String password, Locale locale) {
         if (password.length() < 8) {
-            throw new RuntimeException("Mật khẩu phải có ít nhất 8 ký tự");
+            throw new RuntimeException(getMessage("password.error.minLength", new Object[]{8}, locale));
         }
         if (!password.matches(".*[A-Z].*")) {
-            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ hoa");
+            throw new RuntimeException(getMessage("password.error.uppercaseRequired", null, locale));
         }
         if (!password.matches(".*[a-z].*")) {
-            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ thường");
+            throw new RuntimeException(getMessage("password.error.lowercaseRequired", null, locale));
         }
         if (!password.matches(".*\\d.*")) {
-            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 chữ số");
+            throw new RuntimeException(getMessage("password.error.numberRequired", null, locale));
         }
         if (!password.matches(".*[!@#$%^&*()_+\\-={}\\[\\]|;:'\",.<>/?].*")) {
-            throw new RuntimeException("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
+            throw new RuntimeException(getMessage("password.error.specialCharRequired", null, locale));
         }
     }
 

@@ -22,38 +22,21 @@ interface ShippingInfo {
 // Custom Input Component để tái sử dụng và tạo style đẹp hơn
 const CustomInput = ({
   label,
+  error,
   ...props
-}: { label: string } & React.InputHTMLAttributes<
+}: { label: string; error?: string } & React.InputHTMLAttributes<
   HTMLInputElement | HTMLTextAreaElement
 >) => (
   <div className="relative">
     <input
       {...props}
       id={props.name}
-      className="peer w-full border border-gray-300 rounded-lg pt-4 pb-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150 placeholder-transparent"
-      placeholder={label} // Cần placeholder để hoạt động với style này
-    />
-    <label
-      htmlFor={props.name}
-      className="absolute left-3 top-1 text-xs text-gray-500 transition-all duration-150 ease-in-out
-        peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3
-        peer-focus:top-1 peer-focus:text-xs peer-focus:text-orange-600">
-      {label}
-    </label>
-  </div>
-);
-
-// Custom Textarea Component
-const CustomTextarea = ({
-  label,
-  ...props
-}: { label: string } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
-  <div className="relative">
-    <textarea
-      {...props}
-      id={props.name}
-      rows={3}
-      className="peer w-full border border-gray-300 rounded-lg pt-4 pb-2 px-3 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150 placeholder-transparent resize-none"
+      className={`peer w-full border rounded-lg pt-4 pb-2 px-3 focus:outline-none focus:ring-2 transition duration-150 placeholder-transparent 
+        ${
+          error
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 focus:ring-orange-500"
+        }`}
       placeholder={label}
     />
     <label
@@ -63,6 +46,40 @@ const CustomTextarea = ({
         peer-focus:top-1 peer-focus:text-xs peer-focus:text-orange-600">
       {label}
     </label>
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
+
+// Custom Textarea Component
+const CustomTextarea = ({
+  label,
+  error,
+  ...props
+}: {
+  label: string;
+  error?: string;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+  <div className="relative">
+    <textarea
+      {...props}
+      id={props.name}
+      rows={3}
+      className={`peer w-full border rounded-lg pt-4 pb-2 px-3 focus:outline-none focus:ring-2 transition duration-150 placeholder-transparent resize-none
+        ${
+          error
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 focus:ring-orange-500"
+        }`}
+      placeholder={label}
+    />
+    <label
+      htmlFor={props.name}
+      className="absolute left-3 top-1 text-xs text-gray-500 transition-all duration-150 ease-in-out
+        peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3
+        peer-focus:top-1 peer-focus:text-xs peer-focus:text-orange-600">
+      {label}
+    </label>
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
   </div>
 );
 
@@ -80,6 +97,8 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(!order);
   const [method, setMethod] = useState("COD");
   const [submitting, setSubmitting] = useState(false);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: user?.name || "",
@@ -119,12 +138,31 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     if (!order || submitting) return;
 
-    // Simple validation (có thể mở rộng thêm)
-    if (
-      !shippingInfo.fullName ||
-      !shippingInfo.phone ||
-      !shippingInfo.address
-    ) {
+    const newErrors: Record<string, string> = {};
+
+    if (!shippingInfo.fullName.trim()) {
+      newErrors.fullName = t("payment.errors.requiredFullName");
+    }
+
+    if (!shippingInfo.email.trim()) {
+      newErrors.email = t("payment.errors.requiredEmail");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingInfo.email)) {
+      newErrors.email = t("payment.errors.invalidEmail");
+    }
+
+    if (!shippingInfo.phone.trim()) {
+      newErrors.phone = t("payment.errors.requiredPhone");
+    } else if (!/^(0|\+84)[0-9]{9,10}$/.test(shippingInfo.phone)) {
+      newErrors.phone = t("payment.errors.invalidPhone");
+    }
+
+    if (!shippingInfo.address.trim()) {
+      newErrors.address = t("payment.errors.requiredAddress");
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
       notify("error", t("payment.notify.missingFields"));
       return;
     }
@@ -234,6 +272,7 @@ export default function PaymentPage() {
                   value={shippingInfo.fullName}
                   onChange={handleChange}
                   label={t("payment.shipping.fields.fullName")}
+                  error={errors.fullName}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CustomInput
@@ -242,6 +281,7 @@ export default function PaymentPage() {
                     value={shippingInfo.email}
                     onChange={handleChange}
                     label={t("payment.shipping.fields.email")}
+                    error={errors.email}
                   />
                   <CustomInput
                     type="tel"
@@ -249,6 +289,7 @@ export default function PaymentPage() {
                     value={shippingInfo.phone}
                     onChange={handleChange}
                     label={t("payment.shipping.fields.phone")}
+                    error={errors.phone}
                   />
                 </div>
                 <CustomInput
@@ -257,12 +298,14 @@ export default function PaymentPage() {
                   value={shippingInfo.address}
                   onChange={handleChange}
                   label={t("payment.shipping.fields.address")}
+                  error={errors.address}
                 />
                 <CustomTextarea
                   name="note"
                   value={shippingInfo.note}
                   onChange={handleChange}
                   label={t("payment.shipping.fields.note")}
+                  error={errors.note}
                 />
               </div>
             </div>

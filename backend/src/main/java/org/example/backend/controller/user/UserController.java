@@ -1,5 +1,6 @@
 package org.example.backend.controller.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -113,12 +115,12 @@ public class UserController {
 
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request, HttpServletRequest lang) {
+        Locale locale = lang.getLocale();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        userService.changePassword(email, request.currentPassword, request.newPassword);
+        userService.changePassword(email, request.currentPassword, request.newPassword, locale);
 
         return ResponseEntity.ok(
                 new Response<>("success", null, "Đổi mật khẩu thành công")

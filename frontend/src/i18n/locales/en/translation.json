@@ -471,7 +471,15 @@
     "missingShipping": "Missing shipping information!",
     "notFound": "Payment not found",
     "orderId": "Order ID",
-    "title": "Order Payment"
+    "title": "Order Payment",
+    "errors": {
+      "requiredFullName": "Full name is required",
+      "requiredEmail": "Email is required",
+      "invalidEmail": "Invalid email format",
+      "requiredPhone": "Phone number is required",
+      "invalidPhone": "Invalid phone number",
+      "requiredAddress": "Address is required"
+    }
   },
   "product": {
     "availableQuantity": "Available Quantity",
@@ -860,6 +868,13 @@
           "saving": "Saving...",
           "update": "Update Table",
           "create": "Create Table"
+        },
+        "errors": {
+          "nameRequired": "Table name cannot be empty.",
+          "capacityRange": "Capacity must be between 1 and 10.",
+          "locationRequired": "Please select a location.",
+          "positionRequired": "Please select a table position.",
+          "statusRequired": "Please select a status."
         }
       }
     },
@@ -890,7 +905,10 @@
         "updateSuccess": "Ingredient updated successfully",
         "createSuccess": "Ingredient created successfully",
         "saveError": "Failed to save ingredient",
-        "nameRequiredError": "Ingredient name is required"
+        "nameRequiredError": "Ingredient name is required",
+        "quantityPositiveError": "Quantity must be greater than 0",
+        "unitRequiredError": "Unit is required",
+        "minimumStockNonNegativeError": "Minimum stock cannot be negative"
       },
       "confirmDialog": {
         "deleteMessage": "Are you sure you want to delete this ingredient?"

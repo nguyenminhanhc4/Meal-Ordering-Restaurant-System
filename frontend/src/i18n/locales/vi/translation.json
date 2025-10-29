@@ -471,7 +471,15 @@
     "missingShipping": "Thiếu thông tin giao hàng!",
     "notFound": "Không tìm thấy thanh toán",
     "orderId": "Mã đơn hàng",
-    "title": "Thanh toán đơn hàng"
+    "title": "Thanh toán đơn hàng",
+    "errors": {
+      "requiredFullName": "Họ và tên là bắt buộc",
+      "requiredEmail": "Email là bắt buộc",
+      "invalidEmail": "Email không hợp lệ",
+      "requiredPhone": "Số điện thoại là bắt buộc",
+      "invalidPhone": "Số điện thoại không hợp lệ",
+      "requiredAddress": "Địa chỉ là bắt buộc"
+    }
   },
   "product": {
     "availableQuantity": "Sản phẩm còn",
@@ -860,6 +868,13 @@
           "saving": "Đang lưu...",
           "update": "Cập nhật bàn",
           "create": "Tạo bàn"
+        },
+        "errors": {
+          "nameRequired": "Tên bàn không được để trống.",
+          "capacityRange": "Sức chứa phải từ 1 đến 10.",
+          "locationRequired": "Vui lòng chọn vị trí.",
+          "positionRequired": "Vui lòng chọn vị trí bàn.",
+          "statusRequired": "Vui lòng chọn trạng thái."
         }
       }
     },
@@ -890,7 +905,10 @@
         "updateSuccess": "Cập nhật nguyên liệu thành công",
         "createSuccess": "Thêm nguyên liệu mới thành công",
         "saveError": "Lưu nguyên liệu thất bại",
-        "nameRequiredError": "Tên nguyên liệu không được để trống"
+        "nameRequiredError": "Tên nguyên liệu không được để trống",
+        "quantityPositiveError": "Số lượng phải lớn hơn 0",
+        "unitRequiredError": "Đơn vị là bắt buộc",
+        "minimumStockNonNegativeError": "Tồn kho tối thiểu không được âm"
       },
       "confirmDialog": {
         "deleteMessage": "Bạn có chắc chắn muốn xóa nguyên liệu này không?"

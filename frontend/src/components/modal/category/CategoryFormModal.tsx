@@ -213,12 +213,11 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   onChange={handleInputChange}
                   color={errors.name ? "failure" : "gray"}
                   disabled={isSubmitting}
-                  required
                   aria-describedby={errors.name ? "name-error" : undefined}
                   theme={{
                     field: {
                       input: {
-                        base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
+                        base: "!bg-gray-50 !text-gray-800 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                       },
                     },
                   }}
@@ -285,12 +284,11 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   color={errors.description ? "failure" : "gray"}
                   disabled={isSubmitting}
                   rows={6}
-                  required
                   aria-describedby={
                     errors.description ? "desc-error" : undefined
                   }
                   theme={{
-                    base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
+                    base: "!bg-gray-50 !text-gray-800 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                   }}
                 />
                 {errors.description && (

@@ -278,9 +278,15 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error("Failed to save user:", error);
-      notify("error", t("admin.users.form.notifications.saveFailed"));
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const msg =
+          error.response?.data?.message ??
+          t("admin.users.form.notifications.saveFailed");
+        notify("error", msg);
+      } else {
+        notify("error", t("admin.users.form.notifications.saveFailed"));
+      }
     } finally {
       setLoading(false);
     }
@@ -349,7 +355,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   value={formData.name}
                   onChange={handleChange}
                   placeholder={t("admin.users.form.namePlaceholder")}
-                  required
                   theme={{
                     field: {
                       input: {
@@ -373,7 +378,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   value={formData.email}
                   onChange={handleChange}
                   placeholder={t("admin.users.form.emailPlaceholder")}
-                  required
                   theme={{
                     field: {
                       input: {
@@ -421,7 +425,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                     value={formData.password}
                     onChange={handleChange}
                     placeholder={t("admin.users.form.passwordPlaceholder")}
-                    required
                     theme={{
                       field: {
                         input: {
@@ -447,7 +450,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   name="roleId"
                   value={formData.roleId}
                   onChange={handleChange}
-                  required
                   theme={{
                     field: {
                       select: {
@@ -477,7 +479,6 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
                   name="statusId"
                   value={formData.statusId}
                   onChange={handleChange}
-                  required
                   theme={{
                     field: {
                       select: {

@@ -11,7 +11,7 @@ import {
 } from "flowbite-react";
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "../../../api/axios";
-import { useTranslation } from "react-i18next"; // Thêm useTranslation
+import { useTranslation } from "react-i18next";
 import { useNotification } from "../../Notification";
 import type { TableEntity } from "../../../services/table/tableService";
 
@@ -34,10 +34,18 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
   onSuccess,
   tableData,
 }) => {
-  const { t } = useTranslation(); // Thêm hook useTranslation
+  const { t } = useTranslation();
   const { notify } = useNotification();
 
   const [formData, setFormData] = useState({
+    name: "",
+    capacity: "",
+    locationId: "",
+    positionId: "",
+    statusId: "",
+  });
+
+  const [errors, setErrors] = useState({
     name: "",
     capacity: "",
     locationId: "",
@@ -50,7 +58,6 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
   const [statuses, setStatuses] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // ⚙️ Hàm load options từ BE (memoized)
   const fetchParams = useCallback(async (type: string, signal: AbortSignal) => {
     try {
       const res = await axios.get(`/params?type=${type}`, { signal });
@@ -61,7 +68,6 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
     }
   }, []);
 
-  // 🔄 Khi mở modal => load options (nếu chưa có)
   useEffect(() => {
     if (!show) return;
 
@@ -77,15 +83,14 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
         setPositions(pos);
         setStatuses(sts);
       } catch {
-        notify("error", t("admin.tables.notifications.loadFormOptionsError")); // Sử dụng i18n
+        notify("error", t("admin.tables.notifications.loadFormOptionsError"));
       }
     };
     void load();
 
     return () => abortController.abort();
-  }, [show, fetchParams, notify, t]); // Thêm t vào dependencies
+  }, [show, fetchParams, notify, t]);
 
-  // ✳️ Khi edit thì set sẵn dữ liệu
   useEffect(() => {
     if (tableData) {
       setFormData({
@@ -95,8 +100,22 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
         positionId: String(tableData.positionId || ""),
         statusId: String(tableData.statusId || ""),
       });
+      setErrors({
+        name: "",
+        capacity: "",
+        locationId: "",
+        positionId: "",
+        statusId: "",
+      });
     } else {
       setFormData({
+        name: "",
+        capacity: "",
+        locationId: "",
+        positionId: "",
+        statusId: "",
+      });
+      setErrors({
         name: "",
         capacity: "",
         locationId: "",
@@ -106,27 +125,56 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
     }
   }, [tableData]);
 
-  // 📝 Xử lý thay đổi input
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // 💾 Gửi form
+  const validateForm = () => {
+    const newErrors = {
+      name: "",
+      capacity: "",
+      locationId: "",
+      positionId: "",
+      statusId: "",
+    };
+    let valid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = t("admin.tables.form.errors.nameRequired");
+      valid = false;
+    }
+
+    const cap = Number(formData.capacity);
+    if (!formData.capacity || cap < 1 || cap > 10) {
+      newErrors.capacity = t("admin.tables.form.errors.capacityRange");
+      valid = false;
+    }
+
+    if (!formData.locationId) {
+      newErrors.locationId = t("admin.tables.form.errors.locationRequired");
+      valid = false;
+    }
+    if (!formData.positionId) {
+      newErrors.positionId = t("admin.tables.form.errors.positionRequired");
+      valid = false;
+    }
+    if (!formData.statusId) {
+      newErrors.statusId = t("admin.tables.form.errors.statusRequired");
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
-      notify("error", t("admin.tables.notifications.nameRequiredError")); // Sử dụng i18n
-      return;
-    }
-
-    if (!formData.capacity || Number(formData.capacity) <= 0) {
-      notify("error", t("admin.tables.notifications.capacityInvalidError")); // Sử dụng i18n
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
@@ -140,17 +188,17 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
 
       if (tableData) {
         await axios.put(`/tables/${tableData.id}`, payload);
-        notify("success", t("admin.tables.notifications.updateSuccess")); // Sử dụng i18n
+        notify("success", t("admin.tables.notifications.updateSuccess"));
       } else {
         await axios.post("/tables", payload);
-        notify("success", t("admin.tables.notifications.createSuccess")); // Sử dụng i18n
+        notify("success", t("admin.tables.notifications.createSuccess"));
       }
 
       onSuccess();
       onClose();
     } catch (err) {
       console.error("Save table failed:", err);
-      notify("error", t("admin.tables.notifications.saveError")); // Sử dụng i18n
+      notify("error", t("admin.tables.notifications.saveError"));
     } finally {
       setLoading(false);
     }
@@ -166,26 +214,26 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
         <h3 className="text-lg font-bold text-gray-800">
           {tableData
             ? t("admin.tables.form.editTitle")
-            : t("admin.tables.form.createTitle")}{" "}
+            : t("admin.tables.form.createTitle")}
         </h3>
       </ModalHeader>
 
       <form onSubmit={handleSubmit}>
         <ModalBody className="space-y-6 p-6 bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name */}
             <div>
               <Label
                 htmlFor="name"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                {t("admin.tables.form.labels.name")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.labels.name")}
               </Label>
               <TextInput
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                required
-                placeholder={t("admin.tables.form.placeholders.name")} // Sử dụng i18n
+                placeholder={t("admin.tables.form.placeholders.name")}
                 theme={{
                   field: {
                     input: {
@@ -194,13 +242,17 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                   },
                 }}
               />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              )}
             </div>
 
+            {/* Capacity */}
             <div>
               <Label
                 htmlFor="capacity"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                {t("admin.tables.form.labels.capacity")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.labels.capacity")}
               </Label>
               <TextInput
                 id="capacity"
@@ -209,7 +261,7 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                 value={formData.capacity}
                 onChange={handleChange}
                 min={1}
-                required
+                max={10}
                 theme={{
                   field: {
                     input: {
@@ -218,20 +270,23 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                   },
                 }}
               />
+              {errors.capacity && (
+                <p className="text-red-500 text-xs mt-1">{errors.capacity}</p>
+              )}
             </div>
 
+            {/* Status */}
             <div>
               <Label
                 htmlFor="statusId"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                {t("admin.tables.form.labels.status")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.labels.status")}
               </Label>
               <Select
                 id="statusId"
                 name="statusId"
                 value={formData.statusId}
                 onChange={handleChange}
-                required
                 theme={{
                   field: {
                     select: {
@@ -241,28 +296,30 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                 }}>
                 <option value="">
                   {t("admin.tables.form.placeholders.selectStatus")}
-                </option>{" "}
-                {/* Sử dụng i18n */}
+                </option>
                 {statuses.map((st) => (
                   <option key={st.id} value={st.id}>
-                    {t(`admin.tables.status.${st.code}`)} {/* Sử dụng i18n */}
+                    {t(`admin.tables.status.${st.code}`)}
                   </option>
                 ))}
               </Select>
+              {errors.statusId && (
+                <p className="text-red-500 text-xs mt-1">{errors.statusId}</p>
+              )}
             </div>
 
+            {/* Location */}
             <div>
               <Label
                 htmlFor="locationId"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                {t("admin.tables.form.labels.location")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.labels.location")}
               </Label>
               <Select
                 id="locationId"
                 name="locationId"
                 value={formData.locationId}
                 onChange={handleChange}
-                required
                 theme={{
                   field: {
                     select: {
@@ -272,21 +329,24 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                 }}>
                 <option value="">
                   {t("admin.tables.form.placeholders.selectLocation")}
-                </option>{" "}
-                {/* Sử dụng i18n */}
+                </option>
                 {locations.map((loc) => (
                   <option key={loc.id} value={loc.id}>
-                    {loc.code} {/* Giữ nguyên hoặc dịch nếu cần */}
+                    {loc.code}
                   </option>
                 ))}
               </Select>
+              {errors.locationId && (
+                <p className="text-red-500 text-xs mt-1">{errors.locationId}</p>
+              )}
             </div>
 
+            {/* Position */}
             <div>
               <Label
                 htmlFor="positionId"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                {t("admin.tables.form.labels.position")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.labels.position")}
               </Label>
               <Select
                 id="positionId"
@@ -302,21 +362,23 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
                 }}>
                 <option value="">
                   {t("admin.tables.form.placeholders.selectPosition")}
-                </option>{" "}
-                {/* Sử dụng i18n */}
+                </option>
                 {positions.map((pos) => (
                   <option key={pos.id} value={pos.id}>
-                    {pos.code} {/* Giữ nguyên hoặc dịch nếu cần */}
+                    {pos.code}
                   </option>
                 ))}
               </Select>
+              {errors.positionId && (
+                <p className="text-red-500 text-xs mt-1">{errors.positionId}</p>
+              )}
             </div>
           </div>
         </ModalBody>
 
         <ModalFooter className="flex justify-end space-x-2 p-4 border-t bg-gray-50">
           <Button color="gray" onClick={onClose}>
-            {t("admin.tables.form.buttons.cancel")} {/* Sử dụng i18n */}
+            {t("admin.tables.form.buttons.cancel")}
           </Button>
           <Button
             type="submit"
@@ -325,12 +387,12 @@ export const TableFormModal: React.FC<TableFormModalProps> = ({
             {loading ? (
               <div className="flex items-center gap-2">
                 <Spinner size="sm" light />
-                {t("admin.tables.form.buttons.saving")} {/* Sử dụng i18n */}
+                {t("admin.tables.form.buttons.saving")}
               </div>
             ) : tableData ? (
-              t("admin.tables.form.buttons.update") // Sử dụng i18n
+              t("admin.tables.form.buttons.update")
             ) : (
-              t("admin.tables.form.buttons.create") // Sử dụng i18n
+              t("admin.tables.form.buttons.create")
             )}
           </Button>
         </ModalFooter>

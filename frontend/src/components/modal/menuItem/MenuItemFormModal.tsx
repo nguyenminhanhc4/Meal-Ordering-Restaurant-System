@@ -385,7 +385,6 @@ export function MenuItemFormModal({
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder={t("admin.menuItems.form.namePlaceholder")}
-                required
                 className="w-full"
                 theme={{
                   field: {
@@ -412,7 +411,6 @@ export function MenuItemFormModal({
                 value={formData.price}
                 onChange={handleInputChange}
                 placeholder={t("admin.menuItems.form.pricePlaceholder")}
-                required
                 className="w-full"
                 theme={{
                   field: {
@@ -463,7 +461,6 @@ export function MenuItemFormModal({
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                required
                 className="w-full"
                 theme={{
                   field: {
@@ -491,7 +488,6 @@ export function MenuItemFormModal({
                 name="statusId"
                 value={formData.statusId}
                 onChange={handleInputChange}
-                required
                 className="w-full"
                 theme={{
                   field: {
