@@ -2,6 +2,7 @@ package org.example.backend.service.user;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.user.User;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -34,20 +36,15 @@ public class UserService {
         "image/jpeg", "image/png", "image/gif"
     );
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private ParamRepository paramRepository;
+    private final ParamRepository paramRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private Cloudinary cloudinary;
+    private final Cloudinary cloudinary;
 
     private final Map<String, ResetToken> resetTokens = new HashMap<>();
 

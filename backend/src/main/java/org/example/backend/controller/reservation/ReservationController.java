@@ -1,5 +1,6 @@
 package org.example.backend.controller.reservation;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.table.TableDto;
@@ -24,14 +25,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/reservations")
 public class ReservationController {
 
-    @Autowired
-    private ReservationService reservationService;
+    private final ReservationService reservationService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     // CUSTOMER creates reservation for themselves
     @PostMapping("/me")

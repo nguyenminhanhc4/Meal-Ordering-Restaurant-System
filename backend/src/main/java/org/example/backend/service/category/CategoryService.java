@@ -1,6 +1,7 @@
 package org.example.backend.service.category;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.category.CategoryDTO;
 import org.example.backend.dto.category.CategorySearchRequest;
 import org.example.backend.entity.category.Categories;
@@ -22,13 +23,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CategoryService {
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private WebSocketNotifier webSocketNotifier;
+    private final WebSocketNotifier webSocketNotifier;
 
     // Convert Entity -> DTO
     private CategoryDTO toDTO(Categories category) {

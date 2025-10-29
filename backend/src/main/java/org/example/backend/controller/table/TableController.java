@@ -1,6 +1,7 @@
 package org.example.backend.controller.table;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.table.TableDto;
 import org.example.backend.service.table.TableService;
@@ -12,14 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/tables")
 public class TableController {
 
-    @Autowired
-    private TableService tableService;
+    private final TableService tableService;
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllTables() {
         List<TableDto> tables = tableService.findAll();
         return ResponseEntity.ok(new Response<>("success", tables, "Tables retrieved successfully"));

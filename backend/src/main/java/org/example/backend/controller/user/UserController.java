@@ -3,6 +3,7 @@ package org.example.backend.controller.user;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.UserService;
@@ -21,11 +22,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

@@ -9,6 +9,7 @@ import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
 import org.example.backend.entity.payment.Payment;
 import org.example.backend.entity.user.ShippingInfo;
+import org.example.backend.entity.user.User;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.order.OrderRepository;
 import org.example.backend.repository.param.ParamRepository;
@@ -16,9 +17,13 @@ import org.example.backend.repository.payment.PaymentRepository;
 import org.example.backend.repository.user.ShippingInfoRepository;
 import org.example.backend.service.menu.MenuItemService;
 import org.example.backend.service.notification.NotificationService;
+import org.example.backend.service.user.UserService;
 import org.example.backend.util.WebSocketNotifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
@@ -38,6 +43,7 @@ public class MockPaymentController {
     private final MenuItemRepository menuItemRepository;
     private final ShippingInfoRepository shippingInfoRepository;
     private final MenuItemService menuItemService;
+    private final UserService userService;
     private final NotificationService notificationService;
     private final WebSocketNotifier webSocketNotifier;
 
@@ -82,6 +88,14 @@ public class MockPaymentController {
         Payment payment = paymentRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long currentUser = userService.getUserByEmail(email).getId();
+
+        if (!payment.getOrder().getUser().getId().equals(currentUser)) {
+            throw new AccessDeniedException("Bạn không thể duyệt thanh toán của người khác");
+        }
+
         Param statusSuccess = paramRepository.findByTypeAndCode("PAYMENT_STATUS", "COMPLETED").orElseThrow();
         Param orderPending = paramRepository.findByTypeAndCode("ORDER_STATUS", "PENDING").orElseThrow();
 
@@ -124,6 +138,14 @@ public class MockPaymentController {
     @PreAuthorize("isAuthenticated()")
     public Map<String, String> cancelPayment(@PathVariable String publicId) {
         Payment payment = paymentRepository.findByPublicId(publicId).orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        Long currentUser = userService.getUserByEmail(email).getId();
+
+        if (!payment.getOrder().getUser().getId().equals(currentUser)) {
+            throw new AccessDeniedException("Bạn không thể duyệt thanh toán của người khác");
+        }
 
         Param statusFailed = paramRepository.findByTypeAndCode("PAYMENT_STATUS", "FAILED").orElseThrow();
 

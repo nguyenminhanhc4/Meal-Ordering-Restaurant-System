@@ -1,6 +1,7 @@
 package org.example.backend.controller.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.EmailService;
@@ -13,14 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {

@@ -1,5 +1,6 @@
 package org.example.backend.controller.review;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.review.ReviewDto;
 import org.example.backend.service.review.ReviewService;
@@ -15,14 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/reviews")
 public class ReviewController {
 
-    @Autowired
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

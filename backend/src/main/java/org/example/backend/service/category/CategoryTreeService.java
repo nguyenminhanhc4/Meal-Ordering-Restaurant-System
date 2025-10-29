@@ -1,6 +1,7 @@
 package org.example.backend.service.category;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.category.CategoryTreeDTO;
 import org.example.backend.entity.category.Categories;
 import org.example.backend.repository.category.CategoryRepository;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class CategoryTreeService {
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     public List<CategoryTreeDTO> getCategoryTree() {
         List<Categories> allCategories = categoryRepository.findAll();

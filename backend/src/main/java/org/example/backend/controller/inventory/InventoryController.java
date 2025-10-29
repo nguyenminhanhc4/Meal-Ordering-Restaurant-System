@@ -1,5 +1,6 @@
 package org.example.backend.controller.inventory;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.inventory.InventoryDto;
 import org.example.backend.service.inventory.InventoryService;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/inventories")
 public class InventoryController {
 
-    @Autowired
-    private InventoryService inventoryService;
+    private final InventoryService inventoryService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

@@ -2,6 +2,7 @@ package org.example.backend.controller.cart;
 
 import com.cloudinary.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.cart.CartService;
@@ -14,14 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/carts")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

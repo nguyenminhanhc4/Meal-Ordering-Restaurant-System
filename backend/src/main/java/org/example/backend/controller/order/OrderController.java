@@ -1,5 +1,6 @@
 package org.example.backend.controller.order;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.order.OrderDto;
 import org.example.backend.dto.Response;
@@ -19,14 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
 //    @GetMapping
 //    @PreAuthorize("isAuthenticated()")
@@ -36,6 +36,7 @@ public class OrderController {
 //    }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String paymentStatus,
@@ -47,6 +48,7 @@ public class OrderController {
     }
 
     @GetMapping("/admin/{publicId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<OrderResponseDTO> getOrderDetail(@PathVariable String publicId) {
         OrderResponseDTO order = orderService.getOrderDetail(publicId);
         return ResponseEntity.ok(order);
@@ -95,6 +97,7 @@ public class OrderController {
     }
 
     @PutMapping("/{publicId}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<?> updateStatus(@PathVariable String publicId, @RequestParam String  status) {
         OrderDto updated = orderService.updateStatus(publicId, status);
         return ResponseEntity.ok(new Response<>("success", updated, "Order status updated"));

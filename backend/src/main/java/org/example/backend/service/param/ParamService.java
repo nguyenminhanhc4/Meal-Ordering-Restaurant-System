@@ -1,5 +1,6 @@
 package org.example.backend.service.param;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.param.ParamDTO;
 import org.example.backend.entity.param.Param;
 import org.example.backend.exception.ResourceNotFoundException;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ParamService {
 
-    @Autowired
-    private ParamRepository paramRepository;
+    private final ParamRepository paramRepository;
 
     public List<ParamDTO> getAllParamsByType(String type) {
         List<Param> params = paramRepository.findAllByType(type);
