@@ -16,9 +16,14 @@
       "emailLabel": "Email",
       "emailPlaceholder": "Nhập email của bạn",
       "error": {
+        "requiredEmail": "Vui lòng nhập email.",
         "invalidEmail": "Vui lòng nhập email hợp lệ.",
         "invalidEmailFormat": "Định dạng email không hợp lệ.",
-        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự."
+        "requiredPassword": "Vui lòng nhập mật khẩu.",
+        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự.",
+        "uppercaseRequired": "Mật khẩu phải có ít nhất 1 chữ in hoa.",
+        "numberRequired": "Mật khẩu phải có ít nhất 1 số.",
+        "specialCharRequired": "Mật khẩu phải có ít nhất 1 ký tự đặc biệt (!@#$%^&*)."
       },
       "passwordLabel": "Mật khẩu",
       "failure": "Đăng nhập thất bại. Vui lòng thử lại.",
@@ -30,7 +35,7 @@
       "success": "Đăng nhập thành công!",
       "title": "Đăng nhập",
       "adminTitle": "Đăng nhập Admin",
-      "adminEmailPlaceholder": "admin@example.com", 
+      "adminEmailPlaceholder": "admin@example.com",
       "adminPasswordPlaceholder": "********",
       "accessDenied": "Bạn không có quyền!"
     },
@@ -123,7 +128,7 @@
   "cart": {
     "actions": "Hành động",
     "backToMenu": "Quay lại menu",
-    "cancel":"Hủy",
+    "cancel": "Hủy",
     "checkout": "Đặt hàng",
     "checkoutFail": "Đặt hàng thất bại. Vui lòng thử lại.",
     "checkoutSuccess": "Đặt hàng thành công! Mã đơn: {{publicId}}",
@@ -152,7 +157,7 @@
     "removeFail": "Xóa món thất bại. Vui lòng thử lại.",
     "removeSelected": "Xóa đã chọn",
     "removeSuccess": "Đã xóa khỏi giỏ hàng",
-    "title":"Giỏ hàng",
+    "title": "Giỏ hàng",
     "totalItems": "Tổng số món",
     "totalPrice": "Tổng cộng",
     "updateFail": "Cập nhật số lượng thất bại. Vui lòng thử lại.",
@@ -293,7 +298,7 @@
       "name": "XYZ Restaurant"
     },
     "dropdown": {
-      "lang":"Ngôn ngữ",
+      "lang": "Ngôn ngữ",
       "logout": "Đăng xuất",
       "logoutSuccess": "Đăng xuất thành công!",
       "orders": "Đơn hàng",

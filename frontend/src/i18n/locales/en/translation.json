@@ -16,9 +16,14 @@
       "emailLabel": "Email",
       "emailPlaceholder": "Enter your email",
       "error": {
+        "requiredEmail": "Please enter your email.",
         "invalidEmail": "Please enter a valid email.",
         "invalidEmailFormat": "Invalid email format.",
-        "shortPassword": "Password must be at least 8 characters."
+        "requiredPassword": "Please enter your password.",
+        "shortPassword": "Password must be at least 8 characters.",
+        "uppercaseRequired": "Password must contain at least 1 uppercase letter.",
+        "numberRequired": "Password must contain at least 1 number.",
+        "specialCharRequired": "Password must contain at least 1 special character (!@#$%^&*)."
       },
       "passwordLabel": "Password",
       "failure": "Login failed. Please try again.",
@@ -29,7 +34,7 @@
       "submit": "Log In",
       "success": "Login successful!",
       "title": "Log In",
-      "adminTitle": "Admin Login", 
+      "adminTitle": "Admin Login",
       "adminEmailPlaceholder": "admin@example.com",
       "adminPasswordPlaceholder": "********",
       "accessDenied": "You don't have permission!"
@@ -293,7 +298,7 @@
       "name": "XYZ Restaurant"
     },
     "dropdown": {
-      "lang":"Languages",
+      "lang": "Languages",
       "logout": "Log Out",
       "logoutSuccess": "Logged out successfully!",
       "orders": "Orders",
@@ -844,7 +849,7 @@
           "cancel": "Cancel",
           "saving": "Saving...",
           "update": "Update Table",
-          "create": "Create Table" 
+          "create": "Create Table"
         }
       }
     },

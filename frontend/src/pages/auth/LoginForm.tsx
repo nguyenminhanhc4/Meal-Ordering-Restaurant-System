@@ -7,6 +7,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 export default function LoginForm() {
   const { t } = useTranslation();
@@ -28,16 +29,24 @@ export default function LoginForm() {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // ===== Email validation =====
+    if (!email.trim()) {
+      newErrors.email = t("auth.login.error.requiredEmail");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = t("auth.login.error.invalidEmailFormat");
     }
 
-    if (!email.includes("@")) {
-      newErrors.email = t("auth.login.error.invalidEmail");
-    }
-
-    if (password.length < 8) {
+    // ===== Password validation =====
+    if (!password.trim()) {
+      newErrors.password = t("auth.login.error.requiredPassword");
+    } else if (password.length < 8) {
       newErrors.password = t("auth.login.error.shortPassword");
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = t("auth.login.error.uppercaseRequired");
+    } else if (!/[0-9]/.test(password)) {
+      newErrors.password = t("auth.login.error.numberRequired");
+    } else if (!/[!@#$%^&*]/.test(password)) {
+      newErrors.password = t("auth.login.error.specialCharRequired");
     }
 
     setErrors(newErrors);
@@ -48,7 +57,12 @@ export default function LoginForm() {
         const response = await api.post(
           "/auth/login",
           { email, password },
-          { withCredentials: true }
+          {
+            withCredentials: true,
+            headers: {
+              "Accept-Language": i18n.language,
+            },
+          }
         );
 
         console.log("Login success:", response.data);
@@ -58,7 +72,15 @@ export default function LoginForm() {
         await refreshUser();
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
-          notify("error", t("auth.login.failure"));
+          if (error.response?.data?.message) {
+            const msg = error.response.data.message;
+            setErrors({
+              email: msg,
+              password: msg,
+            });
+          } else {
+            notify("error", t("auth.login.failure"));
+          }
         } else {
           notify("error", t("auth.common.unexpectedError"));
           console.error("Unexpected error:", error);
@@ -74,21 +96,22 @@ export default function LoginForm() {
 
     if (!forgotEmail.trim()) {
       notify("error", t("auth.forgot.error.emptyEmail"));
-      return;
-    }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      notify("error", t("auth.forgot.error.invalidEmailFormat"));
+    } else {
+      try {
+        setForgotLoading(true);
+        await api.post("/auth/forgot-password", { email: forgotEmail });
 
-    try {
-      setForgotLoading(true);
-      await api.post("/auth/forgot-password", { email: forgotEmail });
-
-      notify("success", t("auth.forgot.success"));
-      setForgotEmail("");
-      setShowForgotModal(false);
-    } catch (error: unknown) {
-      console.error("Forgot password error:", error);
-      notify("error", t("auth.forgot.failure"));
-    } finally {
-      setForgotLoading(false);
+        notify("success", t("auth.forgot.success"));
+        setForgotEmail("");
+        setShowForgotModal(false);
+      } catch (error: unknown) {
+        console.error("Forgot password error:", error);
+        notify("error", t("auth.forgot.failure"));
+      } finally {
+        setForgotLoading(false);
+      }
     }
   };
 
@@ -108,7 +131,6 @@ export default function LoginForm() {
             id="email"
             type="text"
             placeholder={t("auth.login.emailPlaceholder")}
-            required
             color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -134,7 +156,6 @@ export default function LoginForm() {
             id="password"
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
-            required
             maxLength={20}
             color={errors.password ? "failure" : "gray"}
             value={password}
@@ -198,7 +219,6 @@ export default function LoginForm() {
                 placeholder={t("auth.forgot.emailPlaceholder")}
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
-                required
                 className="w-full p-3 border rounded-xl placeholder:text-gray-400 bg-stone-700 border-stone-600 text-white focus:ring-2 focus:ring-yellow-500"
               />
               <div className="flex justify-end gap-2">

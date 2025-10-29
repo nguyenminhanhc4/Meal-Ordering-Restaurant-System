@@ -1,16 +1,22 @@
 package org.example.backend.controller.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.auth.InvalidCredentialsException;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.EmailService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.AuthenticationException;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -21,6 +27,8 @@ public class AuthController {
     private final UserService userService;
 
     private final EmailService emailService;
+
+    private final MessageSource messageSource;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
@@ -33,9 +41,45 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+        Locale locale = request.getLocale();
         try {
-            String token = userService.login(userDTO.getEmail(), userDTO.getPassword());
+            // ===== Validate email =====
+            String email = userDTO.getEmail() != null ? userDTO.getEmail().trim() : "";
+            if (email.isEmpty()) {
+                String msg = messageSource.getMessage("login.error.requiredEmail", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                String msg = messageSource.getMessage("login.error.invalidEmailFormat", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Validate password =====
+            String password = userDTO.getPassword() != null ? userDTO.getPassword().trim() : "";
+            if (password.isEmpty()) {
+                String msg = messageSource.getMessage("login.error.requiredPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (password.length() < 8) {
+                String msg = messageSource.getMessage("login.error.shortPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[A-Z].*")) {
+                String msg = messageSource.getMessage("login.error.uppercaseRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[0-9].*")) {
+                String msg = messageSource.getMessage("login.error.numberRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[!@#$%^&*].*")) {
+                String msg = messageSource.getMessage("login.error.specialCharRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Login =====
+            String token = userService.login(email, password);
 
             // Set JWT vào HttpOnly cookie
             ResponseCookie cookie = ResponseCookie.from("token", token)
@@ -46,10 +90,12 @@ public class AuthController {
                     .sameSite("Lax")
                     .build();
 
+            String successMsg = messageSource.getMessage("login.success", null, locale);
             response.addHeader("Set-Cookie", cookie.toString());
-            return ResponseEntity.ok(new Response<>("success", token, "Login successful"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
+            return ResponseEntity.ok(new Response<>("success", token, successMsg));
+        } catch (RuntimeException e) {
+            String msg = messageSource.getMessage("login.error.invalidCredentials", null, locale);
+            return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
         }
     }
 
