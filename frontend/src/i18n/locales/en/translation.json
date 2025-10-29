@@ -45,9 +45,17 @@
       "email": "Email",
       "emailPlaceholder": "Enter your email",
       "error": {
+        "requiredEmail": "Please enter email.",
+        "requiredName": "Please enter name.",
         "invalidEmailFormat": "Invalid email format.",
-        "passwordMismatch": "Passwords do not match.",
-        "shortPassword": "Password must be at least 8 characters."
+        "requiredPassword": "Please enter password.",
+        "shortPassword": "Password must be at least 8 characters.",
+        "uppercaseRequired": "Password must contain at least 1 uppercase letter.",
+        "numberRequired": "Password must contain at least 1 number.",
+        "specialCharRequired": "Password must contain at least 1 special character (!@#$%^&*).",
+        "confirmPassword": "Please re-enter password.",
+        "passwordMismatch": "Password confirmation does not match.",
+        "invalidCredentials": "Invalid email or password"
       },
       "failure": "Registration failed. Please try again.",
       "fullName": "Full Name",
@@ -55,14 +63,14 @@
       "gender": "Gender",
       "haveAccount": "Already have an account?",
       "loading": "Registering...",
-      "loginLink": "Log In",
+      "loginLink": "Login",
       "male": "Male",
       "female": "Female",
       "password": "Password",
       "passwordPlaceholder": "Enter your password",
-      "submit": "Sign Up",
+      "submit": "Register",
       "success": "Registration successful!",
-      "title": "Sign Up"
+      "title": "Register"
     },
     "reset": {
       "confirmPasswordLabel": "Confirm Password",

@@ -45,9 +45,17 @@
       "email": "Email",
       "emailPlaceholder": "Nhập email của bạn",
       "error": {
+        "requiredEmail": "Vui lòng nhập email.",
+        "requiredName": "Vui lòng nhập tên.",
         "invalidEmailFormat": "Định dạng email không hợp lệ.",
+        "requiredPassword": "Vui lòng nhập mật khẩu.",
+        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự.",
+        "uppercaseRequired": "Mật khẩu phải có ít nhất 1 chữ in hoa.",
+        "numberRequired": "Mật khẩu phải có ít nhất 1 số.",
+        "specialCharRequired": "Mật khẩu phải có ít nhất 1 ký tự đặc biệt (!@#$%^&*).",
+        "confirmPassword": "Vui lòng nhập lại mật khẩu.",
         "passwordMismatch": "Mật khẩu xác nhận không khớp.",
-        "shortPassword": "Mật khẩu phải có ít nhất 8 ký tự."
+        "invalidCredentials": "Sai email hoặc mật khẩu"
       },
       "failure": "Đăng ký thất bại. Vui lòng thử lại.",
       "fullName": "Họ và tên",

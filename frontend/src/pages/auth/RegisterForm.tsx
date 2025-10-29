@@ -17,6 +17,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{
+    name?: string;
     email?: string;
     password?: string;
     confirm?: string;
@@ -30,14 +31,37 @@ export default function RegisterForm() {
 
     const newErrors: typeof errors = {};
 
-    if (password.length < 8) {
-      newErrors.password = t("auth.register.error.shortPassword");
+    if (!name.trim()) {
+      newErrors.name = t("auth.register.error.requiredName");
     }
-    if (confirmPassword !== password) {
-      newErrors.confirm = t("auth.register.error.passwordMismatch");
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+    // ===== Email validation =====
+    if (!email.trim()) {
+      newErrors.email = t("auth.register.error.requiredEmail");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = t("auth.register.error.invalidEmailFormat");
+    }
+
+    // ===== Password validation =====
+    if (!password.trim()) {
+      newErrors.password = t("auth.register.error.requiredPassword");
+    } else {
+      if (password.length < 8) {
+        newErrors.password = t("auth.register.error.shortPassword");
+      } else if (!/[A-Z]/.test(password)) {
+        newErrors.password = t("auth.register.error.uppercaseRequired");
+      } else if (!/[0-9]/.test(password)) {
+        newErrors.password = t("auth.register.error.numberRequired");
+      } else if (!/[!@#$%^&*]/.test(password)) {
+        newErrors.password = t("auth.register.error.specialCharRequired");
+      }
+    }
+
+    // ===== Confirm password =====
+    if (!confirmPassword.trim()) {
+      newErrors.confirm = t("auth.register.error.confirmPassword");
+    } else if (confirmPassword !== password) {
+      newErrors.confirm = t("auth.register.error.passwordMismatch");
     }
 
     setErrors(newErrors);
@@ -57,10 +81,18 @@ export default function RegisterForm() {
       } catch (error: unknown) {
         if (error instanceof AxiosError) {
           console.error("Register failed:", error.response?.data);
-          notify(
-            "error",
-            error.response?.data?.message || t("auth.register.failure")
-          );
+          if (error.response?.data?.message === "Invalid email or password") {
+            setErrors({
+              email: t("auth.register.error.invalidCredentials"),
+              password: t("auth.register.error.invalidCredentials"),
+            });
+          } else {
+            notify(
+              "error",
+              error.response?.data?.message || t("auth.register.failure")
+            );
+            setErrors({ email: error.response?.data?.message });
+          }
         } else {
           console.error("Unexpected error:", error);
           notify("error", t("auth.common.unexpectedError"));
@@ -86,8 +118,8 @@ export default function RegisterForm() {
           <TextInput
             id="name"
             type="text"
+            color={errors.email ? "failure" : "gray"}
             placeholder={t("auth.register.fullNamePlaceholder")}
-            required
             value={name}
             onChange={(e) => setName(e.target.value)}
             theme={{
@@ -98,6 +130,9 @@ export default function RegisterForm() {
               },
             }}
           />
+          {errors.email && (
+            <p className="text-red-400 text-sm mt-1">{errors.name}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -109,7 +144,6 @@ export default function RegisterForm() {
             id="email"
             type="text"
             placeholder={t("auth.register.emailPlaceholder")}
-            required
             color={errors.email ? "failure" : "gray"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -135,7 +169,6 @@ export default function RegisterForm() {
             id="password"
             type={showPassword ? "text" : "password"}
             placeholder={t("auth.register.passwordPlaceholder")}
-            required
             maxLength={20}
             color={errors.password ? "failure" : "gray"}
             value={password}
@@ -168,7 +201,6 @@ export default function RegisterForm() {
             id="confirmPassword"
             type={showPassword ? "text" : "password"}
             placeholder={t("auth.register.confirmPasswordPlaceholder")}
-            required
             maxLength={20}
             color={errors.confirm ? "failure" : "gray"}
             value={confirmPassword}
@@ -181,15 +213,15 @@ export default function RegisterForm() {
               },
             }}
           />
+          {errors.confirm && (
+            <p className="text-red-400 text-sm mt-1">{errors.confirm}</p>
+          )}
           <button
             type="button"
             className="absolute inset-y-11 right-0 flex items-center pr-3 text-gray-300 hover:text-white"
             onClick={() => setShowPassword((prev) => !prev)}>
             {showPassword ? <HiEye size={20} /> : <HiEyeOff size={20} />}
           </button>
-          {errors.confirm && (
-            <p className="text-red-400 text-sm mt-1">{errors.confirm}</p>
-          )}
         </div>
 
         {/* Gender */}

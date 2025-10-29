@@ -34,4 +34,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Lazy load: chỉ lấy các field cơ bản, không fetch associations
     @Query("SELECT u FROM User u")
     List<User> findAllUsersLazy();
+
+    boolean existsByEmail(String email);
 }
