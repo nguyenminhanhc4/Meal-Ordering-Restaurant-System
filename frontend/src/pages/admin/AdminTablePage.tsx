@@ -178,7 +178,7 @@ function AdminTables() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold">
           {translate("admin.tables.title")} {/* Use translate */}
         </h1>
         <Button

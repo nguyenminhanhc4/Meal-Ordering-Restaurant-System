@@ -192,9 +192,7 @@ export const AdminTableOrders = () => {
     <div className="space-y-6">
       {/* Title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("admin.reservations.title")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("admin.reservations.title")}</h1>
       </div>
 
       <Card className="!bg-white shadow-lg border-none">

@@ -242,9 +242,7 @@ function AdminMenuItems() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("admin.menuItems.title")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("admin.menuItems.title")}</h1>
         <Button
           color="cyan"
           size="md"

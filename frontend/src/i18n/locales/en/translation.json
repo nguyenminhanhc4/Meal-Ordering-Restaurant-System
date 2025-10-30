@@ -1256,6 +1256,14 @@
           "inventoryError": "Inventory error. Please check if inventory table exists."
         }
       }
+    },
+    "settings": {
+      "title": "Settings",
+      "theme": {
+        "title": "Theme Settings",
+        "light": "Light mode",
+        "dark": "Dark mode"
+      }
     }
   }
 }

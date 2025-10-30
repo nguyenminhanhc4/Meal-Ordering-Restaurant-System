@@ -367,9 +367,7 @@ export const AdminOrderFood = () => {
     <div className="space-y-6">
       {/* Page title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("admin.orders.title")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("admin.orders.title")}</h1>
       </div>
 
       <Card className="!bg-white shadow-lg border-none">

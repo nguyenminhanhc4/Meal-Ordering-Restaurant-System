@@ -59,7 +59,8 @@ export const Pagination: React.FC<PaginationProps> = ({
       <div className="flex items-center gap-2">
         <Button
           size="sm"
-          color="gray"
+          color="white"
+          className="!text-gray-700"
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}>
           <HiChevronLeft className="h-5 w-5" />
@@ -69,7 +70,10 @@ export const Pagination: React.FC<PaginationProps> = ({
           <Button
             key={index}
             size="sm"
-            color={pageNumber === currentPage ? "info" : "gray"}
+            color={pageNumber === currentPage ? "blue" : "white"}
+            className={
+              pageNumber === currentPage ? "text-white" : "text-gray-700"
+            }
             disabled={pageNumber === "..."}
             onClick={() => {
               if (typeof pageNumber === "number") {
@@ -82,7 +86,8 @@ export const Pagination: React.FC<PaginationProps> = ({
 
         <Button
           size="sm"
-          color="gray"
+          color="white"
+          className="!text-gray-700"
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}>
           <HiChevronRight className="h-5 w-5" />

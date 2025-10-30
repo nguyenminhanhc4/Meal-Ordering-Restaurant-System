@@ -200,9 +200,7 @@ function AdminCategories() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex justify-between items-center border-none">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("admin.categories.title")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("admin.categories.title")}</h1>
         {user?.role === "ADMIN" && (
           <Button
             color="cyan"

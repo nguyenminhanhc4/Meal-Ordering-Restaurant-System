@@ -1256,6 +1256,14 @@
           "inventoryError": "Lỗi tồn kho. Vui lòng kiểm tra bảng inventory."
         }
       }
+    },
+    "settings": {
+      "title": "Cài đặt chung",
+      "theme": {
+        "title": "Cài đặt màu.",
+        "light": "Light mode",
+        "dark": "Dark mode"
+      }
     }
   }
 }

@@ -195,9 +195,7 @@ export const AdminUser = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center border-none">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {t("admin.users.title")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("admin.users.title")}</h1>
         <Button
           color="cyan"
           size="md"

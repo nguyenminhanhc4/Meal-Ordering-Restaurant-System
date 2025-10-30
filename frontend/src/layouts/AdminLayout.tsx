@@ -30,6 +30,8 @@ import {
   HiMenu,
   HiOutlineViewGrid,
   HiOutlineCube,
+  HiMoon,
+  HiSun,
 } from "react-icons/hi";
 import { FaChair } from "react-icons/fa";
 import { MdFastfood } from "react-icons/md";
@@ -45,6 +47,7 @@ import LanguageSelector from "../components/LanguageSelector";
 import { useTranslation } from "react-i18next";
 
 import type { NotificationDto } from "../services/types/notification";
+import { useTheme } from "../store/ThemeContext";
 
 /* --------------------------------- INTERFACES --------------------------------- */
 interface SidebarItemButtonProps {
@@ -55,16 +58,18 @@ interface SidebarItemButtonProps {
 
 /* --------------------------------- COMPONENT ---------------------------------- */
 function AdminLayout() {
-  /* ----------------------------- 🔹 HOOKS & CONTEXT ----------------------------- */
+  /* ----------------------------- HOOKS & CONTEXT ----------------------------- */
   const { t } = useTranslation();
   const { user, logout, isChecking, isLoggedIn } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  /* ------------------------------- 🔹 STATE HOOKS ------------------------------- */
+  /* ------------------------------- STATE HOOKS ------------------------------- */
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    Orders: true, // mở mặc định
+    Orders: true,
   });
   const [, setNotifications] = useState<NotificationDto[]>([]);
   const [, setUnreadCount] = useState(0);
@@ -87,7 +92,7 @@ function AdminLayout() {
 
   const sidebarWidth = isSidebarOpen ? "w-64" : "w-[72px]";
 
-  /* -------------------------- 🔹 REALTIME NOTIFICATIONS -------------------------- */
+  /* -------------------------- REALTIME NOTIFICATIONS -------------------------- */
   useRealtimeMessage<{ type: string; data: NotificationDto }>(
     user ? `/topic/notifications/${user.publicId}` : "",
     (msg) => {
@@ -116,7 +121,7 @@ function AdminLayout() {
     }
   );
 
-  /* --------------------------------- 🔹 MENUS ---------------------------------- */
+  /* --------------------------------- MENUS ---------------------------------- */
   const commonMenu = [
     {
       path: "/admin/dashboard",
@@ -197,10 +202,12 @@ function AdminLayout() {
     },
   ];
 
-  /* ---------------------------- 🔹 ACCESS CONTROL ---------------------------- */
+  /* ---------------------------- ACCESS CONTROL ---------------------------- */
   if (isChecking)
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ color: "var(--color-text-secondary)" }}>
         {t("admin.checkingSession")}
       </div>
     );
@@ -215,7 +222,7 @@ function AdminLayout() {
     return null;
   }
 
-  /* -------------------------- 🔹 SIDEBAR ITEM BUTTON -------------------------- */
+  /* -------------------------- SIDEBAR ITEM BUTTON -------------------------- */
   const SidebarItemButton: React.FC<SidebarItemButtonProps> = ({
     path,
     label,
@@ -229,18 +236,23 @@ function AdminLayout() {
           navigate(path);
           if (window.innerWidth < 768) setIsSidebarOpen(false);
         }}
-        className={`relative transition-all duration-200 cursor-pointer select-none text-gray-300
-          ${
-            isActive
-              ? "!bg-gray-800 !text-white font-semibold border-l-4 border-blue-500"
-              : "hover:!bg-gray-800 hover:!text-white"
-          }`}>
+        className={`sidebar-item ${
+          isActive ? "active" : ""
+        } relative transition-all duration-200 cursor-pointer select-none`}>
         <div
           className={`flex items-center ${
             isSidebarOpen
-              ? "gap-3 px-3 py-2 justify-start"
-              : "justify-center py-3"
-          }`}>
+              ? "gap-3 px-1 py-1 justify-start"
+              : "justify-center py-1"
+          } hover-area`}
+          onMouseEnter={(e) =>
+            !isActive &&
+            (e.currentTarget.style.backgroundColor =
+              "var(--color-sidebar-hover)")
+          }
+          onMouseLeave={(e) =>
+            !isActive && (e.currentTarget.style.backgroundColor = "transparent")
+          }>
           {!isSidebarOpen ? (
             <Tooltip
               content={label}
@@ -248,7 +260,7 @@ function AdminLayout() {
               animation="duration-300"
               theme={{
                 target: "inline-flex",
-                base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
+                base: "absolute z-10 inline-block text-sm !text-white !bg-blue-600 transition-opacity duration-300",
                 style: {
                   dark: "!bg-blue-600 !text-white",
                   light: "!bg-blue-600 !text-white",
@@ -264,7 +276,7 @@ function AdminLayout() {
           ) : (
             <>
               <Icon className="w-5 h-5 flex-shrink-0" />
-              <span className="truncate text-sm leading-none">{label}</span>
+              <span className="truncate p-2 text-sm leading-none">{label}</span>
             </>
           )}
         </div>
@@ -274,11 +286,18 @@ function AdminLayout() {
 
   /* ----------------------------------- JSX ----------------------------------- */
   return (
-    <section className="admin-layout">
+    <section
+      className="admin-layout"
+      style={{
+        backgroundColor: "var(--color-bg)",
+        color: "var(--color-text-primary)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
+      }}>
       {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
+          className="fixed inset-0 opacity-50 z-30 md:hidden"
+          style={{ backgroundColor: "var(--color-overlay)" }}
           onClick={toggleSidebar}
         />
       )}
@@ -287,15 +306,14 @@ function AdminLayout() {
         {/* ------------------------------ SIDEBAR ------------------------------ */}
         <Sidebar
           aria-label="Sidebar"
-          className={`flex-shrink-0 transition-all duration-300 ease-in-out z-[60] h-full border-r shadow-lg ${sidebarWidth}`}
+          className={`sidebar-root flex-shrink-0 transition-all duration-300 ease-in-out z-[60] h-full border-r shadow-lg ${sidebarWidth}`}
           theme={{
             root: {
-              inner:
-                "h-full !bg-gray-900 !text-gray-100 relative !overflow-visible",
+              inner: "h-ful relative !overflow-visible",
               base: "h-full relative !rounded-l-none",
             },
             item: {
-              base: "hover:!bg-gray-800 hover:!text-white cursor-pointer text-gray-200",
+              base: "cursor-pointer",
             },
           }}>
           {/* Close button for mobile */}
@@ -303,7 +321,8 @@ function AdminLayout() {
             <Button
               color="gray"
               onClick={toggleSidebar}
-              className="!bg-transparent !text-white">
+              className="!bg-transparent"
+              style={{ color: "var(--color-sidebar-text)" }}>
               <HiX className="w-6 h-6" />
             </Button>
           </div>
@@ -313,7 +332,7 @@ function AdminLayout() {
             href="/admin/dashboard"
             img={logo}
             imgAlt={t("component.megaMenu.logoAlt")}
-            className={`!text-white flex items-center py-3 ${
+            className={`flex items-center sidebar-logo py-3 ${
               isSidebarOpen ? "px-4" : "justify-center"
             }`}>
             {isSidebarOpen && (
@@ -328,7 +347,9 @@ function AdminLayout() {
             {/* Common group */}
             <SidebarItemGroup>
               {isSidebarOpen && (
-                <h6 className="px-3 mb-1 text-xs uppercase tracking-wide text-gray-400">
+                <h6
+                  className="px-1 mb-1 text-xs uppercase tracking-wide"
+                  style={{ color: "var(--color-text-muted)" }}>
                   {t("admin.sidebar.commonGroup")}
                 </h6>
               )}
@@ -355,11 +376,12 @@ function AdminLayout() {
                     }}>
                     <SidebarItem
                       onClick={() => isSidebarOpen && toggleExpand(item.label)}
-                      className={`relative transition-all duration-200 cursor-pointer text-gray-300 ${
-                        expandedMenus[item.label]
-                          ? "!text-white"
-                          : "hover:!bg-gray-800 hover:!text-white"
-                      }`}>
+                      className={`relative transition-all duration-200 cursor-pointer`}
+                      style={{
+                        color: expandedMenus[item.label]
+                          ? "var(--color-sidebar-active-text)"
+                          : "var(--color-sidebar-text)",
+                      }}>
                       <div
                         className={`flex items-center ${
                           isSidebarOpen
@@ -372,6 +394,7 @@ function AdminLayout() {
                               content={item.label}
                               placement="right"
                               animation="duration-300"
+                              className="!bg-var(--color-tooltip-bg) !text-var(--color-tooltip-text)"
                               theme={{
                                 target: "inline-flex",
                                 base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
@@ -394,7 +417,13 @@ function AdminLayout() {
                             {/* Popup submenu */}
                             {hoveredMenu === item.label && (
                               <div
-                                className="absolute left-full top-0 ml-2 bg-gray-900 border border-gray-700 text-white shadow-xl rounded-lg py-2 px-3 z-50 min-w-[220px] animate-fadeIn"
+                                className="absolute left-full top-0 ml-2 shadow-xl rounded-lg py-2 px-3 min-w-[220px] animate-fadeIn z-50"
+                                style={{
+                                  backgroundColor: "var(--color-sidebar-bg)",
+                                  border:
+                                    "1px solid var(--color-sidebar-border)",
+                                  color: "var(--color-sidebar-text)",
+                                }}
                                 onMouseEnter={() => {
                                   if (hoverTimer.current !== null) {
                                     clearTimeout(hoverTimer.current);
@@ -408,8 +437,16 @@ function AdminLayout() {
                                   );
                                 }}>
                                 {/* Header group */}
-                                <div className="flex items-center gap-2 mb-2 border-b border-gray-700 pb-1">
-                                  <item.icon className="w-5 h-5 text-blue-400" />
+                                <div
+                                  className="flex items-center gap-2 mb-2 pb-1"
+                                  style={{
+                                    borderBottom:
+                                      "1px solid var(--color-sidebar-border)",
+                                  }}>
+                                  <item.icon
+                                    className="w-5 h-5"
+                                    style={{ color: "var(--color-primary)" }}
+                                  />
                                   <span className="font-medium text-sm tracking-wide">
                                     {item.label}
                                   </span>
@@ -421,11 +458,27 @@ function AdminLayout() {
                                     <div
                                       key={sub.path}
                                       onClick={() => navigate(sub.path)}
-                                      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-150 ${
-                                        location.pathname === sub.path
-                                          ? "bg-blue-600 text-white"
-                                          : "hover:bg-gray-800 hover:text-white text-gray-300"
-                                      }`}>
+                                      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-150`}
+                                      style={{
+                                        backgroundColor:
+                                          location.pathname === sub.path
+                                            ? "var(--color-primary)"
+                                            : "transparent",
+                                        color:
+                                          location.pathname === sub.path
+                                            ? "white"
+                                            : "var(--color-sidebar-text)",
+                                      }}
+                                      onMouseEnter={(e) =>
+                                        location.pathname !== sub.path &&
+                                        (e.currentTarget.style.backgroundColor =
+                                          "var(--color-sidebar-hover)")
+                                      }
+                                      onMouseLeave={(e) =>
+                                        location.pathname !== sub.path &&
+                                        (e.currentTarget.style.backgroundColor =
+                                          "transparent")
+                                      }>
                                       {sub.icon && (
                                         <sub.icon className="w-4 h-4 flex-shrink-0" />
                                       )}
@@ -441,7 +494,10 @@ function AdminLayout() {
                         ) : (
                           <div className="flex items-center gap-3">
                             {expandedMenus[item.label] ? (
-                              <HiFolderOpen className="w-5 h-5 flex-shrink-0 text-blue-400" />
+                              <HiFolderOpen
+                                className="w-5 h-5 flex-shrink-0"
+                                style={{ color: "var(--color-primary)" }}
+                              />
                             ) : (
                               <HiFolder className="w-5 h-5 flex-shrink-0" />
                             )}
@@ -454,7 +510,11 @@ function AdminLayout() {
                     </SidebarItem>
 
                     {isSidebarOpen && expandedMenus[item.label] && (
-                      <div className="ml-4 border-l border-gray-700">
+                      <div
+                        className="ml-4"
+                        style={{
+                          borderLeft: "1px solid var(--color-sidebar-border)",
+                        }}>
                         {item.children.map((sub) => (
                           <SidebarItemButton key={sub.path} {...sub} />
                         ))}
@@ -471,7 +531,9 @@ function AdminLayout() {
             {user?.role === "ADMIN" && (
               <SidebarItemGroup>
                 {isSidebarOpen && (
-                  <h6 className="px-3 mb-1 text-xs uppercase tracking-wide text-gray-400">
+                  <h6
+                    className="px-1 mb-1 text-xs uppercase tracking-wide"
+                    style={{ color: "var(--color-text-muted)" }}>
                     {t("admin.sidebar.adminGroup")}
                   </h6>
                 )}
@@ -485,7 +547,9 @@ function AdminLayout() {
             {user?.role === "STAFF" && (
               <SidebarItemGroup>
                 {isSidebarOpen && (
-                  <h6 className="px-3 mb-1 text-xs uppercase tracking-wide text-gray-400">
+                  <h6
+                    className="px-1 mb-1 text-xs uppercase tracking-wide"
+                    style={{ color: "var(--color-text-muted)" }}>
                     {t("admin.sidebar.staffGroup")}
                   </h6>
                 )}
@@ -501,17 +565,24 @@ function AdminLayout() {
         <div className="flex flex-col flex-1">
           <Navbar
             fluid
-            className="border-b !border-gray-200 !bg-white shadow-sm">
+            className="border-b shadow-sm"
+            style={{
+              backgroundColor: "var(--color-navbar-bg)",
+              borderBottomColor: "var(--color-navbar-border)",
+            }}>
             {/* Left */}
             <div className="flex items-center">
               <Button
                 onClick={toggleSidebar}
-                color="gray"
-                className="mr-3 p-2 !bg-transparent !border-none text-gray-600 hover:!bg-gray-100">
+                color="blue"
+                className="mr-3 p-2 !bg-transparent"
+                style={{ color: "var(--color-navbar-text)" }}>
                 <HiMenu className="w-6 h-6" />
               </Button>
               <NavbarBrand>
-                <span className="self-center whitespace-nowrap text-xl font-semibold text-gray-800">
+                <span
+                  className="self-center whitespace-nowrap text-xl font-semibold"
+                  style={{ color: "var(--color-navbar-text)" }}>
                   {user?.name || t("admin.navbar.defaultName")}
                 </span>
               </NavbarBrand>
@@ -519,10 +590,24 @@ function AdminLayout() {
 
             {/* Right */}
             <div className="flex items-center gap-3 md:order-2">
+              <Button
+                color="blue"
+                onClick={toggleTheme}
+                className="!bg-transparent !border-none">
+                {theme === "dark" ? (
+                  <HiMoon
+                    className="w-5 h-5"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  />
+                ) : (
+                  <HiSun className="w-5 h-5 text-yellow-400" />
+                )}
+              </Button>
+
               <NotificationBell
-                bgColor="!bg-blue-600"
-                hoverColor="hover:!bg-blue-500"
-                iconColor="text-white"
+                bgColor="bg-var(--color-content-bg)"
+                hoverColor="hover:bg-[var(--color-primary-hover)]"
+                iconColor="text--[var(--color-text-secondary)]"
                 badgeColor="failure"
                 redirectTo="/admin/notifications"
               />
@@ -535,16 +620,20 @@ function AdminLayout() {
                     rounded
                   />
                 }
-                className="!bg-gray-900 !border-gray-700 !text-gray-200 shadow-lg"
+                className="shadow-lg dropdown-floating"
+                style={{
+                  backgroundColor: "var(--color-dropdown-bg)",
+                  borderColor: "var(--color-dropdown-border)",
+                  color: "var(--color-dropdown-text)",
+                }}
                 theme={{
                   floating: {
-                    base: "!bg-gray-900 !text-gray-200 !border-gray-700 shadow-xl rounded-xl overflow-hidden w-64",
+                    base: "shadow-xl rounded-xl overflow-hidden w-64",
                     item: {
-                      base: "flex w-full cursor-pointer items-center justify-start gap-2 px-4 py-2 text-sm text-gray-300 hover:!bg-gray-800 hover:!text-white transition-colors",
+                      base: "flex w-full cursor-pointer items-center justify-start gap-2 px-4 py-2 text-sm transition-colors",
                     },
-                    header:
-                      "!bg-gray-900 text-gray-400 border-b border-gray-700",
-                    divider: "border-gray-700",
+                    header: "border-b",
+                    divider: "",
                   },
                 }}>
                 {/* Header - Avatar + Info */}
@@ -555,17 +644,23 @@ function AdminLayout() {
                     rounded
                     bordered
                     color="gray"
-                    className="mb-2 ring-2 ring-gray-700"
+                    className="mb-2"
                   />
-                  <span className="block text-sm font-semibold text-gray-100">
+                  <span
+                    className="block text-sm font-semibold"
+                    style={{ color: "var(--color-text-primary)" }}>
                     {user?.name}
                   </span>
-                  <span className="block text-xs text-gray-400 truncate max-w-[200px]">
+                  <span
+                    className="block text-xs truncate max-w-[200px]"
+                    style={{ color: "var(--color-text-muted)" }}>
                     {user?.email}
                   </span>
                 </div>
 
-                <DropdownDivider />
+                <DropdownDivider
+                  style={{ borderColor: "var(--color-dropdown-border)" }}
+                />
 
                 {/* Language Selector */}
                 <div
@@ -573,20 +668,34 @@ function AdminLayout() {
                   onClick={handleLangClick as unknown as () => void}>
                   <LanguageSelector
                     compact
-                    accentColor="text-blue-400"
-                    hoverColor="hover:text-white"
-                    activeBg="bg-blue-700 border-blue-900 border-4"
-                    inactiveText="text-gray-400 border-blue-900 border-4"
-                    labelColor="text-gray-200"
+                    accentColor="text-[var(--color-primary)]"
+                    hoverColor="hover:[var(--color-sidebar-hover)]"
+                    activeBg="bg-[var(--color-primary)]"
+                    inactiveText="text-[var(--color-sidebar-active-text)]"
+                    labelColor="text-[var(--color-text-primary)]"
                   />
                 </div>
 
-                <DropdownDivider />
+                <DropdownDivider
+                  style={{ borderColor: "var(--color-dropdown-border)" }}
+                />
 
                 {/* Logout Button */}
                 <DropdownItem
                   icon={HiLogout}
-                  className="hover:!bg-red-600 hover:!text-white !text-gray-300 transition-colors font-medium justify-center"
+                  className="transition-colors font-medium justify-center"
+                  style={{
+                    color: "var(--color-text-secondary)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      "var(--color-danger)";
+                    e.currentTarget.style.color = "white";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "var(--color-text-secondary)";
+                  }}
                   onClick={async () => {
                     await logout();
                     navigate("/admin/login");
@@ -598,7 +707,12 @@ function AdminLayout() {
           </Navbar>
 
           {/* Outlet */}
-          <main className="admin-content">
+          <main
+            className="admin-content text-var(--color-text-primary)"
+            style={{
+              backgroundColor: "var(--color-content-bg)",
+              color: "var(--color-text-primary)",
+            }}>
             <Outlet />
           </main>
         </div>
