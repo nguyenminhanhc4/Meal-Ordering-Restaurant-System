@@ -223,4 +223,15 @@ public class WebSocketNotifier {
         ));
     }
 
+    /**
+     * 🚫 Gửi thông báo khi đơn hàng bị hủy
+     * - Gửi cho admin theo topic /topic/admin/orders/cancelled
+     * - Có thể mở rộng để gửi cho user khác nếu cần
+     */
+    public void notifyOrderCancelled(OrderResponseDTO orderDto) {
+        notify("/topic/admin/orders/cancelled", Map.of(
+                "type", "ORDER_CANCELLED",
+                "data", orderDto
+        ));
+    }
 }

@@ -191,9 +191,7 @@ export const OrderDetailModal = ({
 
             <TableBody className="bg-white divide-y divide-gray-200">
               {order.items.map((item, idx) => (
-                <TableRow
-                  key={idx}
-                  className={idx % 2 === 0 ? "bg-gray-50" : ""}>
+                <TableRow key={idx} className="hover:!bg-gray-100">
                   <TableCell className="text-sm text-gray-700 px-3 py-2 text-left">
                     {item.menuItemName}
                   </TableCell>
@@ -219,31 +217,34 @@ export const OrderDetailModal = ({
       </ModalBody>
 
       {/* Footer */}
-      <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end flex-wrap gap-2">
-        {/* Main action buttons */}
-        {actions
-          .filter((a) => a.visible(order.status))
-          .map((a, idx) => (
+      <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-between flex-wrap gap-2">
+        {/* Nhóm bên trái: các action chính */}
+        <div className="flex flex-wrap gap-2">
+          {actions
+            .filter((a) => a.visible(order.status))
+            .map((a, idx) => (
+              <Button
+                key={idx}
+                color={a.color}
+                onClick={() => a.onClick(order.publicId)}>
+                {t(a.labelKey)}
+              </Button>
+            ))}
+        </div>
+
+        {/* Nhóm bên phải: Mark Paid + Close */}
+        <div className="flex flex-wrap gap-2">
+          {showMarkPaid && (
             <Button
-              key={idx}
-              color={a.color}
-              onClick={() => a.onClick(order.publicId)}>
-              {t(a.labelKey)}
+              color="green"
+              onClick={() => onMarkPaid?.(order.id, order.publicId)}>
+              {t("admin.orders.detail.actions.markPaid")}
             </Button>
-          ))}
-
-        {/* COD payment button */}
-        {showMarkPaid && (
-          <Button
-            color="green"
-            onClick={() => onMarkPaid?.(order.id, order.publicId)}>
-            {t("admin.orders.detail.actions.markPaid")}
+          )}
+          <Button color="gray" onClick={onClose}>
+            {t("admin.orders.detail.actions.close")}
           </Button>
-        )}
-
-        <Button color="gray" onClick={onClose}>
-          {t("admin.orders.detail.actions.close")}
-        </Button>
+        </div>
       </ModalFooter>
     </Modal>
   );

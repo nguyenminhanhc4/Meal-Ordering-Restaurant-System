@@ -1,7 +1,8 @@
 {
   "auth": {
     "common": {
-      "unexpectedError": "An unexpected error occurred!"
+      "unexpectedError": "An unexpected error occurred!",
+      "close": "Cancel"
     },
     "forgot": {
       "emailPlaceholder": "Enter your email",
@@ -343,6 +344,7 @@
       "back": "Back",
       "createdAt": "Created At:",
       "customer": "Ordered By:",
+      "cancel": "Cancel Order",
       "itemsTitle": "Item List",
       "pay": "Pay",
       "table": {
@@ -352,7 +354,12 @@
         "total": "Total"
       },
       "title": "Order #{{id}}",
-      "total": "Total Amount:"
+      "total": "Total Amount:",
+      "confirmCancelTitle": "Confirm Order Cancellation",
+      "confirmCancel": "Are you sure you want to cancel this order?",
+      "cancelSuccess": "Order cancelled successfully!",
+      "cancelError": "Failed to cancel the order!",
+      "cancel": "Cancel Order"
     },
     "errorLoadOrders": "Unable to load order list. Please try again.",
     "errorLoadOrdersNotify": "Failed to load orders",
@@ -964,7 +971,8 @@
         "paidSuccess": "Payment marked as paid successfully!",
         "paidError": "Failed to mark payment as paid.",
         "detailError": "Failed to load order details.",
-        "realtimeNew": "New order: {{publicId}}"
+        "realtimeNew": "New order: {{publicId}}",
+        "realtimeCancelled": "Order {{publicId}} has been cancelled."
       },
       "detail": {
         "header": "Order #{{code}}",

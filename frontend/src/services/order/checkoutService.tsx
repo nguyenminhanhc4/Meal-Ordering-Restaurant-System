@@ -123,3 +123,17 @@ export const updatePaymentStatusByOrder = async (
     throw error;
   }
 };
+
+export const cancelOrder = async (orderPublicId: string): Promise<OrderDto> => {
+  try {
+    const res = await api.put<ApiResponse<OrderDto>>(
+      `/orders/${orderPublicId}/cancel`,
+      {},
+      { withCredentials: true }
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error cancelling order", error);
+    throw error;
+  }
+};

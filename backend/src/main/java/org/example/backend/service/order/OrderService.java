@@ -43,6 +43,7 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final WebSocketNotifier wsNotifier;
     private final NotificationService notificationService;
+    private final WebSocketNotifier webSocketNotifier;
 
     @Transactional
     public OrderDto checkoutCart(CartDto cart) {
@@ -105,6 +106,21 @@ public class OrderService {
 
     public Optional<OrderDto> findByPublicId(String publicId) {
         return orderRepository.findByPublicId(publicId).map(OrderDto::new);
+    }
+
+    public OrderDto cancelOrder(String orderPublicId, String userPublicId) {
+        Order order = orderRepository.findByPublicId(orderPublicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Param statusParam = paramRepository.findByTypeAndCode("ORDER_STATUS", "CANCELLED" )
+                .orElseThrow(() -> new RuntimeException("Invalid status code: " + "CANCELLED"));
+
+        // Gán lại
+        order.setStatus(statusParam);
+        order = orderRepository.save(order);
+
+        webSocketNotifier.notifyOrderCancelled(OrderMapper.toDto(order));
+        return new OrderDto(order);
     }
 
     @Transactional(readOnly = true)

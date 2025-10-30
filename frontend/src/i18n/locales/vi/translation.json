@@ -1,7 +1,8 @@
 {
   "auth": {
     "common": {
-      "unexpectedError": "Đã xảy ra lỗi không xác định!"
+      "unexpectedError": "Đã xảy ra lỗi không xác định!",
+      "close": "Hủy"
     },
     "forgot": {
       "emailPlaceholder": "Nhập email của bạn",
@@ -343,6 +344,7 @@
       "back": "Quay lại",
       "createdAt": "Ngày tạo:",
       "customer": "Người đặt:",
+      "cancel": "Hủy đơn",
       "itemsTitle": "Danh sách món",
       "pay": "Thanh toán",
       "table": {
@@ -352,7 +354,11 @@
         "total": "Thành tiền"
       },
       "title": "Đơn hàng #{{id}}",
-      "total": "Tổng tiền:"
+      "total": "Tổng tiền:",
+      "confirmCancelTitle": "Xác nhận hủy đơn hàng",
+      "confirmCancel": "Bạn có chắc muốn hủy đơn hàng này không?",
+      "cancelSuccess": "Hủy đơn hàng thành công!",
+      "cancelError": "Không thể hủy đơn hàng!"
     },
     "errorLoadOrders": "Không thể tải danh sách đơn hàng. Vui lòng thử lại.",
     "errorLoadOrdersNotify": "Tải đơn hàng thất bại",
@@ -964,11 +970,13 @@
         "paidSuccess": "Đánh dấu thanh toán thành công!",
         "paidError": "Đánh dấu thanh toán thất bại.",
         "detailError": "Không tải được chi tiết đơn hàng.",
-        "realtimeNew": "Đơn hàng mới: {{publicId}}"
+        "realtimeNew": "Đơn hàng mới: {{publicId}}",
+        "realtimeCancelled": "Đơn hàng {{publicId}} đã bị huỷ."
       },
       "detail": {
         "header": "Đơn hàng #{{code}}",
         "customer": "Khách hàng",
+        "cancel": "Hủy đơn",
         "phone": "Điện thoại",
         "address": "Địa chỉ",
         "note": "Ghi chú",

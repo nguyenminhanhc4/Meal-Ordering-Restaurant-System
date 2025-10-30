@@ -82,6 +82,14 @@ public class OrderController {
         return ResponseEntity.ok(new Response<>("success", order, "Order retrieved successfully"));
     }
 
+    @PutMapping("/{publicId}/cancel")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> cancelOrder(@PathVariable String publicId, @CookieValue("token") String token) {
+        String userPublicId = jwtUtil.getPublicIdFromToken(token);
+        OrderDto cancelledOrder = orderService.cancelOrder(publicId, userPublicId);
+        return ResponseEntity.ok(new Response<>("success", cancelledOrder, "Order cancelled successfully"));
+    }
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> create(@RequestBody OrderDto dto) {

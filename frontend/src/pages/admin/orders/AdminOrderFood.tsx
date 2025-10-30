@@ -289,6 +289,29 @@ export const AdminOrderFood = () => {
     (msg) => msg.publicId
   );
 
+  useRealtimeUpdate<Order, string, { data: { publicId: string } }>(
+    "/topic/admin/orders/cancelled",
+    async (publicId) => {
+      const res = await api.get(`/orders/admin/${publicId}`);
+      return res.data;
+    },
+    (cancelledOrder) => {
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.publicId === cancelledOrder.publicId ? cancelledOrder : o
+        )
+      );
+
+      notify(
+        "warning",
+        t("admin.orders.notifications.realtimeCancelled", {
+          publicId: cancelledOrder.publicId.slice(0, 8),
+        })
+      );
+    },
+    (msg) => msg.data.publicId
+  );
+
   // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

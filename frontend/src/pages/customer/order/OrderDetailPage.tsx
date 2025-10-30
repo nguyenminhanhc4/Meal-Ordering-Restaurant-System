@@ -9,9 +9,14 @@ import {
   HiCurrencyDollar,
 } from "react-icons/hi";
 import { useTranslation } from "react-i18next";
-import { getOrderById } from "../../../services/order/checkoutService";
+import {
+  getOrderById,
+  cancelOrder,
+} from "../../../services/order/checkoutService";
 import type { OrderDtoDetail } from "../../../services/types/OrderType";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate.ts";
+import { useNotification } from "../../../components/Notification/NotificationContext";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps.tsx";
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,6 +24,10 @@ const OrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<OrderDtoDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { notify } = useNotification();
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [targetOrderId, setTargetOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -45,12 +54,33 @@ const OrderDetailPage: React.FC = () => {
     getOrderById,
     (updatedOrder) => {
       setOrder((prev) => {
+        console.log(prev);
         if (!prev) return updatedOrder;
         return prev.publicId === updatedOrder.publicId ? updatedOrder : prev;
       });
     },
     (msg) => msg.orderPublicId
   );
+
+  const openCancelDialog = (publicId: string) => {
+    setTargetOrderId(publicId);
+    setOpenConfirm(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!targetOrderId) return;
+    try {
+      await cancelOrder(targetOrderId);
+      notify("success", t("order.detail.cancelSuccess"));
+      setOrder((prev) => (prev ? { ...prev, status: "CANCELLED" } : prev));
+    } catch (err) {
+      console.error("Failed to cancel order", err);
+      notify("error", t("order.detail.cancelError"));
+    } finally {
+      setOpenConfirm(false);
+      setTargetOrderId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -186,21 +216,46 @@ const OrderDetailPage: React.FC = () => {
               <HiArrowLeft className="text-lg" /> {t("order.detail.back")}
             </Button>
 
-            {(!order.paymentStatus || order.paymentStatus === "FAILED") && (
-              <Button
-                color="green"
-                onClick={() =>
-                  navigate(`/orders/${order.publicId}/payment`, {
-                    state: { order },
-                  })
-                }
-                className="flex items-center gap-2">
-                <HiCurrencyDollar className="text-lg" /> {t("order.detail.pay")}
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {/* Hiện nút Hủy khi đơn hàng chưa giao hoặc chưa bị hủy */}
+              {["PENDING", "APPROVED"].includes(order.status) && (
+                <Button
+                  color="red"
+                  onClick={() => openCancelDialog(order.publicId)}
+                  className="flex items-center gap-2">
+                  <HiReceiptTax className="text-lg" />{" "}
+                  {t("order.detail.cancel")}
+                </Button>
+              )}
+
+              {/* Hiện nút Thanh toán nếu chưa thanh toán */}
+              {(!order.paymentStatus || order.paymentStatus === "FAILED") && (
+                <Button
+                  color="green"
+                  onClick={() =>
+                    navigate(`/orders/${order.publicId}/payment`, {
+                      state: { order },
+                    })
+                  }
+                  className="flex items-center gap-2">
+                  <HiCurrencyDollar className="text-lg" />{" "}
+                  {t("order.detail.pay")}
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={openConfirm}
+        title={t("order.detail.confirmCancelTitle")}
+        message={t("order.detail.confirmCancel")}
+        confirmText={t("order.detail.cancel")}
+        cancelText={t("common.cancel")}
+        onConfirm={confirmCancelOrder}
+        onCancel={() => setOpenConfirm(false)}
+      />
     </section>
   );
 };
