@@ -188,7 +188,7 @@ const CartPage: React.FC = () => {
         "success",
         t("cart.checkoutSuccess", { publicId: order.publicId })
       );
-      navigate(`/payment`);
+      navigate(`/orders/${order.publicId}/payment`);
     } catch (err) {
       notify("error", t("cart.checkoutFail"));
     }
