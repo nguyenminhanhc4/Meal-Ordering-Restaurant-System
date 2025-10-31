@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Spinner, Badge } from "flowbite-react";
 import {
   FaSearch,
@@ -74,25 +74,28 @@ export default function OrderHistoryPage() {
     {}
   );
 
-  const loadOrders = async (pageNumber = 0) => {
-    setLoading(true);
-    try {
-      const data = await fetchOrderHistory({
-        page: pageNumber,
-        size: 5,
-        ...filters,
-      });
-      setOrders(data.content);
-      setTotalPages(data.totalPages);
-      setPage(data.number);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadOrders = useCallback(
+    async (pageNumber = 0) => {
+      setLoading(true);
+      try {
+        const data = await fetchOrderHistory({
+          page: pageNumber,
+          size: 5,
+          ...filters,
+        });
+        setOrders(data.content);
+        setTotalPages(data.totalPages);
+        setPage(data.number);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters]
+  );
 
   useEffect(() => {
     loadOrders(0);
-  }, [filters]);
+  }, [filters, loadOrders]);
 
   // WebSocket realtime menu items
   useEffect(() => {

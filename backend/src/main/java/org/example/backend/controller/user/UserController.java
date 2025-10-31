@@ -34,7 +34,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
         try {
-            System.out.println("Creating user with data:");
+            System.out.println("Creating user with data:"); 
             System.out.println("Name: " + userDTO.getName());
             System.out.println("Email: " + userDTO.getEmail());
             System.out.println("Avatar URL: " + userDTO.getAvatarUrl());
