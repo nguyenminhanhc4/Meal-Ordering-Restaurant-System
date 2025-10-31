@@ -5,6 +5,7 @@ import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/payments/**").authenticated()
                         .requestMatchers("/api/v1/mock-payments/**").authenticated()
                         .requestMatchers("/api/v1/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/avatar").authenticated()
                         .requestMatchers("/api/v1/staff/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
