@@ -47,6 +47,7 @@ const OrderListPage: React.FC = () => {
           pageSize,
           selectedStatus
         );
+        console.log("test", data.content);
         setOrders(data.content);
         setTotalPages(data.totalPages);
       } catch (err) {
