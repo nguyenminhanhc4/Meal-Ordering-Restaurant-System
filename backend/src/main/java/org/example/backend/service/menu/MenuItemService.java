@@ -491,7 +491,8 @@ public class MenuItemService {
                 menuItem.getId(),
                 menuItem.getName(),
                 menuItem.getAvatarUrl(),
-                menuItem.getCategory().getId()
+                menuItem.getCategory().getId(),
+                menuItem.getStatus().getCode()
         );
         
         return new MenuItemDto(menuItem);

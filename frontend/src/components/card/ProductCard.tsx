@@ -37,6 +37,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     (msg: { menuItemId: number }) => msg.menuItemId
   );
 
+  useRealtimeUpdate(
+    `/topic/menu/update`,
+    getMenuItemById,
+    (updatedProduct) => {
+      if (!updatedProduct || updatedProduct.id !== currentProduct?.id) return;
+      setCurrentProduct(updatedProduct);
+      notify(
+        "info",
+        t("mealPage.notification.itemUpdated", { name: updatedProduct.name })
+      );
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
+
   const handleAddToCart = async () => {
     if (currentProduct.status !== "AVAILABLE") {
       notify(

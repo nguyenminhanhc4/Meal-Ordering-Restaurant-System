@@ -53,6 +53,20 @@ const ProductDetail: React.FC = () => {
     (msg: { menuItemId: number }) => msg.menuItemId
   );
 
+  useRealtimeUpdate(
+    `/topic/menu/update`,
+    getMenuItemById,
+    (updatedProduct) => {
+      if (!updatedProduct || updatedProduct.id !== product?.id) return;
+      setProduct(updatedProduct);
+      notify(
+        "info",
+        t("mealPage.notification.itemUpdated", { name: updatedProduct.name })
+      );
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
+
   if (isLoading) {
     return (
       <section className="min-h-screen bg-stone-50 py-12 px-4 sm:px-6 md:px-8">

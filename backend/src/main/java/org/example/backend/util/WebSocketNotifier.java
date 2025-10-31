@@ -100,12 +100,13 @@ public class WebSocketNotifier {
     /**
      * ✏️ Gửi thông báo khi cập nhật MenuItem
      */
-    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId) {
+    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId,String newStatus) {
         notify("/topic/menu/update", Map.of(
                 "menuItemId", menuItemId,
                 "name", name,
                 "avatarUrl", avatarUrl,
-                "categoryId", categoryId
+                "categoryId", categoryId,
+                "status", newStatus
         ));
     }
 

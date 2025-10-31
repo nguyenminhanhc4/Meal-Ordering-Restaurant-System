@@ -496,9 +496,6 @@ export function MenuItemFormModal({
                     },
                   },
                 }}>
-                <option value={0}>
-                  {t("common.select")} {t("admin.menuItems.form.statusLabel")}
-                </option>
                 {statuses.map((st) => (
                   <option key={st.id} value={st.id}>
                     {st.code}

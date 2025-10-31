@@ -105,22 +105,6 @@ const MealPage: React.FC = () => {
     (msg: { menuItemId: number }) => msg.menuItemId
   );
 
-  useRealtimeUpdate(
-    `/topic/menu/update`,
-    getMenuItemById,
-    (updatedProduct) => {
-      if (!updatedProduct) return;
-      setProducts((prev) =>
-        prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-      );
-      notify(
-        "info",
-        t("mealPage.notification.itemUpdated", { name: updatedProduct.name })
-      );
-    },
-    (msg: { menuItemId: number }) => msg.menuItemId
-  );
-
   useRealtimeDelete<{ menuItemId: number }>("/topic/menu/delete", (msg) => {
     setProducts((prev) => prev.filter((p) => p.id !== msg.menuItemId));
     notify("warning", t("mealPage.notification.itemDeleted"));
