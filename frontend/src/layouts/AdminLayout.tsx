@@ -605,9 +605,9 @@ function AdminLayout() {
               </Button>
 
               <NotificationBell
-                bgColor="bg-var(--color-content-bg)"
-                hoverColor="hover:bg-[var(--color-primary-hover)]"
-                iconColor="text--[var(--color-text-secondary)]"
+                bgColor="bg-var(--color-navbar-text)"
+                hoverColor="hover:bg-[var(--color-bell-hover)]"
+                iconColor="text-[var(--color-text-secondary)]"
                 badgeColor="failure"
                 redirectTo="/admin/notifications"
               />

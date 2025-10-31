@@ -1265,5 +1265,13 @@
         "dark": "Dark mode"
       }
     }
+  },
+  "pagination": {
+    "first": "First",
+    "previous": "Previous",
+    "next": "Next",
+    "last": "Last",
+    "jumpLabel": "Go to page",
+    "go": "Go"
   }
 }

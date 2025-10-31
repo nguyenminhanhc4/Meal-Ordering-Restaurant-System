@@ -31,7 +31,8 @@ export const themes = {
     "--color-dropdown-text": "#374151",         // gray-700
     "--color-dropdown-border": "#e5e7eb",       // gray-300
 
-    "--color-danger": "#dc2626",                // red-600
+    "--color-danger": "#dc2626",   
+    "--color-bell-hover": "#e2e8f0",
   },
   dark: {
     // NỀN TỐI, CHỮ SÁNG – TOÀN BỘ
@@ -65,6 +66,7 @@ export const themes = {
     "--color-dropdown-border": "#334155",       // slate-700
 
     "--color-danger": "#f87171",                // red-400
+    "--color-bell-hover": "#3b82f6",
   },
 };
 
