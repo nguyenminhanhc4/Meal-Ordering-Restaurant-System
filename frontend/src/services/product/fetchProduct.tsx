@@ -21,7 +21,7 @@ export interface Product {
   categoryId: number;
   categoryName: string;
   categorySlug: string;
-  status: "AVAILABLE" | "OUT_OF_STOCK" | "COMING_SOON"; // enum thu gọn
+  status: "AVAILABLE" | "OUT_OF_STOCK";
   createdAt: string; // có thể parse sang Date nếu muốn
   rating: number;
   sold: number;

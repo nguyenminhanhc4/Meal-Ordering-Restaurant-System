@@ -30,6 +30,7 @@ import { useCart } from "../../../store/CartContext";
 import { connectWebSocket } from "../../../api/websocketClient";
 import { getMenuItemById } from "../../../services/product/fetchProduct";
 import { useTranslation } from "react-i18next";
+import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
@@ -98,6 +99,38 @@ const CartPage: React.FC = () => {
       clients.forEach((client) => client.deactivate());
     };
   }, [cart?.items, t]);
+
+  useRealtimeUpdate(
+    `/topic/menu/update`,
+    getMenuItemById,
+    (updatedProduct) => {
+      if (!updatedProduct) return;
+
+      // Cập nhật lại giỏ hàng: thay đổi thông tin của món tương ứng
+      setCart((prev) => {
+        if (!prev) return prev;
+        const updatedItems = prev.items?.map((item) =>
+          item.menuItemId === updatedProduct.id
+            ? {
+                ...item,
+                status: updatedProduct.status ?? item.status,
+                price: updatedProduct.price ?? item.price,
+                availableQuantity:
+                  updatedProduct.availableQuantity ?? item.availableQuantity,
+              }
+            : item
+        );
+        return { ...prev, items: updatedItems };
+      });
+
+      // Thông báo realtime
+      notify(
+        "info",
+        t("mealPage.notification.itemUpdated", { name: updatedProduct.name })
+      );
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
 
   const handleUpdateQuantity = async (
     itemId: number,
