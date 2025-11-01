@@ -19,6 +19,7 @@ import {
   getOrCreateCart,
   updateCartItem,
   deleteCartItems,
+  getCurrentCart,
 } from "../../../services/cart/cartService";
 import type { Cart, CartItem } from "../../../services/cart/cartService";
 import { useNotification } from "../../../components/Notification/NotificationContext";
@@ -31,13 +32,14 @@ import { connectWebSocket } from "../../../api/websocketClient";
 import { getMenuItemById } from "../../../services/product/fetchProduct";
 import { useTranslation } from "react-i18next";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
+import { useAuth } from "../../../store/AuthContext";
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
-
+  const { user } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [cartUpdated, setCartUpdated] = useState<number>(0);
   const [showAllItems, setShowAllItems] = useState(false);
   const ITEMS_TO_SHOW = 5;
@@ -54,9 +56,6 @@ const CartPage: React.FC = () => {
       try {
         const data = await getOrCreateCart();
         setCart(data);
-      } catch (err) {
-        console.error("cart fetch/create failed", err);
-        setError(t("cart.fetchError"));
       } finally {
         setLoading(false);
       }
@@ -131,6 +130,17 @@ const CartPage: React.FC = () => {
       );
     },
     (msg: { menuItemId: number }) => msg.menuItemId
+  );
+
+  useRealtimeUpdate(
+    `/topic/cart/${user?.publicId}`,
+    async () => await getCurrentCart(),
+    (updatedCart) => {
+      console.log("🛒 Cart updated realtime:", updatedCart);
+      setCart(updatedCart);
+      notify("info", t("cart.realtimeCartUpdated"));
+    },
+    () => user?.publicId
   );
 
   const handleUpdateQuantity = async (
@@ -488,7 +498,7 @@ const CartPage: React.FC = () => {
             <p className="text-xl text-gray-500 mt-4">{t("cart.empty")}</p>
             <Button
               color="primary"
-              className="mt-6 mx-auto !bg-amber-500 hover:!bg-amber-600"
+              className="mt-6 mx-auto text-white !bg-amber-500 hover:!bg-amber-600"
               href="/menu">
               {t("cart.viewMenu")}
             </Button>

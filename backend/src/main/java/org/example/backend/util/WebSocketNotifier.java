@@ -235,4 +235,14 @@ public class WebSocketNotifier {
                 "data", orderDto
         ));
     }
+    /**
+     * 🔄 Gửi thông báo khi giỏ hàng của user thay đổi (tạo mới, cập nhật, checkout, hủy, ...)
+     * Client sẽ subscribe: /topic/cart/{userPublicId}
+     */
+    public void notifyCartUpdated(String userPublicId) {
+        notify("/topic/cart/" + userPublicId, Map.of(
+                "type", "CART_UPDATED",
+                "message", "Cart has been updated"
+        ));
+    }
 }

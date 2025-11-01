@@ -12,6 +12,7 @@ import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.cart.CartRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class CartService {
     private final UserRepository userRepository;
 
     private final ParamRepository paramRepository;
+
+    private final WebSocketNotifier webSocketNotifier;
 
     public List<CartDto> findAll() {
         return cartRepository.findAll()
@@ -75,6 +78,7 @@ public class CartService {
         cart.setStatus(openStatus);
 
         cart = cartRepository.save(cart);
+        webSocketNotifier.notifyCartUpdated(publicId);
         return new CartDto(cart);
     }
 
