@@ -16,7 +16,7 @@ import {
 } from "flowbite-react";
 import { HiTrash, HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
 import {
-  getCurrentCart,
+  getOrCreateCart,
   updateCartItem,
   deleteCartItems,
 } from "../../../services/cart/cartService";
@@ -52,9 +52,10 @@ const CartPage: React.FC = () => {
   useEffect(() => {
     const fetchCartData = async () => {
       try {
-        const data = await getCurrentCart();
+        const data = await getOrCreateCart();
         setCart(data);
       } catch (err) {
+        console.error("cart fetch/create failed", err);
         setError(t("cart.fetchError"));
       } finally {
         setLoading(false);
@@ -271,7 +272,7 @@ const CartPage: React.FC = () => {
           {t("cart.title")}
         </h1>
 
-        {cart && cart.items && cart.items.length > 0 ? (
+        {cart?.status === "OPEN" && (cart?.items?.length ?? 0) > 0 ? (
           <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm">
             <Table hoverable striped className="rounded-lg">
               <TableHead>
@@ -481,7 +482,7 @@ const CartPage: React.FC = () => {
               </div>
             </div>
           </Card>
-        ) : (
+        ) : cart ? (
           <Card className="shadow-lg border-none !bg-white/90 backdrop-blur-sm text-center py-12">
             <HiShoppingCart className="mx-auto h-16 w-16 !text-gray-400" />
             <p className="text-xl text-gray-500 mt-4">{t("cart.empty")}</p>
@@ -492,6 +493,12 @@ const CartPage: React.FC = () => {
               {t("cart.viewMenu")}
             </Button>
           </Card>
+        ) : (
+          // ⏳ Đang load cart
+          <div className="text-center py-12 text-gray-500">
+            <Spinner size="lg" className="mx-auto mb-4" />
+            {t("cart.loading")}
+          </div>
         )}
       </div>
 

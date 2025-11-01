@@ -53,20 +53,31 @@ public class CartService {
     }
 
     public CartDto getCurrentCart(String publicId) {
-        Cart cart = cartRepository.findByUserPublicIdWithItems(publicId)
-                .orElseGet(() -> createCartForUser(publicId)); // tự tạo nếu chưa có
+        Cart cart = cartRepository.findByUserPublicIdWithItemsAndStatus(publicId, "OPEN")
+                .orElseThrow(() -> new ResourceNotFoundException("No open cart found"));
         return new CartDto(cart);
     }
 
-    private Cart createCartForUser(String publicId) {
+    public CartDto createCartForUser(String publicId) {
+        boolean hasActiveCart = cartRepository.existsByUserPublicIdAndStatus(publicId, "OPEN");
+        if (hasActiveCart) {
+            throw new ValidationException("User already has an active cart");
+        }
+
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Param openStatus = paramRepository.findByTypeAndCode("STATUS_CART", "OPEN")
+                .orElseThrow(() -> new RuntimeException("Default status not found"));
+
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setStatus(paramRepository.findByTypeAndCode("STATUS_CART", "OPEN")
-                .orElseThrow(() -> new RuntimeException("Default status not found")));
-        return cartRepository.save(cart);
+        cart.setStatus(openStatus);
+
+        cart = cartRepository.save(cart);
+        return new CartDto(cart);
     }
+
 
     public CartDto updateById(Long id, CartDto dto) {
         Cart cart = cartRepository.findById(id)
