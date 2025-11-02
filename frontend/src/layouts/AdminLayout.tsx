@@ -258,12 +258,13 @@ function AdminLayout() {
               content={label}
               placement="right"
               animation="duration-300"
+              className="tooltip-root"
               theme={{
                 target: "inline-flex",
-                base: "absolute z-10 inline-block text-sm !text-white !bg-blue-600 transition-opacity duration-300",
+                base: "absolute z-10 inline-block text-sm transition-opacity duration-300",
                 style: {
                   dark: "!bg-blue-600 !text-white",
-                  light: "!bg-blue-600 !text-white",
+                  light: "!bg-blue-600 !text-black",
                 },
                 arrow: {
                   style: { dark: "!bg-blue-600", light: "!bg-blue-600" },
@@ -605,9 +606,9 @@ function AdminLayout() {
               </Button>
 
               <NotificationBell
-                bgColor="bg-var(--color-navbar-text)"
+                bgColor="!bg-[var(--color-tooltip-bg)]"
                 hoverColor="hover:bg-[var(--color-bell-hover)]"
-                iconColor="text-[var(--color-text-secondary)]"
+                iconColor="text-white"
                 badgeColor="failure"
                 redirectTo="/admin/notifications"
               />

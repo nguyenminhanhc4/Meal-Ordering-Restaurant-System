@@ -22,7 +22,7 @@ export const themes = {
     "--color-primary": "#3b82f6",               // blue-500
     "--color-primary-hover": "#2563eb",         // blue-600
     "--color-tooltip-bg": "#3b82f6",
-    "--color-tooltip-text": "#ffffff",
+    "--color-tooltip-text": "#374151",
 
     "--color-overlay": "rgba(0, 0, 0, 0.4)",
     "--color-ring": "#3b82f6",
@@ -56,7 +56,7 @@ export const themes = {
     "--color-primary": "#60a5fa",               // blue-400
     "--color-primary-hover": "#3b82f6",         // blue-500
     "--color-tooltip-bg": "#3b82f6",
-    "--color-tooltip-text": "#ffffff",
+    "--color-tooltip-text": "#f1f5f9",
 
     "--color-overlay": "rgba(0, 0, 0, 0.75)",
     "--color-ring": "#60a5fa",

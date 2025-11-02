@@ -16,9 +16,9 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = ({
-  bgColor = "!bg-stone-700",
-  hoverColor = "hover:!bg-stone-600",
-  iconColor = "text-yellow-400",
+  bgColor,
+  hoverColor,
+  iconColor,
   badgeColor = "failure",
   redirectTo = "/profile?tab=notifications", // 👈 Giá trị mặc định
 }) => {
