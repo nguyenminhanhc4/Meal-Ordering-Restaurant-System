@@ -101,12 +101,13 @@ public class WebSocketNotifier {
     /**
      * ✏️ Gửi thông báo khi cập nhật MenuItem
      */
-    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId) {
+    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId,String newStatus) {
         notify("/topic/menu/update", Map.of(
                 "menuItemId", menuItemId,
                 "name", name,
                 "avatarUrl", avatarUrl,
-                "categoryId", categoryId
+                "categoryId", categoryId,
+                "status", newStatus
         ));
     }
 
@@ -187,6 +188,62 @@ public class WebSocketNotifier {
         );
     }
 
-//    public void notifyNewCombo(Long id, String name, BigDecimal price) {
-//    }
+    /**
+     * 🧾 Gửi thông báo khi tạo mới bàn (table)
+     */
+    public void notifyNewTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/new", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * ✏️ Gửi thông báo khi cập nhật bàn
+     */
+    public void notifyUpdatedTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/update", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * 🗑️ Gửi thông báo khi xóa bàn
+     */
+    public void notifyDeletedTable(Long tableId) {
+        notify("/topic/tables/delete", Map.of(
+                "tableId", tableId
+        ));
+    }
+
+    /**
+     * 🚫 Gửi thông báo khi đơn hàng bị hủy
+     * - Gửi cho admin theo topic /topic/admin/orders/cancelled
+     * - Có thể mở rộng để gửi cho user khác nếu cần
+     */
+    public void notifyOrderCancelled(OrderResponseDTO orderDto) {
+        notify("/topic/admin/orders/cancelled", Map.of(
+                "type", "ORDER_CANCELLED",
+                "data", orderDto
+        ));
+    }
+    /**
+     * 🔄 Gửi thông báo khi giỏ hàng của user thay đổi (tạo mới, cập nhật, checkout, hủy, ...)
+     * Client sẽ subscribe: /topic/cart/{userPublicId}
+     */
+    public void notifyCartUpdated(String userPublicId) {
+        notify("/topic/cart/" + userPublicId, Map.of(
+                "type", "CART_UPDATED",
+                "message", "Cart has been updated"
+        ));
+    }
 }

@@ -20,12 +20,19 @@ import Logo from "../../assets/img/vite.svg";
 import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import NotificationBell from "../../components/bell/NotificationBell";
+import LanguageSelector from "../../components/LanguageSelector";
 
 export default function NavbarLanding() {
+  const { t } = useTranslation();
   const { isLoggedIn, user, logout } = useAuth();
   const { notify } = useNotification();
   const [activeSection, setActiveSection] = useState("hero");
+
+  const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,6 +56,7 @@ export default function NavbarLanding() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   return (
     <Navbar
       fluid
@@ -58,7 +66,7 @@ export default function NavbarLanding() {
         <NavbarBrand href="/">
           <img src={Logo} className="mr-3 h-8 sm:h-10" alt="Restaurant Logo" />
           <span className="self-center whitespace-nowrap text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            XYZ Restaurant
+            {t("navbarLanding.brand.name")}
           </span>
         </NavbarBrand>
 
@@ -68,29 +76,29 @@ export default function NavbarLanding() {
             href="#hero"
             active={activeSection === "hero"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-            Trang chủ
+            {t("navbarLanding.menu.home")}
           </NavbarLink>
           <NavbarLink
             href="#menu"
             active={activeSection === "menu"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-            Thực đơn
+            {t("navbarLanding.menu.menu")}
           </NavbarLink>
           <NavbarLink
             href="#about"
             active={activeSection === "about"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-            Giới thiệu
+            {t("navbarLanding.menu.about")}
           </NavbarLink>
           <NavbarLink
             href="#booking"
             active={activeSection === "booking"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
-            Đặt bàn
+            {t("navbarLanding.menu.booking")}
           </NavbarLink>
         </NavbarCollapse>
 
-        {/* Bên phải */}
+        {/* Right side */}
         <div className="flex items-center gap-3">
           {isLoggedIn && user && <NotificationBell />}
           {isLoggedIn && user ? (
@@ -103,8 +111,8 @@ export default function NavbarLanding() {
                     alt="User avatar"
                     img={user.avatarUrl || undefined}
                     rounded
-                    size="md" // tăng size avatar (flowbite hỗ trợ sm, md, lg)
-                    className="w-10 h-10" // fallback đảm bảo to hơn mặc định
+                    size="md"
+                    className="w-10 h-10 ring-1 ring-yellow-400/40"
                     placeholderInitials={
                       user.name ? user.name.charAt(0).toUpperCase() : "?"
                     }
@@ -119,43 +127,78 @@ export default function NavbarLanding() {
                   </div>
                 </div>
               }
-              className="!bg-stone-800 shadow-lg rounded-lg">
-              <DropdownHeader className="bg-stone-700 !text-yellow-400">
+              className="!bg-stone-800 shadow-xl rounded-xl border border-stone-700 min-w-[240px]"
+              theme={{
+                floating: {
+                  base: "!bg-stone-800 !text-gray-200 border border-stone-700 shadow-xl rounded-xl overflow-hidden",
+                  item: {
+                    base: "flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:!bg-stone-700 hover:!text-yellow-400 transition-colors rounded-md mx-1",
+                  },
+                  header:
+                    "!bg-stone-700 text-yellow-400 px-4 py-3 border-b border-stone-600 text-sm font-semibold",
+                  divider: "border-stone-700 mx-2",
+                },
+              }}>
+              {/* Header */}
+              <DropdownHeader className="bg-stone-700 text-yellow-400 px-4 py-3">
                 <span className="block text-sm font-semibold">{user.name}</span>
-                <span className="block truncate text-xs">{user.email}</span>
+                <span className="block truncate text-xs text-gray-300">
+                  {user.email}
+                </span>
               </DropdownHeader>
+
+              {/* Profile */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 href="/profile">
                 <HiOutlineUser className="text-yellow-400" />
-                Hồ sơ
+                {t("navbarLanding.dropdown.profile")}
               </DropdownItem>
+
+              {/* Orders */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 href="/order">
                 <HiOutlineShoppingCart className="text-yellow-400" />
-                Đơn hàng
+                {t("navbarLanding.dropdown.orders")}
               </DropdownItem>
-              <DropdownDivider />
+
+              {/* Language */}
               <DropdownItem
-                className="flex items-center gap-3 hover:!text-yellow-400"
+                className="flex flex-col items-start gap-2 px-4 py-2 hover:!bg-stone-700"
+                onClick={handleLangClick as unknown as () => void}>
+                <LanguageSelector
+                  compact
+                  accentColor="text-yellow-400"
+                  hoverColor="hover:text-yellow-400"
+                  activeBg="bg-stone-800 border-yellow-400"
+                  inactiveText="text-gray-400"
+                  labelColor="text-gray-200"
+                />
+              </DropdownItem>
+
+              <DropdownDivider />
+
+              {/* Logout */}
+              <DropdownItem
+                className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
                 onClick={async () => {
-                  await logout(); // từ AuthContext
-                  notify("success", "Đăng xuất thành công!");
+                  await logout();
+                  notify("success", t("navbarLanding.dropdown.logoutSuccess"));
                 }}>
                 <HiOutlineLogout className="text-yellow-400" />
-                Đăng xuất
+                {t("navbarLanding.dropdown.logout")}
               </DropdownItem>
             </Dropdown>
           ) : (
             <Button
               className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 font-semibold shadow-md"
               href="/login">
-              Đăng nhập
+              {t("navbarLanding.login")}
             </Button>
           )}
 
-          {/* Toggle button cho mobile */}
+          {/* Toggle button for mobile */}
           <NavbarToggle className="text-yellow-500 hover:text-yellow-400" />
         </div>
       </div>

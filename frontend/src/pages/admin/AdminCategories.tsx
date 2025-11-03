@@ -23,7 +23,10 @@ import api from "../../api/axios";
 import { useNotification } from "../../components/Notification";
 import { Pagination } from "../../components/common/Pagination";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
-import { CategoryFormModal } from "../../components/category/CategoryFormModal";
+import { CategoryFormModal } from "../../components/modal/category/CategoryFormModal";
+import { useTranslation } from "react-i18next";
+import { AxiosError } from "axios";
+import { useAuth } from "../../store/AuthContext";
 
 interface Category {
   id: number;
@@ -42,56 +45,51 @@ interface CategorySearchRequest {
 }
 
 function AdminCategories() {
+  const { t } = useTranslation(); // <-- i18n hook
+  const { notify } = useNotification();
+  const { user } = useAuth();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedParent, setSelectedParent] = useState("");
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
-
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     Category | undefined
   >(undefined);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const pageSize = 15;
-  const { notify } = useNotification();
 
-  // useEffect để fetch data khi component mount và khi có thay đổi
+  // Load parent categories
   useEffect(() => {
     const abortController = new AbortController();
 
-    // Function để load parent categories
     const loadParentCategories = async () => {
       try {
         const response = await api.get("/categories", {
           signal: abortController.signal,
         });
-        if (response.data) {
-          setParentCategories(response.data);
-        }
+        if (response.data) setParentCategories(response.data);
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Fetch parent categories error:", error);
+          notify("error", t("admin.categories.notifications.loadParentsError"));
           setParentCategories([]);
         }
       }
     };
 
-    // Load parent categories khi có refreshTrigger
     void loadParentCategories();
+    return () => abortController.abort();
+  }, [refreshTrigger, notify, t]);
 
-    return () => {
-      abortController.abort();
-    };
-  }, [refreshTrigger]); // Chạy lại khi refreshTrigger thay đổi
-
-  // useEffect riêng cho fetchCategories - inline logic để tránh dependency issue
+  // Load categories with search/filter
   useEffect(() => {
     const abortController = new AbortController();
 
@@ -104,16 +102,12 @@ function AdminCategories() {
           sortDirection: "desc",
         };
 
-        // Handle parent filter logic
         if (selectedParent === "0") {
-          // Root categories only (hasParent = false)
           searchRequest.hasParent = false;
         } else if (selectedParent) {
-          // Specific parent ID
           searchRequest.parentId = parseInt(selectedParent);
         }
 
-        // Thử với endpoint search trước, nếu không có thì fallback
         let response;
         try {
           response = await api.post(
@@ -121,9 +115,7 @@ function AdminCategories() {
             searchRequest,
             { signal: abortController.signal }
           );
-        } catch (searchError) {
-          console.warn("Search endpoint failed, trying fallback:", searchError);
-          // Fallback to basic endpoint
+        } catch {
           response = await api.get(
             `/categories/paginated?page=${
               currentPage - 1
@@ -132,38 +124,27 @@ function AdminCategories() {
           );
         }
 
-        if (response.data) {
-          const result = response.data;
-          setCategories(result.content || result || []);
-          setTotalPages(result.totalPages || 1);
-          setTotalItems(result.totalElements || result.length || 0);
-        }
+        const result = response.data;
+        setCategories(result.content || result || []);
+        setTotalPages(result.totalPages || 1);
+        setTotalItems(result.totalElements || result.length || 0);
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Fetch categories error:", error);
-          notify(
-            "error",
-            "Could not load categories. Please check if backend is running."
-          );
+          notify("error", t("admin.categories.notifications.loadError"));
           setCategories([]);
           setTotalPages(1);
           setTotalItems(0);
         }
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
+        if (!abortController.signal.aborted) setLoading(false);
       }
     };
 
     void loadCategories();
+    return () => abortController.abort();
+  }, [currentPage, searchTerm, selectedParent, refreshTrigger, notify, t]);
 
-    return () => {
-      abortController.abort();
-    };
-  }, [currentPage, searchTerm, selectedParent, notify, refreshTrigger]);
-
-  // Handlers để reset page về 1 khi tìm kiếm/lọc
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -174,33 +155,33 @@ function AdminCategories() {
     setCurrentPage(1);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
-  // Handler để refresh list sau khi tạo/sửa
   const handleSuccess = () => {
     setShowModal(false);
-    setRefreshTrigger((prev) => prev + 1); // Trigger refresh cho parent categories
+    setRefreshTrigger((prev) => prev + 1);
   };
 
-  // Handler sau khi xóa
   const confirmDelete = async () => {
-    if (categoryToDelete) {
-      try {
-        await api.delete(`/categories/${categoryToDelete}`);
-        notify("success", "Category deleted successfully");
-        setRefreshTrigger((prev) => prev + 1); // Trigger refresh cho parent categories
-      } catch (error: unknown) {
-        console.error("Error deleting category:", error);
-        notify(
-          "error",
-          `Failed to delete category: ${(error as Error).message}`
-        );
-      } finally {
-        setCategoryToDelete(null);
-        setShowConfirmDialog(false);
-      }
+    if (!categoryToDelete) return;
+    try {
+      await api.delete(`/categories/${categoryToDelete}`);
+      notify("success", t("admin.categories.notifications.deleteSuccess"));
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      const msg =
+        axiosError.response?.data?.message ??
+        axiosError.message ??
+        "Unknown error";
+
+      notify(
+        "error",
+        t("admin.categories.notifications.deleteError", { error: msg })
+      );
+    } finally {
+      setCategoryToDelete(null);
+      setShowConfirmDialog(false);
     }
   };
 
@@ -210,54 +191,57 @@ function AdminCategories() {
   };
 
   const getParentName = (parentId?: number) => {
-    if (!parentId) return "Root Category";
+    if (!parentId) return t("admin.categories.rootBadge");
     const parent = parentCategories.find((p) => p.id === parentId);
     return parent ? parent.name : "Unknown";
   };
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex justify-between items-center border-none">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Category Management
-        </h1>
-        <Button
-          color="cyan"
-          size="md"
-          onClick={() => {
-            setSelectedCategory(undefined);
-            setShowModal(true);
-          }}>
-          <HiPlus className="mr-2 h-5 w-5" />
-          Add New Category
-        </Button>
+        <h1 className="text-2xl font-bold">{t("admin.categories.title")}</h1>
+        {user?.role === "ADMIN" && (
+          <Button
+            color="cyan"
+            size="md"
+            onClick={() => {
+              setSelectedCategory(undefined);
+              setShowModal(true);
+            }}>
+            <HiPlus className="mr-2 h-5 w-5" />
+            {t("admin.categories.addButton")}
+          </Button>
+        )}
       </div>
 
       <Card className="!bg-white shadow-lg border-none">
+        {/* Filters */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-4">
+            {/* Search */}
             <div className="relative w-64">
               <TextInput
                 type="text"
-                placeholder="Search by name or description..."
+                placeholder={t("admin.categories.searchPlaceholder")}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 icon={HiSearch}
-                className="focus:ring-cyan-500 focus:border-cyan-500"
                 theme={{
                   field: {
                     input: {
-                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                     },
                   },
                 }}
               />
             </div>
+
+            {/* Parent Filter */}
             <div className="w-48">
               <Select
                 value={selectedParent}
                 onChange={handleParentChange}
-                className="focus:ring-cyan-500 focus:border-cyan-500"
                 theme={{
                   field: {
                     select: {
@@ -265,11 +249,11 @@ function AdminCategories() {
                     },
                   },
                 }}>
-                <option value="">All Categories</option>
-                <option value="0">Root Categories Only</option>
+                <option value="">{t("admin.categories.parentAll")}</option>
+                <option value="0">{t("admin.categories.parentRoot")}</option>
                 {parentCategories.map((parent) => (
                   <option key={parent.id} value={parent.id}>
-                    Under: {parent.name}
+                    {t("admin.categories.parentUnder", { name: parent.name })}
                   </option>
                 ))}
               </Select>
@@ -277,32 +261,34 @@ function AdminCategories() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <Table hoverable>
-            <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+            <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
                   <HiCollection className="inline mr-2" />
-                  Category Name
+                  {t("admin.categories.table.name")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  Description
+                  {t("admin.categories.table.description")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  Parent Category
+                  {t("admin.categories.table.parent")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700 text-center">
-                  Actions
+                  {t("admin.categories.table.actions")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
+
             <TableBody className="divide-y">
               {loading ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
                     className="text-center bg-white text-gray-700 py-4">
-                    Loading...
+                    {t("admin.categories.loading")}
                   </TableCell>
                 </TableRow>
               ) : categories.length === 0 ? (
@@ -310,14 +296,14 @@ function AdminCategories() {
                   <TableCell
                     colSpan={4}
                     className="text-center bg-white text-gray-700 py-4">
-                    No categories found
+                    {t("admin.categories.noItems")}
                   </TableCell>
                 </TableRow>
               ) : (
                 categories.map((category) => (
                   <TableRow
                     key={category.id}
-                    className="bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+                    className="bg-white hover:bg-gray-50">
                     <TableCell className="p-3 bg-white text-gray-700">
                       <div className="flex items-center">
                         <HiCollection className="mr-2 text-cyan-500" />
@@ -326,11 +312,14 @@ function AdminCategories() {
                         </span>
                       </div>
                     </TableCell>
+
                     <TableCell className="p-3 bg-white text-gray-700">
                       <span className="text-sm text-gray-600">
-                        {category.description || "No description"}
+                        {category.description ||
+                          t("admin.categories.noDescription")}
                       </span>
                     </TableCell>
+
                     <TableCell className="p-3 bg-white text-gray-700">
                       <Badge
                         color={category.parentId ? "info" : "success"}
@@ -338,25 +327,32 @@ function AdminCategories() {
                         {getParentName(category.parentId)}
                       </Badge>
                     </TableCell>
+
                     <TableCell className="p-3 bg-white text-gray-700 text-center">
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          size="xs"
-                          color="blue"
-                          className="bg-cyan-500 hover:bg-cyan-600 focus:ring-cyan-300"
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setShowModal(true);
-                          }}>
-                          <HiPencil className="h-4 w-4 text-white" />
-                        </Button>
-                        <Button
-                          size="xs"
-                          color="failure"
-                          className="bg-red-500 hover:bg-red-600 focus:ring-red-300"
-                          onClick={() => handleDeleteCategory(category.id)}>
-                          <HiTrash className="h-4 w-4 text-white" />
-                        </Button>
+                        {user?.role === "ADMIN" && (
+                          <>
+                            <Button
+                              size="xs"
+                              color="blue"
+                              onClick={() => {
+                                setSelectedCategory(category);
+                                setShowModal(true);
+                              }}
+                              aria-label={t("admin.categories.editTooltip")}
+                              title={t("admin.categories.editTooltip")}>
+                              <HiPencil className="h-4 w-4 text-white" />
+                            </Button>
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={() => handleDeleteCategory(category.id)}
+                              aria-label={t("admin.categories.deleteTooltip")}
+                              title={t("admin.categories.deleteTooltip")}>
+                              <HiTrash className="h-4 w-4 text-white" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -386,10 +382,11 @@ function AdminCategories() {
           setCategoryToDelete(null);
         }}
         onConfirm={confirmDelete}
-        message="Are you sure you want to delete this category?"
+        confirmText={t("admin.categories.confirm.title")}
+        message={t("admin.categories.confirm.message")}
       />
 
-      {/* Category Form Modal */}
+      {/* Form Modal */}
       <CategoryFormModal
         show={showModal}
         onClose={() => setShowModal(false)}

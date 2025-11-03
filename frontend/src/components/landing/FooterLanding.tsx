@@ -1,6 +1,9 @@
 import { FaFacebookF, FaInstagram, FaYoutube, FaTiktok } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function FooterLanding() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-stone-800 text-gray-200 py-12">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -9,32 +12,34 @@ export default function FooterLanding() {
           <h2 className="text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-4">
             XYZ Restaurant
           </h2>
-          <p className="text-sm">123 Đường ABC, Quận 1, TP.HCM</p>
-          <p className="text-sm mt-1">+84 123 456 789</p>
-          <p className="text-sm mt-1">contact@xyzrestaurant.com</p>
+          <p className="text-sm">{t("footer.address")}</p>
+          <p className="text-sm mt-1">{t("footer.phone")}</p>
+          <p className="text-sm mt-1">{t("footer.email")}</p>
         </div>
 
         {/* Menu nhanh / Links */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Liên kết nhanh</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            {t("footer.quickLinks")}
+          </h3>
           <ul className="space-y-2">
             <li>
               <a href="/" className="hover:text-yellow-400 transition-colors">
-                Trang chủ
+                {t("footer.home")}
               </a>
             </li>
             <li>
               <a
                 href="/menu"
                 className="hover:text-yellow-400 transition-colors">
-                Thực đơn
+                {t("footer.menu")}
               </a>
             </li>
             <li>
               <a
                 href="/table"
                 className="hover:text-yellow-400 transition-colors">
-                Đặt bàn
+                {t("footer.reserveTable")}
               </a>
             </li>
           </ul>
@@ -42,13 +47,17 @@ export default function FooterLanding() {
 
         {/* Giờ mở cửa */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Giờ mở cửa</h3>
-          <p>Thứ 2 – Chủ nhật: 9:00 – 22:00</p>
+          <h3 className="text-lg font-semibold mb-4">
+            {t("footer.openingHours")}
+          </h3>
+          <p>{t("footer.workingTime")}</p>
         </div>
 
         {/* Social Media */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Kết nối với chúng tôi</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            {t("footer.connectWithUs")}
+          </h3>
           <div className="flex gap-4">
             <a
               href="https://www.facebook.com/login"
@@ -84,7 +93,7 @@ export default function FooterLanding() {
 
       {/* Copyright */}
       <div className="mt-12 border-t border-stone-700 pt-4 text-center text-sm text-gray-400">
-        © 2025 XYZ Restaurant. All rights reserved.
+        © 2025 XYZ Restaurant. {t("footer.copyright")}
       </div>
     </footer>
   );

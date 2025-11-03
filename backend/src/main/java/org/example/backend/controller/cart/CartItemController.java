@@ -1,5 +1,6 @@
 package org.example.backend.controller.cart;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDeleteDTO;
 import org.example.backend.dto.cart.CartItemDto;
 import org.example.backend.dto.Response;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/cart-items")
 public class CartItemController {
 
-    @Autowired
-    private CartItemService cartItemService;
+    private final CartItemService cartItemService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

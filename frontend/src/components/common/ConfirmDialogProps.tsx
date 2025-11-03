@@ -19,10 +19,10 @@ interface ConfirmDialogProps {
 
 const ConfirmDialog: FC<ConfirmDialogProps> = ({
   open,
-  title = "Xác nhận",
-  message = "Bạn có chắc muốn thực hiện hành động này?",
-  confirmText = "Xóa",
-  cancelText = "Hủy",
+  title,
+  message,
+  confirmText,
+  cancelText,
   onConfirm,
   onCancel,
 }) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   Button,
@@ -13,18 +13,18 @@ import {
   Spinner,
 } from "flowbite-react";
 import { HiPlus, HiTrash } from "react-icons/hi";
-import api from "../../api/axios";
-import { useNotification } from "../Notification";
+import api from "../../../api/axios";
+import { useNotification } from "../../Notification";
 import type {
   MenuItem,
-  MenuItemCreateDTO,
-  MenuItemUpdateDTO,
   Category,
   StatusParam,
   Ingredient,
   MenuItemIngredientCreateDTO,
   MenuItemIngredientUpdateDTO,
-} from "../../services/types/menuItem";
+} from "../../../services/types/menuItem";
+import { useTranslation } from "react-i18next";
+import { isAxiosError } from "axios";
 
 interface MenuItemFormModalProps {
   show: boolean;
@@ -49,6 +49,9 @@ export function MenuItemFormModal({
   categories,
   statuses,
 }: MenuItemFormModalProps) {
+  const { t } = useTranslation();
+  const { notify } = useNotification();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -65,47 +68,35 @@ export function MenuItemFormModal({
   >([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { notify } = useNotification();
+  const [, setSelectedFile] = useState<File | null>(null);
 
-  // Load ingredients when modal opens
+  const isEditMode = !!menuItemData;
+
+  // Load ingredients
   useEffect(() => {
     if (show) {
       const loadIngredients = async () => {
         try {
-          const response = await api.get("/ingredients");
-          if (response.data?.data) {
-            setIngredients(response.data.data);
-          } else if (response.data) {
-            setIngredients(response.data);
-          }
+          const response = await api.get<{ data: Ingredient[] }>(
+            "/ingredients"
+          );
+          setIngredients(response.data?.data || response.data || []);
         } catch (error) {
           console.error("Error loading ingredients:", error);
-          notify("error", "Could not load ingredients");
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.loadIngredientsError")
+          );
         }
       };
-
       void loadIngredients();
     }
-  }, [show, notify]);
+  }, [show, notify, t]);
 
-  // Reset form when modal opens/closes or menuItemData changes
+  // Reset form
   useEffect(() => {
     if (show) {
-      console.log(
-        "� STATUS DEBUG - Modal opened with statuses:",
-        statuses.length,
-        "items"
-      );
-      statuses.forEach((status) => {
-        console.log(
-          `📊 STATUS DEBUG - Form Status: ID=${status.id}, Code=${status.code}, Name=${status.name}`
-        );
-      });
-
       if (menuItemData) {
-        // Edit mode
         setFormData({
           name: menuItemData.name,
           description: menuItemData.description,
@@ -116,46 +107,26 @@ export function MenuItemFormModal({
           availableQuantity: menuItemData.availableQuantity || 0,
         });
 
-        // Load existing ingredients
-        if (menuItemData.ingredients && menuItemData.ingredients.length > 0) {
-          console.log(
-            "🥬 Loading existing ingredients:",
-            menuItemData.ingredients
-          );
-          setSelectedIngredients(
-            menuItemData.ingredients.map((ing) => ({
-              ingredientId: ing.ingredientId,
-              quantityNeeded: ing.quantityNeeded,
-              ingredientName: ing.ingredientName,
-            }))
-          );
-        } else {
-          console.log("🥬 No existing ingredients found");
-          setSelectedIngredients([]);
-        }
-      } else {
-        // Create mode
-        console.log("➕ Setting form to create mode");
-        console.log(
-          "📊 STATUS DEBUG - Available statuses for create mode:",
-          statuses
+        setSelectedIngredients(
+          menuItemData.ingredients?.map((ing) => ({
+            ingredientId: ing.ingredientId,
+            quantityNeeded: ing.quantityNeeded,
+            ingredientName: ing.ingredientName,
+          })) || []
         );
+      } else {
+        const defaultCategoryId = categories.length > 0 ? categories[0].id : 0;
+        const defaultStatusId = statuses.length > 0 ? statuses[0].id : 0;
 
-        const defaultData = {
+        setFormData({
           name: "",
           description: "",
           price: 0,
-          categoryId: categories.length > 0 ? categories[0].id : 0,
-          statusId: statuses.length > 0 ? statuses[0].id : 0,
+          categoryId: defaultCategoryId,
+          statusId: defaultStatusId,
           avatarUrl: "",
           availableQuantity: 0,
-        };
-        console.log("📝 Default form data:", defaultData);
-        console.log(
-          "📊 STATUS DEBUG - Default statusId set to:",
-          defaultData.statusId
-        );
-        setFormData(defaultData);
+        });
         setSelectedIngredients([]);
       }
     }
@@ -167,309 +138,216 @@ export function MenuItemFormModal({
     >
   ) => {
     const { name, value } = e.target;
-    const newValue =
-      name === "price" ||
-      name === "categoryId" ||
-      name === "statusId" ||
-      name === "availableQuantity"
-        ? Number(value)
-        : value;
+    const numValue = [
+      "price",
+      "categoryId",
+      "statusId",
+      "availableQuantity",
+    ].includes(name)
+      ? Number(value)
+      : value;
 
-    console.log(`📝 Form field changed: ${name} = ${newValue}`);
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: numValue }));
   };
 
-  const addIngredient = () => {
-    if (ingredients.length > 0) {
-      const firstAvailableIngredient = ingredients.find(
-        (ing) => !selectedIngredients.some((sel) => sel.ingredientId === ing.id)
-      );
-
-      if (firstAvailableIngredient) {
-        setSelectedIngredients((prev) => [
-          ...prev,
-          {
-            ingredientId: firstAvailableIngredient.id,
-            quantityNeeded: 1,
-            ingredientName: firstAvailableIngredient.name,
-          },
-        ]);
-      }
+  const addIngredient = useCallback(() => {
+    const available = ingredients.find(
+      (ing) => !selectedIngredients.some((sel) => sel.ingredientId === ing.id)
+    );
+    if (available) {
+      setSelectedIngredients((prev) => [
+        ...prev,
+        {
+          ingredientId: available.id,
+          quantityNeeded: 1,
+          ingredientName: available.name,
+        },
+      ]);
     }
-  };
+  }, [ingredients, selectedIngredients]);
 
-  const removeIngredient = (index: number) => {
+  const removeIngredient = useCallback((index: number) => {
     setSelectedIngredients((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const updateIngredient = (
-    index: number,
-    field: keyof IngredientSelection,
-    value: string | number
-  ) => {
-    setSelectedIngredients((prev) =>
-      prev.map((ing, i) => {
-        if (i === index) {
+  const updateIngredient = useCallback(
+    (
+      index: number,
+      field: keyof IngredientSelection,
+      value: string | number
+    ) => {
+      setSelectedIngredients((prev) =>
+        prev.map((ing, i) => {
+          if (i !== index) return ing;
           const updated = { ...ing, [field]: value };
           if (field === "ingredientId") {
             const ingredient = ingredients.find((ingr) => ingr.id === value);
             updated.ingredientName = ingredient?.name;
           }
           return updated;
-        }
-        return ing;
-      })
-    );
-  };
+        })
+      );
+    },
+    [ingredients]
+  );
 
-  const getAvailableIngredients = (currentIngredientId?: number) => {
-    return ingredients.filter(
-      (ing) =>
-        ing.id === currentIngredientId ||
-        !selectedIngredients.some((sel) => sel.ingredientId === ing.id)
-    );
-  };
+  const getAvailableIngredients = useCallback(
+    (currentId?: number) => {
+      return ingredients.filter(
+        (ing) =>
+          ing.id === currentId ||
+          !selectedIngredients.some((sel) => sel.ingredientId === ing.id)
+      );
+    },
+    [ingredients, selectedIngredients]
+  );
 
-  // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        notify("error", "Please select a valid image file");
-        return;
-      }
+    if (!file) return;
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        notify("error", "Image size must be less than 5MB");
-        return;
-      }
-
-      setSelectedFile(file);
-      uploadImageToCloudinary(file);
+    if (!file.type.startsWith("image/")) {
+      notify("error", t("admin.menuItems.form.validation.imageInvalid"));
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      notify("error", t("admin.menuItems.form.validation.imageSize"));
+      return;
+    }
+
+    setSelectedFile(file);
+    uploadImageToCloudinary(file);
   };
 
-  // Upload image to Cloudinary
   const uploadImageToCloudinary = async (file: File) => {
     setUploadingImage(true);
-
     try {
-      console.log("📤 Uploading file:", file.name, file.size, file.type);
-
       const formData = new FormData();
       formData.append("image", file);
 
-      console.log("🌐 Calling API: POST /menu-items/upload-image");
-
-      // Try new endpoint first
-      let response;
-      try {
-        response = await api.post("/menu-items/upload-image", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      } catch (uploadError) {
-        console.warn(
-          "❌ New upload endpoint failed, trying fallback..." + uploadError
-        );
-        // Fallback: For now, just show a placeholder URL and let user input manually
-        notify(
-          "warning",
-          "Upload feature requires backend restart. Please enter image URL manually for now."
-        );
-        return;
-      }
-
-      console.log("✅ Upload response:", response.data);
+      const response = await api.post<{ data: string }>(
+        "/menu-items/upload-image",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       if (response.data?.data) {
-        setFormData((prev) => ({
-          ...prev,
-          avatarUrl: response.data.data,
-        }));
-        notify("success", "Image uploaded successfully");
-        console.log("🖼️ Image URL set:", response.data.data);
+        setFormData((prev) => ({ ...prev, avatarUrl: response.data.data }));
+        notify(
+          "success",
+          t("admin.menuItems.form.notifications.uploadSuccess")
+        );
       }
-    } catch (error) {
-      console.error("❌ Error uploading image:", error);
+    } catch (error: unknown) {
+      console.error("Upload error:", error);
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        const msg = error.response?.data?.message ?? error.message;
 
-      // Log detailed error information
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as {
-          status?: number;
-          message?: string;
-          response?: { data?: { message?: string; error?: string } };
-          config?: { url?: string };
-        };
-        console.error("📊 UPLOAD DEBUG - Error details:");
-        console.error("  - Status:", axiosError.status);
-        console.error("  - URL:", axiosError.config?.url);
-        console.error("  - Response data:", axiosError.response?.data);
-
-        if (axiosError.status === 500) {
+        if (status === 500) {
+          notify(
+            "warning",
+            t("admin.menuItems.form.notifications.uploadWarning")
+          );
+        } else {
           notify(
             "error",
-            "Server error during upload. Please restart backend and try again."
+            t("admin.menuItems.form.notifications.uploadError", { error: msg })
           );
-        } else if (axiosError.response?.data?.message) {
-          notify("error", `Upload failed: ${axiosError.response.data.message}`);
-        } else {
-          notify("error", `Upload failed: ${axiosError.message}`);
         }
       } else {
         notify(
           "error",
-          "Failed to upload image. Please check if backend is running."
+          t("admin.menuItems.form.notifications.uploadError", {
+            error: "Lỗi không xác định",
+          })
         );
       }
     } finally {
       setUploadingImage(false);
       setSelectedFile(null);
-      // Reset file input
-      const fileInput = document.getElementById(
-        "avatarFile"
-      ) as HTMLInputElement;
-      if (fileInput) fileInput.value = "";
+      const input = document.getElementById("avatarFile") as HTMLInputElement;
+      if (input) input.value = "";
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("🚀 Submitting form with data:", formData);
-    console.log("🥬 Selected ingredients:", selectedIngredients);
-
-    if (!formData.name.trim()) {
-      notify("error", "Menu item name is required");
-      return;
-    }
-
-    if (formData.price <= 0) {
-      notify("error", "Price must be greater than 0");
-      return;
-    }
-
-    if (!formData.categoryId) {
-      notify("error", "Category is required");
-      return;
-    }
-
-    if (!formData.statusId) {
-      notify("error", "Status is required");
-      return;
-    }
-
-    // Validate statusId exists in available statuses
-    const validStatus = statuses.find((s) => s.id === formData.statusId);
-    if (!validStatus) {
-      console.error("📊 STATUS DEBUG - Invalid statusId:", formData.statusId);
-      console.error(
-        "📊 STATUS DEBUG - Available status IDs:",
-        statuses.map((s) => s.id)
+    if (!formData.name.trim())
+      return notify("error", t("admin.menuItems.form.validation.nameRequired"));
+    if (formData.price <= 0)
+      return notify(
+        "error",
+        t("admin.menuItems.form.validation.priceRequired")
       );
-      notify("error", "Selected status is invalid");
-      return;
-    }
-    console.log("📊 STATUS DEBUG - Valid status selected:", validStatus);
+    if (!formData.categoryId)
+      return notify(
+        "error",
+        t("admin.menuItems.form.validation.categoryRequired")
+      );
+    if (!formData.statusId)
+      return notify(
+        "error",
+        t("admin.menuItems.form.validation.statusRequired")
+      );
+
+    const validStatus = statuses.find((s) => s.id === formData.statusId);
+    if (!validStatus)
+      return notify(
+        "error",
+        t("admin.menuItems.form.validation.statusInvalid")
+      );
 
     setLoading(true);
-
     try {
-      if (menuItemData) {
-        // Update existing menu item
-        const updateData: MenuItemUpdateDTO = {
-          ...formData,
-          ingredients: selectedIngredients.map(
-            (ing) =>
-              ({
-                ingredientId: ing.ingredientId,
-                quantityNeeded: ing.quantityNeeded,
-              } as MenuItemIngredientUpdateDTO)
-          ),
-        };
+      const payload = {
+        ...formData,
+        ingredients: selectedIngredients.map((ing) => ({
+          ingredientId: ing.ingredientId,
+          quantityNeeded: ing.quantityNeeded,
+        })) as MenuItemIngredientCreateDTO[] | MenuItemIngredientUpdateDTO[],
+      };
 
-        console.log("✏️ Updating menu item with data:", updateData);
-        const response = await api.put(
-          `/menu-items/admin/${menuItemData.id}`,
-          updateData
+      if (isEditMode && menuItemData) {
+        await api.put(`/menu-items/admin/${menuItemData.id}`, payload);
+        notify(
+          "success",
+          t("admin.menuItems.form.notifications.updateSuccess")
         );
-        console.log("✅ Update response:", response.data);
-        notify("success", "Menu item updated successfully");
       } else {
-        // Create new menu item
-        const createData: MenuItemCreateDTO = {
-          ...formData,
-          ingredients: selectedIngredients.map(
-            (ing) =>
-              ({
-                ingredientId: ing.ingredientId,
-                quantityNeeded: ing.quantityNeeded,
-              } as MenuItemIngredientCreateDTO)
-          ),
-        };
-
-        console.log("➕ Creating menu item with data:", createData);
-        console.log("📊 STATUS DEBUG - Available statuses for validation:");
-        statuses.forEach((s) =>
-          console.log(`  - Status ID=${s.id}, Code=${s.code}`)
+        await api.post("/menu-items/admin", payload);
+        notify(
+          "success",
+          t("admin.menuItems.form.notifications.createSuccess")
         );
-        console.log(
-          "📊 STATUS DEBUG - Selected statusId in form:",
-          createData.statusId
-        );
-
-        const response = await api.post("/menu-items/admin", createData);
-        console.log("✅ Create response:", response.data);
-        notify("success", "Menu item created successfully");
       }
 
       onSuccess();
     } catch (error: unknown) {
-      console.error("❌ Error saving menu item:", error);
+      if (isAxiosError(error)) {
+        const msg = error.response?.data?.message ?? error.message;
 
-      // Log detailed error information for debugging
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as {
-          status?: number;
-          message?: string;
-          response?: { data?: { message?: string } };
-          config?: { data?: string };
-        };
-        console.error("📊 STATUS DEBUG - Error details:");
-        console.error("  - Status:", axiosError.status);
-        console.error("  - Response data:", axiosError.response?.data);
-        console.error("  - Request data:", axiosError.config?.data);
-
-        if (axiosError.response?.data?.message) {
-          console.error(
-            "📊 STATUS DEBUG - Backend error message:",
-            axiosError.response.data.message
+        if (msg?.includes("getInventory")) {
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.inventoryError")
           );
-          if (axiosError.response.data.message.includes("getInventory")) {
-            notify(
-              "error",
-              "Backend inventory error. Please check if inventory table exists and has proper setup."
-            );
-          } else {
-            notify(
-              "error",
-              `Failed to save menu item: ${axiosError.response.data.message}`
-            );
-          }
         } else {
-          notify("error", `Failed to save menu item: ${axiosError.message}`);
+          notify(
+            "error",
+            t("admin.menuItems.form.notifications.saveError", { error: msg })
+          );
         }
       } else {
         notify(
           "error",
-          `Failed to save menu item: ${(error as Error).message}`
+          t("admin.menuItems.form.notifications.saveError", {
+            error: "Lỗi không xác định",
+          })
         );
       }
     } finally {
@@ -483,32 +361,30 @@ export function MenuItemFormModal({
       onClose={onClose}
       size="5xl"
       className="shadow-lg z-[70]">
-      {/* Modal Header */}
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
         <h3 className="text-xl font-bold text-gray-800">
-          {menuItemData ? "Edit Menu Item" : "Create New Menu Item"}
+          {isEditMode
+            ? t("admin.menuItems.form.titleEdit")
+            : t("admin.menuItems.form.titleCreate")}
         </h3>
       </ModalHeader>
 
       <form onSubmit={handleSubmit} className="flex flex-col">
-        {/* Modal Body */}
         <ModalBody className="p-6 space-y-6 bg-gray-50">
-          {/* Basic Information Grid */}
+          {/* Basic Info */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
-            {/* Name */}
-            <div className="lg:col-span-1">
+            <div>
               <Label
                 htmlFor="name"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                Name *
+                {t("admin.menuItems.form.nameLabel")}
               </Label>
               <TextInput
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                placeholder="Enter menu item name"
-                required
+                placeholder={t("admin.menuItems.form.namePlaceholder")}
                 className="w-full"
                 theme={{
                   field: {
@@ -520,12 +396,11 @@ export function MenuItemFormModal({
               />
             </div>
 
-            {/* Price */}
-            <div className="lg:col-span-1">
+            <div>
               <Label
                 htmlFor="price"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                Price (VND) *
+                {t("admin.menuItems.form.priceLabel")}
               </Label>
               <TextInput
                 id="price"
@@ -535,8 +410,7 @@ export function MenuItemFormModal({
                 step="1000"
                 value={formData.price}
                 onChange={handleInputChange}
-                placeholder="Enter price"
-                required
+                placeholder={t("admin.menuItems.form.pricePlaceholder")}
                 className="w-full"
                 theme={{
                   field: {
@@ -548,12 +422,11 @@ export function MenuItemFormModal({
               />
             </div>
 
-            {/* Available Quantity */}
-            <div className="lg:col-span-1">
+            <div>
               <Label
                 htmlFor="availableQuantity"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                Available Quantity
+                {t("admin.menuItems.form.quantityLabel")}
               </Label>
               <TextInput
                 id="availableQuantity"
@@ -562,7 +435,7 @@ export function MenuItemFormModal({
                 min="0"
                 value={formData.availableQuantity}
                 onChange={handleInputChange}
-                placeholder="Enter available quantity"
+                placeholder={t("admin.menuItems.form.quantityPlaceholder")}
                 className="w-full"
                 theme={{
                   field: {
@@ -575,20 +448,19 @@ export function MenuItemFormModal({
             </div>
           </div>
 
-          {/* Category and Status Row */}
+          {/* Category & Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <Label
                 htmlFor="categoryId"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                Category *
+                {t("admin.menuItems.form.categoryLabel")}
               </Label>
               <Select
                 id="categoryId"
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                required
                 className="w-full"
                 theme={{
                   field: {
@@ -597,10 +469,9 @@ export function MenuItemFormModal({
                     },
                   },
                 }}>
-                <option value={0}>Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
                   </option>
                 ))}
               </Select>
@@ -610,14 +481,13 @@ export function MenuItemFormModal({
               <Label
                 htmlFor="statusId"
                 className="mb-2 block text-sm font-medium !text-gray-700">
-                Status *
+                {t("admin.menuItems.form.statusLabel")}
               </Label>
               <Select
                 id="statusId"
                 name="statusId"
                 value={formData.statusId}
                 onChange={handleInputChange}
-                required
                 className="w-full"
                 theme={{
                   field: {
@@ -626,10 +496,9 @@ export function MenuItemFormModal({
                     },
                   },
                 }}>
-                <option value={0}>Select Status</option>
-                {statuses.map((status) => (
-                  <option key={status.id} value={status.id}>
-                    {status.code}
+                {statuses.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.code}
                   </option>
                 ))}
               </Select>
@@ -641,14 +510,14 @@ export function MenuItemFormModal({
             <Label
               htmlFor="description"
               className="mb-2 block text-sm font-medium !text-gray-700">
-              Description
+              {t("admin.menuItems.form.descriptionLabel")}
             </Label>
             <Textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              placeholder="Enter menu item description"
+              placeholder={t("admin.menuItems.form.descriptionPlaceholder")}
               rows={3}
               className="w-full resize-none"
               theme={{
@@ -657,52 +526,43 @@ export function MenuItemFormModal({
             />
           </div>
 
-          {/* Image Upload Section */}
+          {/* Image Upload */}
           <div className="bg-white p-4 rounded-lg border border-gray-300">
             <Label className="mb-3 block text-lg font-medium !text-gray-700">
-              Image Upload
+              {t("admin.menuItems.form.imageSection")}
             </Label>
             <div className="space-y-4">
-              {/* File Upload */}
               <div>
                 <Label
                   htmlFor="avatarFile"
                   className="mb-2 block text-sm font-medium !text-gray-700">
-                  Upload Image File:
+                  {t("admin.menuItems.form.uploadLabel")}
                 </Label>
                 <input
                   id="avatarFile"
                   type="file"
                   accept="image/*"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-lg file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-cyan-50 file:text-cyan-700
-                    hover:file:bg-cyan-100
-                    border border-gray-300 rounded-lg
-                    focus:ring-2 focus:ring-cyan-500 !bg-white"
                   disabled={uploadingImage}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 !bg-white"
                 />
-                <div className="text-xs text-gray-500 mt-1">
-                  Max file size: 5MB. Supported formats: JPG, PNG, GIF
-                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("admin.menuItems.form.uploadHint")}
+                </p>
               </div>
 
-              {/* Manual URL Input */}
               <div>
                 <Label
                   htmlFor="avatarUrl"
                   className="mb-2 block text-sm font-medium !text-gray-700">
-                  Or enter image URL manually:
+                  {t("admin.menuItems.form.urlLabel")}
                 </Label>
                 <TextInput
                   id="avatarUrl"
                   name="avatarUrl"
                   value={formData.avatarUrl}
                   onChange={handleInputChange}
-                  placeholder="https://example.com/image.jpg"
+                  placeholder={t("admin.menuItems.form.urlPlaceholder")}
                   className="w-full text-sm"
                   theme={{
                     field: {
@@ -714,26 +574,24 @@ export function MenuItemFormModal({
                 />
               </div>
 
-              {/* Upload Status */}
               {uploadingImage && (
                 <div className="flex items-center text-sm text-cyan-600">
                   <Spinner size="sm" className="mr-2" />
-                  Uploading image...
+                  {t("admin.menuItems.form.uploading")}
                 </div>
               )}
 
-              {/* Image Preview */}
               {formData.avatarUrl && (
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-600">Current image:</div>
+                  <div className="text-sm text-gray-600">
+                    {t("admin.menuItems.form.previewTitle")}
+                  </div>
                   <div className="flex items-start space-x-3">
                     <img
                       src={formData.avatarUrl}
                       alt="Preview"
                       className="w-20 h-20 object-cover rounded-lg border-2 border-cyan-400"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
+                      onError={(e) => (e.currentTarget.style.display = "none")}
                     />
                     <div className="flex-1">
                       <div className="text-xs text-gray-500 break-all bg-gray-100 p-2 rounded">
@@ -746,11 +604,11 @@ export function MenuItemFormModal({
             </div>
           </div>
 
-          {/* Ingredients Section */}
+          {/* Ingredients */}
           <Card className="!bg-white border !border-gray-300">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold !text-gray-700">
-                Ingredients
+                {t("admin.menuItems.form.ingredientsSection")}
               </h3>
               <Button
                 type="button"
@@ -759,23 +617,23 @@ export function MenuItemFormModal({
                 onClick={addIngredient}
                 disabled={selectedIngredients.length >= ingredients.length}>
                 <HiPlus className="mr-2 h-4 w-4" />
-                Add Ingredient
+                {t("admin.menuItems.form.addButton")}
               </Button>
             </div>
 
             {selectedIngredients.length === 0 ? (
               <p className="text-gray-500 text-center py-4">
-                No ingredients added yet
+                {t("admin.menuItems.form.noIngredients")}
               </p>
             ) : (
               <div className="space-y-3">
-                {selectedIngredients.map((ingredient, index) => (
+                {selectedIngredients.map((ing, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="flex-1">
                       <Select
-                        value={ingredient.ingredientId}
+                        value={ing.ingredientId}
                         onChange={(e) =>
                           updateIngredient(
                             index,
@@ -790,14 +648,14 @@ export function MenuItemFormModal({
                             },
                           },
                         }}>
-                        <option value={0}>Select Ingredient</option>
-                        {getAvailableIngredients(ingredient.ingredientId).map(
-                          (ing) => (
-                            <option key={ing.id} value={ing.id}>
-                              {ing.name} ({ing.unit})
-                            </option>
-                          )
-                        )}
+                        <option value={0}>
+                          {t("admin.menuItems.form.ingredientSelect")}
+                        </option>
+                        {getAvailableIngredients(ing.ingredientId).map((i) => (
+                          <option key={i.id} value={i.id}>
+                            {i.name} ({i.unit})
+                          </option>
+                        ))}
                       </Select>
                     </div>
                     <div className="w-32">
@@ -805,7 +663,7 @@ export function MenuItemFormModal({
                         type="number"
                         min="0"
                         step="0.1"
-                        value={ingredient.quantityNeeded}
+                        value={ing.quantityNeeded}
                         onChange={(e) =>
                           updateIngredient(
                             index,
@@ -813,7 +671,7 @@ export function MenuItemFormModal({
                             Number(e.target.value)
                           )
                         }
-                        placeholder="Quantity"
+                        placeholder={t("admin.menuItems.form.quantityInput")}
                         theme={{
                           field: {
                             input: {
@@ -837,14 +695,13 @@ export function MenuItemFormModal({
           </Card>
         </ModalBody>
 
-        {/* Modal Footer */}
         <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
           <Button
             color="red"
             onClick={onClose}
             disabled={loading}
             className="text-gray-50">
-            Cancel
+            {t("admin.menuItems.form.buttonCancel")}
           </Button>
           <Button
             type="submit"
@@ -853,12 +710,12 @@ export function MenuItemFormModal({
             {loading ? (
               <div className="flex items-center gap-2">
                 <Spinner size="sm" light={true} />
-                Saving...
+                {t("admin.menuItems.form.buttonSaving")}
               </div>
-            ) : menuItemData ? (
-              "Update Menu Item"
+            ) : isEditMode ? (
+              t("admin.menuItems.form.buttonUpdate")
             ) : (
-              "Create Menu Item"
+              t("admin.menuItems.form.buttonCreate")
             )}
           </Button>
         </ModalFooter>

@@ -1,20 +1,17 @@
 import React, { useState } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
-import { Button, Textarea, Label } from "flowbite-react";
+import { Button, Textarea, Label, Spinner } from "flowbite-react";
 import { HiXCircle } from "react-icons/hi";
+import { useTranslation } from "react-i18next";
 import { useNotification } from "../../components/Notification/NotificationContext";
-import { Spinner } from "flowbite-react";
 
 interface ProductReviewFormProps {
   productId: number;
   onSubmit: (data: { rating: number; comment: string }) => Promise<void>;
 }
 
-const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  productId,
-  onSubmit,
-}) => {
+const ProductReviewForm: React.FC<ProductReviewFormProps> = ({ onSubmit }) => {
+  const { t } = useTranslation();
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
@@ -27,20 +24,17 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
     e.preventDefault();
 
     if (rating < 0.5) {
-      notify("error", "Vui lòng chọn số sao đánh giá");
+      notify("error", t("review.error.noRating"));
       return;
     }
 
     if (!comment.trim()) {
-      notify("error", "Vui lòng nhập bình luận");
+      notify("error", t("review.error.emptyComment"));
       return;
     }
 
     if (comment.length > MAX_COMMENT_LENGTH) {
-      notify(
-        "error",
-        `Bình luận không được vượt quá ${MAX_COMMENT_LENGTH} ký tự`
-      );
+      notify("error", t("review.error.tooLong", { max: MAX_COMMENT_LENGTH }));
       return;
     }
 
@@ -52,7 +46,7 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
       setComment("");
     } catch (err) {
       console.error(err);
-      notify("error", "Gửi đánh giá thất bại");
+      notify("error", t("review.error.submitFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -87,7 +81,7 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
             const percent = (e.clientX - left) / width;
             setRating(star - 1 + (percent >= 0.5 ? 1 : 0.5));
           }}
-          aria-label={`Đánh giá ${star} sao`}>
+          aria-label={t("review.aria.rateStar", { star })}>
           <StarComponent
             className={`${
               displayRating >= star - 0.5 ? "text-yellow-500" : "text-gray-300"
@@ -101,17 +95,17 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
   return (
     <div className="mt-8 border-t pt-6">
       <h2 className="text-3xl font-bold mb-4 text-gray-800">
-        Viết đánh giá của bạn
+        {t("review.title")}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Label>
           <Label className="mb-2 text-xl block !text-gray-800 font-semibold">
-            Đánh giá
+            {t("review.rating")}
           </Label>
           <div
             className="flex items-center gap-1 mb-4"
             role="radiogroup"
-            aria-label="Đánh giá sao">
+            aria-label={t("review.aria.ratingGroup")}>
             {renderStars()}
             {rating > 0 && (
               <span className="ml-3 text-sm text-gray-600">
@@ -123,12 +117,12 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
 
         <div>
           <Label className="mb-2 text-xl block !text-gray-800 font-semibold">
-            Bình luận
+            {t("review.comment")}
           </Label>
           <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Chia sẻ cảm nhận của bạn về món ăn..."
+            placeholder={t("review.placeholder")}
             rows={4}
             maxLength={MAX_COMMENT_LENGTH}
             className="w-full !text-black border-stone-300 !bg-white focus:border-green-500 focus:ring-green-500"
@@ -142,7 +136,7 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
                   ? "text-red-600"
                   : "text-gray-500"
               }`}>
-              {comment.length}/{MAX_COMMENT_LENGTH} ký tự
+              {comment.length}/{MAX_COMMENT_LENGTH} {t("review.characters")}
             </p>
           </div>
         </div>
@@ -153,13 +147,13 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
             color="success"
             disabled={submitting}
             className="bg-gradient-to-r text-white from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-            aria-label="Gửi đánh giá">
+            aria-label={t("review.aria.submit")}>
             {submitting ? (
               <span className="flex items-center gap-2">
-                <Spinner size="sm" /> Đang gửi...
+                <Spinner size="sm" /> {t("review.sending")}
               </span>
             ) : (
-              "Gửi đánh giá"
+              t("review.submit")
             )}
           </Button>
           <Button
@@ -168,9 +162,9 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({
             onClick={handleReset}
             disabled={submitting}
             className="border-stone-300 hover:bg-stone-100"
-            aria-label="Hủy đánh giá">
+            aria-label={t("review.aria.cancel")}>
             <HiXCircle className="mr-2 h-5 w-5" />
-            Hủy
+            {t("review.cancel")}
           </Button>
         </div>
       </form>

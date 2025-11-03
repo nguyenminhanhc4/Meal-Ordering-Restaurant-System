@@ -2,6 +2,7 @@ package org.example.backend.service.reservation;
 
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.reservation.ReservationDto;
 import org.example.backend.dto.table.TableDto;
 import org.example.backend.dto.table.TableStatusUpdate;
@@ -31,28 +32,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
+    private final ReservationRepository reservationRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final TableRepository tableRepository;
 
-    @Autowired
-    private TableRepository tableRepository;
+    private final ParamRepository paramRepository;
 
-    @Autowired
-    private ParamRepository paramRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final WebSocketNotifier webSocketNotifier;
 
-    @Autowired
-    private WebSocketNotifier webSocketNotifier;
-
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     // ========================= CREATE =========================
     @Transactional

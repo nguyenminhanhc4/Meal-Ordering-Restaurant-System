@@ -1,6 +1,63 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s ease-in-out;
+}
+
 .admin-layout {
   display: flex;
   min-height: 100vh;
+  @apply min-h-screen;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: all 0.3s ease;
+}
+
+/* Sidebar */
+.admin-layout .sidebar {
+  background-color: var(--color-sidebar-bg) !important;
+  color: var(--color-sidebar-text) !important;
+}
+
+.admin-layout .sidebar .flowbite-sidebar-item {
+  @apply hover:bg-[var(--color-sidebar-hover)] hover:text-white;
+}
+
+.admin-layout .sidebar .flowbite-sidebar-item.active {
+  @apply bg-[var(--color-sidebar-hover)] text-white border-l-4 border-[var(--color-active)];
+}
+
+/* Navbar */
+.admin-layout .navbar {
+  background-color: var(--color-navbar-bg) !important;
+  color: var(--color-navbar-text) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* Tooltip */
+.admin-layout .flowbite-tooltip {
+  background-color: var(--color-tooltip-bg) !important;
+  color: white !important;
+}
+
+.admin-layout .flowbite-tooltip .arrow {
+  background-color: var(--color-tooltip-bg) !important;
+}
+
+/* Popup submenu khi hover (collapsed) */
+.admin-layout .popup-submenu {
+  background-color: var(--color-sidebar-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-sidebar-text);
 }
 
 .admin-sidebar {
@@ -14,5 +71,109 @@
   flex: 1;
   min-height: 100vh;
   padding: 1.5rem;
-  background-color: #f9fafb;
+  @apply flex-1 min-h-[calc(100vh-80px)] p-6;
+  background-color: var(--color-content-bg);
+}
+
+/* Sidebar */
+.sidebar-root * {
+  background-color: var(--color-sidebar-bg) !important;
+  border-right-color: var(--color-sidebar-border) !important;
+}
+
+/* Override Flowbite SidebarItem */
+.sidebar-item {
+  background-color: transparent !important;
+  color: var(--color-sidebar-text) !important;
+  border-left: none !important;
+  font-weight: normal !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-item.active {
+  background-color: var(--color-sidebar-active) !important;
+  color: var(--color-sidebar-active-text) !important;
+  border-left: 4px solid var(--color-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Hover effect */
+.sidebar-item .hover-area:hover {
+  background-color: var(--color-sidebar-hover) !important;
+}
+
+/* Tooltip - dùng var */
+.sidebar-item .flowbite-tooltip {
+  background-color: var(--color-tooltip-bg) !important;
+  color: var(--color-tooltip-text) !important;
+}
+
+.sidebar-item .flowbite-tooltip-arrow {
+  background-color: var(--color-tooltip-bg) !important;
+}
+
+.sidebar-logo * {
+  color: var(--color-sidebar-text) !important;
+}
+
+/* Navbar */
+.navbar-root {
+  background-color: var(--color-navbar-bg) !important;
+  color: var(--color-navbar-text) !important;
+  border-bottom-color: var(--color-navbar-border) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltip */
+.tooltip-root {
+  background-color: var(--color-tooltip-bg) !important;
+  color: var(--color-tooltip-text) !important;
+}
+
+.tooltip-arrow {
+  background-color: var(--color-tooltip-bg) !important;
+}
+
+/* Dropdown */
+.dropdown-floating {
+  background-color: var(--color-dropdown-bg) !important;
+  color: var(--color-dropdown-text) !important;
+  border-color: var(--color-dropdown-border) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-dropdown-hover) !important;
+  color: var(--color-dropdown-text) !important;
+}
+
+/* Popup Submenu */
+.popup-submenu {
+  background-color: var(--color-sidebar-bg);
+  border-color: var(--color-sidebar-border);
+  color: var(--color-sidebar-text);
+}
+
+.popup-submenu-item.active {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+.popup-submenu-item:hover {
+  background-color: var(--color-sidebar-hover) !important;
+}
+
+/* Group Headers */
+.group-header {
+  color: var(--color-text-muted);
+}
+
+/* Overlay */
+.overlay-mobile {
+  background-color: var(--color-overlay);
+}
+
+/* Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
 }

@@ -5,6 +5,7 @@ import {
   HiCurrencyDollar,
   HiShoppingCart,
 } from "react-icons/hi";
+import { useTranslation } from "react-i18next";
 
 interface StatCardProps {
   title: string;
@@ -21,6 +22,7 @@ const StatCard: React.FC<StatCardProps> = ({
   icon,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const getIcon = () => {
     const iconClass = "h-10 w-10";
     switch (icon) {
@@ -151,7 +153,7 @@ const StatCard: React.FC<StatCardProps> = ({
             </div>
 
             <span className="ml-2 text-gray-600 text-xs sm:text-sm whitespace-nowrap">
-              so với tháng trước
+              {t("admin.dashboard.stats.comparison")}
             </span>
           </div>
         )}

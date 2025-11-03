@@ -16,16 +16,15 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = ({
-  bgColor = "!bg-stone-700",
-  hoverColor = "hover:!bg-stone-600",
-  iconColor = "text-yellow-400",
+  bgColor,
+  hoverColor,
+  iconColor,
   badgeColor = "failure",
   redirectTo = "/profile?tab=notifications", // 👈 Giá trị mặc định
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [, setNotifications] = useState<NotificationDto[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {

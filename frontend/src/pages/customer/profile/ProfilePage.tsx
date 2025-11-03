@@ -11,6 +11,7 @@ import {
   HiOutlineBell,
 } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface SidebarLinkProps {
   label: string;
@@ -43,6 +44,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
 export default function ProfilePage() {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("profile");
+  const { t } = useTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -53,31 +55,31 @@ export default function ProfilePage() {
   const profileTabs = [
     {
       id: "profile",
-      label: "Thông tin cá nhân",
+      label: t("profile.sidebar.tabs.profile"),
       icon: HiOutlineUser,
       component: UserProfileContent,
     },
     {
       id: "orders",
-      label: "Lịch sử đặt món",
+      label: t("profile.sidebar.tabs.orders"),
       icon: HiOutlineClock,
       component: OrderHistoryPage,
     },
     {
       id: "reservations",
-      label: "Lịch sử đặt bàn",
+      label: t("profile.sidebar.tabs.reservations"),
       icon: HiOutlineClock,
       component: UserReservationHistory,
     },
     {
       id: "notifications",
-      label: "Thông báo",
+      label: t("profile.sidebar.tabs.notifications"),
       icon: HiOutlineBell,
       component: NotificationList,
     },
     {
       id: "security",
-      label: "Bảo mật & Mật khẩu",
+      label: t("profile.sidebar.tabs.security"),
       icon: HiOutlineLockClosed,
       component: UserSecuritySettings,
     },
@@ -94,7 +96,7 @@ export default function ProfilePage() {
           <div className="bg-white rounded-3xl shadow-2xl p-4 sticky top-20 border border-blue-800">
             <div className="mb-4 text-center">
               <h2 className="text-lg font-semibold text-blue-800 uppercase tracking-wide">
-                Hồ sơ người dùng
+                {t("profile.sidebar.title")}
               </h2>
               <div className="mt-2 h-[2px] bg-blue-800 mx-auto rounded-full"></div>
             </div>

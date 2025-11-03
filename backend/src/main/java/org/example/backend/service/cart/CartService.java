@@ -12,6 +12,7 @@ import org.example.backend.exception.ResourceNotFoundException;
 import org.example.backend.repository.cart.CartRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.example.backend.repository.user.UserRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class CartService {
     private final UserRepository userRepository;
 
     private final ParamRepository paramRepository;
+
+    private final WebSocketNotifier webSocketNotifier;
 
     public List<CartDto> findAll() {
         return cartRepository.findAll()
@@ -53,20 +56,32 @@ public class CartService {
     }
 
     public CartDto getCurrentCart(String publicId) {
-        Cart cart = cartRepository.findByUserPublicIdWithItems(publicId)
-                .orElseGet(() -> createCartForUser(publicId)); // tự tạo nếu chưa có
+        Cart cart = cartRepository.findByUserPublicIdWithItemsAndStatus(publicId, "OPEN")
+                .orElseThrow(() -> new ResourceNotFoundException("No open cart found"));
         return new CartDto(cart);
     }
 
-    private Cart createCartForUser(String publicId) {
+    public CartDto createCartForUser(String publicId) {
+        boolean hasActiveCart = cartRepository.existsByUserPublicIdAndStatus(publicId, "OPEN");
+        if (hasActiveCart) {
+            throw new ValidationException("User already has an active cart");
+        }
+
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Param openStatus = paramRepository.findByTypeAndCode("STATUS_CART", "OPEN")
+                .orElseThrow(() -> new RuntimeException("Default status not found"));
+
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setStatus(paramRepository.findByTypeAndCode("STATUS_CART", "OPEN")
-                .orElseThrow(() -> new RuntimeException("Default status not found")));
-        return cartRepository.save(cart);
+        cart.setStatus(openStatus);
+
+        cart = cartRepository.save(cart);
+        webSocketNotifier.notifyCartUpdated(publicId);
+        return new CartDto(cart);
     }
+
 
     public CartDto updateById(Long id, CartDto dto) {
         Cart cart = cartRepository.findById(id)

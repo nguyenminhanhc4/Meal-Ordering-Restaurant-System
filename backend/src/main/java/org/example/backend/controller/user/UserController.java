@@ -1,8 +1,10 @@
 package org.example.backend.controller.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.UserService;
@@ -15,23 +17,24 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
         try {
-            System.out.println("Creating user with data:");
+            System.out.println("Creating user with data:"); 
             System.out.println("Name: " + userDTO.getName());
             System.out.println("Email: " + userDTO.getEmail());
             System.out.println("Avatar URL: " + userDTO.getAvatarUrl());
@@ -112,12 +115,12 @@ public class UserController {
 
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request, HttpServletRequest lang) {
+        Locale locale = lang.getLocale();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        userService.changePassword(email, request.currentPassword, request.newPassword);
+        userService.changePassword(email, request.currentPassword, request.newPassword, locale);
 
         return ResponseEntity.ok(
                 new Response<>("success", null, "Đổi mật khẩu thành công")

@@ -46,7 +46,7 @@ export default function NotificationProvider({
       {children}
 
       {/* Toast container fixed góc phải */}
-      <div className="fixed top-5 right-5 flex flex-col gap-2 z-[9999]">
+      <div className="fixed top-20 right-5 flex flex-col gap-2 z-[9999]">
         {notifications.map((n) => (
           <Toast
             key={n.id}

@@ -1,41 +1,150 @@
 package org.example.backend.controller.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.apache.http.auth.InvalidCredentialsException;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
+import org.example.backend.repository.user.UserRepository;
 import org.example.backend.service.user.EmailService;
 import org.example.backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.AuthenticationException;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
+
+    private final UserRepository userRepository;
+
+    private final MessageSource messageSource;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> register(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+        Locale locale = request.getLocale();
         try {
+            // ===== Validate name =====
+            String name = userDTO.getName() != null ? userDTO.getName().trim() : "";
+            if (name.isEmpty()) {
+                String msg = messageSource.getMessage("register.error.requiredName", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Validate email =====
+            String email = userDTO.getEmail() != null ? userDTO.getEmail().trim() : "";
+            if (email.isEmpty()) {
+                String msg = messageSource.getMessage("register.error.requiredEmail", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!email.matches("^[^\\s@]+@[^\s@]+\\.[^\\s@]+$")) {
+                String msg = messageSource.getMessage("register.error.invalidEmailFormat", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (userRepository.existsByEmail(email)) {
+                String msg = messageSource.getMessage("register.error.emailExists", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Validate password =====
+            String password = userDTO.getPassword() != null ? userDTO.getPassword().trim() : "";
+            String confirmPassword = userDTO.getConfirmPassword() != null ? userDTO.getConfirmPassword().trim() : "";
+            if (password.isEmpty()) {
+                String msg = messageSource.getMessage("register.error.requiredPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (password.length() < 8) {
+                String msg = messageSource.getMessage("register.error.shortPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[A-Z].*")) {
+                String msg = messageSource.getMessage("register.error.uppercaseRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[0-9].*")) {
+                String msg = messageSource.getMessage("register.error.numberRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[!@#$%^&*].*")) {
+                String msg = messageSource.getMessage("register.error.specialCharRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            if (!password.equals(confirmPassword)) {
+                String msg = messageSource.getMessage("register.error.passwordMismatch", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Validate gender =====
+            String gender = userDTO.getGender() != null ? userDTO.getGender().trim() : "";
+            if (!"MALE".equalsIgnoreCase(gender) && !"FEMALE".equalsIgnoreCase(gender)) {
+                String msg = messageSource.getMessage("register.error.invalidGender", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Register user =====
             UserDTO registeredUser = userService.register(userDTO);
-            return ResponseEntity.ok(new Response<>("success", registeredUser, "User registered successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
+            String successMsg = messageSource.getMessage("register.success", null, locale);
+            return ResponseEntity.ok(new Response<>("success", registeredUser, successMsg));
+        } catch (RuntimeException e) {
+            String msg = messageSource.getMessage("register.error.failed", null, locale);
+            return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+        Locale locale = request.getLocale();
         try {
-            String token = userService.login(userDTO.getEmail(), userDTO.getPassword());
+            // ===== Validate email =====
+            String email = userDTO.getEmail() != null ? userDTO.getEmail().trim() : "";
+            if (email.isEmpty()) {
+                String msg = messageSource.getMessage("login.error.requiredEmail", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                String msg = messageSource.getMessage("login.error.invalidEmailFormat", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Validate password =====
+            String password = userDTO.getPassword() != null ? userDTO.getPassword().trim() : "";
+            if (password.isEmpty()) {
+                String msg = messageSource.getMessage("login.error.requiredPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (password.length() < 8) {
+                String msg = messageSource.getMessage("login.error.shortPassword", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[A-Z].*")) {
+                String msg = messageSource.getMessage("login.error.uppercaseRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[0-9].*")) {
+                String msg = messageSource.getMessage("login.error.numberRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+            if (!password.matches(".*[!@#$%^&*].*")) {
+                String msg = messageSource.getMessage("login.error.specialCharRequired", null, locale);
+                return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
+            }
+
+            // ===== Login =====
+            String token = userService.login(email, password);
 
             // Set JWT vào HttpOnly cookie
             ResponseCookie cookie = ResponseCookie.from("token", token)
@@ -46,10 +155,12 @@ public class AuthController {
                     .sameSite("Lax")
                     .build();
 
+            String successMsg = messageSource.getMessage("login.success", null, locale);
             response.addHeader("Set-Cookie", cookie.toString());
-            return ResponseEntity.ok(new Response<>("success", token, "Login successful"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new Response<>("error", null, e.getMessage()));
+            return ResponseEntity.ok(new Response<>("success", token, successMsg));
+        } catch (RuntimeException e) {
+            String msg = messageSource.getMessage("login.error.invalidCredentials", null, locale);
+            return ResponseEntity.badRequest().body(new Response<>("error", null, msg));
         }
     }
 

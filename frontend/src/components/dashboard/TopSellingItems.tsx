@@ -1,6 +1,12 @@
 import React from "react";
 import { Badge } from "flowbite-react";
-import { HiTrendingUp, HiTrendingDown, HiFire, HiExclamation } from "react-icons/hi";
+import {
+  HiTrendingUp,
+  HiTrendingDown,
+  HiFire,
+  HiExclamation,
+} from "react-icons/hi";
+import { useTranslation } from "react-i18next"; // Thêm useTranslation
 import type { MenuItemSalesDto } from "../../services/types/statistics.types";
 
 interface TopSellingItemsProps {
@@ -16,13 +22,17 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
   type,
   loading = false,
 }) => {
+  const { t } = useTranslation(); // Thêm hook useTranslation
+
   if (loading) {
     return (
       <div>
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/2 mb-6"></div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center space-x-4 mb-4 bg-gray-50 p-4 rounded-xl">
+            <div
+              key={i}
+              className="flex items-center space-x-4 mb-4 bg-gray-50 p-4 rounded-xl">
               <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
               <div className="w-16 h-16 bg-gray-200 rounded-xl"></div>
               <div className="flex-1">
@@ -41,7 +51,8 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
       <div>
         <h3 className="text-xl font-bold text-gray-900 mb-6">{title}</h3>
         <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <p className="text-gray-500">Không có dữ liệu</p>
+          <p className="text-gray-500">{t("admin.dashboard.charts.noData")}</p>{" "}
+          {/* Sử dụng i18n */}
         </div>
       </div>
     );
@@ -60,17 +71,22 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
         </h3>
         <Badge
           color={type === "best" ? "success" : "warning"}
-          className="px-3 py-1"
-        >
+          className="px-3 py-1">
           {type === "best" ? (
             <div className="flex items-center gap-1">
               <HiTrendingUp className="w-4 h-4" />
-              <span className="font-semibold">Top {items.length}</span>
+              <span className="font-semibold">
+                {t("admin.dashboard.charts.topItems", { count: items.length })}{" "}
+                {/* Sử dụng i18n với biến đếm */}
+              </span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
               <HiTrendingDown className="w-4 h-4" />
-              <span className="font-semibold">Cần cải thiện</span>
+              <span className="font-semibold">
+                {t("admin.dashboard.charts.needsImprovement")}
+              </span>{" "}
+              {/* Sử dụng i18n */}
             </div>
           )}
         </Badge>
@@ -84,8 +100,7 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
               type === "best"
                 ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 hover:shadow-md"
                 : "bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200 hover:shadow-md"
-            } hover:scale-[1.02] cursor-pointer`}
-          >
+            } hover:scale-[1.02] cursor-pointer`}>
             {/* Rank Badge */}
             <div
               className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-base shadow-md ${
@@ -96,8 +111,7 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
                   : index === 2
                   ? "bg-gradient-to-br from-orange-400 to-orange-600 text-white"
                   : "bg-gradient-to-br from-blue-400 to-blue-600 text-white"
-              }`}
-            >
+              }`}>
               {index + 1}
             </div>
 
@@ -112,7 +126,7 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-md">
                   <span className="text-gray-400 text-xs font-semibold">
-                    No img
+                    {t("admin.dashboard.charts.noImage")} {/* Sử dụng i18n */}
                   </span>
                 </div>
               )}
@@ -125,14 +139,20 @@ const TopSellingItems: React.FC<TopSellingItemsProps> = ({
               </p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500">Đã bán:</span>
+                  <span className="text-xs text-gray-500">
+                    {t("admin.dashboard.charts.sold")}
+                  </span>{" "}
+                  {/* Sử dụng i18n */}
                   <span className="text-sm font-bold text-gray-900">
                     {item.totalQuantitySold}
                   </span>
                 </div>
                 <span className="text-gray-300">|</span>
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500">Doanh thu:</span>
+                  <span className="text-xs text-gray-500">
+                    {t("admin.dashboard.charts.revenue")}
+                  </span>{" "}
+                  {/* Sử dụng i18n */}
                   <span className="text-sm font-bold text-emerald-600">
                     {item.totalRevenue.toLocaleString("vi-VN")} ₫
                   </span>

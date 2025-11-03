@@ -1,4 +1,3 @@
-// src/pages/customer/orders/OrderDetailPage.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, Badge, Spinner, Table, Button } from "flowbite-react";
@@ -9,15 +8,26 @@ import {
   HiCalendar,
   HiCurrencyDollar,
 } from "react-icons/hi";
-import { getOrderById } from "../../../services/order/checkoutService";
+import { useTranslation } from "react-i18next";
+import {
+  getOrderById,
+  cancelOrder,
+} from "../../../services/order/checkoutService";
 import type { OrderDtoDetail } from "../../../services/types/OrderType";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate.ts";
+import { useNotification } from "../../../components/Notification/NotificationContext";
+import ConfirmDialog from "../../../components/common/ConfirmDialogProps.tsx";
 
 const OrderDetailPage: React.FC = () => {
-  const { orderId } = useParams(); // lấy orderId từ URL
+  const { t } = useTranslation();
+  const { orderId } = useParams();
   const [order, setOrder] = useState<OrderDtoDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { notify } = useNotification();
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [targetOrderId, setTargetOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -44,12 +54,33 @@ const OrderDetailPage: React.FC = () => {
     getOrderById,
     (updatedOrder) => {
       setOrder((prev) => {
+        console.log(prev);
         if (!prev) return updatedOrder;
         return prev.publicId === updatedOrder.publicId ? updatedOrder : prev;
       });
     },
     (msg) => msg.orderPublicId
   );
+
+  const openCancelDialog = (publicId: string) => {
+    setTargetOrderId(publicId);
+    setOpenConfirm(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!targetOrderId) return;
+    try {
+      await cancelOrder(targetOrderId);
+      notify("success", t("order.detail.cancelSuccess"));
+      setOrder((prev) => (prev ? { ...prev, status: "CANCELLED" } : prev));
+    } catch (err) {
+      console.error("Failed to cancel order", err);
+      notify("error", t("order.detail.cancelError"));
+    } finally {
+      setOpenConfirm(false);
+      setTargetOrderId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -62,27 +93,16 @@ const OrderDetailPage: React.FC = () => {
   if (!order) {
     return (
       <div className="text-center text-red-500 p-4">
-        Không tìm thấy đơn hàng.
+        {t("order.errorNotFound")}
       </div>
     );
   }
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "Chờ duyệt";
-      case "APPROVED":
-        return "Đã duyệt";
-      case "DELIVERING":
-        return "Đang giao";
-      case "DELIVERED":
-        return "Đã giao";
-      case "CANCELLED":
-        return "Đã hủy";
-      default:
-        return status;
-    }
+    const key = `order.statusLabel.${status}`;
+    return t(key);
   };
+
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="container mx-auto max-w-4xl py-12 px-4 md:px-6">
@@ -90,8 +110,10 @@ const OrderDetailPage: React.FC = () => {
           {/* Header */}
           <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
             <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
-              <HiReceiptTax className="text-purple-600" /> Đơn hàng #
-              {order.publicId.slice(0, 8)}
+              <HiReceiptTax className="text-purple-600" />{" "}
+              {t("order.detail.title", {
+                id: order.publicId.slice(0, 8),
+              })}
             </h1>
             <Badge
               color={
@@ -117,19 +139,25 @@ const OrderDetailPage: React.FC = () => {
           <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
             <p className="flex items-center gap-2">
               <HiUser className="text-blue-500" />
-              <span className="font-medium text-gray-900">Người đặt:</span>{" "}
+              <span className="font-medium text-gray-900">
+                {t("order.detail.customer")}
+              </span>{" "}
               {order.userName}
             </p>
             <p className="flex items-center gap-2">
               <HiCalendar className="text-indigo-500" />
-              <span className="font-medium text-gray-900">Ngày tạo:</span>{" "}
+              <span className="font-medium text-gray-900">
+                {t("order.detail.createdAt")}
+              </span>{" "}
               {order.createdAt
                 ? new Date(order.createdAt).toLocaleString()
                 : "-"}
             </p>
             <p className="flex items-center gap-2">
               <HiCurrencyDollar className="text-green-600" />
-              <span className="font-medium text-gray-900">Tổng tiền:</span>{" "}
+              <span className="font-medium text-gray-900">
+                {t("order.detail.total")}
+              </span>{" "}
               <span className="text-green-600 font-semibold">
                 {order.totalAmount?.toLocaleString("vi-VN", {
                   style: "currency",
@@ -141,7 +169,7 @@ const OrderDetailPage: React.FC = () => {
 
           {/* Order Items Table */}
           <h2 className="text-xl font-semibold mb-3 text-gray-800">
-            Danh sách món
+            {t("order.detail.itemsTitle")}
           </h2>
           <Table
             striped
@@ -149,10 +177,12 @@ const OrderDetailPage: React.FC = () => {
             className="shadow-sm rounded-lg overflow-hidden">
             <thead className="bg-gray-100 text-gray-700">
               <tr>
-                <th className="px-4 py-2">Tên món</th>
-                <th className="px-4 py-2">Số lượng</th>
-                <th className="px-4 py-2">Đơn giá</th>
-                <th className="px-4 py-2">Thành tiền</th>
+                <th className="px-4 py-2">{t("order.detail.table.name")}</th>
+                <th className="px-4 py-2">
+                  {t("order.detail.table.quantity")}
+                </th>
+                <th className="px-4 py-2">{t("order.detail.table.price")}</th>
+                <th className="px-4 py-2">{t("order.detail.table.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -177,32 +207,55 @@ const OrderDetailPage: React.FC = () => {
             </tbody>
           </Table>
 
-          {/* Back Button */}
           {/* Action Buttons */}
           <div className="mt-6 flex justify-between items-center">
-            {/* Quay lại */}
             <Button
               color="purple"
               href="/order"
               className="flex items-center gap-2">
-              <HiArrowLeft className="text-lg" /> Quay lại
+              <HiArrowLeft className="text-lg" /> {t("order.detail.back")}
             </Button>
-            {/* Thanh toán (chỉ khi PENDING) */}
-            {(!order.paymentStatus || order.paymentStatus === "FAILED") && (
-              <Button
-                color="green"
-                onClick={() =>
-                  navigate(`/orders/${order.publicId}/payment`, {
-                    state: { order },
-                  })
-                }
-                className="flex items-center gap-2">
-                <HiCurrencyDollar className="text-lg" /> Thanh toán
-              </Button>
-            )}
+
+            <div className="flex gap-2">
+              {/* Hiện nút Hủy khi đơn hàng chưa giao hoặc chưa bị hủy */}
+              {["PENDING", "APPROVED"].includes(order.status) && (
+                <Button
+                  color="red"
+                  onClick={() => openCancelDialog(order.publicId)}
+                  className="flex items-center gap-2">
+                  <HiReceiptTax className="text-lg" />{" "}
+                  {t("order.detail.cancel")}
+                </Button>
+              )}
+
+              {/* Hiện nút Thanh toán nếu chưa thanh toán */}
+              {(!order.paymentStatus || order.paymentStatus === "FAILED") && (
+                <Button
+                  color="green"
+                  onClick={() =>
+                    navigate(`/orders/${order.publicId}/payment`, {
+                      state: { order },
+                    })
+                  }
+                  className="flex items-center gap-2">
+                  <HiCurrencyDollar className="text-lg" />{" "}
+                  {t("order.detail.pay")}
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={openConfirm}
+        title={t("order.detail.confirmCancelTitle")}
+        message={t("order.detail.confirmCancel")}
+        confirmText={t("order.detail.cancel")}
+        cancelText={t("common.cancel")}
+        onConfirm={confirmCancelOrder}
+        onCancel={() => setOpenConfirm(false)}
+      />
     </section>
   );
 };

@@ -11,6 +11,7 @@ public class UserDTO {
     private String phone;
     private String address;
     private String password;
+    private String confirmPassword;
     private String avatarUrl;
     private Long roleId;
     private String gender;

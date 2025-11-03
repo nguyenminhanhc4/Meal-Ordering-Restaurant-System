@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Label, TextInput, Card } from "flowbite-react";
-import api from "../../api/axios"; // axios instance
+import api from "../../api/axios";
 import { AxiosError } from "axios";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useAuth } from "../../store/AuthContext";
+import { useTranslation } from "react-i18next";
 
 function AdminLogin() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,16 +32,16 @@ function AdminLogin() {
       console.log(user?.role);
 
       if (user?.role === "ADMIN" || user?.role === "STAFF") {
-        notify("success", "Đăng nhập thành công!");
+        notify("success", t("auth.login.success"));
         navigate("/admin/dashboard");
       } else {
-        notify("error", "Bạn không có quyền!");
+        notify("error", t("auth.login.accessDenied"));
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        notify("error", err.response?.data.message || "Login failed!");
+        notify("error", err.response?.data.message || t("auth.login.failure"));
       } else {
-        notify("error", "Unexpected error!");
+        notify("error", t("auth.common.unexpectedError"));
       }
     } finally {
       setLoading(false);
@@ -50,19 +52,19 @@ function AdminLogin() {
     <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md p-6 shadow-2xl rounded-lg border-l-8 !border-blue-600 dark:!bg-gray-800 dark:!border-blue-700">
         <h1 className="text-3xl font-extrabold text-center mb-6 text-gray-800 dark:text-white">
-          Admin Login
+          {t("auth.login.adminTitle")}
         </h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div>
             <Label
               htmlFor="email"
               className="mb-1 block text-gray-700 dark:text-gray-300">
-              Email
+              {t("auth.login.emailLabel")}
             </Label>
             <TextInput
               id="email"
               type="email"
-              placeholder="admin@example.com"
+              placeholder={t("auth.login.adminEmailPlaceholder")}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -73,12 +75,12 @@ function AdminLogin() {
             <Label
               htmlFor="password"
               className="mb-1 block text-gray-700 dark:text-gray-300">
-              Mật khẩu
+              {t("auth.login.passwordLabel")}
             </Label>
             <TextInput
               id="password"
               type="password"
-              placeholder="********"
+              placeholder={t("auth.login.adminPasswordPlaceholder")}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -90,7 +92,7 @@ function AdminLogin() {
             color="blue"
             disabled={loading}
             className="w-full mt-4 py-2 text-lg font-semibold">
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            {loading ? t("auth.login.loading") : t("auth.login.submit")}{" "}
           </Button>
         </form>
       </Card>

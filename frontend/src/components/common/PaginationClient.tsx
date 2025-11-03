@@ -7,6 +7,7 @@ import {
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
 } from "react-icons/md";
+import { useTranslation } from "react-i18next";
 
 /**
  * Props cho component Pagination
@@ -31,9 +32,9 @@ const Pagination: React.FC<PaginationProps> = ({
   loading = false,
   onPageChange,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const [inputPage, setInputPage] = useState<string>("");
+  const { t } = useTranslation();
 
   // Khi đổi trang → cập nhật URL + gọi callback
   const handlePageChange = (page: number) => {
@@ -89,7 +90,7 @@ const Pagination: React.FC<PaginationProps> = ({
         <Button
           onClick={() => handlePageChange(0)}
           disabled={currentPage === 0 || loading}
-          aria-label="Trang đầu"
+          aria-label={t("pagination.first")}
           className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
             currentPage === 0
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -102,7 +103,7 @@ const Pagination: React.FC<PaginationProps> = ({
         <Button
           onClick={() => handlePageChange(Math.max(currentPage - 1, 0))}
           disabled={currentPage === 0 || loading}
-          aria-label="Trang trước"
+          aria-label={t("pagination.previous")}
           className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
             currentPage === 0
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -143,7 +144,7 @@ const Pagination: React.FC<PaginationProps> = ({
             handlePageChange(Math.min(currentPage + 1, totalPages - 1))
           }
           disabled={currentPage === totalPages - 1 || loading}
-          aria-label="Trang sau"
+          aria-label={t("pagination.next")}
           className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
             currentPage === totalPages - 1
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -156,7 +157,7 @@ const Pagination: React.FC<PaginationProps> = ({
         <Button
           onClick={() => handlePageChange(totalPages - 1)}
           disabled={currentPage === totalPages - 1 || loading}
-          aria-label="Trang cuối"
+          aria-label={t("pagination.last")}
           className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
             currentPage === totalPages - 1
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -171,7 +172,7 @@ const Pagination: React.FC<PaginationProps> = ({
         onSubmit={handleJumpSubmit}
         className="flex items-center gap-2 text-sm sm:text-base">
         <label htmlFor="jump" className="text-gray-700">
-          Tới trang:
+          {t("pagination.jumpLabel")}:
         </label>
         <input
           id="jump"
@@ -186,7 +187,7 @@ const Pagination: React.FC<PaginationProps> = ({
           type="submit"
           disabled={!inputPage.trim() || loading}
           className="px-3 py-1 rounded-lg text-sm bg-amber-400 hover:bg-amber-500 text-white">
-          Đi
+          {t("pagination.go")}
         </Button>
       </form>
     </div>

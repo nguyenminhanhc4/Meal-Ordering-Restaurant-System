@@ -11,4 +11,7 @@ export default {
     extend: {},
   },
   plugins: [require("flowbite/plugin")],
+  corePlugins: {
+    preflight: true,
+  },
 };

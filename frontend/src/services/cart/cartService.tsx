@@ -1,6 +1,7 @@
 // src/services/cart/cartService.ts
 import api from "../../api/axios";
 import type { ApiResponse } from "../types/ApiType";
+import { AxiosError } from "axios";
 
 /* -------------------------------------------------------------------------- */
 /* 🧩 Interface models                                                        */
@@ -66,6 +67,20 @@ export const createCart = async (): Promise<Cart> => {
     { withCredentials: true }
   );
   return res.data.data;
+};
+
+export const getOrCreateCart = async (): Promise<Cart> => {
+  try {
+    const cart = await getCurrentCart();
+    return cart;
+  } catch (err: unknown) {
+    if (err instanceof AxiosError && err.response?.status === 404) {
+      console.log("No open cart found → creating new cart...");
+      const newCart = await createCart();
+      return newCart;
+    }
+    throw err;
+  }
 };
 
 /**
