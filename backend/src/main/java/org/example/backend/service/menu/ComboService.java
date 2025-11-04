@@ -2,95 +2,142 @@ package org.example.backend.service.menu;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.ComboDto;
-import org.example.backend.entity.category.Categories;
+import org.example.backend.dto.menu.ComboItemDto;
+import org.example.backend.dto.menu.ComboRequest;
+import org.example.backend.dto.menu.ComboItemRequest;
 import org.example.backend.entity.menu.Combo;
-import org.example.backend.entity.param.Param;
+import org.example.backend.entity.menu.ComboItem;
+import org.example.backend.entity.menu.MenuItem;
 import org.example.backend.repository.category.CategoryRepository;
+import org.example.backend.repository.menu.ComboItemRepository;
 import org.example.backend.repository.menu.ComboRepository;
+import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.param.ParamRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ComboService {
 
     private final ComboRepository comboRepository;
+    private final ComboItemRepository comboItemRepository;
+    private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoryRepository;
     private final ParamRepository paramRepository;
 
+    @Transactional(readOnly = true)
     public List<ComboDto> findAll() {
-        return comboRepository.findAll()
-                .stream().map(ComboDto::new)
-                .collect(Collectors.toList());
+        return comboRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    public Optional<ComboDto> findById(Long id) {
-        return comboRepository.findById(id).map(ComboDto::new);
+    @Transactional(readOnly = true)
+    public ComboDto findById(Long id) {
+        return comboRepository.findById(id).map(this::toDto).orElseThrow(() -> new RuntimeException("Combo not found"));
     }
 
-    public ComboDto getById(Long id) {
-        return comboRepository.findById(id)
-                .map(ComboDto::new)
-                .orElseThrow(() -> new RuntimeException("Combo not found"));
+    @Transactional
+    public ComboDto create(ComboRequest request) {
+        Combo combo = new Combo();
+        mapRequestToEntity(request, combo);
+        Combo saved = comboRepository.save(combo);
+        return toDto(saved);
     }
 
-    public ComboDto save(ComboDto dto) {
-        Combo entity = toEntity(dto);
-        return new ComboDto(comboRepository.save(entity));
+    @Transactional
+    public ComboDto update(Long id, ComboRequest request) {
+        Combo combo = comboRepository.findById(id).orElseThrow(() -> new RuntimeException("Combo not found"));
+
+        mapRequestToEntity(request, combo);
+        Combo updated = comboRepository.save(combo);
+        return toDto(updated);
     }
 
-    public ComboDto updateById(Long id, ComboDto dto) {
-        Combo entity = comboRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Combo not found"));
-
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setPrice(dto.getPrice());
-        entity.setAvatarUrl(dto.getAvatarUrl());
-
-        if (dto.getCategoryId() != null) {
-            Categories category = categoryRepository.findById(dto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            entity.setCategory(category);
-        }
-
-        if (dto.getStatusId() != null) {
-            Param status = paramRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new RuntimeException("Status not found"));
-            entity.setStatus(status);
-        }
-
-        return new ComboDto(comboRepository.save(entity));
+    @Transactional
+    public void delete(Long id) {
+        Combo combo = comboRepository.findById(id).orElseThrow(() -> new RuntimeException("Combo not found"));
+        comboItemRepository.deleteAll(combo.getItems());
+        comboRepository.delete(combo);
     }
 
-    public void deleteById(Long id) {
-        Combo entity = comboRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Combo not found"));
-        comboRepository.delete(entity);
-    }
+    // ===== Helper Mapping =====
+    private void mapRequestToEntity(ComboRequest request, Combo combo) {
+        combo.setName(request.getName());
+        combo.setDescription(request.getDescription());
+        combo.setAvatarUrl(request.getAvatarUrl());
 
-    private Combo toEntity(ComboDto dto) {
-        Combo entity = new Combo();
-        entity.setId(dto.getId());
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setPrice(dto.getPrice());
-        entity.setAvatarUrl(dto.getAvatarUrl());
-
-        if (dto.getCategoryId() != null) {
-            entity.setCategory(categoryRepository.findById(dto.getCategoryId())
+        if (request.getCategoryId() != null) {
+            combo.setCategory(categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found")));
         }
 
-        if (dto.getStatusId() != null) {
-            entity.setStatus(paramRepository.findById(dto.getStatusId())
+        if (request.getStatusId() != null) {
+            combo.setStatus(paramRepository.findById(request.getStatusId())
                     .orElseThrow(() -> new RuntimeException("Status not found")));
         }
 
-        return entity;
+        if (request.getItems() != null) {
+            // Map menuItemId -> quantity trong request
+            Map<Long, Integer> requestedItems = request.getItems().stream()
+                    .collect(Collectors.toMap(
+                            ComboItemRequest::getMenuItemId,
+                            item -> item.getQuantity() != null ? item.getQuantity() : 1
+                    ));
+
+            // Xóa những ComboItem không còn trong request
+            combo.getItems().removeIf(ci -> !requestedItems.containsKey(ci.getMenuItem().getId()));
+
+            // Merge hoặc thêm mới ComboItem
+            for (Map.Entry<Long, Integer> entry : requestedItems.entrySet()) {
+                Long menuItemId = entry.getKey();
+                Integer qty = entry.getValue();
+
+                // Kiểm tra xem item này đã có trong combo chưa
+                ComboItem existing = combo.getItems().stream()
+                        .filter(ci -> ci.getMenuItem().getId().equals(menuItemId))
+                        .findFirst()
+                        .orElse(null);
+
+                if (existing != null) {
+                    // Nếu đã tồn tại, cộng dồn quantity
+                    existing.setQuantity(existing.getQuantity() + qty);
+                } else {
+                    // Nếu chưa có, tạo mới
+                    MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                            .orElseThrow(() -> new RuntimeException("MenuItem not found: " + menuItemId));
+                    ComboItem ci = new ComboItem();
+                    ci.setCombo(combo);
+                    ci.setMenuItem(menuItem);
+                    ci.setQuantity(qty);
+                    combo.getItems().add(ci);
+                }
+            }
+
+            // Tính tổng giá và giảm 10%
+            BigDecimal total = combo.getItems().stream()
+                    .map(ci -> ci.getMenuItem().getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            combo.setPrice(total.subtract(total.multiply(BigDecimal.valueOf(0.1))));
+        } else {
+            combo.getItems().clear();
+            combo.setPrice(BigDecimal.ZERO);
+        }
+    }
+
+
+    private ComboDto toDto(Combo combo) {
+        return ComboDto.builder().id(combo.getId()).name(combo.getName()).description(combo.getDescription()).avatarUrl(combo.getAvatarUrl()).price(combo.getPrice()).category(combo.getCategory() != null ? combo.getCategory().getName() : null).status(combo.getStatus() != null ? combo.getStatus().getName() : null).items(toItemDtos(combo.getItems())).build();
+    }
+
+    private List<ComboItemDto> toItemDtos(List<ComboItem> items) {
+        if (items == null) return List.of();
+        return items.stream().map(item -> ComboItemDto.builder().id(item.getMenuItem().getId()).name(item.getMenuItem().getName()).quantity(item.getQuantity()).price(item.getMenuItem().getPrice()).avatarUrl(item.getMenuItem().getAvatarUrl()).category(item.getMenuItem().getCategory() != null ? item.getMenuItem().getCategory().getName() : null).build()).collect(Collectors.toList());
     }
 }

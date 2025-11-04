@@ -41,11 +41,6 @@ public class Combo extends BaseEntity {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @ManyToMany
-    @JoinTable(
-            name = "combo_items",
-            joinColumns = @JoinColumn(name = "combo_id"),
-            inverseJoinColumns = @JoinColumn(name = "menu_item_id")
-    )
-    private List<MenuItem> items;
+    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComboItem> items;
 }

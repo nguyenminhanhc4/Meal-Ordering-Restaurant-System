@@ -223,7 +223,7 @@ export const AdminUser = () => {
                 theme={{
                   field: {
                     input: {
-                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
+                      base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-cyan-500",
                     },
                   },
                 }}
