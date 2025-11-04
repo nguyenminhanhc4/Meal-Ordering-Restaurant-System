@@ -30,4 +30,16 @@ public interface ComboRepository extends JpaRepository<Combo, Long> {
         WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
         """)
     Page<Object[]> findAllWithSearch(@Param("search") String search, Pageable pageable);
+
+    @Query("""
+SELECT c FROM Combo c
+WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
+  AND (:categoryId IS NULL OR c.category.id = :categoryId)
+  AND (:statusId IS NULL OR c.status.id = :statusId)
+""")
+    Page<Combo> searchCombos(@Param("search") String search,
+                             @Param("categoryId") Long categoryId,
+                             @Param("statusId") Long statusId,
+                             Pageable pageable);
+
 }

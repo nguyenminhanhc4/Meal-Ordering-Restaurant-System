@@ -16,6 +16,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,26 +37,20 @@ public class ComboService {
     private final ParamRepository paramRepository;
 
     @Transactional(readOnly = true)
-    public Page<ComboDto> findAll(int page, int size, String search) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Object[]> results = comboRepository.findAllWithSearch(search, pageable);
+    public Page<ComboDto> findAll(int page, int size, String search, Long categoryId, Long statusId, String sort) {
+        Sort sortOption = switch (sort.toLowerCase()) {
+            case "price-asc" -> Sort.by("price").ascending();
+            case "price-desc" -> Sort.by("price").descending();
+            case "newest" -> Sort.by("createdAt").descending();
+            default -> Sort.by("name").ascending();
+        };
 
-        return results.map(obj -> {
-            Combo combo = (Combo) obj[0];
-            String categoryName = (String) obj[1];
-            String statusName = (String) obj[2];
-            return ComboDto.builder()
-                    .id(combo.getId())
-                    .name(combo.getName())
-                    .description(combo.getDescription())
-                    .avatarUrl(combo.getAvatarUrl())
-                    .price(combo.getPrice())
-                    .category(categoryName)
-                    .status(statusName)
-                    .items(toItemDtos(combo.getItems()))
-                    .build();
-        });
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+
+        Page<Combo> results = comboRepository.searchCombos(search, categoryId, statusId, pageable);
+        return results.map(this::toDto);
     }
+
 
     @Transactional(readOnly = true)
     public ComboDto findById(Long id) {
