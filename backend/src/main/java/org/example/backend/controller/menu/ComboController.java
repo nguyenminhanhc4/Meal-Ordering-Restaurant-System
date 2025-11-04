@@ -1,9 +1,11 @@
 package org.example.backend.controller.menu;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.Response;
 import org.example.backend.dto.menu.ComboDto;
 import org.example.backend.dto.menu.ComboRequest;
 import org.example.backend.service.menu.ComboService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,15 @@ public class ComboController {
     private final ComboService comboService;
 
     @GetMapping
-    public ResponseEntity<List<ComboDto>> getAll() {
-        return ResponseEntity.ok(comboService.findAll());
+    public ResponseEntity<?> getAllCombos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search
+    ) {
+        Page<ComboDto> combos = comboService.findAll(page, size, search);
+        return ResponseEntity.ok(new Response<>("success", combos, "Combos retrieved successfully"));
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ComboDto> getById(@PathVariable Long id) {

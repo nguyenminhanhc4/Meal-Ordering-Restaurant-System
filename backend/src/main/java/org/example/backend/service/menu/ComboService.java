@@ -13,6 +13,9 @@ import org.example.backend.repository.menu.ComboItemRepository;
 import org.example.backend.repository.menu.ComboRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.param.ParamRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,8 +36,25 @@ public class ComboService {
     private final ParamRepository paramRepository;
 
     @Transactional(readOnly = true)
-    public List<ComboDto> findAll() {
-        return comboRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    public Page<ComboDto> findAll(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Object[]> results = comboRepository.findAllWithSearch(search, pageable);
+
+        return results.map(obj -> {
+            Combo combo = (Combo) obj[0];
+            String categoryName = (String) obj[1];
+            String statusName = (String) obj[2];
+            return ComboDto.builder()
+                    .id(combo.getId())
+                    .name(combo.getName())
+                    .description(combo.getDescription())
+                    .avatarUrl(combo.getAvatarUrl())
+                    .price(combo.getPrice())
+                    .category(categoryName)
+                    .status(statusName)
+                    .items(toItemDtos(combo.getItems()))
+                    .build();
+        });
     }
 
     @Transactional(readOnly = true)
