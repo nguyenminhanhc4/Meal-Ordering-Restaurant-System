@@ -37,6 +37,7 @@ import {
 import NotificationBell from "../../components/bell/NotificationBell";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../../components/LanguageSelector";
+import { Link } from "react-router-dom";
 
 const MegaMenuComponent: React.FC = () => {
   const { t } = useTranslation();
@@ -155,21 +156,19 @@ const MegaMenuComponent: React.FC = () => {
     <Navbar
       fluid
       className="fixed top-0 left-0 w-full z-50 shadow-lg !bg-stone-800 text-white h-16">
-      <NavbarBrand href="/">
-        <img
-          src={Logo}
-          className="mr-3 h-8 sm:h-10"
-          alt={t("component.megaMenu.logoAlt")}
-        />
-        <span className="self-center whitespace-nowrap text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          XYZ Restaurant
-        </span>
-      </NavbarBrand>
+      <Link to="/">
+        <NavbarBrand>
+          <img src={Logo} className="mr-3 h-8 sm:h-10" alt="Logo" />
+          <span className="text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            XYZ Restaurant
+          </span>
+        </NavbarBrand>
+      </Link>
 
       <div className="flex items-center gap-6 md:order-2">
         {isLoggedIn && user && (
-          <a
-            href="/cart"
+          <Link
+            to="/cart"
             className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 transition text-white shadow">
             <HiOutlineShoppingCart className="h-5 w-5 text-yellow-400" />
             <span className="hidden sm:inline font-medium">
@@ -184,7 +183,7 @@ const MegaMenuComponent: React.FC = () => {
                 {cartItemCount}
               </Badge>
             )}
-          </a>
+          </Link>
         )}
 
         {isLoggedIn && user && <NotificationBell />}
@@ -222,18 +221,18 @@ const MegaMenuComponent: React.FC = () => {
               <span className="block text-sm font-semibold">{user.name}</span>
               <span className="block truncate text-xs">{user.email}</span>
             </DropdownHeader>
-            <DropdownItem
-              className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
-              href="/profile">
-              <HiOutlineUser className="text-yellow-400" />
-              {t("component.megaMenu.profile")}
-            </DropdownItem>
-            <DropdownItem
-              className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
-              href="/order">
-              <HiOutlineShoppingCart className="text-yellow-400" />
-              {t("component.megaMenu.orders")}
-            </DropdownItem>
+            <Link to="/profile">
+              <DropdownItem className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700">
+                <HiOutlineUser className="text-yellow-400" />
+                {t("component.megaMenu.profile")}
+              </DropdownItem>
+            </Link>
+            <Link to="/order">
+              <DropdownItem className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700">
+                <HiOutlineShoppingCart className="text-yellow-400" />
+                {t("component.megaMenu.orders")}
+              </DropdownItem>
+            </Link>
             <DropdownItem
               className="flex flex-col items-start gap-2 px-4 py-2 hover:!bg-stone-700"
               onClick={handleLangClick as unknown as () => void}>
@@ -258,24 +257,25 @@ const MegaMenuComponent: React.FC = () => {
             </DropdownItem>
           </Dropdown>
         ) : (
-          <Button
-            className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 font-semibold shadow-md"
-            href="/login">
-            {t("component.megaMenu.login")}
-          </Button>
+          <Link to="/login">
+            <Button className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 font-semibold shadow-md">
+              {t("component.megaMenu.login")}
+            </Button>
+          </Link>
         )}
 
         <NavbarToggle />
       </div>
 
       <NavbarCollapse>
-        <NavbarLink
-          href="/"
-          className={`text-lg transition-colors duration-200 ${getActiveClass(
-            "/"
-          )}`}>
-          {t("component.megaMenu.home")}
-        </NavbarLink>
+        <Link to="/">
+          <NavbarLink
+            className={`text-lg transition-colors duration-200 ${getActiveClass(
+              "/"
+            )}`}>
+            {t("component.megaMenu.home")}
+          </NavbarLink>
+        </Link>
 
         <Dropdown
           onMouseEnter={() => setIsMenuOpen(true)}
@@ -289,11 +289,12 @@ const MegaMenuComponent: React.FC = () => {
           className="w-screen !bg-stone-800 border-none shadow-lg !left-0 !right-0 !ml-0 !pl-0 dropdown-fullwidth">
           <div className="py-8 px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
             <div className="px-3 py-2 rounded-lg bg-stone-800/50 border border-stone-700 hover:bg-stone-700/40 transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer col-span-full md:col-span-2 lg:col-span-4">
-              <a
-                href="/menu"
+              <Link
+                to="/menu"
                 className="text-sm font-semibold text-amber-300 hover:text-amber-400">
                 {t("component.megaMenu.viewAllMenu")}
-              </a>
+              </Link>
+
               <span className="text-xs text-stone-300">
                 {t("component.megaMenu.allDishes")}
               </span>
@@ -336,13 +337,13 @@ const MegaMenuComponent: React.FC = () => {
                               <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
                                 {child.children.map((subChild) => (
                                   <li key={subChild.id}>
-                                    <a
-                                      href={`/menu/${subChild.name
+                                    <Link
+                                      to={`/menu/${subChild.name
                                         .toLowerCase()
                                         .replace(/\s+/g, "-")}`}
                                       className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
                                       {subChild.name}
-                                    </a>
+                                    </Link>
                                   </li>
                                 ))}
                               </ul>
@@ -361,13 +362,14 @@ const MegaMenuComponent: React.FC = () => {
           </div>
         </Dropdown>
 
-        <NavbarLink
-          href="/table"
-          className={`text-lg transition-colors duration-200 ${getActiveClass(
-            "/table"
-          )}`}>
-          {t("component.megaMenu.tableBooking")}
-        </NavbarLink>
+        <Link to="/table">
+          <NavbarLink
+            className={`text-lg transition-colors duration-200 ${getActiveClass(
+              "/table"
+            )}`}>
+            {t("component.megaMenu.tableBooking")}
+          </NavbarLink>
+        </Link>
       </NavbarCollapse>
     </Navbar>
   );

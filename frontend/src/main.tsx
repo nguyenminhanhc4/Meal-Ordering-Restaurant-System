@@ -5,16 +5,19 @@ import App from "./App.tsx";
 import { NotificationProvider } from "./components/Notification/index.tsx";
 import { AuthProvider } from "./store/AuthContext";
 import { CartProvider } from "./store/CartContext.tsx";
+import { BrowserRouter } from "react-router-dom";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <NotificationProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </NotificationProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <NotificationProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );

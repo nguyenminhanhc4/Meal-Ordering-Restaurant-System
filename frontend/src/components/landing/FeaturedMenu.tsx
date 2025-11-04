@@ -11,11 +11,13 @@ import { useTranslation } from "react-i18next";
 import { getTopPopularMenuItems } from "../../services/product/fetchProduct";
 import type { Product } from "../../services/product/fetchProduct";
 import { FaStar, FaStarHalf, FaRegStar, FaShoppingCart } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function FeaturedMenu() {
   const { t } = useTranslation();
   const [dishes, setDishes] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const slidesCount = 3;
 
@@ -131,7 +133,7 @@ export default function FeaturedMenu() {
 
                   <Button
                     size="lg"
-                    href={`/menu/product/${dish.id}`}
+                    onClick={() => navigate(`/menu/product/${dish.id}`)}
                     className="mt-4 w-full font-extrabold text-lg bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-orange-300/50 hover:from-red-600 hover:to-orange-600 transition-all rounded-xl">
                     <FaShoppingCart className="inline mr-2" />{" "}
                     {t("home.menu.orderNow")}
@@ -143,12 +145,12 @@ export default function FeaturedMenu() {
         ))}
       </Carousel>
 
-      <a
-        href="/menu"
+      <Link
+        to="/menu"
         className="mt-6 inline-flex items-center gap-2 text-yellow-500 font-semibold underline hover:text-orange-500 hover:decoration-2 transition-colors duration-200">
         {t("home.menu.viewMore")}
         <ChevronRightIcon className="w-5 h-5" />
-      </a>
+      </Link>
     </section>
   );
 }

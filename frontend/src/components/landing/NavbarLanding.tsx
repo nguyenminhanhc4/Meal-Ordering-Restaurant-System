@@ -21,6 +21,7 @@ import { useAuth } from "../../store/AuthContext";
 import { useNotification } from "../../components/Notification/NotificationContext";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
 import NotificationBell from "../../components/bell/NotificationBell";
 import LanguageSelector from "../../components/LanguageSelector";
 
@@ -29,6 +30,7 @@ export default function NavbarLanding() {
   const { isLoggedIn, user, logout } = useAuth();
   const { notify } = useNotification();
   const [activeSection, setActiveSection] = useState("hero");
+  const navigate = useNavigate();
 
   const handleLangClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -63,12 +65,18 @@ export default function NavbarLanding() {
       className="fixed top-0 left-0 w-full z-50 shadow-lg !bg-stone-800 text-white">
       <div className="flex w-full items-center justify-between">
         {/* Brand */}
-        <NavbarBrand href="/">
-          <img src={Logo} className="mr-3 h-8 sm:h-10" alt="Restaurant Logo" />
-          <span className="self-center whitespace-nowrap text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-            {t("navbarLanding.brand.name")}
-          </span>
-        </NavbarBrand>
+        <Link to="/">
+          <NavbarBrand>
+            <img
+              src={Logo}
+              className="mr-3 h-8 sm:h-10"
+              alt="Restaurant Logo"
+            />
+            <span className="self-center whitespace-nowrap text-xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              {t("navbarLanding.brand.name")}
+            </span>
+          </NavbarBrand>
+        </Link>
 
         {/* Menu items */}
         <NavbarCollapse className="flex-1.5 justify-center">
@@ -150,7 +158,7 @@ export default function NavbarLanding() {
               {/* Profile */}
               <DropdownItem
                 className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
-                href="/profile">
+                onClick={() => navigate("/profile")}>
                 <HiOutlineUser className="text-yellow-400" />
                 {t("navbarLanding.dropdown.profile")}
               </DropdownItem>
@@ -158,7 +166,7 @@ export default function NavbarLanding() {
               {/* Orders */}
               <DropdownItem
                 className="flex items-center gap-3 hover:!text-yellow-400 hover:!bg-stone-700"
-                href="/order">
+                onClick={() => navigate("/order")}>
                 <HiOutlineShoppingCart className="text-yellow-400" />
                 {t("navbarLanding.dropdown.orders")}
               </DropdownItem>
@@ -193,7 +201,7 @@ export default function NavbarLanding() {
           ) : (
             <Button
               className="bg-yellow-600 hover:bg-yellow-500 text-stone-900 font-semibold shadow-md"
-              href="/login">
+              onClick={() => navigate("/login")}>
               {t("navbarLanding.login")}
             </Button>
           )}

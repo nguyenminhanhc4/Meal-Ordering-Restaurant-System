@@ -15,6 +15,7 @@ import {
   useRealtimeDelete,
 } from "../../../api/useRealtimeUpdate.ts";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 /**
  * 🍽️ MealPage
@@ -142,11 +143,11 @@ const MealPage: React.FC = () => {
             </div>
 
             <div className="w-full md:w-auto flex-none">
-              <a
-                href="/menu"
+              <Link
+                to="/menu"
                 className="block w-full md:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-colors duration-200">
                 {t("mealPage.actions.viewAll")}
-              </a>
+              </Link>
             </div>
           </div>
         </Card>
