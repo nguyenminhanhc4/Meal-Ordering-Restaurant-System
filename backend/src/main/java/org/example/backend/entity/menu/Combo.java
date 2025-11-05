@@ -7,6 +7,7 @@ import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.param.Param;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -42,5 +43,5 @@ public class Combo extends BaseEntity {
     private String avatarUrl;
 
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ComboItem> items;
+    private List<ComboItem> items = new ArrayList<>();
 }

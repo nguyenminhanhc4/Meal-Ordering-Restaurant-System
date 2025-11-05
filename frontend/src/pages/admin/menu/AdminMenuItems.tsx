@@ -19,20 +19,20 @@ import {
   HiTrash,
   HiMenuAlt1,
 } from "react-icons/hi";
-import api from "../../api/axios";
-import { useNotification } from "../../components/Notification";
-import { Pagination } from "../../components/common/Pagination";
-import { ConfirmDialog } from "../../components/common/ConfirmDialog";
-import { MenuItemFormModal } from "../../components/modal/menuItem/MenuItemFormModal";
+import api from "../../../api/axios";
+import { useNotification } from "../../../components/Notification";
+import { Pagination } from "../../../components/common/Pagination";
+import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
+import { MenuItemFormModal } from "../../../components/modal/menuItem/MenuItemFormModal";
 import type {
   MenuItem,
   MenuItemSearchRequest,
   Category,
   StatusParam,
-} from "../../services/types/menuItem";
+} from "../../../services/types/menuItem";
 import { useTranslation } from "react-i18next";
 import { AxiosError, isAxiosError } from "axios";
-import { useAuth } from "../../store/AuthContext";
+import { useAuth } from "../../../store/AuthContext";
 
 function AdminMenuItems() {
   const { t } = useTranslation();
@@ -348,7 +348,7 @@ function AdminMenuItems() {
 
             <TableBody className="divide-y">
               {loading ? (
-                <TableRow>
+                <TableRow className="bg-white hover:!bg-gray-100">
                   <TableCell colSpan={7} className="text-center py-4">
                     {t("admin.menuItems.loading")}
                   </TableCell>
@@ -363,7 +363,7 @@ function AdminMenuItems() {
                 menuItems.map((item) => (
                   <TableRow
                     key={item.id}
-                    className="bg-white hover:!bg-gray-50">
+                    className="bg-white hover:!bg-gray-100">
                     <TableCell className="p-3">
                       <div className="w-16 h-16 rounded-lg overflow-hidden">
                         {item.avatarUrl ? (

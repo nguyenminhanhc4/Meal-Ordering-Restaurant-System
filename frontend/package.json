@@ -25,6 +25,7 @@
     "react-i18next": "^16.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.1",
+    "react-select": "^5.10.2",
     "sockjs-client": "^1.6.1"
   },
   "devDependencies": {

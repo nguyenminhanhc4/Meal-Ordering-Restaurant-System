@@ -2,7 +2,9 @@
   "auth": {
     "common": {
       "unexpectedError": "Đã xảy ra lỗi không xác định!",
-      "close": "Hủy"
+      "close": "Hủy",
+      "update": "Cập nhật",
+      "create": "Thêm mới"
     },
     "forgot": {
       "emailPlaceholder": "Nhập email của bạn",
@@ -186,11 +188,15 @@
     "unknownError": "Lỗi không xác định khi thêm vào giỏ hàng"
   },
   "common": {
-    "cancel": "Hủy",
     "currency": "Đồng",
     "loading": "Đang tải...",
     "send": "Gửi",
     "sending": "Đang gửi...",
+    "update": "Cập nhật",
+    "create": "Tạo mới",
+    "cancel": "Hủy",
+    "saving": "Đang lưu...",
+    "error": "Lỗi hệ thống",
     "pagination": {
       "showing": "Hiển thị từ {{start}} đến {{end}} trong số {{total}} mục"
     },
@@ -747,12 +753,81 @@
   },
   "admin": {
     "checkingSession": "Đang kiểm tra phiên...",
+    "combos": {
+      "title": "Quản lý Combo",
+      "addButton": "Thêm Combo",
+      "searchPlaceholder": "Tìm kiếm combo...",
+      "categoryAll": "Tất cả danh mục",
+      "statusAll": "Tất cả trạng thái",
+      "loading": "Đang tải...",
+      "noItems": "Không có combo nào.",
+      "noDescription": "Chưa có mô tả.",
+      "table": {
+        "image": "Hình ảnh",
+        "name": "Tên combo",
+        "category": "Danh mục",
+        "price": "Giá",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "status": {
+        "ACTIVE": "Đang bán",
+        "INACTIVE": "Ngừng bán"
+      },
+      "notifications": {
+        "loadError": "Không tải được danh sách combo.",
+        "loadRefError": "Không tải được danh mục hoặc trạng thái.",
+        "deleteSuccess": "Xóa combo thành công.",
+        "deleteError": "Không thể xóa combo."
+      },
+      "confirm": {
+        "title": "Xác nhận xóa",
+        "message": "Bạn có chắc muốn xóa combo này không?"
+      },
+      "form": {
+        "titleEdit": "Chỉnh sửa Combo",
+        "titleCreate": "Tạo Combo mới",
+        "nameLabel": "Tên combo",
+        "namePlaceholder": "Nhập tên combo...",
+        "categoryLabel": "Danh mục",
+        "statusLabel": "Trạng thái",
+        "descriptionLabel": "Mô tả",
+        "descriptionPlaceholder": "Mô tả ngắn về combo...",
+        "imageSection": "Hình ảnh",
+        "uploadLabel": "Tải ảnh lên",
+        "uploadHint": "Chỉ chấp nhận ảnh dưới 5MB",
+        "urlLabel": "Hoặc nhập URL ảnh",
+        "urlPlaceholder": "https://...",
+        "previewTitle": "Xem trước",
+        "uploading": "Đang tải lên...",
+        "update": "Cập nhật",
+        "itemsSection": "Danh sách món trong combo",
+        "addButton": "Thêm món",
+        "itemSelect": "— Chọn món —",
+        "quantityInput": "Số lượng",
+        "noItems": "Chưa có món nào. Nhấn 'Thêm món' để bắt đầu.",
+        "validation": {
+          "nameRequired": "Tên combo không được để trống!",
+          "atLeastOneItem": "Combo phải có ít nhất 1 món!",
+          "selectAllItems": "Vui lòng chọn món cho tất cả các dòng!",
+          "imageInvalid": "Vui lòng chọn file ảnh hợp lệ!",
+          "imageSize": "Ảnh không được vượt quá 5MB!"
+        },
+        "uploadSuccess": "Tải ảnh thành công!",
+        "uploadError": "Lỗi tải ảnh: {{error}}",
+        "createSuccess": "Tạo combo thành công!",
+        "updateSuccess": "Cập nhật combo thành công!",
+        "saveError": "Lỗi khi lưu combo",
+        "loadMenuItemsError": "Không tải được danh sách món ăn!"
+      }
+    },
     "sidebar": {
       "logo": "Admin Panel",
       "commonGroup": "Chung",
       "adminGroup": "Quản trị hệ thống",
       "staffGroup": "Tác vụ nhân viên",
       "menu": {
+        "combos": "Combo",
         "dashboard": "Dashboard",
         "tables": "Bàn",
         "ingredients": "Nguyên liệu",
@@ -761,6 +836,7 @@
         "tableOrders": "Đơn đặt bàn",
         "users": "Người dùng",
         "categories": "Danh mục",
+        "menu": "Menu",
         "menuItems": "Món ăn",
         "settings": "Cài đặt",
         "myTasks": "Tác vụ của tôi"
@@ -1265,6 +1341,12 @@
         "dark": "Dark mode"
       }
     }
+  },
+  "status": {
+    "active": "Hoạt động",
+    "inactive": "Tạm dừng",
+    "pending": "Đang chờ duyệt",
+    "out_of_stock": "Hết hàng"
   },
   "pagination": {
     "first": "Trang đầu",
