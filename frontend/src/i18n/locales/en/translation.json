@@ -795,6 +795,7 @@
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Brief description of the combo...",
         "imageSection": "Image",
+        "itemsUnit": "items",
         "uploadLabel": "Upload Image",
         "uploadHint": "Only images under 5MB are accepted",
         "urlLabel": "Or Enter Image URL",

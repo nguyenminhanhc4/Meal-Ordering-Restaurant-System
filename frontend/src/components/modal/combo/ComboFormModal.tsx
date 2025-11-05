@@ -5,12 +5,12 @@ import {
   Label,
   TextInput,
   Textarea,
-  Select,
   Card,
   ModalHeader,
   ModalBody,
   ModalFooter,
   Spinner,
+  Select as FlowbiteSelect,
 } from "flowbite-react";
 import { HiPlus, HiTrash } from "react-icons/hi";
 import api from "../../../api/axios";
@@ -26,7 +26,9 @@ import type {
 } from "../../../services/product/fetchCombo";
 import type { Page } from "../../../services/types/PageType";
 import { updateCombo, createCombo } from "../../../services/product/fetchCombo";
+import ReactSelect from "react-select";
 
+// Component props interface
 interface ComboFormModalProps {
   show: boolean;
   onClose: () => void;
@@ -36,12 +38,14 @@ interface ComboFormModalProps {
   statuses: StatusParam[];
 }
 
+// Selected item interface
 interface ComboItemSelection {
   menuItemId: number;
   quantity: number;
   menuItemName?: string;
 }
 
+// Custom input theme
 const inputTheme = {
   field: {
     input: {
@@ -65,6 +69,7 @@ export function ComboFormModal({
   const { notify } = useNotification();
   const isEditMode = !!comboData;
 
+  // Form states
   const [formData, setFormData] = useState<ComboRequest>({
     name: "",
     description: "",
@@ -73,31 +78,37 @@ export function ComboFormModal({
     statusId: 0,
     items: [],
   });
-
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<ComboItemSelection[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingItems, setLoadingItems] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [, setSelectedFile] = useState<File | null>(null);
+  const [searchTerm] = useState("");
 
-  // Load menu items
+  // Load all menu items with pagination
   useEffect(() => {
     if (!show) return;
 
     const loadMenuItems = async () => {
       setLoadingItems(true);
       try {
-        const res = await api.get<{ data: Page<MenuItem> }>("/menu-items");
+        let allItems: MenuItem[] = [];
+        let page = 0;
+        const size = 50;
+        let hasMore = true;
 
-        const data = Array.isArray(res.data.data.content)
-          ? res.data.data.content
-          : Array.isArray(res.data)
-          ? res.data
-          : [];
+        while (hasMore) {
+          const res = await api.get<{ data: Page<MenuItem> }>(
+            `/menu-items?page=${page}&size=${size}`
+          );
+          const pageData = res.data.data;
+          allItems = [...allItems, ...pageData.content];
+          hasMore = !pageData.last;
+          page++;
+        }
 
-        console.log(data);
-        setMenuItems(data);
+        setMenuItems(allItems);
       } catch {
         notify("error", t("admin.combos.form.loadMenuItemsError"));
         setMenuItems([]);
@@ -108,7 +119,7 @@ export function ComboFormModal({
     void loadMenuItems();
   }, [show, notify, t]);
 
-  // Reset form
+  // Reset form on show or data change
   useEffect(() => {
     if (!show) return;
 
@@ -149,6 +160,7 @@ export function ComboFormModal({
     }
   }, [show, comboData, categories, statuses]);
 
+  // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -161,6 +173,7 @@ export function ComboFormModal({
     setFormData((prev) => ({ ...prev, [name]: numValue }));
   };
 
+  // Add a new combo item
   const addComboItem = useCallback(() => {
     const available = menuItems.find(
       (mi) => !selectedItems.some((sel) => sel.menuItemId === mi.id)
@@ -177,10 +190,12 @@ export function ComboFormModal({
     }
   }, [menuItems, selectedItems]);
 
+  // Remove a combo item by index
   const removeComboItem = useCallback((index: number) => {
     setSelectedItems((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
+  // Update a combo item field
   const updateComboItem = useCallback(
     (index: number, field: "menuItemId" | "quantity", value: number) => {
       setSelectedItems((prev) =>
@@ -198,18 +213,23 @@ export function ComboFormModal({
     [menuItems]
   );
 
+  // Get filtered available menu items
   const getAvailableMenuItems = useCallback(
     (currentId?: number) => {
-      return menuItems.filter(
-        (mi) =>
-          mi.id === currentId ||
-          !selectedItems.some((sel) => sel.menuItemId === mi.id)
-      );
+      return menuItems
+        .filter((mi) =>
+          mi.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .filter(
+          (mi) =>
+            mi.id === currentId ||
+            !selectedItems.some((sel) => sel.menuItemId === mi.id)
+        );
     },
-    [menuItems, selectedItems]
+    [menuItems, selectedItems, searchTerm]
   );
 
-  // Upload image
+  // Handle image file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -228,6 +248,7 @@ export function ComboFormModal({
     uploadImageToCloudinary(file);
   };
 
+  // Upload image to Cloudinary
   const uploadImageToCloudinary = async (file: File) => {
     setUploadingImage(true);
     try {
@@ -266,6 +287,7 @@ export function ComboFormModal({
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -288,14 +310,12 @@ export function ComboFormModal({
 
       if (isEditMode && comboData) {
         await updateCombo(comboData.id, payload);
-
         notify("success", t("admin.combos.form.updateSuccess"));
-        onSuccess();
       } else {
         await createCombo(payload);
         notify("success", t("admin.combos.form.createSuccess"));
-        onSuccess();
       }
+      onSuccess();
       onClose();
     } catch (error) {
       console.error("Submit error:", error);
@@ -317,7 +337,7 @@ export function ComboFormModal({
 
       <form onSubmit={handleSubmit} className="flex flex-col">
         <ModalBody className="p-6 space-y-6 bg-gray-50">
-          {/* Basic Info */}
+          {/* Basic Info Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <Label
@@ -342,7 +362,7 @@ export function ComboFormModal({
                 className="mb-2 block text-sm font-medium !text-gray-700">
                 {t("admin.combos.form.categoryLabel")}
               </Label>
-              <Select
+              <FlowbiteSelect
                 id="categoryId"
                 name="categoryId"
                 value={formData.categoryId}
@@ -356,11 +376,11 @@ export function ComboFormModal({
                       : c.name}
                   </option>
                 ))}
-              </Select>
+              </FlowbiteSelect>
             </div>
           </div>
 
-          {/* Description */}
+          {/* Description Section */}
           <div>
             <Label
               htmlFor="description"
@@ -381,7 +401,7 @@ export function ComboFormModal({
             />
           </div>
 
-          {/* Image Upload */}
+          {/* Image Upload Section */}
           <div className="bg-white p-4 rounded-lg border border-gray-300">
             <Label className="mb-3 block text-lg font-medium !text-gray-700">
               {t("admin.combos.form.imageSection")}
@@ -453,14 +473,14 @@ export function ComboFormModal({
             </div>
           </div>
 
-          {/* Status */}
+          {/* Status Section */}
           <div>
             <Label
               htmlFor="statusId"
               className="mb-2 block text-sm font-medium !text-gray-700">
               {t("admin.combos.form.statusLabel")}
             </Label>
-            <Select
+            <FlowbiteSelect
               id="statusId"
               name="statusId"
               value={formData.statusId}
@@ -472,16 +492,16 @@ export function ComboFormModal({
                   {t(`status.${s.code.toLowerCase()}`) || s.code}
                 </option>
               ))}
-            </Select>
+            </FlowbiteSelect>
           </div>
 
-          {/* Combo Items */}
+          {/* Combo Items Section */}
           <Card className="!bg-white border !border-gray-300">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold !text-gray-700">
                 {t("admin.combos.form.itemsSection")}
                 <span className="ml-2 text-sm font-normal text-gray-500">
-                  ({selectedItems.length} món)
+                  ({selectedItems.length} {t("admin.combos.form.itemsUnit")})
                 </span>
               </h3>
               <Button
@@ -516,25 +536,52 @@ export function ComboFormModal({
                     key={index}
                     className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                     <div className="flex-1">
-                      <Select
-                        value={item.menuItemId}
-                        onChange={(e) =>
-                          updateComboItem(
-                            index,
-                            "menuItemId",
-                            Number(e.target.value)
+                      <ReactSelect
+                        value={
+                          getAvailableMenuItems(item.menuItemId).find(
+                            (mi) => mi.id === item.menuItemId
                           )
+                            ? {
+                                value: item.menuItemId,
+                                label: item.menuItemName || "Unknown",
+                              }
+                            : null
                         }
-                        theme={inputTheme}>
-                        <option value={0}>
-                          {t("admin.combos.form.itemSelect")}
-                        </option>
-                        {getAvailableMenuItems(item.menuItemId).map((mi) => (
-                          <option key={mi.id} value={mi.id}>
-                            {mi.name} — {mi.categoryName}
-                          </option>
-                        ))}
-                      </Select>
+                        onChange={(selectedOption) => {
+                          if (selectedOption) {
+                            updateComboItem(
+                              index,
+                              "menuItemId",
+                              selectedOption.value
+                            );
+                          }
+                        }}
+                        options={getAvailableMenuItems(item.menuItemId).map(
+                          (mi) => ({
+                            value: mi.id,
+                            label: `${mi.name} — ${mi.categoryName}`,
+                          })
+                        )}
+                        placeholder={t("admin.combos.form.itemSelect")}
+                        isSearchable={true}
+                        classNamePrefix="react-select"
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            backgroundColor: "white",
+                            borderColor: "gray-500",
+                            "&:hover": { borderColor: "cyan-500" },
+                            "&:focus": {
+                              borderColor: "cyan-500",
+                              boxShadow: "0 0 0 1px cyan-500",
+                            },
+                          }),
+                          menu: (base) => ({
+                            ...base,
+                            zIndex: 9999,
+                          }),
+                        }}
+                      />
                     </div>
                     <div className="w-32">
                       <TextInput
@@ -566,6 +613,7 @@ export function ComboFormModal({
           </Card>
         </ModalBody>
 
+        {/* Modal Footer */}
         <ModalFooter className="p-4 border-t bg-gray-50 border-gray-200 flex justify-end space-x-2">
           <Button
             color="red"

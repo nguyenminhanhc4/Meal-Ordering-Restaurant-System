@@ -794,6 +794,7 @@
         "descriptionLabel": "Mô tả",
         "descriptionPlaceholder": "Mô tả ngắn về combo...",
         "imageSection": "Hình ảnh",
+        "itemsUnit": "món",
         "uploadLabel": "Tải ảnh lên",
         "uploadHint": "Chỉ chấp nhận ảnh dưới 5MB",
         "urlLabel": "Hoặc nhập URL ảnh",
