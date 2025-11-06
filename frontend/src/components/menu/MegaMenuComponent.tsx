@@ -335,17 +335,46 @@ const MegaMenuComponent: React.FC = () => {
 
                             {child.children?.length > 0 && isOpen && (
                               <ul className="ml-5 mt-2 space-y-1.5 border-l border-gray-600/30 pl-3">
-                                {child.children.map((subChild) => (
-                                  <li key={subChild.id}>
-                                    <Link
-                                      to={`/menu/${subChild.name
-                                        .toLowerCase()
-                                        .replace(/\s+/g, "-")}`}
-                                      className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
-                                      {subChild.name}
-                                    </Link>
-                                  </li>
-                                ))}
+                                {child.children.map((subChild) => {
+                                  // ✅ Nếu cha là "Combo" hoặc nằm trong cây Combo => dùng link /combo
+                                  const isComboBranch = child.name
+                                    .toLowerCase()
+                                    .includes("combo");
+                                  const basePath = isComboBranch
+                                    ? "/combo"
+                                    : "/menu";
+
+                                  return (
+                                    <li key={subChild.id}>
+                                      <Link
+                                        to={`${basePath}/${subChild.name
+                                          .toLowerCase()
+                                          .replace(/\s+/g, "-")}`}
+                                        className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
+                                        {subChild.name}
+                                      </Link>
+
+                                      {/* ✅ Nếu có cấp con nữa, lặp đệ quy */}
+                                      {subChild.children?.length > 0 && (
+                                        <ul className="ml-5 mt-1 space-y-1 border-l border-gray-600/30 pl-3">
+                                          {subChild.children.map(
+                                            (deepChild) => (
+                                              <li key={deepChild.id}>
+                                                <Link
+                                                  to={`/combo/${deepChild.name
+                                                    .toLowerCase()
+                                                    .replace(/\s+/g, "-")}`}
+                                                  className="py-1 px-2 block rounded-md text-gray-400 hover:text-yellow-400 transition-colors duration-200 text-sm">
+                                                  {deepChild.name}
+                                                </Link>
+                                              </li>
+                                            )
+                                          )}
+                                        </ul>
+                                      )}
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             )}
                           </li>

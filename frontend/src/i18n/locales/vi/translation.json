@@ -1356,5 +1356,40 @@
     "last": "Trang cuối",
     "jumpLabel": "Tới trang",
     "go": "Đi"
+  },
+  "comboPage": {
+    "title": "Danh sách Combo",
+    "description": "Khám phá những combo hấp dẫn dành cho bạn.",
+    "noItems": "Không có combo nào trong danh mục này.",
+    "loadingMore": "Đang tải thêm...",
+    "notification": {
+      "fetchError": "Không thể tải danh sách combo.",
+      "itemDeleted": "Một combo đã bị xóa."
+    },
+    "actions": {
+      "viewAll": "Xem tất cả combo",
+      "loadMore": "Xem thêm"
+    }
+  },
+  "comboCard": {
+    "updated": "{{name}} đã được cập nhật.",
+    "notAvailable": "Combo {{name}} hiện không khả dụng.",
+    "addedToCart": "Đã thêm {{name}} vào giỏ hàng!",
+    "addToCartError": "Không thể thêm vào giỏ hàng. Vui lòng thử lại.",
+    "noImage": "Không có hình ảnh",
+    "status": {
+      "available": "Còn hàng",
+      "out_of_stock": "Hết hàng",
+      "coming_soon": "Sắp ra mắt"
+    },
+    "moreItems": "món khác",
+    "view": "Xem chi tiết",
+    "add": "Thêm vào giỏ",
+    "category": "Danh mục",
+    "price": "Giá",
+    "currency": "₫"
+  },
+  "productCard": {
+    "currency": "₫"
   }
 }

@@ -27,7 +27,6 @@ public class ComboController {
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long statusId,
-            @RequestParam(required = false) String slug,
             @RequestParam(defaultValue = "name-asc") String sort
             ) {
         Page<ComboDto> combos = comboService.findAll(page, size, search, categoryId, statusId, sort);

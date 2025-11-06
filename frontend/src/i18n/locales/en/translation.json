@@ -1356,5 +1356,40 @@
     "last": "Last",
     "jumpLabel": "Go to page",
     "go": "Go"
+  },
+  "comboPage": {
+    "title": "Combo List",
+    "description": "Discover our delicious combos tailored just for you.",
+    "noItems": "No combos found in this category.",
+    "loadingMore": "Loading more...",
+    "notification": {
+      "fetchError": "Failed to load combos.",
+      "itemDeleted": "A combo has been deleted."
+    },
+    "actions": {
+      "viewAll": "View All Combos",
+      "loadMore": "Load More"
+    }
+  },
+  "comboCard": {
+    "updated": "{{name}} has been updated.",
+    "notAvailable": "Combo {{name}} is currently unavailable.",
+    "addedToCart": "{{name}} has been added to your cart!",
+    "addToCartError": "Failed to add to cart. Please try again.",
+    "noImage": "No image available",
+    "status": {
+      "available": "Available",
+      "out_of_stock": "Out of Stock",
+      "coming_soon": "Coming Soon"
+    },
+    "moreItems": "more items",
+    "view": "View",
+    "add": "Add to Cart",
+    "category": "Category",
+    "price": "Price",
+    "currency": "₫"
+  },
+  "productCard": {
+    "currency": "₫"
   }
 }
