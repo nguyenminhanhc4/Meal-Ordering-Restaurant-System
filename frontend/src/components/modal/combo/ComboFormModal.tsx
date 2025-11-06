@@ -20,14 +20,13 @@ import { isAxiosError } from "axios";
 import type {
   Combo,
   ComboRequest,
-  Category,
   StatusParam,
   MenuItem,
 } from "../../../services/product/fetchCombo";
 import type { Page } from "../../../services/types/PageType";
 import { updateCombo, createCombo } from "../../../services/product/fetchCombo";
 import ReactSelect from "react-select";
-
+import { type Category } from "../../../services/category/fetchCategories";
 // Component props interface
 interface ComboFormModalProps {
   show: boolean;
@@ -153,7 +152,9 @@ export function ComboFormModal({
         avatarUrl: "",
         categoryId: categories[0]?.id || 0,
         statusId:
-          statuses.find((s) => s.code === "ACTIVE")?.id || statuses[0]?.id || 0,
+          statuses.find((s) => s.code === "AVAILABLE")?.id ||
+          statuses[0]?.id ||
+          0,
         items: [],
       });
       setSelectedItems([]);
@@ -325,6 +326,18 @@ export function ComboFormModal({
     }
   };
 
+  function renderCategoryOptions(
+    categories: Category[],
+    level: number = 0
+  ): JSX.Element[] {
+    return categories.flatMap((cat) => [
+      <option key={cat.id} value={cat.id}>
+        {"— ".repeat(level) + cat.name}
+      </option>,
+      ...(cat.children ? renderCategoryOptions(cat.children, level + 1) : []),
+    ]);
+  }
+
   return (
     <Modal show={show} onClose={onClose} size="5xl" className="z-[70]">
       <ModalHeader className="!p-4 border-b bg-gray-50 !border-gray-600">
@@ -369,13 +382,7 @@ export function ComboFormModal({
                 onChange={handleInputChange}
                 className="w-full"
                 theme={inputTheme}>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.parentCategory
-                      ? `${c.parentCategory.name} → ${c.name}`
-                      : c.name}
-                  </option>
-                ))}
+                {renderCategoryOptions(categories)}
               </FlowbiteSelect>
             </div>
           </div>

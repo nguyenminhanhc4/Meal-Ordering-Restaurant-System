@@ -771,8 +771,8 @@
         "actions": "Thao tác"
       },
       "status": {
-        "ACTIVE": "Đang bán",
-        "INACTIVE": "Ngừng bán"
+        "AVAILABLE": "Đang bán",
+        "OUT_OF_STOCK": "Ngừng bán"
       },
       "notifications": {
         "loadError": "Không tải được danh sách combo.",
@@ -1344,7 +1344,7 @@
     }
   },
   "status": {
-    "active": "Hoạt động",
+    "available": "Hoạt động",
     "inactive": "Tạm dừng",
     "pending": "Đang chờ duyệt",
     "out_of_stock": "Hết hàng"

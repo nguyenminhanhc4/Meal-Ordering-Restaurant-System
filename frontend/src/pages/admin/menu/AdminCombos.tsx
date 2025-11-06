@@ -30,13 +30,8 @@ import {
   deleteCombo,
   getAllCombos,
 } from "../../../services/product/fetchCombo";
+import { type Category } from "../../../services/category/fetchCategories";
 import api from "../../../api/axios";
-
-interface Category {
-  id: number;
-  name: string;
-  parentCategory?: Category | null;
-}
 
 interface StatusParam {
   id: number;
@@ -85,7 +80,7 @@ function AdminCombos() {
         // Lấy tất cả danh mục
         const [catRes, statusRes] = await Promise.all([
           api.get<Category[]>("/categories"),
-          api.get<{ data: StatusParam[] }>("/params?type=STATUS"),
+          api.get<{ data: StatusParam[] }>("/params?type=MENU_ITEM_STATUS"),
         ]);
 
         const allCategories = catRes.data || [];
@@ -99,9 +94,9 @@ function AdminCombos() {
         if (comboCategory) {
           // Gọi API lấy danh mục con của combo
           const childRes = await api.get<Category[]>(
-            `/categories/${comboCategory.id}/children`
+            `/categories/tree/${comboCategory.id}/tree`
           );
-          comboCategories = [comboCategory, ...(childRes.data || [])];
+          comboCategories = childRes.data || [];
         }
 
         setCategories(comboCategories);
@@ -208,9 +203,9 @@ function AdminCombos() {
   }, []);
 
   const getStatusBadgeColor = useCallback((status: string) => {
-    return status === "ACTIVE"
+    return status === "AVAILABLE"
       ? "success"
-      : status === "INACTIVE"
+      : status === "OUT_OF_STOCK"
       ? "failure"
       : "gray";
   }, []);
@@ -223,6 +218,18 @@ function AdminCombos() {
       }).format(price),
     []
   );
+
+  function renderCategoryOptions(
+    categories: Category[],
+    level: number = 0
+  ): JSX.Element[] {
+    return categories.flatMap((cat) => [
+      <option key={cat.id} value={cat.id}>
+        {"— ".repeat(level) + cat.name}
+      </option>,
+      ...(cat.children ? renderCategoryOptions(cat.children, level + 1) : []),
+    ]);
+  }
 
   return (
     <div className="space-y-6">
@@ -272,11 +279,7 @@ function AdminCombos() {
                   },
                 }}>
                 <option value="">{t("admin.combos.categoryAll")}</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
+                {renderCategoryOptions(categories)}
               </Select>
             </div>
 

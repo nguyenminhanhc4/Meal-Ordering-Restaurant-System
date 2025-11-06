@@ -772,8 +772,8 @@
         "actions": "Actions"
       },
       "status": {
-        "ACTIVE": "Available",
-        "INACTIVE": "Unavailable"
+        "AVAILABLE": "Available",
+        "OUT_OF_STOCK": "Unavailable"
       },
       "notifications": {
         "loadError": "Failed to load combo list.",
@@ -1344,7 +1344,7 @@
     }
   },
   "status": {
-    "active": "Active",
+    "available": "available",
     "inactive": "Inactive",
     "pending": "Pending",
     "out_of_stock": "Out of Stock"

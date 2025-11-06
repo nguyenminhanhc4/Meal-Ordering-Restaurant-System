@@ -2,7 +2,7 @@ import { HRTrimmed } from "flowbite-react";
 import FeaturedMenu from "../../../components/landing/FeaturedMenu";
 import AboutSection from "../../../components/landing/AboutSection";
 import HeroSection from "../../../components/landing/HeroSection";
-import BookingForm from "../../../components/landing/BookingForm";
+// import BookingForm from "../../../components/landing/BookingForm";
 
 export default function LandingPage() {
   return (
@@ -20,10 +20,10 @@ export default function LandingPage() {
       {/* About Section */}
       <AboutSection />
 
-      <HRTrimmed className="!bg-amber-900" />
+      {/* <HRTrimmed className="!bg-amber-900" /> */}
 
       {/* Booking Form Section */}
-      <BookingForm />
+      {/* <BookingForm /> */}
     </>
   );
 }

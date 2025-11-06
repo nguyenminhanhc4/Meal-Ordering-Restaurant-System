@@ -98,12 +98,12 @@ export default function NavbarLanding() {
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             {t("navbarLanding.menu.about")}
           </NavbarLink>
-          <NavbarLink
+          {/* <NavbarLink
             href="#booking"
             active={activeSection === "booking"}
             className="text-gray-200 text-lg hover:!text-yellow-400 transition-colors">
             {t("navbarLanding.menu.booking")}
-          </NavbarLink>
+          </NavbarLink> */}
         </NavbarCollapse>
 
         {/* Right side */}
