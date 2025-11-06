@@ -163,9 +163,20 @@ function AdminLayout() {
       icon: HiCollection,
     },
     {
-      path: "/admin/menu-items",
-      label: t("admin.sidebar.menu.menuItems"),
+      label: t("admin.sidebar.menu.menu"),
       icon: HiMenuAlt1,
+      children: [
+        {
+          path: "/admin/menu-items",
+          label: t("admin.sidebar.menu.menuItems"),
+          icon: HiMenuAlt1,
+        },
+        {
+          path: "/admin/combos",
+          label: t("admin.sidebar.menu.combos"),
+          icon: MdFastfood,
+        },
+      ],
     },
     {
       path: "/admin/tables",
@@ -186,9 +197,20 @@ function AdminLayout() {
       icon: HiCollection,
     },
     {
-      path: "/admin/menu-items",
-      label: t("admin.sidebar.menu.menuItems"),
+      label: t("admin.sidebar.menu.menu"),
       icon: HiMenuAlt1,
+      children: [
+        {
+          path: "/admin/menu-items",
+          label: t("admin.sidebar.menu.menuItems"),
+          icon: HiMenuAlt1,
+        },
+        {
+          path: "/admin/combos",
+          label: t("admin.sidebar.menu.combos"),
+          icon: MdFastfood,
+        },
+      ],
     },
     {
       path: "/admin/tables",
@@ -538,9 +560,163 @@ function AdminLayout() {
                     {t("admin.sidebar.adminGroup")}
                   </h6>
                 )}
-                {adminMenu.map((item) => (
-                  <SidebarItemButton key={item.path} {...item} />
-                ))}
+                {adminMenu.map((item) =>
+                  item.children ? (
+                    <div
+                      key={item.label}
+                      className="relative"
+                      onMouseEnter={() => {
+                        if (!isSidebarOpen) {
+                          if (hoverTimer.current !== null)
+                            clearTimeout(hoverTimer.current);
+                          setHoveredMenu(item.label);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!isSidebarOpen) {
+                          hoverTimer.current = setTimeout(
+                            () => setHoveredMenu(null),
+                            300
+                          );
+                        }
+                      }}>
+                      <SidebarItem
+                        onClick={() =>
+                          isSidebarOpen && toggleExpand(item.label)
+                        }
+                        className="relative transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: expandedMenus[item.label]
+                            ? "var(--color-sidebar-active-text)"
+                            : "var(--color-sidebar-text)",
+                        }}>
+                        <div
+                          className={`flex items-center ${
+                            isSidebarOpen
+                              ? "gap-3 px-3 py-2"
+                              : "justify-center py-3"
+                          }`}>
+                          {!isSidebarOpen ? (
+                            <>
+                              <Tooltip
+                                content={item.label}
+                                placement="right"
+                                animation="duration-300"
+                                className="!bg-var(--color-tooltip-bg) !text-var(--color-tooltip-text)">
+                                <div>
+                                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                                </div>
+                              </Tooltip>
+
+                              {hoveredMenu === item.label && (
+                                <div
+                                  className="absolute left-full top-0 ml-2 shadow-xl rounded-lg py-2 px-3 min-w-[220px] animate-fadeIn z-50"
+                                  style={{
+                                    backgroundColor: "var(--color-sidebar-bg)",
+                                    border:
+                                      "1px solid var(--color-sidebar-border)",
+                                    color: "var(--color-sidebar-text)",
+                                  }}
+                                  onMouseEnter={() => {
+                                    if (hoverTimer.current !== null)
+                                      clearTimeout(hoverTimer.current);
+                                    setHoveredMenu(item.label);
+                                  }}
+                                  onMouseLeave={() => {
+                                    hoverTimer.current = setTimeout(
+                                      () => setHoveredMenu(null),
+                                      300
+                                    );
+                                  }}>
+                                  {/* Header */}
+                                  <div
+                                    className="flex items-center gap-2 mb-2 pb-1"
+                                    style={{
+                                      borderBottom:
+                                        "1px solid var(--color-sidebar-border)",
+                                    }}>
+                                    <item.icon
+                                      className="w-5 h-5"
+                                      style={{ color: "var(--color-primary)" }}
+                                    />
+                                    <span className="font-medium text-sm tracking-wide">
+                                      {item.label}
+                                    </span>
+                                  </div>
+
+                                  {/* List submenu */}
+                                  <div className="flex flex-col gap-1">
+                                    {item.children.map((sub) => (
+                                      <div
+                                        key={sub.path}
+                                        onClick={() => navigate(sub.path)}
+                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-150`}
+                                        style={{
+                                          backgroundColor:
+                                            location.pathname === sub.path
+                                              ? "var(--color-primary)"
+                                              : "transparent",
+                                          color:
+                                            location.pathname === sub.path
+                                              ? "white"
+                                              : "var(--color-sidebar-text)",
+                                        }}
+                                        onMouseEnter={(e) =>
+                                          location.pathname !== sub.path &&
+                                          (e.currentTarget.style.backgroundColor =
+                                            "var(--color-sidebar-hover)")
+                                        }
+                                        onMouseLeave={(e) =>
+                                          location.pathname !== sub.path &&
+                                          (e.currentTarget.style.backgroundColor =
+                                            "transparent")
+                                        }>
+                                        {sub.icon && (
+                                          <sub.icon className="w-4 h-4 flex-shrink-0" />
+                                        )}
+                                        <span className="text-sm truncate">
+                                          {sub.label}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              {expandedMenus[item.label] ? (
+                                <HiFolderOpen
+                                  className="w-5 h-5 flex-shrink-0"
+                                  style={{ color: "var(--color-primary)" }}
+                                />
+                              ) : (
+                                <HiFolder className="w-5 h-5 flex-shrink-0" />
+                              )}
+                              <span className="truncate text-sm leading-none">
+                                {item.label}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </SidebarItem>
+
+                      {isSidebarOpen && expandedMenus[item.label] && (
+                        <div
+                          className="ml-4"
+                          style={{
+                            borderLeft: "1px solid var(--color-sidebar-border)",
+                          }}>
+                          {item.children.map((sub) => (
+                            <SidebarItemButton key={sub.path} {...sub} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <SidebarItemButton key={item.path} {...item} />
+                  )
+                )}
               </SidebarItemGroup>
             )}
 
@@ -554,9 +730,163 @@ function AdminLayout() {
                     {t("admin.sidebar.staffGroup")}
                   </h6>
                 )}
-                {staffMenu.map((item) => (
-                  <SidebarItemButton key={item.path} {...item} />
-                ))}
+                {staffMenu.map((item) =>
+                  item.children ? (
+                    <div
+                      key={item.label}
+                      className="relative"
+                      onMouseEnter={() => {
+                        if (!isSidebarOpen) {
+                          if (hoverTimer.current !== null)
+                            clearTimeout(hoverTimer.current);
+                          setHoveredMenu(item.label);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!isSidebarOpen) {
+                          hoverTimer.current = setTimeout(
+                            () => setHoveredMenu(null),
+                            300
+                          );
+                        }
+                      }}>
+                      <SidebarItem
+                        onClick={() =>
+                          isSidebarOpen && toggleExpand(item.label)
+                        }
+                        className="relative transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: expandedMenus[item.label]
+                            ? "var(--color-sidebar-active-text)"
+                            : "var(--color-sidebar-text)",
+                        }}>
+                        <div
+                          className={`flex items-center ${
+                            isSidebarOpen
+                              ? "gap-3 px-3 py-2"
+                              : "justify-center py-3"
+                          }`}>
+                          {!isSidebarOpen ? (
+                            <>
+                              <Tooltip
+                                content={item.label}
+                                placement="right"
+                                animation="duration-300"
+                                className="!bg-var(--color-tooltip-bg) !text-var(--color-tooltip-text)">
+                                <div>
+                                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                                </div>
+                              </Tooltip>
+
+                              {hoveredMenu === item.label && (
+                                <div
+                                  className="absolute left-full top-0 ml-2 shadow-xl rounded-lg py-2 px-3 min-w-[220px] animate-fadeIn z-50"
+                                  style={{
+                                    backgroundColor: "var(--color-sidebar-bg)",
+                                    border:
+                                      "1px solid var(--color-sidebar-border)",
+                                    color: "var(--color-sidebar-text)",
+                                  }}
+                                  onMouseEnter={() => {
+                                    if (hoverTimer.current !== null)
+                                      clearTimeout(hoverTimer.current);
+                                    setHoveredMenu(item.label);
+                                  }}
+                                  onMouseLeave={() => {
+                                    hoverTimer.current = setTimeout(
+                                      () => setHoveredMenu(null),
+                                      300
+                                    );
+                                  }}>
+                                  {/* Header */}
+                                  <div
+                                    className="flex items-center gap-2 mb-2 pb-1"
+                                    style={{
+                                      borderBottom:
+                                        "1px solid var(--color-sidebar-border)",
+                                    }}>
+                                    <item.icon
+                                      className="w-5 h-5"
+                                      style={{ color: "var(--color-primary)" }}
+                                    />
+                                    <span className="font-medium text-sm tracking-wide">
+                                      {item.label}
+                                    </span>
+                                  </div>
+
+                                  {/* List submenu */}
+                                  <div className="flex flex-col gap-1">
+                                    {item.children.map((sub) => (
+                                      <div
+                                        key={sub.path}
+                                        onClick={() => navigate(sub.path)}
+                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-150`}
+                                        style={{
+                                          backgroundColor:
+                                            location.pathname === sub.path
+                                              ? "var(--color-primary)"
+                                              : "transparent",
+                                          color:
+                                            location.pathname === sub.path
+                                              ? "white"
+                                              : "var(--color-sidebar-text)",
+                                        }}
+                                        onMouseEnter={(e) =>
+                                          location.pathname !== sub.path &&
+                                          (e.currentTarget.style.backgroundColor =
+                                            "var(--color-sidebar-hover)")
+                                        }
+                                        onMouseLeave={(e) =>
+                                          location.pathname !== sub.path &&
+                                          (e.currentTarget.style.backgroundColor =
+                                            "transparent")
+                                        }>
+                                        {sub.icon && (
+                                          <sub.icon className="w-4 h-4 flex-shrink-0" />
+                                        )}
+                                        <span className="text-sm truncate">
+                                          {sub.label}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-3">
+                              {expandedMenus[item.label] ? (
+                                <HiFolderOpen
+                                  className="w-5 h-5 flex-shrink-0"
+                                  style={{ color: "var(--color-primary)" }}
+                                />
+                              ) : (
+                                <HiFolder className="w-5 h-5 flex-shrink-0" />
+                              )}
+                              <span className="truncate text-sm leading-none">
+                                {item.label}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </SidebarItem>
+
+                      {isSidebarOpen && expandedMenus[item.label] && (
+                        <div
+                          className="ml-4"
+                          style={{
+                            borderLeft: "1px solid var(--color-sidebar-border)",
+                          }}>
+                          {item.children.map((sub) => (
+                            <SidebarItemButton key={sub.path} {...sub} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <SidebarItemButton key={item.path} {...item} />
+                  )
+                )}
               </SidebarItemGroup>
             )}
           </SidebarItems>

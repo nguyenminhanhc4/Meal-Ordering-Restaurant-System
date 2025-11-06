@@ -16,6 +16,11 @@ public class CategoryTreeController {
 
     @GetMapping
     public List<CategoryTreeDTO> getTree() {
-        return categoryTreeService.getCategoryTree();
+        return categoryTreeService.getCategoryTree(null);
+    }
+
+    @GetMapping("/{id}/tree")
+    public List<CategoryTreeDTO> getTreeByRoot(@PathVariable Long id) {
+        return categoryTreeService.getCategoryTree(id);
     }
 }

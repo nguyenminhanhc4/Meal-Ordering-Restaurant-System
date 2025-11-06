@@ -2,7 +2,9 @@
   "auth": {
     "common": {
       "unexpectedError": "An unexpected error occurred!",
-      "close": "Cancel"
+      "close": "Cancel",
+      "update": "Update",
+      "create": "Create"
     },
     "forgot": {
       "emailPlaceholder": "Enter your email",
@@ -191,6 +193,10 @@
     "loading": "Loading...",
     "send": "Send",
     "sending": "Sending...",
+    "update": "Update",
+    "create": "Create",
+    "saving": "Saving...",
+    "error": "System error",
     "pagination": {
       "showing": "Showing {{start}} to {{end}} of {{total}} entries"
     },
@@ -748,12 +754,82 @@
   },
   "admin": {
     "checkingSession": "Checking session...",
+    "combos": {
+      "title": "Combo Management",
+      "addButton": "Add Combo",
+      "searchPlaceholder": "Search combos...",
+      "categoryAll": "All Categories",
+      "statusAll": "All Statuses",
+      "loading": "Loading...",
+      "noItems": "No combos found.",
+      "noDescription": "No description available.",
+      "table": {
+        "image": "Image",
+        "name": "Name",
+        "category": "Category",
+        "price": "Price",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "AVAILABLE": "Available",
+        "OUT_OF_STOCK": "Unavailable"
+      },
+      "notifications": {
+        "loadError": "Failed to load combo list.",
+        "loadRefError": "Failed to load categories or statuses.",
+        "deleteSuccess": "Combo deleted successfully.",
+        "deleteError": "Failed to delete combo."
+      },
+      "confirm": {
+        "title": "Delete Combo",
+        "message": "Are you sure you want to delete this combo?"
+      },
+      "form": {
+        "titleEdit": "Edit Combo",
+        "titleCreate": "Create New Combo",
+        "nameLabel": "Combo Name",
+        "namePlaceholder": "Enter combo name...",
+        "categoryLabel": "Category",
+        "statusLabel": "Status",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description of the combo...",
+        "imageSection": "Image",
+        "itemsUnit": "items",
+        "uploadLabel": "Upload Image",
+        "uploadHint": "Only images under 5MB are accepted",
+        "urlLabel": "Or Enter Image URL",
+        "urlPlaceholder": "https://...",
+        "previewTitle": "Preview",
+        "uploading": "Uploading...",
+        "update": "Update",
+        "itemsSection": "Combo Items",
+        "addButton": "Add Item",
+        "itemSelect": "— Select Item —",
+        "quantityInput": "Quantity",
+        "noItems": "No items yet. Click 'Add Item' to start.",
+        "validation": {
+          "nameRequired": "Combo name is required!",
+          "atLeastOneItem": "Combo must have at least 1 item!",
+          "selectAllItems": "Please select an item for every row!",
+          "imageInvalid": "Please select a valid image file!",
+          "imageSize": "Image must not exceed 5MB!"
+        },
+        "uploadSuccess": "Image uploaded successfully!",
+        "uploadError": "Upload failed: {{error}}",
+        "createSuccess": "Combo created successfully!",
+        "updateSuccess": "Combo updated successfully!",
+        "saveError": "Error saving combo",
+        "loadMenuItemsError": "Failed to load menu items!"
+      }
+    },
     "sidebar": {
       "logo": "Admin Panel",
       "commonGroup": "General",
       "adminGroup": "System Administration",
       "staffGroup": "Staff Tasks",
       "menu": {
+        "combos": "Combo",
         "dashboard": "Dashboard",
         "tables": "Tables",
         "ingredients": "Ingredients",
@@ -762,6 +838,7 @@
         "tableOrders": "Table Orders",
         "users": "Users",
         "categories": "Categories",
+        "menu": "Menu",
         "menuItems": "Menu Items",
         "settings": "Settings",
         "myTasks": "My Tasks"
@@ -1266,6 +1343,12 @@
       }
     }
   },
+  "status": {
+    "available": "available",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "out_of_stock": "Out of Stock"
+  },
   "pagination": {
     "first": "First",
     "previous": "Previous",
@@ -1273,5 +1356,40 @@
     "last": "Last",
     "jumpLabel": "Go to page",
     "go": "Go"
+  },
+  "comboPage": {
+    "title": "Combo List",
+    "description": "Discover our delicious combos tailored just for you.",
+    "noItems": "No combos found in this category.",
+    "loadingMore": "Loading more...",
+    "notification": {
+      "fetchError": "Failed to load combos.",
+      "itemDeleted": "A combo has been deleted."
+    },
+    "actions": {
+      "viewAll": "View All Combos",
+      "loadMore": "Load More"
+    }
+  },
+  "comboCard": {
+    "updated": "{{name}} has been updated.",
+    "notAvailable": "Combo {{name}} is currently unavailable.",
+    "addedToCart": "{{name}} has been added to your cart!",
+    "addToCartError": "Failed to add to cart. Please try again.",
+    "noImage": "No image available",
+    "status": {
+      "available": "Available",
+      "out_of_stock": "Out of Stock",
+      "coming_soon": "Coming Soon"
+    },
+    "moreItems": "more items",
+    "view": "View",
+    "add": "Add to Cart",
+    "category": "Category",
+    "price": "Price",
+    "currency": "₫"
+  },
+  "productCard": {
+    "currency": "₫"
   }
 }

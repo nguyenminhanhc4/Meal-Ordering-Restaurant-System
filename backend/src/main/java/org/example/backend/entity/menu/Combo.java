@@ -8,7 +8,7 @@ import org.example.backend.entity.category.Categories;
 import org.example.backend.entity.param.Param;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -60,32 +60,6 @@ public class Combo extends BaseEntity {
 
     private double discountPercent; // e.g. 10 means 10%
 
-    // 🔹 Combo includes several menu items
-    @ManyToMany
-    @JoinTable(
-            name = "combo_items",
-            joinColumns = @JoinColumn(name = "combo_id"),
-            inverseJoinColumns = @JoinColumn(name = "menu_item_id")
-    )
-    private List<MenuItem> menuItems;
-
-    @PrePersist
-    @PreUpdate
-    public void updatePrice() {
-        this.price = calculateTotalPrice();
-    }
-
-    public BigDecimal calculateTotalPrice() {
-        if (menuItems == null || menuItems.isEmpty()) return BigDecimal.ZERO;
-
-        BigDecimal sum = menuItems.stream()
-                .map(MenuItem::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal discount = sum
-                .multiply(BigDecimal.valueOf(discountPercent))
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-        return sum.subtract(discount).setScale(2, RoundingMode.HALF_UP);
-    }
+    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComboItem> items = new ArrayList<>();
 }

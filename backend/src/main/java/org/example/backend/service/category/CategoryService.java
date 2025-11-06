@@ -132,11 +132,13 @@ public class CategoryService {
     }
 
     // Get children by parentId
-    public List<CategoryDTO> getChildren(Long parentId) {
-        return categoryRepository.findByParentId(parentId).stream()
+    public List<CategoryDTO> getAllChildren(Long parentId) {
+        return categoryRepository.findAllDescendants(parentId)
+                .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
 
     // Phân trang cơ bản
     public Page<CategoryDTO> getAllCategoriesWithPagination(int page, int size, String sortBy, String sortDirection) {

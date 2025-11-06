@@ -49,7 +49,7 @@ public class CategoryController {
     // Optional: get children of a category
     @GetMapping("/{id}/children")
     public List<CategoryDTO> getChildren(@PathVariable Long id) {
-        return categoryService.getChildren(id);
+        return categoryService.getAllChildren(id);
     }
 
     // API phân trang cơ bản

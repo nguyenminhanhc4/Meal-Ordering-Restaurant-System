@@ -1,133 +1,119 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Card, Button, Spinner } from "flowbite-react";
-import {
-  getAllMenuItems,
-  getMenuItemById,
-} from "../../../services/product/fetchProduct";
-import type { Product } from "../../../services/product/fetchProduct";
+import { getAllCombos } from "../../../services/product/fetchCombo";
+import type { Combo } from "../../../services/product/fetchCombo";
 import { useNotification } from "../../../components/Notification/NotificationContext";
-import ProductCard from "../../../components/card/ProductCard";
 import SearchBar from "../../../components/search_filter/SearchBar";
 import SortFilter from "../../../components/search_filter/SortFilter";
-import {
-  useRealtimeUpdate,
-  useRealtimeDelete,
-} from "../../../api/useRealtimeUpdate.ts";
+import ComboCard from "../../../components/card/ComboCard";
+import { useRealtimeDelete } from "../../../api/useRealtimeUpdate";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 /**
- * 🍽️ MealPage
- * Trang hiển thị danh sách món ăn theo danh mục.
+ * 🧩 ComboPage — Trang hiển thị danh sách Combo theo danh mục (slug)
  */
-const MealPage: React.FC = () => {
-  const { categorySlug } = useParams<{ categorySlug: string }>();
+const ComboPage: React.FC = () => {
+  const { categorySlug } = useParams<{ categorySlug?: string }>();
   const { t } = useTranslation();
   const { notify } = useNotification();
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [combos, setCombos] = useState<Combo[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(6);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("popular");
+  const [sort, setSort] = useState("name-asc");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  /** 🔄 fetchProducts — Gọi API lấy dữ liệu món ăn */
-  const fetchProducts = useCallback(
+  /** 🔄 Fetch combos từ API */
+  const fetchCombos = useCallback(
     async (page: number, append = false) => {
       try {
         if (append) setLoadingMore(true);
         else setLoading(true);
 
-        const pageData = await getAllMenuItems(
+        // Backend API: getAllCombos(page, size, search, categoryId, statusId, sort)
+        const pageData = await getAllCombos(
           page,
           pageSize,
           search,
-          sort,
-          categorySlug
+          undefined,
+          undefined,
+          sort
         );
-
         let fetched = pageData.content;
+
         if (categorySlug) {
+          const normalizedSlug = categorySlug
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "-");
+
           fetched = fetched.filter(
-            (p: Product) => p.categorySlug === categorySlug
+            (p: Combo) =>
+              p.category &&
+              p.category
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/\s+/g, "-") === normalizedSlug
           );
         }
 
-        setProducts((prev) => (append ? [...prev, ...fetched] : fetched));
+        setCombos((prev) => (append ? [...prev, ...fetched] : fetched));
         setTotalPages(pageData.totalPages);
       } catch (error) {
-        console.error("Error fetching menu items:", error);
-        notify("error", t("mealPage.notification.fetchError"));
+        console.error("Error fetching combos:", error);
+        notify("error", t("comboPage.notification.fetchError"));
       } finally {
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [categorySlug, pageSize, search, sort, notify, t]
+    [pageSize, search, sort, categorySlug, notify, t]
   );
 
+  /** Gọi API khi đổi trang hoặc thay đổi filter */
   useEffect(() => {
-    fetchProducts(currentPage, currentPage > 0);
-  }, [categorySlug, currentPage, search, sort, fetchProducts]);
+    fetchCombos(currentPage, currentPage > 0);
+  }, [categorySlug, currentPage, search, sort, fetchCombos]);
 
+  /** Reset trang khi thay đổi filter/search/danh mục */
   useEffect(() => {
-    setProducts([]);
+    setCombos([]);
     setCurrentPage(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [search, sort, categorySlug]);
 
-  /** 🔁 Realtime updates */
-  useRealtimeUpdate(
-    `/topic/menu/new`,
-    getMenuItemById,
-    (updatedOrNewProduct) => {
-      if (!updatedOrNewProduct) return;
-      setProducts((prev) => {
-        const exists = prev.some((p) => p.id === updatedOrNewProduct.id);
-        if (exists) {
-          return prev.map((p) =>
-            p.id === updatedOrNewProduct.id ? updatedOrNewProduct : p
-          );
-        }
-        return [updatedOrNewProduct, ...prev];
-      });
-
-      notify(
-        "info",
-        t("mealPage.notification.itemUpdatedOrAdded", {
-          name: updatedOrNewProduct.name,
-        })
-      );
-    },
-    (msg: { menuItemId: number }) => msg.menuItemId
-  );
-
-  useRealtimeDelete<{ menuItemId: number }>("/topic/menu/delete", (msg) => {
-    setProducts((prev) => prev.filter((p) => p.id !== msg.menuItemId));
-    notify("warning", t("mealPage.notification.itemDeleted"));
+  /** 🔁 Realtime delete */
+  useRealtimeDelete<{ comboId: number }>("/topic/combo/delete", (msg) => {
+    setCombos((prev) => prev.filter((c) => c.id !== msg.comboId));
+    notify("warning", t("comboPage.notification.itemDeleted"));
   });
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-100 py-12 px-4 sm:px-6 md:px-8">
       <div className="max-w-screen-xl mx-auto py-12 px-4 md:px-6">
-        {/* === Tiêu đề danh mục === */}
+        {/* === Tiêu đề === */}
         <h2 className="text-4xl font-extrabold text-center text-amber-800 mb-4 border-b-2 border-stone-800 pb-2">
           {categorySlug
             ? categorySlug
-                .replace("-", " ")
-                .replace(/\b\w/g, (c) => c.toUpperCase())
-            : t("mealPage.title.default")}
+                .replace(/-/g, " ") // thay tất cả dấu '-'
+                .replace(
+                  /\p{L}+/gu,
+                  (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                )
+            : t("comboPage.title")}
         </h2>
 
         <p className="text-amber-600 text-lg text-center mb-8">
-          {t("mealPage.description")}
+          {t("comboPage.description")}
         </p>
 
-        {/* === Thanh tìm kiếm & bộ lọc === */}
+        {/* === Search & Sort === */}
         <Card className="mb-8 !bg-white !border-stone-400 shadow-sm">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
             <div className="flex-1 w-full md:w-auto">
@@ -144,9 +130,9 @@ const MealPage: React.FC = () => {
 
             <div className="w-full md:w-auto flex-none">
               <Link
-                to="/menu"
+                to="/combo"
                 className="block w-full md:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-colors duration-200">
-                {t("mealPage.actions.viewAll")}
+                {t("comboPage.actions.viewAll")}
               </Link>
             </div>
           </div>
@@ -154,25 +140,25 @@ const MealPage: React.FC = () => {
 
         <hr className="border-t-2 border-stone-800 mb-8" />
 
-        {/* === Danh sách món ăn === */}
+        {/* === Danh sách Combo === */}
         <div className="relative min-h-[400px]">
           <div
             className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-300 ${
               loading ? "opacity-50 pointer-events-none" : "opacity-100"
             }`}>
-            {products.length > 0
-              ? products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+            {combos.length > 0
+              ? combos.map((combo) => (
+                  <ComboCard key={combo.id} combo={combo} />
                 ))
               : !loading && (
                   <div className="text-gray-500 text-center col-span-full">
-                    {t("mealPage.noItems")}
+                    {t("comboPage.noItems")}
                   </div>
                 )}
           </div>
 
-          {/* Skeleton khi đang load trang đầu */}
-          {loading && products.length === 0 && (
+          {/* Skeleton khi đang load */}
+          {loading && combos.length === 0 && (
             <div className="absolute inset-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: pageSize }).map((_, idx) => (
                 <div
@@ -194,10 +180,10 @@ const MealPage: React.FC = () => {
               className="bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-lg transition-colors duration-200 disabled:opacity-70">
               {loadingMore ? (
                 <span className="flex items-center gap-2">
-                  <Spinner size="sm" /> {t("mealPage.loadingMore")}
+                  <Spinner size="sm" /> {t("comboPage.loadingMore")}
                 </span>
               ) : (
-                t("mealPage.actions.loadMore")
+                t("comboPage.actions.loadMore")
               )}
             </Button>
           </div>
@@ -207,4 +193,4 @@ const MealPage: React.FC = () => {
   );
 };
 
-export default MealPage;
+export default ComboPage;

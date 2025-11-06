@@ -70,7 +70,7 @@ export default function RegisterForm() {
     if (Object.keys(newErrors).length === 0) {
       try {
         setLoading(true);
-        const response = await api.post(
+        await api.post(
           "/auth/register",
           {
             name,
@@ -85,7 +85,6 @@ export default function RegisterForm() {
             },
           }
         );
-        console.log("Register success:", response.data);
         notify("success", t("auth.register.success"));
         navigate("/login");
       } catch (error: unknown) {

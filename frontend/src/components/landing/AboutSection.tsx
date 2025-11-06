@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import bg_scene from "../../assets/img/bg_restaurant.png";
 import bg_food from "../../assets/temp/beef_steak.jpg";
 import bg_staff from "../../assets/temp/staff_photo.jpg";
+import { Link } from "react-router-dom";
 
 export default function AboutSection() {
   const { t } = useTranslation();
@@ -64,18 +65,20 @@ export default function AboutSection() {
       </div>
 
       <div className="flex justify-center gap-4">
-        <Button
-          size="lg"
-          href="/table"
-          className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
-          {t("home.about.bookTable")}
-        </Button>
-        <Button
-          size="lg"
-          href="/menu"
-          className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
-          {t("home.about.orderNow")}
-        </Button>
+        <Link to="/table">
+          <Button
+            size="lg"
+            className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
+            {t("home.about.bookTable")}
+          </Button>
+        </Link>
+        <Link to="/menu">
+          <Button
+            size="lg"
+            className="font-semibold bg-amber-900 text-amber-50 shadow-md hover:scale-105 transition-transform duration-200">
+            {t("home.about.orderNow")}
+          </Button>
+        </Link>
       </div>
     </section>
   );

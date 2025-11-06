@@ -4,237 +4,198 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.dto.menu.ComboDto;
-import org.example.backend.entity.category.Categories;
+import org.example.backend.dto.menu.*;
 import org.example.backend.entity.menu.Combo;
+import org.example.backend.entity.menu.ComboItem;
 import org.example.backend.entity.menu.MenuItem;
-import org.example.backend.entity.param.Param;
+import org.example.backend.exception.BadRequestException;
+import org.example.backend.exception.NotFoundException;
 import org.example.backend.repository.category.CategoryRepository;
+import org.example.backend.repository.menu.ComboItemRepository;
 import org.example.backend.repository.menu.ComboRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.param.ParamRepository;
-import org.example.backend.util.WebSocketNotifier;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ComboService {
 
     private final ComboRepository comboRepository;
+    private final ComboItemRepository comboItemRepository;
+    private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoryRepository;
     private final MenuItemRepository menuItemRepository;
     private final ParamRepository paramRepository;
     private final Cloudinary cloudinary;
     private final WebSocketNotifier webSocketNotifier;
 
-    // =============================================
-    // BASIC CRUD
-    // =============================================
-
     @Transactional(readOnly = true)
-    public List<ComboDto> findAll() {
-        return comboRepository.findAll()
-                .stream()
-                .map(ComboDto::new)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<ComboDto> findById(Long id) {
-        return comboRepository.findById(id).map(ComboDto::new);
-    }
-
-    public ComboDto getById(Long id) {
-        return comboRepository.findById(id)
-                .map(ComboDto::new)
-                .orElseThrow(() -> new RuntimeException("Combo not found"));
-    }
-
-    // =============================================
-    // PAGINATION + SEARCH
-    // =============================================
-
-    @Transactional(readOnly = true)
-    public Page<ComboDto> findAll(int page, int size, String search, String sort, Long typeCategoryId) {
-        Sort sortOption;
-        String sortLower = sort != null ? sort.toLowerCase() : "popular";
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-
-        // 🔹 Define sorting option
-        if ("price-asc".equals(sortLower)) {
-            sortOption = Sort.by(Sort.Direction.ASC, "c.price");
-        } else if ("price-desc".equals(sortLower)) {
-            sortOption = Sort.by(Sort.Direction.DESC, "c.price");
-        } else if ("newest".equals(sortLower)) {
-            sortOption = Sort.by(Sort.Direction.DESC, "c.createdAt");
-        } else {
-            sortOption = Sort.unsorted(); // custom logic for "popular"
-        }
+    public Page<ComboDto> findAll(int page, int size, String search, Long categoryId, Long statusId, String sort) {
+        Sort sortOption = switch (sort.toLowerCase()) {
+            case "price-asc" -> Sort.by("price").ascending();
+            case "price-desc" -> Sort.by("price").descending();
+            case "newest" -> Sort.by("createdAt").descending();
+            default -> Sort.by("name").ascending();
+        };
 
         Pageable pageable = PageRequest.of(page, size, sortOption);
-        Page<Combo> results;
-
-        boolean hasSearch = search != null && !search.trim().isEmpty();
-        boolean hasCategory = typeCategoryId != null;
-
-        // 🔹 Choose query dynamically based on filters
-        if (hasSearch && hasCategory) {
-            results = comboRepository.findByTypeCategoryAndName(typeCategoryId, search.trim(), pageable);
-        } else if (hasSearch) {
-            results = comboRepository.findAllWithDetailsByName(search.trim(), pageable);
-        } else if (hasCategory) {
-            results = comboRepository.findByTypeCategory(typeCategoryId, pageable);
-        } else if ("popular".equals(sortLower)) {
-            results = comboRepository.findAllWithDetailsOrdered(sevenDaysAgo, pageable);
-        } else {
-            results = comboRepository.findAllWithDetails(pageable);
-        }
-
-        // 🔹 Map Page<Combo> results to Page<ComboDto>
-        return results.map(combo -> new ComboDto(combo));
+        Page<Combo> results = comboRepository.searchCombos(search, categoryId, statusId, pageable);
+        return results.map(this::toDto);
     }
 
-    // =============================================
-    // CREATE / UPDATE
-    // =============================================
-
-    @Transactional
-    public ComboDto save(ComboDto dto) {
-        Combo entity = toEntity(dto);
-        entity = comboRepository.save(entity);
-
-//        webSocketNotifier.notifyNewCombo(entity.getId(), entity.getName(), entity.getPrice());
-        return new ComboDto(entity);
+    @Transactional(readOnly = true)
+    public ComboDto findById(Long id) {
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Combo not found: " + id));
+        return toDto(combo);
     }
 
     @Transactional
-    public ComboDto updateById(Long id, ComboDto dto) {
-        Combo entity = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found"));
-
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setDiscountPercent(dto.getDiscountPercent());
-
-        // === CATEGORY LINKS ===
-        if (dto.getTypeCategoryId() != null) {
-            Categories type = categoryRepository.findById(dto.getTypeCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Type category not found"));
-            entity.setTypeCategory(type);
-        }
-
-//        if (dto.getAvailabilityCategoryId() != null) {
-//            Categories availability = categoryRepository.findById(dto.getAvailabilityCategoryId())
-//                    .orElseThrow(() -> new RuntimeException("Availability category not found"));
-//            entity.setAvailabilityCategory(availability);
-//        }
-
-        if (dto.getPeopleCategoryId() != null) {
-            Categories people = categoryRepository.findById(dto.getPeopleCategoryId())
-                    .orElseThrow(() -> new RuntimeException("People category not found"));
-            entity.setPeopleCategory(people);
-        }
-
-        // === MENU ITEMS ===
-        if (dto.getMenuItemIds() != null && !dto.getMenuItemIds().isEmpty()) {
-            List<MenuItem> items = menuItemRepository.findAllById(dto.getMenuItemIds());
-            entity.setMenuItems(items);
-        }
-
-        comboRepository.save(entity);
-//        webSocketNotifier.notifyUpdatedCombo(entity.getId(), entity.getName(), entity.getPrice());
-
-        return new ComboDto(entity);
+    public ComboDto create(ComboRequest request) {
+        Combo combo = new Combo();
+        mapRequestToEntity(request, combo);
+        Combo saved = comboRepository.save(combo);
+        return toDto(saved);
     }
-
-    // =============================================
-    // DELETE
-    // =============================================
 
     @Transactional
-    public void deleteById(Long id) {
-        try {
-            Combo combo = comboRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Combo not found"));
+    public ComboDto update(Long id, ComboRequest request) {
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Combo not found: " + id));
 
-            // You can add foreign key safety checks here if combos are referenced in orders
-            comboRepository.delete(combo);
-
-//            webSocketNotifier.notifyDeletedCombo(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete combo: " + e.getMessage());
-        }
+        mapRequestToEntity(request, combo);
+        Combo updated = comboRepository.save(combo);
+        return toDto(updated);
     }
 
-    // =============================================
-    // CLOUDINARY UPLOAD
-    // =============================================
+    @Transactional
+    public void delete(Long id) {
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Combo not found: " + id));
+        comboItemRepository.deleteAll(combo.getItems());
+        comboRepository.delete(combo);
+    }
 
-    public String uploadComboImage(MultipartFile file, String folder) throws IOException {
-        if (file == null || file.isEmpty()) return null;
+    // ===== Helper Mapping =====
+    private void mapRequestToEntity(ComboRequest request, Combo combo) {
+        // 1. Cập nhật thông tin cơ bản
+        combo.setName(request.getName());
+        combo.setDescription(request.getDescription());
+        combo.setAvatarUrl(request.getAvatarUrl());
 
-        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap(
-                        "folder", folder,
-                        "public_id", fileName,
-                        "overwrite", true
+        // 2. Cập nhật Category
+        combo.setCategory(
+                request.getCategoryId() != null && request.getCategoryId() > 0
+                        ? categoryRepository.findById(request.getCategoryId())
+                        .orElseThrow(() -> new NotFoundException("Category not found: " + request.getCategoryId()))
+                        : null
+        );
+
+        // 3. Cập nhật Status
+        combo.setStatus(
+                request.getStatusId() != null && request.getStatusId() > 0
+                        ? paramRepository.findById(request.getStatusId())
+                        .orElseThrow(() -> new NotFoundException("Status not found: " + request.getStatusId()))
+                        : null
+        );
+
+        if (combo.getItems() == null) {
+            combo.setItems(new ArrayList<>()); // ← QUAN TRỌNG
+        }
+
+        // 4. Lấy danh sách món được gửi từ Frontend
+        List<ComboItemRequest> incoming = request.getItems() != null ? request.getItems() : List.of();
+
+        // 5. Tạo map: menuItemId → quantity (dễ tra cứu)
+        Map<Long, Integer> requestedMap = incoming.stream()
+                .peek(item -> {
+                    if (item.getMenuItemId() == null || item.getMenuItemId() <= 0)
+                        throw new BadRequestException("menuItemId must not be null or <= 0");
+                    if (item.getQuantity() == null || item.getQuantity() <= 0)
+                        throw new BadRequestException("quantity must be > 0");
+                })
+                .collect(Collectors.toMap(
+                        ComboItemRequest::getMenuItemId,
+                        ComboItemRequest::getQuantity
                 ));
 
-        return uploadResult.get("secure_url").toString();
+        // 6. XÓA những món KHÔNG CÒN trong request
+        combo.getItems().removeIf(ci -> !requestedMap.containsKey(ci.getMenuItem().getId()));
+
+        // 7. CẬP NHẬT hoặc THÊM MỚI
+        for (Map.Entry<Long, Integer> entry : requestedMap.entrySet()) {
+            Long menuItemId = entry.getKey();
+            int qty = entry.getValue();
+
+            ComboItem existing = combo.getItems().stream()
+                    .filter(ci -> ci.getMenuItem().getId().equals(menuItemId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existing != null) {
+                // Cập nhật số lượng (ghi đè, không cộng)
+                existing.setQuantity(qty);
+            } else {
+                // Thêm mới
+                MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                        .orElseThrow(() -> new NotFoundException("MenuItem not found: " + menuItemId));
+
+                ComboItem newItem = new ComboItem();
+                newItem.setCombo(combo);
+                newItem.setMenuItem(menuItem);
+                newItem.setQuantity(qty);
+                combo.getItems().add(newItem);
+            }
+        }
+
+        // 8. Tính lại giá combo
+        BigDecimal totalPrice = combo.getItems().stream()
+                .map(ci -> ci.getMenuItem().getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        combo.setPrice(totalPrice);
     }
 
-    // =============================================
-    // MAPPING: DTO → ENTITY
-    // =============================================
+    // ===== DTO Mapping =====
+    private ComboDto toDto(Combo combo) {
+        return ComboDto.builder()
+                .id(combo.getId())
+                .name(combo.getName())
+                .description(combo.getDescription())
+                .avatarUrl(combo.getAvatarUrl())
+                .price(combo.getPrice())
+                .category(combo.getCategory() != null ? combo.getCategory().getName() : null)
+                .status(combo.getStatus() != null ? combo.getStatus().getCode() : null)
+                .items(toItemDtos(combo.getItems()))
+                .build();
+    }
 
-    private Combo toEntity(ComboDto dto) {
-        Combo entity = new Combo();
-        entity.setId(dto.getId());
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setDiscountPercent(dto.getDiscountPercent());
-
-        // === CATEGORY LINKS ===
-        if (dto.getTypeCategoryId() != null) {
-            Categories type = categoryRepository.findById(dto.getTypeCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Type category not found"));
-            entity.setTypeCategory(type);
-        }
-
-//        if (dto.getAvailabilityCategoryId() != null) {
-//            Categories availability = categoryRepository.findById(dto.getAvailabilityCategoryId())
-//                    .orElseThrow(() -> new RuntimeException("Availability category not found"));
-//            entity.setAvailabilityCategory(availability);
-//        }
-
-        if (dto.getPeopleCategoryId() != null) {
-            Categories people = categoryRepository.findById(dto.getPeopleCategoryId())
-                    .orElseThrow(() -> new RuntimeException("People category not found"));
-            entity.setPeopleCategory(people);
-        }
-
-        // === STATUS ===
-        if (dto.getStatusId() != null) {
-            Param status = paramRepository.findById(dto.getStatusId())
-                    .orElseThrow(() -> new RuntimeException("Status not found"));
-            entity.setStatus(status);
-        }
-
-        // === MENU ITEMS ===
-        if (dto.getMenuItemIds() != null && !dto.getMenuItemIds().isEmpty()) {
-            List<MenuItem> items = menuItemRepository.findAllById(dto.getMenuItemIds());
-            entity.setMenuItems(items);
-        }
-
-        return entity;
+    private List<ComboItemDto> toItemDtos(List<ComboItem> items) {
+        if (items == null || items.isEmpty()) return List.of();
+        return items.stream()
+                .map(item -> ComboItemDto.builder()
+                        .id(item.getMenuItem().getId())
+                        .name(item.getMenuItem().getName())
+                        .quantity(item.getQuantity())
+                        .price(item.getMenuItem().getPrice())
+                        .avatarUrl(item.getMenuItem().getAvatarUrl())
+                        .category(item.getMenuItem().getCategory() != null
+                                ? item.getMenuItem().getCategory().getName()
+                                : null)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

@@ -19,27 +19,31 @@ import {
   HiTrash,
   HiMenuAlt1,
 } from "react-icons/hi";
-import api from "../../api/axios";
-import { useNotification } from "../../components/Notification";
-import { Pagination } from "../../components/common/Pagination";
-import { ConfirmDialog } from "../../components/common/ConfirmDialog";
-import { MenuItemFormModal } from "../../components/modal/menuItem/MenuItemFormModal";
-import type {
-  MenuItem,
-  MenuItemSearchRequest,
-  Category,
-  StatusParam,
-} from "../../services/types/menuItem";
+import { useNotification } from "../../../components/Notification";
+import { Pagination } from "../../../components/common/Pagination";
+import { ConfirmDialog } from "../../../components/common/ConfirmDialog";
+import { ComboFormModal } from "../../../components/modal/combo/ComboFormModal";
 import { useTranslation } from "react-i18next";
-import { AxiosError, isAxiosError } from "axios";
-import { useAuth } from "../../store/AuthContext";
+import { useAuth } from "../../../store/AuthContext";
+import {
+  type Combo,
+  deleteCombo,
+  getAllCombos,
+} from "../../../services/product/fetchCombo";
+import { type Category } from "../../../services/category/fetchCategories";
+import api from "../../../api/axios";
 
-function AdminMenuItems() {
+interface StatusParam {
+  id: number;
+  code: string;
+}
+
+function AdminCombos() {
   const { t } = useTranslation();
   const { notify } = useNotification();
-
   const { user } = useAuth();
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+  const [combos, setCombos] = useState<Combo[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -48,11 +52,11 @@ function AdminMenuItems() {
   const [statuses, setStatuses] = useState<StatusParam[]>([]);
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState<
-    MenuItem | undefined
-  >(undefined);
+  const [selectedCombo, setSelectedCombo] = useState<Combo | undefined>(
+    undefined
+  );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [menuItemToDelete, setMenuItemToDelete] = useState<number | null>(null);
+  const [comboToDelete, setComboToDelete] = useState<number | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -60,80 +64,86 @@ function AdminMenuItems() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const pageSize = 15;
 
-  const searchRequest = useMemo<MenuItemSearchRequest>(
+  const searchRequest = useMemo(
     () => ({
-      name: searchTerm.trim() || undefined,
+      search: searchTerm.trim(),
       categoryId: selectedCategory ? parseInt(selectedCategory) : undefined,
       statusId: selectedStatus ? parseInt(selectedStatus) : undefined,
-      sortBy: "id",
-      sortDirection: "desc",
     }),
     [searchTerm, selectedCategory, selectedStatus]
   );
 
-  // Load reference data
+  // Load danh mục & trạng thái
   useEffect(() => {
     const loadReferenceData = async () => {
       try {
-        const [categoriesRes, statusesRes] = await Promise.all([
+        // Lấy tất cả danh mục
+        const [catRes, statusRes] = await Promise.all([
           api.get<Category[]>("/categories"),
           api.get<{ data: StatusParam[] }>("/params?type=MENU_ITEM_STATUS"),
         ]);
 
-        setCategories(categoriesRes.data || []);
-        setStatuses(statusesRes.data?.data || []);
-      } catch (error) {
-        console.error("Error loading reference data:", error);
-        notify("error", t("admin.menuItems.notifications.loadRefError"));
+        const allCategories = catRes.data || [];
+
+        // Tìm danh mục "Combo"
+        const comboCategory = allCategories.find(
+          (c) => c.name.toLowerCase() === "combo"
+        );
+
+        let comboCategories: Category[] = [];
+        if (comboCategory) {
+          // Gọi API lấy danh mục con của combo
+          const childRes = await api.get<Category[]>(
+            `/categories/tree/${comboCategory.id}/tree`
+          );
+          comboCategories = childRes.data || [];
+        }
+
+        setCategories(comboCategories);
+        setStatuses(statusRes.data?.data || []);
+      } catch (err) {
+        console.error(err);
+        notify("error", t("admin.combos.notifications.loadRefError"));
       }
     };
 
     void loadReferenceData();
-  }, [refreshTrigger, notify, t]);
+  }, [notify, t, refreshTrigger]);
 
-  // Load menu items
+  // Load combos
   useEffect(() => {
-    const abortController = new AbortController();
-
-    const loadMenuItems = async () => {
+    const loadCombos = async () => {
       setLoading(true);
       try {
-        let response;
-        try {
-          response = await api.post(
-            `/menu-items/admin/search?page=${currentPage - 1}&size=${pageSize}`,
-            searchRequest,
-            { signal: abortController.signal }
-          );
-        } catch {
-          response = await api.get(
-            `/menu-items/admin?page=${
-              currentPage - 1
-            }&size=${pageSize}&sortBy=id&sortDirection=desc`,
-            { signal: abortController.signal }
-          );
-        }
+        const data = await getAllCombos(
+          currentPage - 1,
+          pageSize,
+          searchTerm,
+          selectedCategory ? parseInt(selectedCategory) : undefined,
+          selectedStatus ? parseInt(selectedStatus) : undefined
+        );
 
-        const result = response.data.data || response.data;
-        setMenuItems(result.content || result || []);
-        setTotalPages(result.totalPages || 1);
-        setTotalItems(result.totalElements || result.length || 0);
-      } catch (error) {
-        if (!abortController.signal.aborted) {
-          console.error("Fetch menu items error:", error);
-          notify("error", t("admin.menuItems.notifications.loadError"));
-          setMenuItems([]);
-          setTotalPages(1);
-          setTotalItems(0);
-        }
+        setCombos(data.content);
+        setTotalPages(data.totalPages);
+        setTotalItems(data.totalElements);
+      } catch (err) {
+        console.error(err);
+        notify("error", t("admin.combos.notifications.loadError"));
       } finally {
-        if (!abortController.signal.aborted) setLoading(false);
+        setLoading(false);
       }
     };
-
-    void loadMenuItems();
-    return () => abortController.abort();
-  }, [currentPage, searchRequest, refreshTrigger, notify, t]);
+    void loadCombos();
+  }, [
+    currentPage,
+    searchRequest,
+    refreshTrigger,
+    notify,
+    t,
+    searchTerm,
+    selectedCategory,
+    selectedStatus,
+  ]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,59 +180,27 @@ function AdminMenuItems() {
   }, []);
 
   const confirmDelete = useCallback(async () => {
-    if (!menuItemToDelete) return;
-
+    if (!comboToDelete) return;
     try {
-      await api.delete(`/menu-items/admin/${menuItemToDelete}`);
-      notify("success", t("admin.menuItems.notifications.deleteSuccess"));
-
+      await deleteCombo(comboToDelete);
+      notify("success", t("admin.combos.notifications.deleteSuccess"));
       setRefreshTrigger((prev) => prev + 1);
       const remaining = totalItems - 1;
       const maxPage = Math.ceil(remaining / pageSize) || 1;
       if (currentPage > maxPage) setCurrentPage(1);
-    } catch (error: unknown) {
-      if (isAxiosError(error)) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        const msg = axiosError.response?.data?.message ?? axiosError.message;
-        const status = axiosError.response?.status;
-
-        if (status === 400 && msg?.includes("foreign key")) {
-          notify("error", t("admin.menuItems.notifications.deleteForeignKey"));
-        } else if (status === 404) {
-          notify("error", t("admin.menuItems.notifications.deleteNotFound"));
-        } else if (status === 403) {
-          notify("error", t("admin.menuItems.notifications.deleteForbidden"));
-        } else {
-          notify(
-            "error",
-            t("admin.menuItems.notifications.deleteError", { error: msg })
-          );
-        }
-      } else {
-        // Lỗi không phải từ Axios (rất hiếm)
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        notify(
-          "error",
-          t("admin.menuItems.notifications.deleteError", { error: msg })
-        );
-      }
+    } catch (err) {
+      console.log(err);
+      notify("error", t("admin.combos.notifications.deleteError"));
     } finally {
-      setMenuItemToDelete(null);
+      setComboToDelete(null);
       setShowConfirmDialog(false);
     }
-  }, [menuItemToDelete, notify, totalItems, pageSize, currentPage, t]);
+  }, [comboToDelete, notify, totalItems, currentPage, t]);
 
-  const handleDeleteMenuItem = useCallback((id: number) => {
-    setMenuItemToDelete(id);
+  const handleDeleteCombo = useCallback((id: number) => {
+    setComboToDelete(id);
     setShowConfirmDialog(true);
   }, []);
-
-  const getCategoryName = useCallback(
-    (id: number) => {
-      return categories.find((c) => c.id === id)?.name || "Unknown";
-    },
-    [categories]
-  );
 
   const getStatusBadgeColor = useCallback((status: string) => {
     return status === "AVAILABLE"
@@ -232,42 +210,57 @@ function AdminMenuItems() {
       : "gray";
   }, []);
 
-  const formatPrice = useCallback((price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  }, []);
+  const formatPrice = useCallback(
+    (price: number) =>
+      new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(price),
+    []
+  );
+
+  function renderCategoryOptions(
+    categories: Category[],
+    level: number = 0
+  ): JSX.Element[] {
+    return categories.flatMap((cat) => [
+      <option key={cat.id} value={cat.id}>
+        {"— ".repeat(level) + cat.name}
+      </option>,
+      ...(cat.children ? renderCategoryOptions(cat.children, level + 1) : []),
+    ]);
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t("admin.menuItems.title")}</h1>
+        <h1 className="text-2xl font-bold">{t("admin.combos.title")}</h1>
         <Button
           color="cyan"
           size="md"
           onClick={() => {
-            setSelectedMenuItem(undefined);
+            setSelectedCombo(undefined);
             setShowModal(true);
           }}>
           <HiPlus className="mr-2 h-5 w-5" />
-          {t("admin.menuItems.addButton")}
+          {t("admin.combos.addButton")}
         </Button>
       </div>
 
       <Card className="!bg-white shadow-lg border-none">
+        {/* Filters */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-4 items-center">
             <div className="relative w-64">
               <TextInput
-                placeholder={t("admin.menuItems.searchPlaceholder")}
+                placeholder={t("admin.combos.searchPlaceholder")}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 icon={HiSearch}
                 theme={{
                   field: {
                     input: {
-                      base: "!bg-gray-50 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
+                      base: "!bg-gray-50 !text-gray-700 border-gray-500 focus:!ring-cyan-500 focus:!border-gray-500",
                     },
                   },
                 }}
@@ -285,12 +278,8 @@ function AdminMenuItems() {
                     },
                   },
                 }}>
-                <option value="">{t("admin.menuItems.categoryAll")}</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
+                <option value="">{t("admin.combos.categoryAll")}</option>
+                {renderCategoryOptions(categories)}
               </Select>
             </div>
 
@@ -298,7 +287,6 @@ function AdminMenuItems() {
               <Select
                 value={selectedStatus}
                 onChange={handleStatusChange}
-                className="focus:ring-cyan-500 focus:border-cyan-500"
                 theme={{
                   field: {
                     select: {
@@ -306,7 +294,7 @@ function AdminMenuItems() {
                     },
                   },
                 }}>
-                <option value="">{t("admin.menuItems.statusAll")}</option>
+                <option value="">{t("admin.combos.statusAll")}</option>
                 {statuses.map((st) => (
                   <option key={st.id} value={st.id}>
                     {st.code}
@@ -317,59 +305,57 @@ function AdminMenuItems() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <Table hoverable>
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.image")}
+                  {t("admin.combos.table.image")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
                   <HiMenuAlt1 className="inline mr-2" />
-                  {t("admin.menuItems.table.name")}
+                  {t("admin.combos.table.name")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.category")}
+                  {t("admin.combos.table.category")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.price")}
+                  {t("admin.combos.table.price")}
                 </TableHeadCell>
                 <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.status")}
+                  {t("admin.combos.table.status")}
                 </TableHeadCell>
-                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.stock")}
-                </TableHeadCell>
-                <TableHeadCell className="text-center p-3 !bg-gray-50 text-gray-700">
-                  {t("admin.menuItems.table.actions")}
+                <TableHeadCell className="p-3 !bg-gray-50 text-gray-700 text-center">
+                  {t("admin.combos.table.actions")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
 
             <TableBody className="divide-y">
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
-                    {t("admin.menuItems.loading")}
+                <TableRow className="bg-white hover:!bg-gray-100">
+                  <TableCell colSpan={6} className="text-center py-4">
+                    {t("admin.combos.loading")}
                   </TableCell>
                 </TableRow>
-              ) : menuItems.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
-                    {t("admin.menuItems.noItems")}
+              ) : combos.length === 0 ? (
+                <TableRow className="bg-white hover:!bg-gray-100">
+                  <TableCell colSpan={6} className="text-center py-4">
+                    {t("admin.combos.noItems")}
                   </TableCell>
                 </TableRow>
               ) : (
-                menuItems.map((item) => (
+                combos.map((combo) => (
                   <TableRow
-                    key={item.id}
+                    key={combo.id}
                     className="bg-white hover:!bg-gray-50">
                     <TableCell className="p-3">
                       <div className="w-16 h-16 rounded-lg overflow-hidden">
-                        {item.avatarUrl ? (
+                        {combo.avatarUrl ? (
                           <img
-                            src={item.avatarUrl}
-                            alt={item.name}
+                            src={combo.avatarUrl}
+                            alt={combo.name}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -383,45 +369,33 @@ function AdminMenuItems() {
                     <TableCell className="p-3">
                       <div className="flex flex-col">
                         <span className="font-semibold text-gray-900">
-                          {item.name}
+                          {combo.name}
                         </span>
                         <span className="text-sm text-gray-500 line-clamp-2">
-                          {item.description ||
-                            t("admin.menuItems.noDescription")}
+                          {combo.description || t("admin.combos.noDescription")}
                         </span>
                       </div>
                     </TableCell>
 
                     <TableCell className="p-3">
                       <Badge color="info" className="text-xs">
-                        {getCategoryName(item.categoryId)}
+                        {combo.category || "Unknown"}
                       </Badge>
                     </TableCell>
 
                     <TableCell className="p-3">
                       <span className="font-semibold text-green-600">
-                        {formatPrice(item.price)}
+                        {formatPrice(combo.price)}
                       </span>
                     </TableCell>
 
                     <TableCell className="p-3">
                       <Badge
-                        color={getStatusBadgeColor(item.status)}
+                        color={getStatusBadgeColor(combo.status)}
                         className="text-xs">
-                        {t(`admin.menuItems.status.${item.status}`) ||
-                          item.status}
+                        {t(`admin.combos.status.${combo.status}`) ||
+                          combo.status}
                       </Badge>
-                    </TableCell>
-
-                    <TableCell className="p-3">
-                      <span
-                        className={`font-medium ${
-                          (item.availableQuantity || 0) > 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}>
-                        {item.availableQuantity || 0}
-                      </span>
                     </TableCell>
 
                     <TableCell className="p-3 text-center">
@@ -430,20 +404,16 @@ function AdminMenuItems() {
                           size="xs"
                           color="blue"
                           onClick={() => {
-                            setSelectedMenuItem(item);
+                            setSelectedCombo(combo);
                             setShowModal(true);
-                          }}
-                          aria-label={t("common.edit")}
-                          title={t("common.edit")}>
+                          }}>
                           <HiPencil className="h-4 w-4 text-white" />
                         </Button>
                         {user?.role === "ADMIN" && (
                           <Button
                             size="xs"
                             color="red"
-                            onClick={() => handleDeleteMenuItem(item.id)}
-                            aria-label={t("common.delete")}
-                            title={t("common.delete")}>
+                            onClick={() => handleDeleteCombo(combo.id)}>
                             <HiTrash className="h-4 w-4 text-white" />
                           </Button>
                         )}
@@ -456,6 +426,7 @@ function AdminMenuItems() {
           </Table>
         </div>
 
+        {/* Pagination */}
         <div className="flex items-center justify-center mt-4">
           <Pagination
             currentPage={currentPage}
@@ -467,22 +438,23 @@ function AdminMenuItems() {
         </div>
       </Card>
 
+      {/* Dialog + Modal */}
       <ConfirmDialog
         show={showConfirmDialog}
         onClose={() => {
           setShowConfirmDialog(false);
-          setMenuItemToDelete(null);
+          setComboToDelete(null);
         }}
         onConfirm={confirmDelete}
-        confirmText={t("admin.menuItems.confirm.title")}
-        message={t("admin.menuItems.confirm.message")}
+        confirmText={t("admin.combos.confirm.title")}
+        message={t("admin.combos.confirm.message")}
       />
 
-      <MenuItemFormModal
+      <ComboFormModal
         show={showModal}
         onClose={() => setShowModal(false)}
         onSuccess={handleSuccess}
-        menuItemData={selectedMenuItem}
+        comboData={selectedCombo}
         categories={categories}
         statuses={statuses}
       />
@@ -490,4 +462,4 @@ function AdminMenuItems() {
   );
 }
 
-export default AdminMenuItems;
+export default AdminCombos;
