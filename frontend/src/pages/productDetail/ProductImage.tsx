@@ -1,9 +1,10 @@
 import React from "react";
 import type { Product } from "../../services/product/fetchProduct";
+import type { Combo } from "../../services/product/fetchCombo";
 import { useTranslation } from "react-i18next";
 
 interface ProductImageProps {
-  product: Product;
+  product: Product | Combo;
   imgError: boolean;
   setImgError: (error: boolean) => void;
 }
@@ -15,8 +16,9 @@ const ProductImage: React.FC<ProductImageProps> = ({
 }) => {
   const { t } = useTranslation();
   const isNew =
+    "createdAt" in product &&
     new Date(product.createdAt) >
-    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   return (
     <div className="group relative">

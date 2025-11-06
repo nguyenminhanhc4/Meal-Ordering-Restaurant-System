@@ -9,11 +9,12 @@ import {
   addItemToCart,
 } from "../../services/cart/cartService";
 import type { Product } from "../../services/product/fetchProduct";
+import type { Combo } from "../../services/product/fetchCombo";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 interface ProductAddToCartProps {
-  product: Product;
+  product: Product | Combo;
   quantity: number;
   setQuantity: (quantity: number) => void;
 }
@@ -29,7 +30,8 @@ const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
   const { fetchCart } = useCart();
 
   const handleAddToCart = useCallback(async () => {
-    const availableQty = product.availableQuantity ?? 0;
+    const availableQty =
+      "availableQuantity" in product ? product.availableQuantity ?? 0 : 9999;
     if (product.status !== "AVAILABLE") {
       notify("error", t("product.unavailable", { name: product.name }));
       return;
@@ -72,7 +74,8 @@ const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
     }
   }, [product, quantity, addingToCart, notify, t, fetchCart]);
 
-  const availableQty = product.availableQuantity ?? 0;
+  const availableQty =
+    "availableQuantity" in product ? product.availableQuantity ?? 0 : 9999;
 
   return (
     <div className="flex items-center gap-4 py-4 border-t border-b border-stone-200">

@@ -1389,7 +1389,8 @@
     "price": "Giá",
     "currency": "₫"
   },
-  "productCard": {
-    "currency": "₫"
+  "comboDetail": {
+    "backToList": "Quay lại menu",
+    "itemsTitle": "Danh sách món"
   }
 }

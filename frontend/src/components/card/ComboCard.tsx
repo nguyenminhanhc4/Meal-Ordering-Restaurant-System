@@ -127,7 +127,7 @@ const ComboCard: React.FC<ComboCardProps> = ({ combo }) => {
         <Button
           color="warning"
           size="lg"
-          href={`/menu/combo/${combo.id}`}
+          href={`/combo/product/${combo.id}`}
           className="hover:bg-yellow-500 flex-1">
           <HiEye className="mr-2 h-5 w-5" />
           {t("comboCard.view")}

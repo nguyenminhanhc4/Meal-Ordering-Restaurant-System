@@ -14,6 +14,7 @@ import TableSeatMap from "../pages/customer/table/TableSeatMap";
 import ProfilePage from "../pages/customer/profile/ProfilePage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import NotificationList from "../components/Notification/NotificationList.tsx";
+import ComboDetail from "../pages/productDetail/ComboDetail.tsx";
 
 export default (
   <Route element={<MealLayout />}>
@@ -21,6 +22,7 @@ export default (
     <Route path="/menu/:categorySlug" element={<MealPage />} />
     <Route path="/combo/:categorySlug" element={<ComboPage />} />
     <Route path="/menu/product/:id" element={<ProductDetail />} />
+    <Route path="/combo/product/:id" element={<ComboDetail />} />
     <Route path="/cart" element={<CartPage />} />
     <Route path="/order" element={<OrderListPage />} />
     <Route path="/orders/:orderId" element={<OrderDetailPage />} />
