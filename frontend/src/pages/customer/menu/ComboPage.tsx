@@ -130,9 +130,9 @@ const ComboPage: React.FC = () => {
 
             <div className="w-full md:w-auto flex-none">
               <Link
-                to="/combo"
+                to="/menu"
                 className="block w-full md:w-auto text-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-colors duration-200">
-                {t("comboPage.actions.viewAll")}
+                {t("mealPage.actions.viewAll")}
               </Link>
             </div>
           </div>

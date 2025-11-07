@@ -29,6 +29,8 @@ import { useTranslation } from "react-i18next";
 export interface OrderItem {
   menuItemId: number;
   menuItemName: string;
+  comboId: number;
+  comboName: string;
   imageUrl: string;
   status: string;
   quantity: number;
@@ -157,7 +159,7 @@ export const AdminOrderFood = () => {
         });
 
         const result = response.data;
-
+        console.log(result.content);
         // ✅ Lấy đúng cấu trúc dữ liệu trả về
         if (result?.content) {
           setOrders(result.content);

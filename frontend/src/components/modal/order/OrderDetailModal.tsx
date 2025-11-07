@@ -193,8 +193,11 @@ export const OrderDetailModal = ({
               {order.items.map((item, idx) => (
                 <TableRow key={idx} className="hover:!bg-gray-100">
                   <TableCell className="text-sm text-gray-700 px-3 py-2 text-left">
-                    {item.menuItemName}
+                    {item.menuItemName && <span>{item.menuItemName}</span>}
+                    {item.menuItemName && item.comboName && <span> / </span>}
+                    {item.comboName && <span>{item.comboName}</span>}
                   </TableCell>
+
                   <TableCell className="text-sm text-gray-700 px-3 py-2 text-center">
                     {item.quantity}
                   </TableCell>
