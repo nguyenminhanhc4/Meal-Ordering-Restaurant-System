@@ -12,14 +12,24 @@ import type { Product } from "../../services/product/fetchProduct";
 import type { Combo } from "../../services/product/fetchCombo";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { addComboToCart } from "../../services/cart/comboCartService";
 
-interface ProductAddToCartProps {
-  product: Product | Combo;
-  quantity: number;
-  setQuantity: (quantity: number) => void;
-}
+type ProductAddToCartProps =
+  | {
+      type: "product";
+      product: Product;
+      quantity: number;
+      setQuantity: (quantity: number) => void;
+    }
+  | {
+      type: "combo";
+      product: Combo;
+      quantity: number;
+      setQuantity: (quantity: number) => void;
+    };
 
 const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
+  type,
   product,
   quantity,
   setQuantity,
@@ -40,9 +50,10 @@ const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
       notify("error", t("product.invalidQuantity", { qty: availableQty }));
       return;
     }
-    if (addingToCart) return;
 
+    if (addingToCart) return;
     setAddingToCart(true);
+
     try {
       let cart = null;
       try {
@@ -55,7 +66,12 @@ const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
         cart = created;
       }
 
-      await addItemToCart(cart.id, { menuItemId: product.id, quantity });
+      if (type === "product") {
+        await addItemToCart(cart.id, { menuItemId: product.id, quantity });
+      } else if (type === "combo") {
+        await addComboToCart(cart.id, { comboId: product.id, quantity });
+      }
+
       await fetchCart();
       notify(
         "success",
@@ -72,8 +88,7 @@ const ProductAddToCart: React.FC<ProductAddToCartProps> = ({
     } finally {
       setAddingToCart(false);
     }
-  }, [product, quantity, addingToCart, notify, t, fetchCart]);
-
+  }, [type, product, quantity, addingToCart, notify, t, fetchCart]);
   const availableQty =
     "availableQuantity" in product ? product.availableQuantity ?? 0 : 9999;
 

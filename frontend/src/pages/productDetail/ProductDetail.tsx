@@ -108,6 +108,7 @@ const ProductDetail: React.FC = () => {
           <div>
             <ProductInfo product={product} />
             <ProductAddToCart
+              type="product"
               product={product}
               quantity={quantity}
               setQuantity={setQuantity}

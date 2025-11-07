@@ -115,6 +115,7 @@ const ComboDetail: React.FC = () => {
             </div>
 
             <ProductAddToCart
+              type="combo"
               product={combo}
               quantity={quantity}
               setQuantity={setQuantity}
