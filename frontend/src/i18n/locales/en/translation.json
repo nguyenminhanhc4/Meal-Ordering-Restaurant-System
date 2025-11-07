@@ -176,7 +176,15 @@
     "updateFail": "Failed to update quantity. Please try again.",
     "updateSuccess": "Quantity updated successfully!",
     "viewMenu": "View Menu",
-    "viewMore": "View {{count}} more items"
+    "viewMore": "View {{count}} more items",
+    "menuItems": "Items",
+    "combos": "Combos",
+    "comboName": "Combo name",
+    "removeComboSuccess": "Delete combo successfully!",
+    "removeComboFail": "Delete combo failed!!",
+    "clearComboSuccess": "Delete all combo successfully!",
+    "clearComboFail": "Delete all combo failed!!",
+    "confirmRemoveCombo": "Are you sure you want to delete this combo ?"
   },
   "cartBTN": {
     "addToCart": "Add {{quantity}} {{name}} to cart",

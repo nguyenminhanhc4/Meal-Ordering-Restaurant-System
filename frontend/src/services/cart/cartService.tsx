@@ -35,12 +35,43 @@ export interface Cart {
   createdAt?: string;
   updatedAt?: string;
   items?: CartItem[];
+  combos?: CartComboItem[];
+  totalAmount: number;
 }
 
 /** Payload để xoá nhiều món hoặc giỏ hàng */
 export interface CartDeleteRequest {
   cartId?: number;
   itemIds?: number[];
+}
+
+export interface CartComboItem {
+  id: number;
+  comboId: number;
+  comboName: string;
+  avatarUrl?: string;
+  price: number;
+  quantity: number;
+  status: string;
+  description?: string;
+  categoryName?: string;
+  items: {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+    avatarUrl?: string;
+    category: string;
+  }[];
+}
+
+export interface ComboItemInCombo {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+  avatarUrl?: string | null;
+  category?: string;
 }
 
 /* -------------------------------------------------------------------------- */

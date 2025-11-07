@@ -176,7 +176,15 @@
     "updateFail": "Cập nhật số lượng thất bại. Vui lòng thử lại.",
     "updateSuccess": "Cập nhật số lượng thành công!",
     "viewMenu": "Xem thực đơn",
-    "viewMore": "Xem thêm {{count}} món"
+    "viewMore": "Xem thêm {{count}} món",
+    "menuItems": "Món ăn",
+    "combos": "Combos",
+    "comboName": "Tên combo",
+    "removeComboSuccess": "Xóa combo thành công!",
+    "removeComboFail": "Xóa combo thất bại!!",
+    "clearComboSuccess": "Xóa toàn bộ combo thành công!",
+    "clearComboFail": "Xóa toàn bộ thất bại!!",
+    "confirmRemoveCombo": "Bạn có muốn xóa combo này không ?"
   },
   "cartBTN": {
     "addToCart": "Thêm {{quantity}} {{name}} vào giỏ hàng",

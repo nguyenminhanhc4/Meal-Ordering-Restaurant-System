@@ -4,11 +4,8 @@ import { HiEye, HiShoppingCart } from "react-icons/hi";
 import { getComboById } from "../../services/product/fetchCombo";
 import { useNotification } from "../Notification/NotificationContext";
 import { useCart } from "../../store/CartContext";
-import {
-  getCurrentCart,
-  createCart,
-  addItemToCart,
-} from "../../services/cart/cartService";
+import { getCurrentCart, createCart } from "../../services/cart/cartService";
+import { addComboToCart } from "../../services/cart/comboCartService";
 import { useRealtimeUpdate } from "../../api/useRealtimeUpdate";
 import { useTranslation } from "react-i18next";
 import type { Combo } from "../../services/product/fetchCombo";
@@ -44,8 +41,8 @@ const ComboCard: React.FC<ComboCardProps> = ({ combo }) => {
 
     try {
       const cart = await getCurrentCart().catch(() => createCart());
-      await addItemToCart(cart.id, {
-        menuItemId: currentCombo.id,
+      await addComboToCart(cart.id, {
+        comboId: currentCombo.id,
         quantity: 1,
       });
       notify(

@@ -65,13 +65,45 @@ export const getCartCombos = async (
   return res.data.data;
 };
 
+export const updateCartCombo = async (comboId: number, quantity: number) => {
+  const res = await api.put<ApiResponse<CartComboItem>>(
+    `/cart-combos/${comboId}`,
+    { quantity },
+    { withCredentials: true }
+  );
+  return res.data.data;
+};
+
 /**
- * Xóa combo khỏi giỏ
+ * Xóa 1 combo khỏi giỏ
  */
 export const removeComboFromCart = async (
   comboItemId: number
 ): Promise<void> => {
   await api.delete<ApiResponse<void>>(`/cart-combos/${comboItemId}`, {
+    withCredentials: true,
+  });
+};
+
+/**
+ * Xóa nhiều combo khỏi giỏ
+ */
+export const deleteCartCombos = async (payload: {
+  comboIds?: number[];
+  cartId?: number;
+}): Promise<void> => {
+  await api.delete<ApiResponse<void>>(`/cart-combos`, {
+    data: payload,
+    withCredentials: true,
+  });
+};
+
+/**
+ * Xóa toàn bộ combo trong giỏ hàng
+ */
+export const clearCartCombos = async (cartId: number): Promise<void> => {
+  await api.delete<ApiResponse<void>>(`/cart-combos`, {
+    data: { cartId },
     withCredentials: true,
   });
 };

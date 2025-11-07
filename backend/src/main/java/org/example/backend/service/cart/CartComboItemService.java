@@ -81,14 +81,21 @@ public class CartComboItemService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteById(Long id) {
-        cartComboItemRepository.deleteById(id);
+    public CartComboItemDto updateQuantity(Long id, int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+        CartComboItem entity = cartComboItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Combo item not found"));
+        entity.setQuantity(quantity);
+        return new CartComboItemDto(cartComboItemRepository.save(entity));
     }
 
-    public void clearCartCombos(Long cartId) {
-        List<CartComboItem> items = cartComboItemRepository.findByCartId(cartId);
-        if (!items.isEmpty()) {
-            cartComboItemRepository.deleteAll(items);
-        }
+    public void deleteByIds(List<Long> ids) {
+        cartComboItemRepository.deleteAllByIdInBatch(ids);
+    }
+
+    public void clearCombos(Long cartId) {
+        cartComboItemRepository.deleteByCartId(cartId);
     }
 }
