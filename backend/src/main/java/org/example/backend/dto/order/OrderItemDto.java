@@ -24,14 +24,14 @@ public class OrderItemDto {
         if (entity != null) {
             this.id = entity.getId();
 
-            if (entity.getCombo() != null) {
-                this.comboId = entity.getCombo().getId();
-                this.comboName = entity.getCombo().getName();
-            }
-
             if (entity.getMenuItem() != null) {
                 this.menuItemId = entity.getMenuItem().getId();
                 this.menuItemName = entity.getMenuItem().getName();
+            }
+
+            if (entity.getCombo() != null) {
+                this.comboId = entity.getCombo().getId();
+                this.comboName = entity.getCombo().getName();
             }
 
             this.quantity = entity.getQuantity();

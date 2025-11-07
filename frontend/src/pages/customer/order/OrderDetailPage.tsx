@@ -188,7 +188,14 @@ const OrderDetailPage: React.FC = () => {
             <tbody>
               {order.orderItems?.map((item) => (
                 <tr key={item.id} className="text-gray-800">
-                  <td className="px-4 py-2">{item.menuItemName}</td>
+                  <td className="px-4 py-2">
+                    {item.menuItemName
+                      ? item.menuItemName
+                      : item.comboName
+                      ? `${item.comboName} (Combo)`
+                      : "-"}
+                  </td>
+
                   <td className="px-4 py-2">{item.quantity}</td>
                   <td className="px-4 py-2">
                     {item.price.toLocaleString("vi-VN", {

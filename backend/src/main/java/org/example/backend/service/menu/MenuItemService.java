@@ -168,6 +168,8 @@ public class MenuItemService {
         for (OrderItem orderItem : orderItems) {
             MenuItem menuItem = orderItem.getMenuItem();
 
+            if (menuItem == null) continue;
+
             Inventory inventory = inventoryRepository.findByMenuItem(menuItem)
                     .orElseThrow(() -> new RuntimeException(
                             "Inventory not found for menu item: " + menuItem.getName()
