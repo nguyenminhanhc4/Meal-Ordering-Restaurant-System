@@ -50,8 +50,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             """)
     Page<Order> findAllWithCustomSort(@Param("status") String status, @Param("paymentStatus") String paymentStatus, @Param("keyword") String keyword, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"user", "status", "payment", "payment.shippingInfo", "orderItems", "orderItems.menuItem", "orderItems.combo"})
-    Optional<Order> findByPublicId(String publicId);
+        @EntityGraph(attributePaths = {"user", "status", "payment", "payment.shippingInfo", "orderItems", "orderItems.menuItem", "orderItems.combo"})
+        Optional<Order> findByPublicId(String publicId);
 
     //    Optional<Order> findByPublicId(String publicId);
     @Query("""

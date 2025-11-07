@@ -400,7 +400,7 @@ export default function PaymentPage() {
                     key={item.id}
                     className="flex justify-between items-start text-sm border-b py-2 last:border-b-0">
                     <p className="text-gray-700">
-                      {item.menuItemName}{" "}
+                      {item.comboName || item.menuItemName}{" "}
                       <span className="text-xs text-gray-500">
                         {t("payment.summary.items.x", { count: item.quantity })}
                       </span>

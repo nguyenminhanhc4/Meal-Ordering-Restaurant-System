@@ -12,6 +12,8 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
   SELECT DISTINCT c FROM Cart c
   LEFT JOIN FETCH c.items i
   LEFT JOIN FETCH i.menuItem m
+  LEFT JOIN FETCH c.comboItems ci
+  LEFT JOIN FETCH ci.combo combo
   WHERE c.user.publicId = :publicId
     AND c.status.code = :statusCode
 """)

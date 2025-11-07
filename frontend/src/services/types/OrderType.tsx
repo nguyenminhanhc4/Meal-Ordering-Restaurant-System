@@ -3,6 +3,8 @@ export interface OrderItemDto {
   id: number;
   menuItemId: number;
   menuItemName?: string;
+  comboId: number;
+  comboName?: string;
   quantity: number;
   price: number;
 }

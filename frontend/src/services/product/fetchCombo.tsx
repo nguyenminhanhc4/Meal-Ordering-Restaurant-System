@@ -103,8 +103,9 @@ export const getComboById = async (
   id: number | string
 ): Promise<Combo | null> => {
   try {
-    const response = await api.get<ApiResponse<Combo>>(`/admin/combos/${id}`);
-    return response.data.data;
+    const response = await api.get<Combo>(`/admin/combos/${id}`);
+    console.log("response combo", response.data);
+    return response.data;
   } catch (error) {
     console.error(`Error fetching combo ${id}:`, error);
     return null;

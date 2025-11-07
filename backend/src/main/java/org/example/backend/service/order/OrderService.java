@@ -10,6 +10,7 @@ import org.example.backend.entity.order.Order;
 import org.example.backend.entity.order.OrderItem;
 import org.example.backend.entity.param.Param;
 import org.example.backend.repository.cart.CartRepository;
+import org.example.backend.repository.menu.ComboRepository;
 import org.example.backend.repository.menu.MenuItemRepository;
 import org.example.backend.repository.order.OrderItemRepository;
 import org.example.backend.repository.order.OrderRepository;
@@ -41,6 +42,7 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
+    private final ComboRepository comboRepository;
     private final WebSocketNotifier wsNotifier;
     private final NotificationService notificationService;
     private final WebSocketNotifier webSocketNotifier;
@@ -59,22 +61,36 @@ public class OrderService {
         order.setPublicId(UUID.randomUUID().toString());
         orderRepository.save(order);
 
-        // 2. Tạo OrderItems từ CartItem
-        List<OrderItem> orderItems = cart.getItems().stream().map(item -> {
-            OrderItem oi = new OrderItem();
-            oi.setOrder(order);
-            oi.setMenuItem(menuItemRepository.findById(item.getMenuItemId()).orElseThrow());
-            oi.setQuantity(item.getQuantity());
-            oi.setPrice(item.getPrice()); // giá snapshot
-            return orderItemRepository.save(oi);
-        }).toList();
+        // 2️⃣ Thêm món lẻ (CartItems)
+        if (cart.getItems() != null && !cart.getItems().isEmpty()) {
+            for (var item : cart.getItems()) {
+                OrderItem oi = new OrderItem();
+                oi.setOrder(order);
+                oi.setMenuItem(menuItemRepository.findById(item.getMenuItemId()).orElseThrow());
+                oi.setQuantity(item.getQuantity());
+                oi.setPrice(item.getPrice());
+                orderItemRepository.save(oi);
+            }
+        }
 
-        order.setOrderItems(orderItems);
+        // 3️⃣ Thêm combo (CartComboItems)
+        if (cart.getCombos() != null && !cart.getCombos().isEmpty()) {
+            for (var comboItem : cart.getCombos()) {
+                OrderItem oi = new OrderItem();
+                oi.setOrder(order);
+                oi.setCombo(comboRepository.findById(comboItem.getComboId()).orElseThrow());
+                oi.setQuantity(comboItem.getQuantity());
+                oi.setPrice(comboItem.getPrice());
+                orderItemRepository.save(oi);
+            }
+        }
+
 
         // 3. Đổi trạng thái Cart
         Cart cartEntity = cartRepository.findById(cart.getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-        Param cartStatus = paramRepository.findByTypeAndCode("STATUS_CART","CANCELLED").get();
+        Param cartStatus = paramRepository.findByTypeAndCode("STATUS_CART","CANCELLED")
+                .orElseThrow(() -> new RuntimeException("Invalid status code: " + "CANCELLED"));
         cartEntity.setStatus(cartStatus);
         cartRepository.save(cartEntity);
 
