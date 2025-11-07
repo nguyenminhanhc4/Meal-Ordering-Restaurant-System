@@ -5,7 +5,7 @@ import api from "../../api/axios";
 export interface TableEntity {
   id: number;
   name: string;
-  shortName: string;
+  shortName?: string;
   capacity: number;
   statusId: number;
   statusName: string;
@@ -23,9 +23,7 @@ export interface TableEntity {
  */
 export const getAllTables = async (): Promise<TableEntity[]> => {
   try {
-    const response = await api.get<ApiResponse<TableEntity[]>>("/tables", {
-      withCredentials: true, // 👈 gửi cookie / token
-    });
+    const response = await api.get<ApiResponse<TableEntity[]>>("/tables");
     return response.data.data;
   } catch (error) {
     console.error("Error fetching tables:", error);

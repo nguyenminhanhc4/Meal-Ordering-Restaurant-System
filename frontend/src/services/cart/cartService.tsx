@@ -1,6 +1,7 @@
 // src/services/cart/cartService.ts
 import api from "../../api/axios";
 import type { ApiResponse } from "../types/ApiType";
+import { AxiosError } from "axios";
 
 /* -------------------------------------------------------------------------- */
 /* 🧩 Interface models                                                        */
@@ -34,12 +35,43 @@ export interface Cart {
   createdAt?: string;
   updatedAt?: string;
   items?: CartItem[];
+  combos?: CartComboItem[];
+  totalAmount: number;
 }
 
 /** Payload để xoá nhiều món hoặc giỏ hàng */
 export interface CartDeleteRequest {
   cartId?: number;
   itemIds?: number[];
+}
+
+export interface CartComboItem {
+  id: number;
+  comboId: number;
+  comboName: string;
+  avatarUrl?: string;
+  price: number;
+  quantity: number;
+  status: string;
+  description?: string;
+  categoryName?: string;
+  items: {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+    avatarUrl?: string;
+    category: string;
+  }[];
+}
+
+export interface ComboItemInCombo {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+  avatarUrl?: string | null;
+  category?: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -66,6 +98,20 @@ export const createCart = async (): Promise<Cart> => {
     { withCredentials: true }
   );
   return res.data.data;
+};
+
+export const getOrCreateCart = async (): Promise<Cart> => {
+  try {
+    const cart = await getCurrentCart();
+    return cart;
+  } catch (err: unknown) {
+    if (err instanceof AxiosError && err.response?.status === 404) {
+      console.log("No open cart found → creating new cart...");
+      const newCart = await createCart();
+      return newCart;
+    }
+    throw err;
+  }
 };
 
 /**

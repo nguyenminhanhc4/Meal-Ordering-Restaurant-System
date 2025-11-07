@@ -16,6 +16,7 @@ public class OrderItemDto {
     private Long menuItemId;
     private Long comboId;
     private String menuItemName;
+    private String comboName;
     private Integer quantity;
     private BigDecimal price;
 
@@ -24,13 +25,14 @@ public class OrderItemDto {
             this.comboId = entity.getCombo().getId();
             this.id = entity.getId();
 
-            if (entity.getCombo() != null) {
-                this.comboId = entity.getCombo().getId();
-            }
-
             if (entity.getMenuItem() != null) {
                 this.menuItemId = entity.getMenuItem().getId();
                 this.menuItemName = entity.getMenuItem().getName();
+            }
+
+            if (entity.getCombo() != null) {
+                this.comboId = entity.getCombo().getId();
+                this.comboName = entity.getCombo().getName();
             }
 
             this.quantity = entity.getQuantity();

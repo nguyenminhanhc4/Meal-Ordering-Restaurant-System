@@ -14,6 +14,7 @@ import {
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
 import type { RevenueStatisticsDto } from "../../services/types/statistics.types";
+import { useTranslation } from "react-i18next";
 
 ChartJS.register(
   CategoryScale,
@@ -55,6 +56,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   type = "bar",
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [chartData, setChartData] = useState<ChartData | null>(null);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
         labels,
         datasets: [
           {
-            label: "Doanh thu (₫)",
+            label: t("admin.dashboard.charts.revenueLabel"),
             data: revenues,
             backgroundColor:
               type === "bar"
@@ -80,7 +82,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
             tension: 0.4,
           },
           {
-            label: "Số đơn hàng",
+            label: t("admin.dashboard.charts.ordersLabel"),
             data: orders,
             backgroundColor:
               type === "bar"
@@ -95,7 +97,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
         ],
       });
     }
-  }, [data, type]);
+  }, [data, type, t]);
 
   const options = {
     responsive: true,
@@ -132,7 +134,11 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
         borderColor: "rgba(255, 255, 255, 0.1)",
         borderWidth: 1,
         callbacks: {
-          label: function (context: { dataset: { label?: string }; parsed: { y: number | null }; datasetIndex: number }) {
+          label: function (context: {
+            dataset: { label?: string };
+            parsed: { y: number | null };
+            datasetIndex: number;
+          }) {
             let label = context.dataset.label || "";
             if (label) {
               label += ": ";
@@ -142,9 +148,11 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
                 label += new Intl.NumberFormat("vi-VN").format(
                   context.parsed.y
                 );
-                label += " ₫";
+                label += ` ${t("admin.dashboard.charts.revenueUnit")}`;
               } else {
-                label += context.parsed.y + " đơn";
+                label +=
+                  context.parsed.y +
+                  ` ${t("admin.dashboard.charts.ordersUnit")}`;
               }
             }
             return label;
@@ -214,7 +222,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
       <div>
         <h3 className="text-xl font-bold text-gray-900 mb-6">{title}</h3>
         <div className="h-80 flex items-center justify-center bg-gray-50 rounded-xl">
-          <p className="text-gray-500">Không có dữ liệu</p>
+          <p className="text-gray-500">{t("admin.dashboard.charts.noData")}</p>
         </div>
       </div>
     );

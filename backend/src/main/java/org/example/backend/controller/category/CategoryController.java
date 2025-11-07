@@ -1,5 +1,6 @@
 package org.example.backend.controller.category;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.category.CategoryDTO;
 import org.example.backend.dto.category.CategorySearchRequest;
 import org.example.backend.service.category.CategoryService;
@@ -10,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     // Create
     @PostMapping
@@ -48,7 +49,7 @@ public class CategoryController {
     // Optional: get children of a category
     @GetMapping("/{id}/children")
     public List<CategoryDTO> getChildren(@PathVariable Long id) {
-        return categoryService.getChildren(id);
+        return categoryService.getAllChildren(id);
     }
 
     // API phân trang cơ bản

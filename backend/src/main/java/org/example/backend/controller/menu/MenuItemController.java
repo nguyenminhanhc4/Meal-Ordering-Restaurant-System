@@ -1,5 +1,6 @@
 package org.example.backend.controller.menu;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.menu.MenuItemDto;
 import org.example.backend.dto.menu.MenuItemCreateDTO;
@@ -17,11 +18,11 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/menu-items")
 public class MenuItemController {
 
-    @Autowired
-    private MenuItemService menuItemService;
+    private final MenuItemService menuItemService;
 
     @GetMapping
     public ResponseEntity<?> getAllMenuItems(

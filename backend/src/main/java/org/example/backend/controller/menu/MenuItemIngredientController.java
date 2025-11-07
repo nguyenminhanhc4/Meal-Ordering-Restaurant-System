@@ -1,5 +1,6 @@
 package org.example.backend.controller.menu;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.menu.MenuItemIngredientDto;
 import org.example.backend.service.menu.MenuItemIngredientService;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/menu-item-ingredients")
 public class MenuItemIngredientController {
 
-    @Autowired
-    private MenuItemIngredientService menuItemIngredientService;
+    private final MenuItemIngredientService menuItemIngredientService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

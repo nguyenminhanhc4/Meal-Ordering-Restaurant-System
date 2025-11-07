@@ -12,54 +12,72 @@ import {
   addItemToCart,
 } from "../../services/cart/cartService";
 import { useRealtimeUpdate } from "../../api/useRealtimeUpdate";
+import { useTranslation } from "react-i18next";
+
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { t } = useTranslation();
   const { notify } = useNotification();
   const { fetchCart } = useCart();
 
-  // 🧩 Dữ liệu sản phẩm hiện tại (cập nhật realtime)
   const [currentProduct, setCurrentProduct] = useState(product);
 
-  // 🧠 Lắng nghe cập nhật realtime từ WebSocket
   useRealtimeUpdate(
-    `/topic/menu/${product?.id}`, // topic
-    getMenuItemById, // fetchFn: lấy dữ liệu mới từ API
+    `/topic/menu/${product?.id}`,
+    getMenuItemById,
     (updated) => {
       if (updated) {
         setCurrentProduct(updated);
-        notify("info", `${updated.name} đã được cập nhật`);
+        notify("info", t("productCard.updated", { name: updated.name }));
       }
     },
     (msg: { menuItemId: number }) => msg.menuItemId
   );
 
-  // 🛒 Xử lý thêm vào giỏ hàng
+  useRealtimeUpdate(
+    `/topic/menu/update`,
+    getMenuItemById,
+    (updatedProduct) => {
+      if (!updatedProduct || updatedProduct.id !== currentProduct?.id) return;
+      setCurrentProduct(updatedProduct);
+      notify(
+        "info",
+        t("mealPage.notification.itemUpdated", { name: updatedProduct.name })
+      );
+    },
+    (msg: { menuItemId: number }) => msg.menuItemId
+  );
+
   const handleAddToCart = async () => {
     if (currentProduct.status !== "AVAILABLE") {
-      notify("error", `${currentProduct.name} hiện không có sẵn`);
+      notify(
+        "error",
+        t("productCard.notAvailable", { name: currentProduct.name })
+      );
       return;
     }
 
     try {
       const cart = await getCurrentCart().catch(() => createCart());
-      const updatedCart = await addItemToCart(cart.id, {
+      await addItemToCart(cart.id, {
         menuItemId: currentProduct.id,
         quantity: 1,
       });
 
-      notify("success", `Đã thêm ${currentProduct.name} vào giỏ hàng`);
-      console.log("Updated cart:", updatedCart);
+      notify(
+        "success",
+        t("productCard.addedToCart", { name: currentProduct.name })
+      );
       await fetchCart();
     } catch (error) {
-      notify("error", "Lỗi khi thêm vào giỏ hàng");
+      notify("error", t("productCard.addToCartError"));
       console.error(error);
     }
   };
 
-  // ⭐ Tính điểm trung bình
   const averageRating = product?.reviews?.length
     ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
       product.reviews.length
@@ -89,7 +107,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           />
         ) : (
           <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-500">
-            Không có hình ảnh
+            {t("productCard.noImage")}
           </div>
         )}
 
@@ -98,15 +116,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             statusColors[currentProduct.status]
           } text-white text-sm px-2 py-1 rounded animate-pulse`}>
           {currentProduct.status === "AVAILABLE"
-            ? "Có sẵn"
+            ? t("productCard.available")
             : currentProduct.status === "OUT_OF_STOCK"
-            ? "Hết hàng"
-            : "Sắp ra mắt"}
+            ? t("productCard.outOfStock")
+            : t("productCard.comingSoon")}
         </span>
 
         {isNew && (
           <span className="absolute top-10 left-2 bg-blue-500 text-white text-sm px-2 py-1 rounded animate-pulse">
-            Mới
+            {t("productCard.new")}
           </span>
         )}
       </div>
@@ -134,15 +152,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       <p className="text-gray-600 text-base mb-2 line-clamp-2">
-        {product.description || "Món ăn ngon, đang chờ bạn khám phá!"}
+        {product.description || t("productCard.defaultDescription")}
       </p>
 
       <div className="flex gap-2 mb-2">
         <Badge color="warning" size="sm">
           {product.categorySlug
-            .replace("-", " ")
-            .replace(/\b\w/g, (c) => c.toUpperCase())}
+            ? product.categorySlug
+                .replace(/-/g, " ")
+                .replace(/\p{L}/gu, (c, i, str) =>
+                  i === 0 || str[i - 1] === " "
+                    ? c.toUpperCase()
+                    : c.toLowerCase()
+                )
+            : "Default"}
         </Badge>
+
         {product.tags?.map((tag) => (
           <Badge key={tag} color="info" size="sm">
             {tag}
@@ -151,10 +176,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       <p className="text-yellow-600 font-medium group-hover:text-yellow-700 mb-2">
-        {product.price.toLocaleString("vi-VN")} VNĐ
+        {product.price.toLocaleString("vi-VN")} {t("productCard.currency")}
       </p>
 
-      <p className="text-gray-500 text-sm mb-2">Đã bán {product.sold ?? 0}+</p>
+      <p className="text-gray-500 text-sm mb-2">
+        {t("productCard.sold", { count: product.sold ?? 0 })}
+      </p>
 
       <div className="flex justify-between gap-2 mt-4">
         <Button
@@ -163,7 +190,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           href={`/menu/product/${product.id}`}
           className="hover:bg-yellow-500 hover:scale-105 transition-transform duration-200 flex-1">
           <HiEye className="mr-2 h-5 w-5" />
-          Xem
+          {t("productCard.view")}
         </Button>
         <Button
           color="success"
@@ -176,7 +203,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               : ""
           }`}>
           <HiShoppingCart className="mr-2 h-5 w-5" />
-          Thêm
+          {t("productCard.add")}
         </Button>
       </div>
     </div>

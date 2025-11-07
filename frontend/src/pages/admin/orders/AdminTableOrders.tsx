@@ -23,10 +23,14 @@ import type {
 } from "../../../services/reservation/reservationService";
 import { AxiosError } from "axios";
 import api from "../../../api/axios";
-import { ReservationDetailModal } from "../../../components/order/ReservationDetailModal";
+import { ReservationDetailModal } from "../../../components/modal/order/ReservationDetailModal";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
+import { useTranslation } from "react-i18next"; // <-- added
 
 export const AdminTableOrders = () => {
+  const { t } = useTranslation(); // <-- i18n hook
+  const { notify } = useNotification();
+
   const [reservations, setReservations] = useState<ReservationDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,7 +42,6 @@ export const AdminTableOrders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 10;
-  const { notify } = useNotification();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [selectedReservation, setSelectedReservation] =
@@ -70,19 +73,11 @@ export const AdminTableOrders = () => {
       } else {
         console.error(err);
       }
-      notify("error", "Failed to load reservations");
+      notify("error", t("admin.reservations.notifications.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedStatus,
-    fromDate,
-    toDate,
-    notify,
-  ]);
+  }, [currentPage, searchTerm, selectedStatus, fromDate, toDate, t, notify]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -94,24 +89,26 @@ export const AdminTableOrders = () => {
         });
         if (res.data?.data) setStatuses(res.data.data);
       } catch {
-        if (!signal.aborted) notify("error", "Could not load order statuses.");
+        if (!signal.aborted)
+          notify(
+            "error",
+            t("admin.reservations.notifications.loadStatusesError")
+          );
       }
     };
+
     void loadStatuses(abortController.signal);
     void fetchReservations();
-  }, [notify, fetchReservations]);
+
+    return () => abortController.abort();
+  }, [notify, fetchReservations, t]);
 
   useRealtimeUpdate<void, string, { reservationPublicId: string }>(
     "/topic/reservations",
-    async (id: string) => {
-      console.log("🔄 Admin fetching updated reservation:", id);
-      // We don't have a single-reservation fetch here; refresh the list instead.
+    async () => {
       await fetchReservations();
-      return;
     },
-    (data) => {
-      console.log("📡 Admin got new reservation:", data);
-      // data is void/undefined; refetch to update the list
+    () => {
       void fetchReservations();
     },
     (msg) => msg.reservationPublicId
@@ -149,21 +146,21 @@ export const AdminTableOrders = () => {
 
   const handleApprove = async (publicId: string) => {
     await api.put(`/reservations/${publicId}/approve`);
-    notify("success", "Reservation approved successfully!");
+    notify("success", t("admin.reservations.notifications.approveSuccess"));
     setShowModal(false);
     fetchReservations();
   };
 
   const handleComplete = async (publicId: string) => {
     await api.put(`/reservations/${publicId}/complete`);
-    notify("success", "Reservation completed successfully!");
+    notify("success", t("admin.reservations.notifications.completeSuccess"));
     setShowModal(false);
     fetchReservations();
   };
 
   const handleCancel = async (publicId: string) => {
     await api.put(`/reservations/${publicId}/cancel`);
-    notify("success", "Reservation cancelled successfully!");
+    notify("success", t("admin.reservations.notifications.cancelSuccess"));
     setShowModal(false);
     fetchReservations();
   };
@@ -183,18 +180,28 @@ export const AdminTableOrders = () => {
     }
   };
 
+  // Format table names: "3 tables" or "A1, A2"
+  const formatTableNames = (tableNames: string[]) => {
+    if (tableNames.length > 2) {
+      return t("admin.reservations.tableCount", { count: tableNames.length });
+    }
+    return t("admin.reservations.tableList", { tables: tableNames.join(", ") });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Table Orders</h1>
+        <h1 className="text-2xl font-bold">{t("admin.reservations.title")}</h1>
       </div>
 
       <Card className="!bg-white shadow-lg border-none">
         {/* Filters */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4 mb-4 flex-wrap">
+          {/* Search */}
           <div className="relative w-64">
             <TextInput
-              placeholder="Search by customer or order code..."
+              placeholder={t("admin.reservations.searchPlaceholder")}
               value={searchTerm}
               onChange={handleSearchChange}
               icon={HiSearch}
@@ -207,6 +214,8 @@ export const AdminTableOrders = () => {
               }}
             />
           </div>
+
+          {/* Status Filter */}
           <div className="w-48">
             <Select
               value={selectedStatus}
@@ -218,7 +227,7 @@ export const AdminTableOrders = () => {
                   },
                 },
               }}>
-              <option value="">All Statuses</option>
+              <option value="">{t("admin.reservations.statusAll")}</option>
               {statuses.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.code}
@@ -226,22 +235,30 @@ export const AdminTableOrders = () => {
               ))}
             </Select>
           </div>
+
           {/* From Date */}
-          <div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 whitespace-nowrap">
+              {t("admin.reservations.fromDateLabel")}:
+            </label>
             <input
               type="datetime-local"
               value={fromDate}
               onChange={handleFromDateChange}
-              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500"
+              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500 px-2 py-1"
             />
           </div>
+
           {/* To Date */}
-          <div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 whitespace-nowrap">
+              {t("admin.reservations.toDateLabel")}:
+            </label>
             <input
               type="datetime-local"
               value={toDate}
               onChange={handleToDateChange}
-              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500"
+              className="border-gray-500 rounded-md !bg-gray-50 text-gray-700 focus:!ring-cyan-500 focus:!border-cyan-500 px-2 py-1"
             />
           </div>
         </div>
@@ -252,35 +269,36 @@ export const AdminTableOrders = () => {
             <TableHead className="text-xs uppercase !bg-gray-50 text-gray-700">
               <TableRow>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Reservation ID
+                  {t("admin.reservations.table.reservationId")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Customer
+                  {t("admin.reservations.table.customer")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Tables
+                  {t("admin.reservations.table.tables")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Time
+                  {t("admin.reservations.table.time")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  People
+                  {t("admin.reservations.table.people")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Status
+                  {t("admin.reservations.table.status")}
                 </TableHeadCell>
                 <TableHeadCell className="w-20 !bg-gray-50 text-gray-700 text-center px-3 py-2">
-                  Action
+                  {t("admin.reservations.table.action")}
                 </TableHeadCell>
               </TableRow>
             </TableHead>
+
             <TableBody className="divide-y">
               {loading ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
                     className="text-center bg-white text-gray-700 py-4">
-                    Loading...
+                    {t("admin.reservations.loading")}
                   </TableCell>
                 </TableRow>
               ) : reservations.length === 0 ? (
@@ -288,7 +306,7 @@ export const AdminTableOrders = () => {
                   <TableCell
                     colSpan={7}
                     className="text-center bg-white text-gray-700 py-4">
-                    No reservations found
+                    {t("admin.reservations.noReservations")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -303,9 +321,7 @@ export const AdminTableOrders = () => {
                       {res.userName}
                     </TableCell>
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center truncate">
-                      {res.tableNames.length > 2
-                        ? `${res.tableNames.length} tables`
-                        : res.tableNames.join(", ")}
+                      {formatTableNames(res.tableNames)}
                     </TableCell>
                     <TableCell className="text-sm text-gray-700 px-3 py-2 text-center truncate">
                       {formatDateTime(res.reservationTime)}
@@ -323,7 +339,7 @@ export const AdminTableOrders = () => {
                         size="xs"
                         color="blue"
                         onClick={() => handleView(res)}>
-                        Review
+                        {t("admin.reservations.reviewButton")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -344,6 +360,8 @@ export const AdminTableOrders = () => {
           />
         </div>
       </Card>
+
+      {/* Detail Modal */}
       <ReservationDetailModal
         show={showModal}
         onClose={() => setShowModal(false)}

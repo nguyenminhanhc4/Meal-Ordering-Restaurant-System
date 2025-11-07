@@ -11,7 +11,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "carts")
@@ -21,19 +23,25 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Cart extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user; // Owner of the cart
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private Param status; // ACTIVE / CHECKED_OUT
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> items = new ArrayList<>();
+    @Builder.Default
+    @OrderBy("id ASC")
+    private Set<CartItem> items = new HashSet<>();
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @OrderBy("id ASC")
+    private Set<CartComboItem> comboItems = new HashSet<>();
 }

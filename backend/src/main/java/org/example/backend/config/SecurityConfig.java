@@ -5,6 +5,7 @@ import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,21 +34,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for REST API
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Allow public access to auth endpoints
-                        .requestMatchers("/api/v1/users/me").authenticated() // Require authentication for /users/me
-                        .requestMatchers("/api/v1/users/**").authenticated()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/menu-items/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/tables/**").permitAll()
+                        .requestMatchers("/api/v1/users/me").authenticated()
                         .requestMatchers("/api/v1/carts/**").authenticated()
                         .requestMatchers("/api/v1/cart-items/**").authenticated()
                         .requestMatchers("/api/v1/orders/**").authenticated()
                         .requestMatchers("/api/v1/payments/**").authenticated()
                         .requestMatchers("/api/v1/mock-payments/**").authenticated()
                         .requestMatchers("/api/v1/reviews/**").authenticated()
-                        .requestMatchers("/api/v1/tables/**").authenticated()
-                        .requestMatchers("/api/v1/menu-items/**").permitAll()
-                        .requestMatchers("/api/v1/staff/**").hasRole("ADMIN") // Require ADMIN role for /staff/**
-                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN") // Require ADMIN role for /users/**
-                        .requestMatchers("/api/v1/categories/**").permitAll()
-                        .anyRequest().authenticated() // All other requests require authentication
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/avatar").authenticated()
+                        .requestMatchers("/api/v1/staff/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 

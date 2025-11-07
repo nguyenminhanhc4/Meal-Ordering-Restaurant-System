@@ -18,12 +18,13 @@ import type { OrderDto } from "../../../services/types/OrderType";
 import Pagination from "../../../components/common/PaginationClient";
 import { useRealtimeUpdate } from "../../../api/useRealtimeUpdate";
 import api from "../../../api/axios";
+import { useTranslation } from "react-i18next";
 
 const OrderListPage: React.FC = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loadingNext, setLoadingNext] = useState(false); // Loading khi đổi trang
+  const [, setLoadingNext] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -35,7 +36,6 @@ const OrderListPage: React.FC = () => {
 
   const { notify } = useNotification();
 
-  // Giữ dữ liệu cũ khi đổi trang, chỉ update khi data về
   useEffect(() => {
     const fetchOrders = async () => {
       if (currentPage === 0) setLoading(true);
@@ -47,23 +47,24 @@ const OrderListPage: React.FC = () => {
           pageSize,
           selectedStatus
         );
+        console.log("test", data.content);
         setOrders(data.content);
         setTotalPages(data.totalPages);
       } catch (err) {
         console.error(err);
-        setError("Không thể tải danh sách order. Vui lòng thử lại.");
-        notify("error", "Tải order thất bại");
+        setError(t("order.errorLoadOrders"));
+        notify("error", t("order.errorLoadOrdersNotify"));
       } finally {
         setLoading(false);
         setLoadingNext(false);
       }
     };
     fetchOrders();
-  }, [notify, currentPage, pageSize, selectedStatus]);
+  }, [notify, currentPage, pageSize, selectedStatus, t]);
 
   useRealtimeUpdate(
-    `/topic/order`, // topic backend gửi
-    getOrderById, // fetchFn: lấy order mới nhất
+    `/topic/order`,
+    getOrderById,
     (updatedOrder: OrderDto) => {
       setOrders((prev) =>
         prev.map((o) =>
@@ -71,7 +72,7 @@ const OrderListPage: React.FC = () => {
         )
       );
     },
-    (msg: { orderPublicId: string; status: string }) => msg.orderPublicId // getIdFromMsg
+    (msg: { orderPublicId: string; status: string }) => msg.orderPublicId
   );
 
   useEffect(() => {
@@ -82,34 +83,33 @@ const OrderListPage: React.FC = () => {
         const res = await api.get("/params?type=ORDER_STATUS", { signal });
         if (res.data?.data) setOrderStatuses(res.data.data);
       } catch {
-        if (!signal.aborted)
-          notify("error", "Không thể tải danh sách trạng thái.");
+        if (!signal.aborted) notify("error", t("order.errorLoadStatus"));
       }
     };
 
     loadOrderStatuses(controller.signal);
     return () => controller.abort();
-  }, [notify]);
+  }, [notify, t]);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(e.target.value);
-    setCurrentPage(0); // reset về trang đầu tiên
+    setCurrentPage(0);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "warning"; // vàng
+        return "warning";
       case "APPROVED":
-        return "info"; // xanh dương
+        return "info";
       case "DELIVERING":
-        return "purple"; // tím
+        return "purple";
       case "DELIVERED":
-        return "success"; // xanh lá
+        return "success";
       case "CANCELLED":
-        return "failure"; // đỏ
+        return "failure";
       default:
-        return "gray"; // fallback
+        return "gray";
     }
   };
 
@@ -130,22 +130,8 @@ const OrderListPage: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "Chờ duyệt";
-      case "APPROVED":
-        return "Đã duyệt";
-      case "DELIVERING":
-        return "Đang giao";
-      case "DELIVERED":
-        return "Đã giao";
-      case "CANCELLED":
-        return "Đã hủy";
-      default:
-        return status;
-    }
-  };
+  const getStatusLabel = (status: string) =>
+    t(`order.statusLabel.${status}`, status);
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-12 px-4 sm:px-6 md:px-8">
@@ -153,7 +139,7 @@ const OrderListPage: React.FC = () => {
         <div className="flex justify-between items-center mb-10 p-4 bg-amber-50 rounded-xl shadow-sm border border-amber-100 flex-wrap gap-4">
           <h1 className="text-3xl font-extrabold text-amber-800 flex items-center gap-3">
             <HiOutlineClipboardList className="w-8 h-8 text-amber-600" />
-            Danh sách đơn hàng
+            {t("order.header")}
           </h1>
 
           <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-200 shadow-sm w-full md:max-w-xs">
@@ -162,11 +148,11 @@ const OrderListPage: React.FC = () => {
               className="flex-1 border border-yellow-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
               value={selectedStatus}
               onChange={handleStatusChange}
-              aria-label="Chọn trạng thái đơn hàng">
-              <option value="">Tất cả</option>
+              aria-label={t("order.statusSelectAria")}>
+              <option value="">{t("order.allStatuses")}</option>
               {orderStatuses.map((s) => (
                 <option key={s.code} value={s.code}>
-                  {s.name}
+                  {t(`order.statusLabel.${s.code}`, s.code)}
                 </option>
               ))}
             </select>
@@ -176,7 +162,7 @@ const OrderListPage: React.FC = () => {
             size="sm"
             className="!bg-emerald-600 hover:!bg-emerald-700 text-white shadow-md flex items-center gap-2 rounded-lg"
             href="/menu">
-            <HiOutlineHome className="w-4 h-4" /> Quay lại Menu
+            <HiOutlineHome className="w-4 h-4" /> {t("order.backToMenu")}
           </Button>
         </div>
 
@@ -189,7 +175,7 @@ const OrderListPage: React.FC = () => {
         <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {orders.length === 0 && !loading ? (
             <Card className="text-center py-12 col-span-full">
-              <p className="text-gray-500 text-lg">Bạn chưa có đơn hàng nào.</p>
+              <p className="text-gray-500 text-lg">{t("order.noOrders")}</p>
             </Card>
           ) : (
             orders.map((order) => {
@@ -200,11 +186,15 @@ const OrderListPage: React.FC = () => {
               );
               const itemPreview = order.orderItems
                 ?.slice(0, 2)
-                .map((item) => `${item.menuItemName} x${item.quantity}`)
+                .map((item) => {
+                  const names = [item.menuItemName, item.comboName]
+                    .filter(Boolean)
+                    .join(" / ");
+                  return `${names} x${item.quantity}`;
+                })
                 .join(", ");
               const hasMoreItems =
                 order.orderItems && order.orderItems.length > 2;
-
               const borderColor = getBorderColor(order.status);
 
               return (
@@ -213,7 +203,7 @@ const OrderListPage: React.FC = () => {
                   className={`relative shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 rounded-2xl border-t-4 ${borderColor} !bg-white`}>
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold text-gray-800">
-                      Order #{shortId}
+                      {t("order.orderNumber", { id: shortId })}
                     </h2>
                     <Badge color={getStatusColor(order.status)}>
                       {getStatusLabel(order.status)}
@@ -226,10 +216,10 @@ const OrderListPage: React.FC = () => {
                     </p>
                     <p className="flex items-center gap-2">
                       <FaUtensils className="text-orange-500" /> {totalItems}{" "}
-                      món
+                      {t("order.items")}
                     </p>
                     <p className="line-clamp-1 text-gray-600">
-                      Món: {itemPreview}
+                      {t("order.itemsPreview")}: {itemPreview}
                       {hasMoreItems && " ..."}
                     </p>
                     <p className="flex items-center gap-2 font-semibold text-green-600 text-base">
@@ -251,7 +241,7 @@ const OrderListPage: React.FC = () => {
                     size="sm"
                     className="flex text-white items-center gap-1 mt-4 !bg-blue-600 hover:!bg-blue-700 transition-colors duration-200 w-full justify-center"
                     href={`/orders/${order.publicId}`}>
-                    <HiExternalLink /> Xem chi tiết
+                    <HiExternalLink /> {t("order.viewDetails")}
                   </Button>
                 </Card>
               );
@@ -266,7 +256,6 @@ const OrderListPage: React.FC = () => {
             ))}
         </div>
 
-        {/* Pagination */}
         {orders.length > 0 && (
           <Pagination
             currentPage={currentPage}

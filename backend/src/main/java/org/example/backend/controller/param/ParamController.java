@@ -1,5 +1,6 @@
 package org.example.backend.controller.param;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.param.ParamDTO;
 import org.example.backend.service.param.ParamService;
@@ -10,11 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/params")
 public class ParamController {
-
-    @Autowired
-    private ParamService paramService;
+    private final ParamService paramService;
 
     @GetMapping
     public ResponseEntity<?> getParamsByType(@RequestParam String type) {

@@ -1,0 +1,1404 @@
+{
+  "auth": {
+    "common": {
+      "unexpectedError": "An unexpected error occurred!",
+      "close": "Cancel",
+      "update": "Update",
+      "create": "Create"
+    },
+    "forgot": {
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "emptyEmail": "Please enter your email."
+      },
+      "failure": "Unable to send request at this time. Please try again later.",
+      "success": "Password reset request sent. Please check your email.",
+      "title": "Forgot Password"
+    },
+    "login": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "requiredEmail": "Please enter your email.",
+        "invalidEmail": "Please enter a valid email.",
+        "invalidEmailFormat": "Invalid email format.",
+        "requiredPassword": "Please enter your password.",
+        "shortPassword": "Password must be at least 8 characters.",
+        "uppercaseRequired": "Password must contain at least 1 uppercase letter.",
+        "numberRequired": "Password must contain at least 1 number.",
+        "specialCharRequired": "Password must contain at least 1 special character (!@#$%^&*)."
+      },
+      "passwordLabel": "Password",
+      "failure": "Login failed. Please try again.",
+      "forgotPassword": "Forgot password?",
+      "loading": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "submit": "Log In",
+      "success": "Login successful!",
+      "title": "Log In",
+      "adminTitle": "Admin Login",
+      "adminEmailPlaceholder": "admin@example.com",
+      "adminPasswordPlaceholder": "********",
+      "accessDenied": "You don't have permission!"
+    },
+    "register": {
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "error": {
+        "requiredEmail": "Please enter email.",
+        "requiredName": "Please enter name.",
+        "invalidEmailFormat": "Invalid email format.",
+        "requiredPassword": "Please enter password.",
+        "shortPassword": "Password must be at least 8 characters.",
+        "uppercaseRequired": "Password must contain at least 1 uppercase letter.",
+        "numberRequired": "Password must contain at least 1 number.",
+        "specialCharRequired": "Password must contain at least 1 special character (!@#$%^&*).",
+        "confirmPassword": "Please re-enter password.",
+        "passwordMismatch": "Password confirmation does not match.",
+        "invalidCredentials": "Invalid email or password"
+      },
+      "failure": "Registration failed. Please try again.",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "gender": "Gender",
+      "haveAccount": "Already have an account?",
+      "loading": "Registering...",
+      "loginLink": "Login",
+      "male": "Male",
+      "female": "Female",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Register",
+      "success": "Registration successful!",
+      "title": "Register"
+    },
+    "reset": {
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "error": {
+        "invalidToken": "Invalid token",
+        "passwordMismatch": "Passwords do not match",
+        "shortPassword": "Password must be at least 8 characters",
+        "uppercase": "Password must contain at least 1 uppercase letter",
+        "lowercase": "Password must contain at least 1 lowercase letter",
+        "number": "Password must contain at least 1 number",
+        "specialChar": "Password must contain at least 1 special character",
+        "requiredPassword": "Please enter password.",
+        "requiredConfirm": "Please re-enter password."
+      },
+      "failure": "Error resetting password",
+      "loading": "Processing...",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "success": "Password reset successful!",
+      "submit": "Reset Password",
+      "title": "Reset Password"
+    }
+  },
+  "bookedList": {
+    "actions": "Actions",
+    "cancel": "Cancel Reservation",
+    "details": "Details",
+    "edit": "Edit",
+    "empty": {
+      "message": "Book a table now to enjoy delicious meals!",
+      "title": "No tables have been reserved."
+    },
+    "people": "Number of People",
+    "status": {
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "processing": "Processing"
+    },
+    "statusHeader": "Status",
+    "tableTime": "Table & Time",
+    "title": "List of Reserved Tables",
+    "unknownTable": "(Unknown)"
+  },
+  "bookingModal": {
+    "cancelButton": "Cancel",
+    "capacity": "Maximum Capacity",
+    "capacityUnit": "seats",
+    "confirmButton": "Confirm Reservation",
+    "createBooking": "Book Table",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Enter customer name",
+    "errorTime": "⚠️ Reservation time must be between {{min}}:00 and {{max}}:00.",
+    "note": "Additional Notes (if any)",
+    "notePlaceholder": "Birthday, gathering, ...",
+    "numberOfPeople": "Number of Guests",
+    "phone": "Phone Number",
+    "phonePlaceholder": "0123456789",
+    "reservationTime": "Reservation Time (Date & Time)",
+    "tableCapacity": "This table has a maximum capacity of {{capacity}} people.",
+    "updateBooking": "Update Reservation",
+    "updateButton": "Update Information",
+    "workingHours": "Operating Hours: {{min}}:00 AM - {{max}}:00 PM"
+  },
+  "cart": {
+    "actions": "Actions",
+    "backToMenu": "Back to Menu",
+    "cancel": "Cancel",
+    "checkout": "Place Order",
+    "checkoutFail": "Order placement failed. Please try again.",
+    "checkoutSuccess": "Order placed successfully! Order ID: {{publicId}}",
+    "clearAll": "Clear All",
+    "clearFail": "Failed to clear cart. Please try again.",
+    "clearSuccess": "Cart cleared successfully",
+    "collapseList": "Collapse List",
+    "confirm": "Delete",
+    "confirmClear": "Are you sure you want to clear the entire cart?",
+    "confirmRemoveItem": "Are you sure you want to remove \"{{name}}\" from the cart?",
+    "confirmRemoveSelected": "Are you sure you want to remove {{count}} selected items?",
+    "confirmTitle": "Confirm Deletion",
+    "empty": "Your cart is empty",
+    "fetchError": "Unable to load cart. Please try again.",
+    "image": "Image",
+    "itemName": "Item Name",
+    "noCategory": "Not specified",
+    "noDescription": "No description",
+    "outOfStock": "Out of Stock",
+    "price": "Price",
+    "quantity": "Quantity",
+    "quantityMax": "Maximum quantity for this item is {{qty}}.",
+    "quantityMin": "Quantity must be greater than 0.",
+    "realtimeError": "Error updating cart in real-time:",
+    "realtimeUpdate": "Real-time cart update:",
+    "removeFail": "Failed to remove item. Please try again.",
+    "removeSelected": "Remove Selected",
+    "removeSuccess": "Removed from cart",
+    "title": "Cart",
+    "totalItems": "Total Items",
+    "totalPrice": "Total",
+    "updateFail": "Failed to update quantity. Please try again.",
+    "updateSuccess": "Quantity updated successfully!",
+    "viewMenu": "View Menu",
+    "viewMore": "View {{count}} more items",
+    "menuItems": "Items",
+    "combos": "Combos",
+    "comboName": "Combo name",
+    "removeComboSuccess": "Delete combo successfully!",
+    "removeComboFail": "Delete combo failed!!",
+    "clearComboSuccess": "Delete all combo successfully!",
+    "clearComboFail": "Delete all combo failed!!",
+    "confirmRemoveCombo": "Are you sure you want to delete this combo ?"
+  },
+  "cartBTN": {
+    "addToCart": "Add {{quantity}} {{name}} to cart",
+    "addToCartButton": "Add to Cart",
+    "added": "Added {{qty}} {{name}} to cart",
+    "adding": "Adding...",
+    "decreaseQuantity": "Decrease Quantity",
+    "increaseQuantity": "Increase Quantity",
+    "unknownError": "Unknown error when adding to cart"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "currency": "VND",
+    "loading": "Loading...",
+    "send": "Send",
+    "sending": "Sending...",
+    "update": "Update",
+    "create": "Create",
+    "saving": "Saving...",
+    "error": "System error",
+    "pagination": {
+      "showing": "Showing {{start}} to {{end}} of {{total}} entries"
+    },
+    "confirmDialog": {
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "component": {
+    "megaMenu": {
+      "allDishes": "All Dishes & Drinks",
+      "cart": "Cart",
+      "categoryDeleted": "A category has been deleted!",
+      "categoryUpdated": "Category \"{{name}}\" has been updated!",
+      "home": "Home",
+      "loadCategoriesError": "Error loading categories. Please try again.",
+      "login": "Log In",
+      "logoAlt": "Restaurant Logo",
+      "logout": "Log Out",
+      "logoutSuccess": "Logged out successfully!",
+      "menu": "Menu",
+      "newCategoryAdded": "Category \"{{name}}\" has been added!",
+      "noCategory": "No categories",
+      "orders": "Orders",
+      "profile": "Profile",
+      "tableBooking": "Table Booking",
+      "unexpectedError": "An unexpected error occurred.",
+      "userAvatarAlt": "User Avatar",
+      "viewAllMenu": "View Full Menu"
+    },
+    "searchBar": {
+      "ariaLabel": "Search for dishes",
+      "clearLabel": "Clear search input",
+      "placeholder": "Search for dishes..."
+    },
+    "sortFilter": {
+      "ariaLabel": "Select sorting method",
+      "newest": "Newest",
+      "popular": "Popular",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low"
+    }
+  },
+  "footer": {
+    "address": "123 ABC Street, District 1, Ho Chi Minh City",
+    "connectWithUs": "Connect with Us",
+    "copyright": "All rights reserved.",
+    "email": "contact@xyzrestaurant.com",
+    "home": "Home",
+    "menu": "Menu",
+    "openingHours": "Opening Hours",
+    "phone": "+84 123 456 789",
+    "quickLinks": "Quick Links",
+    "reserveTable": "Reserve Table",
+    "workingTime": "Monday – Sunday: 9:00 AM – 10:00 PM"
+  },
+  "heroSection": {
+    "button": {
+      "bookTable": "Book a Table Now",
+      "orderNow": "Order Now"
+    },
+    "subtitle": "Cozy, elegant ambiance – your destination for refined dining experiences.",
+    "title": {
+      "highlight": "XYZ Restaurant",
+      "prefix": "Welcome to"
+    }
+  },
+  "home": {
+    "about": {
+      "bookTable": "Book a Table Now",
+      "description": "XYZ Restaurant is committed to delivering exquisite dining experiences with elegant ambiance and dedicated service.",
+      "features": {
+        "freshFood": {
+          "description": "High-quality ingredients, expertly prepared to ensure exceptional flavors.",
+          "title": "Fresh Food"
+        },
+        "luxurySpace": {
+          "description": "Modern design with warm lighting, creating a comfortable atmosphere for diners.",
+          "title": "Luxurious Ambiance"
+        },
+        "professionalService": {
+          "description": "Friendly, dedicated staff delivering outstanding experiences.",
+          "title": "Professional Service"
+        }
+      },
+      "orderNow": "Order Now",
+      "title": "About Us"
+    },
+    "menu": {
+      "orderNow": "Order Now",
+      "soldCount": "Sold {{count}}+ servings",
+      "title": "Featured Dishes",
+      "viewMore": "View More"
+    }
+  },
+  "mealPage": {
+    "actions": {
+      "loadMore": "Load More",
+      "viewAll": "View All"
+    },
+    "description": "Explore the most delicious dishes in the category",
+    "loadingMore": "Loading...",
+    "noItems": "No dishes available in this category",
+    "notification": {
+      "fetchError": "Unable to load dish list",
+      "itemDeleted": "Dish has been removed from the system",
+      "itemUpdated": "{{name}} has been updated",
+      "itemUpdatedOrAdded": "{{name}} has been updated or added"
+    },
+    "title": {
+      "default": "Dish List"
+    }
+  },
+  "navbarLanding": {
+    "brand": {
+      "name": "XYZ Restaurant"
+    },
+    "dropdown": {
+      "lang": "Languages",
+      "logout": "Log Out",
+      "logoutSuccess": "Logged out successfully!",
+      "orders": "Orders",
+      "profile": "Profile"
+    },
+    "login": "Log In",
+    "menu": {
+      "about": "About",
+      "booking": "Table Booking",
+      "home": "Home",
+      "menu": "Menu"
+    }
+  },
+  "notification": {
+    "cancel": "Cancel",
+    "cancelSelect": "Cancel Delete",
+    "confirmDelete": "Are you sure you want to delete {{count}} notifications?",
+    "delete": "Delete",
+    "deleteFail": "Deletion failed!",
+    "deleted": "Notification deleted!",
+    "errorLoad": "Error loading notifications",
+    "errorMarkRead": "Error marking as read",
+    "loading": "Loading notifications...",
+    "noNotification": "No notifications available",
+    "selectMultiple": "Delete Multiple",
+    "title": "Notifications"
+  },
+  "order": {
+    "backToMenu": "Back to Menu",
+    "header": "Orders",
+    "detail": {
+      "back": "Back",
+      "createdAt": "Created At:",
+      "customer": "Ordered By:",
+      "cancel": "Cancel Order",
+      "itemsTitle": "Item List",
+      "pay": "Pay",
+      "table": {
+        "name": "Item Name",
+        "price": "Unit Price",
+        "quantity": "Quantity",
+        "total": "Total"
+      },
+      "title": "Order #{{id}}",
+      "total": "Total Amount:",
+      "confirmCancelTitle": "Confirm Order Cancellation",
+      "confirmCancel": "Are you sure you want to cancel this order?",
+      "cancelSuccess": "Order cancelled successfully!",
+      "cancelError": "Failed to cancel the order!",
+      "cancel": "Cancel Order"
+    },
+    "errorLoadOrders": "Unable to load order list. Please try again.",
+    "errorLoadOrdersNotify": "Failed to load orders",
+    "errorLoadStatus": "Unable to load status list.",
+    "errorNotFound": "Order not found.",
+    "items": "items",
+    "itemsPreview": "Items",
+    "noOrders": "You have no orders.",
+    "orderNumber": "Order #{{id}}",
+    "statusLabel": {
+      "APPROVED": "Approved",
+      "CANCELLED": "Cancelled",
+      "DELIVERED": "Delivered",
+      "DELIVERING": "Delivering",
+      "PENDING": "Pending"
+    },
+    "statusSelectAria": "Select order status",
+    "allStatuses": "All",
+    "viewDetails": "View Details"
+  },
+  "orderHistory": {
+    "collapse": "Collapse",
+    "filters": {
+      "searchPlaceholder": "Search for dishes...",
+      "status": {
+        "all": "All"
+      }
+    },
+    "moreItems": "more items",
+    "noOrders": "No matching orders found.",
+    "notifications": {
+      "addToCartFail": "Unknown error when adding to cart",
+      "addToCartSuccess": "Item added to cart!"
+    },
+    "orderId": "Order ID",
+    "quantity": "Qty",
+    "outOfStock": "Out of Stock",
+    "reorder": "Reorder",
+    "status": {
+      "approved": "Confirmed",
+      "cancelled": "Cancelled",
+      "delivered": "Delivered",
+      "delivering": "Delivering",
+      "pending": "Pending"
+    },
+    "title": "Order History",
+    "viewAll": "View All"
+  },
+  "payment": {
+    "backToOrders": "Back to Order List",
+    "error": {
+      "backHome": "Back to Home",
+      "notFound": "Order information not found or unavailable.",
+      "title": "Payment Error"
+    },
+    "failed": {
+      "description": "An error occurred during payment. Please try again or choose another method.",
+      "retry": "Retry Payment",
+      "title": "Payment Failed"
+    },
+    "loading": {
+      "message": "Loading order information..."
+    },
+    "method": {
+      "cod": {
+        "desc": "You will pay in cash upon delivery.",
+        "label": "Cash on Delivery (COD)"
+      },
+      "title": "Payment Method",
+      "online": {
+        "desc": "Fast and secure payment via online payment gateway.",
+        "label": "Online Payment"
+      }
+    },
+    "mockTitle": "Mock Payment Gateway",
+    "notify": {
+      "failed": "Payment failed. Please try again later.",
+      "missingFields": "Please fill in full name, phone number, and delivery address.",
+      "success": "Payment successful!"
+    },
+    "shipping": {
+      "desc": "Please review your delivery information before confirming payment.",
+      "fields": {
+        "address": "Address",
+        "email": "Email",
+        "fullName": "Full Name",
+        "note": "Note (optional)",
+        "phone": "Phone Number"
+      },
+      "title": "Delivery Information"
+    },
+    "success": {
+      "description": "Thank you for your payment. Your order is being processed and will be delivered soon.",
+      "title": "Payment Successful!"
+    },
+    "summary": {
+      "button": {
+        "pay": "Confirm Payment",
+        "processing": "Processing..."
+      },
+      "items": {
+        "x": "x{{count}}"
+      },
+      "terms": "By proceeding with payment, you agree to our purchase terms.",
+      "totalLabel": "Total",
+      "title": "Order Summary #{{id}}"
+    },
+    "amount": "Amount",
+    "approveBtn": "Approve",
+    "approveFailed": "Payment approval failed: ",
+    "cancelBtn": "Cancel",
+    "cancelFailed": "Payment cancellation failed: ",
+    "cancelled": "Payment cancelled",
+    "approved": "Payment approved!",
+    "loading": "Loading payment information...",
+    "missingShipping": "Missing shipping information!",
+    "notFound": "Payment not found",
+    "orderId": "Order ID",
+    "title": "Order Payment",
+    "errors": {
+      "requiredFullName": "Full name is required",
+      "requiredEmail": "Email is required",
+      "invalidEmail": "Invalid email format",
+      "requiredPhone": "Phone number is required",
+      "invalidPhone": "Invalid phone number",
+      "requiredAddress": "Address is required"
+    }
+  },
+  "product": {
+    "availableQuantity": "Available Quantity",
+    "backToMenu": "Back to Menu",
+    "category": "Category",
+    "defaultDescription": "Delicious dish waiting for you to explore! Contact us for more details.",
+    "inStock": "In Stock",
+    "invalidQuantity": "Invalid quantity, maximum {{qty}}",
+    "loadError": "Error loading product",
+    "new": "NEW DISH",
+    "noImage": "No image available",
+    "notFound": "Product not found",
+    "outOfStock": "Out of Stock",
+    "reviewsCount": "({{count}} reviews)",
+    "sold": "Sold",
+    "status": "Status",
+    "unavailable": "Product {{name}} is currently unavailable",
+    "unit": "serving",
+    "updated": "Product updated"
+  },
+  "productCard": {
+    "add": "Add",
+    "addToCartError": "Error adding to cart",
+    "addedToCart": "Added {{name}} to cart",
+    "available": "Available",
+    "comingSoon": "Coming Soon",
+    "currency": "VND",
+    "defaultDescription": "Delicious dish waiting for you to explore!",
+    "new": "New",
+    "noImage": "No image available",
+    "outOfStock": "Out of Stock",
+    "sold": "Sold {{count}}+",
+    "updated": "{{name}} has been updated",
+    "view": "View"
+  },
+  "profile": {
+    "actions": {
+      "cancel": "Cancel",
+      "editProfile": "Edit Profile",
+      "save": "Save Changes"
+    },
+    "avatarAlt": "User Avatar",
+    "changeAvatar": "Change",
+    "fields": {
+      "address": "Address",
+      "gender": "Gender",
+      "genderPlaceholder": "-- Select Gender --",
+      "name": "Name",
+      "phone": "Phone Number"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male",
+      "notUpdated": "Not updated"
+    },
+    "loading": "Loading information...",
+    "notifications": {
+      "avatarUpdateFail": "Unable to update avatar.",
+      "avatarUpdateSuccess": "Avatar updated successfully!",
+      "updateFail": "Profile update failed.",
+      "updateSuccess": "Profile updated successfully!"
+    },
+    "sidebar": {
+      "tabs": {
+        "notifications": "Notifications",
+        "orders": "Order History",
+        "profile": "Personal Information",
+        "reservations": "Reservation History",
+        "security": "Security & Password"
+      },
+      "title": "User Profile"
+    }
+  },
+  "review": {
+    "alreadyReviewed": "You reviewed this dish on {{date}}",
+    "cancel": "Cancel",
+    "characters": "characters",
+    "comment": "Comment",
+    "customerReviews": "Customer Reviews",
+    "delete": "Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete this review?",
+    "deleteConfirmTitle": "Delete Review",
+    "deleteFailed": "Unable to delete review",
+    "deleted": "Review deleted",
+    "edit": "Edit",
+    "error": {
+      "emptyComment": "Please enter review content",
+      "noRating": "Please select a star rating",
+      "submitFailed": "Failed to submit review",
+      "tooLong": "Review content is too long, maximum {{max}} characters"
+    },
+    "filter": {
+      "all": "All",
+      "negative": "Negative (≤2★)",
+      "neutral": "Neutral (3★)",
+      "positive": "Positive (≥4★)"
+    },
+    "loginToReview": "Please log in to write a review",
+    "noReviews": "No reviews match the current filter",
+    "placeholder": "Share your thoughts about this dish...",
+    "rating": "Rating",
+    "sending": "Sending...",
+    "submit": "Submit Review",
+    "submitFailed": "Failed to submit review",
+    "submitted": "Review submitted",
+    "summary": "Summary",
+    "title": "Write Your Review",
+    "updateFailed": "Unable to update review",
+    "updated": "Review updated successfully",
+    "aria": {
+      "cancel": "Cancel review",
+      "rateStar": "Rate {{star}} stars",
+      "ratingGroup": "Select star rating",
+      "submit": "Submit review"
+    }
+  },
+  "security": {
+    "changePasswordBtn": "Change Password",
+    "changePasswordTitle": "Change Account Password",
+    "confirmPasswordLabel": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "currentPasswordLabel": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "currentPasswordRequired": "Please enter your current password",
+    "emailLabel": "Registered Email",
+    "emailPlaceholder": "Enter your email",
+    "enterEmail": "Please enter your email.",
+    "forgotPasswordDesc": "Enter your email to receive a password reset link.",
+    "forgotPasswordFailed": "Unable to send request, please try again.",
+    "forgotPasswordSent": "Password reset request sent. Please check your email.",
+    "forgotPasswordTitle": "Request Password Reset",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "passwordChanged": "Password changed successfully!",
+    "passwordChangeFailed": "Error changing password!",
+    "passwordLowercase": "New password must contain at least 1 lowercase letter",
+    "passwordMinLength": "New password must be at least 8 characters",
+    "passwordNumber": "New password must contain at least 1 number",
+    "passwordSpecialChar": "New password must contain at least 1 special character",
+    "passwordUppercase": "New password must contain at least 1 uppercase letter",
+    "confirmPasswordMismatch": "Passwords do not match",
+    "sendRequest": "Send Password Reset Request",
+    "sending": "Sending...",
+    "tabChangePassword": "Change Password",
+    "tabForgotPassword": "Forgot Password",
+    "title": "Security Settings",
+    "unknownError": "An unexpected error occurred!",
+    "updating": "Updating..."
+  },
+  "table": {
+    "button": {
+      "viewBooked": "View Reserved Tables"
+    },
+    "confirm": {
+      "cancel": "Exit",
+      "cancelMessage": "Are you sure you want to cancel this reservation?",
+      "cancelTitle": "Confirm Reservation Cancellation",
+      "confirm": "Confirm"
+    },
+    "count": {
+      "available": "Available",
+      "booked": "Reserved",
+      "total": "Total"
+    },
+    "filter": {
+      "allAreas": "All Areas"
+    },
+    "header": {
+      "title": "Book Table"
+    },
+    "legend": {
+      "available": "Available",
+      "booked": "Reserved",
+      "myTable": "My Table",
+      "pending": "Pending Approval",
+      "title": "Legend"
+    },
+    "notify": {
+      "bookingFail": "Unable to book table, please try again!",
+      "bookingSuccess": "Successfully booked table {{table}} at {{time}}!",
+      "generalError": "An error occurred!",
+      "updateFail": "Unable to update reservation!",
+      "updateSuccess": "Reservation updated successfully!"
+    },
+    "status": {
+      "available": "Available",
+      "booked": "Reserved",
+      "myConfirmed": "Your reserved table (Confirmed)",
+      "myPending": "Your reserved table (Pending)"
+    },
+    "tooltip": {
+      "capacity": "Capacity",
+      "location": "Area",
+      "position": "Position",
+      "seats": "seats",
+      "status": "Status"
+    }
+  },
+  "tableTranslations": {
+    "location": {
+      "MAIN_HALL": "Main Hall",
+      "VIP_ROOM": "VIP Room",
+      "OUTDOOR": "Outdoor",
+      "GARDEN": "Garden Area",
+      "PRIVATE_ROOM": "Private Room",
+      "BAR_AREA": "Bar Area"
+    },
+    "position": {
+      "CENTER": "Center of Hall",
+      "FAMILY": "Family",
+      "GOOD_VIEW": "Scenic View",
+      "BAR": "Bar",
+      "VIP": "VIP Area",
+      "PERSONAL": "Personal/Private"
+    },
+    "status": {
+      "AVAILABLE": "Available",
+      "OCCUPIED": "Occupied",
+      "CONFIRMED": "Confirmed",
+      "PENDING": "Pending Approval",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "userReservation": {
+    "actions": "Actions",
+    "cancelButton": "Back",
+    "cancelFail": "Error cancelling reservation",
+    "cancelSuccess": "Reservation cancelled successfully",
+    "confirmCancelButton": "Confirm Cancellation",
+    "confirmCancelTitle": "Confirm Reservation Cancellation",
+    "confirmCancelMessage": "Are you sure you want to cancel this reservation?",
+    "details": "Details",
+    "errorFetching": "Error loading reservation history",
+    "filterLabel": "Filter:",
+    "noReservations": "☕ You have no reservation history.",
+    "noReservationsTip": "Try booking a table to experience our services!",
+    "numberOfPeople": "Number of People",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "timeAsc": "Reservation Time (Earliest)",
+      "timeDesc": "Reservation Time (Latest)"
+    },
+    "sortLabel": "Sort:",
+    "status": {
+      "all": "All",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "unknown": "Unknown"
+    },
+    "statusLabel": "Status",
+    "tableTime": "Table & Time",
+    "title": "Reservation History",
+    "unknownTable": "(Unknown)",
+    "updateFail": "Error updating reservation",
+    "updateSuccess": "Reservation updated successfully"
+  },
+  "admin": {
+    "checkingSession": "Checking session...",
+    "combos": {
+      "title": "Combo Management",
+      "addButton": "Add Combo",
+      "searchPlaceholder": "Search combos...",
+      "categoryAll": "All Categories",
+      "statusAll": "All Statuses",
+      "loading": "Loading...",
+      "noItems": "No combos found.",
+      "noDescription": "No description available.",
+      "table": {
+        "image": "Image",
+        "name": "Name",
+        "category": "Category",
+        "price": "Price",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "AVAILABLE": "Available",
+        "OUT_OF_STOCK": "Unavailable"
+      },
+      "notifications": {
+        "loadError": "Failed to load combo list.",
+        "loadRefError": "Failed to load categories or statuses.",
+        "deleteSuccess": "Combo deleted successfully.",
+        "deleteError": "Failed to delete combo."
+      },
+      "confirm": {
+        "title": "Delete Combo",
+        "message": "Are you sure you want to delete this combo?"
+      },
+      "form": {
+        "titleEdit": "Edit Combo",
+        "titleCreate": "Create New Combo",
+        "nameLabel": "Combo Name",
+        "namePlaceholder": "Enter combo name...",
+        "categoryLabel": "Category",
+        "statusLabel": "Status",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description of the combo...",
+        "imageSection": "Image",
+        "itemsUnit": "items",
+        "uploadLabel": "Upload Image",
+        "uploadHint": "Only images under 5MB are accepted",
+        "urlLabel": "Or Enter Image URL",
+        "urlPlaceholder": "https://...",
+        "previewTitle": "Preview",
+        "uploading": "Uploading...",
+        "update": "Update",
+        "itemsSection": "Combo Items",
+        "addButton": "Add Item",
+        "itemSelect": "— Select Item —",
+        "quantityInput": "Quantity",
+        "noItems": "No items yet. Click 'Add Item' to start.",
+        "validation": {
+          "nameRequired": "Combo name is required!",
+          "atLeastOneItem": "Combo must have at least 1 item!",
+          "selectAllItems": "Please select an item for every row!",
+          "imageInvalid": "Please select a valid image file!",
+          "imageSize": "Image must not exceed 5MB!"
+        },
+        "uploadSuccess": "Image uploaded successfully!",
+        "uploadError": "Upload failed: {{error}}",
+        "createSuccess": "Combo created successfully!",
+        "updateSuccess": "Combo updated successfully!",
+        "saveError": "Error saving combo",
+        "loadMenuItemsError": "Failed to load menu items!"
+      }
+    },
+    "sidebar": {
+      "logo": "Admin Panel",
+      "commonGroup": "General",
+      "adminGroup": "System Administration",
+      "staffGroup": "Staff Tasks",
+      "menu": {
+        "combos": "Combo",
+        "dashboard": "Dashboard",
+        "tables": "Tables",
+        "ingredients": "Ingredients",
+        "orders": "Orders",
+        "foodOrders": "Food Orders",
+        "tableOrders": "Table Orders",
+        "users": "Users",
+        "categories": "Categories",
+        "menu": "Menu",
+        "menuItems": "Menu Items",
+        "settings": "Settings",
+        "myTasks": "My Tasks"
+      }
+    },
+    "navbar": {
+      "defaultName": "Admin"
+    },
+    "dashboard": {
+      "error": {
+        "fetchFailed": "Unable to load statistics data. Please try again later.",
+        "alertTitle": "Error!"
+      },
+      "header": {
+        "title": "Dashboard Analytics",
+        "description": "Overview of statistics and business reports",
+        "liveBadge": "Live"
+      },
+      "refreshButton": {
+        "loading": "Loading...",
+        "refresh": "Refresh"
+      },
+      "stats": {
+        "totalRevenue": "Total Revenue This Month",
+        "totalOrders": "Total Orders",
+        "avgOrderValue": "Average Order Value",
+        "growth": "Growth",
+        "comparison": "compared to last month"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "month": "By Day",
+        "year": "By Month"
+      },
+      "charts": {
+        "bestSellingItems": "Best Selling Items",
+        "worstSellingItems": "Needing Improvement",
+        "monthRevenue": "📊 Revenue by Day (Current Month)",
+        "yearRevenue": "📈 Revenue by Month (Current Year)",
+        "noData": "No data available",
+        "topItems": "Top {{count}}",
+        "needsImprovement": "Needs Improvement",
+        "sold": "Sold:",
+        "revenue": "Revenue:",
+        "noImage": "No image",
+        "revenueLabel": "Revenue (VND)",
+        "ordersLabel": "Number of Orders",
+        "revenueUnit": "VND",
+        "ordersUnit": "orders"
+      }
+    },
+    "tables": {
+      "title": "Table Management",
+      "addNewTable": "Add New Table",
+      "searchPlaceholder": "Search table...",
+      "filters": {
+        "allLocations": "All Locations",
+        "allPositions": "All Positions",
+        "allStatus": "All Status"
+      },
+      "tableHeaders": {
+        "name": "Name",
+        "location": "Location",
+        "position": "Position",
+        "capacity": "Capacity",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "tableMessages": {
+        "loading": "Loading...",
+        "noTablesFound": "No tables found"
+      },
+      "notifications": {
+        "loadFilterError": "Could not load filter data",
+        "loadTablesError": "Could not load tables",
+        "deleteSuccess": "Table deleted successfully",
+        "deleteError": "Could not delete table",
+        "loadFormOptionsError": "Failed to load form options",
+        "nameRequiredError": "Table name is required",
+        "capacityInvalidError": "Capacity must be a positive number",
+        "updateSuccess": "Table updated successfully",
+        "createSuccess": "Table created successfully",
+        "saveError": "Failed to save table"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Are you sure you want to delete this table?"
+      },
+      "status": {
+        "AVAILABLE": "Available",
+        "OCCUPIED": "Occupied",
+        "MAINTENANCE": "Maintenance"
+      },
+      "form": {
+        "editTitle": "Edit Table",
+        "createTitle": "Create Table",
+        "labels": {
+          "name": "Table Name",
+          "capacity": "Capacity",
+          "status": "Status",
+          "location": "Location",
+          "position": "Position"
+        },
+        "placeholders": {
+          "name": "Table A1",
+          "selectStatus": "Select status",
+          "selectLocation": "Select location",
+          "selectPosition": "Select position"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "saving": "Saving...",
+          "update": "Update Table",
+          "create": "Create Table"
+        },
+        "errors": {
+          "nameRequired": "Table name cannot be empty.",
+          "capacityRange": "Capacity must be between 1 and 10.",
+          "locationRequired": "Please select a location.",
+          "positionRequired": "Please select a table position.",
+          "statusRequired": "Please select a status."
+        }
+      }
+    },
+    "ingredients": {
+      "title": "Ingredient Management",
+      "addNewIngredient": "Add New Ingredient",
+      "searchPlaceholder": "Search ingredient...",
+      "tableHeaders": {
+        "name": "Name",
+        "quantity": "Quantity",
+        "unit": "Unit",
+        "minStock": "Min Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "tableMessages": {
+        "loading": "Loading...",
+        "noIngredientsFound": "No ingredients found"
+      },
+      "status": {
+        "lowStock": "Low Stock",
+        "ok": "OK"
+      },
+      "notifications": {
+        "loadError": "Could not load ingredients",
+        "deleteSuccess": "Ingredient deleted successfully",
+        "deleteError": "Failed to delete ingredient",
+        "updateSuccess": "Ingredient updated successfully",
+        "createSuccess": "Ingredient created successfully",
+        "saveError": "Failed to save ingredient",
+        "nameRequiredError": "Ingredient name is required",
+        "quantityPositiveError": "Quantity must be greater than 0",
+        "unitRequiredError": "Unit is required",
+        "minimumStockNonNegativeError": "Minimum stock cannot be negative"
+      },
+      "confirmDialog": {
+        "deleteMessage": "Are you sure you want to delete this ingredient?"
+      },
+      "form": {
+        "editTitle": "Update Ingredient",
+        "createTitle": "Add New Ingredient",
+        "labels": {
+          "name": "Ingredient Name",
+          "quantity": "Quantity",
+          "unit": "Unit",
+          "minimumStock": "Minimum Stock"
+        },
+        "placeholders": {
+          "unit": "E.g., KG, L, G..."
+        },
+        "buttons": {
+          "save": "Save Changes",
+          "create": "Add New",
+          "cancel": "Cancel"
+        }
+      }
+    },
+    "orders": {
+      "title": "Order Management",
+      "searchPlaceholder": "Search by customer or code...",
+      "statusAll": "All Statuses",
+      "paymentAll": "All Payment Statuses",
+      "table": {
+        "orderCode": "Order Code",
+        "customer": "Customer",
+        "payment": "Payment",
+        "total": "Total",
+        "status": "Status",
+        "createdAt": "Created At",
+        "action": "Action"
+      },
+      "loading": "Loading...",
+      "noOrders": "No orders found",
+      "viewDetails": "View Details",
+      "notifications": {
+        "loadError": "Could not load orders. Please try again later.",
+        "loadStatusesError": "Could not load order statuses.",
+        "loadPaymentStatusesError": "Could not load payment statuses.",
+        "approveSuccess": "Order approved successfully!",
+        "approveError": "Failed to approve order.",
+        "deliveryStartSuccess": "Order is now delivering.",
+        "deliveryStartError": "Failed to update delivery status.",
+        "deliveredSuccess": "Order delivered successfully!",
+        "deliveredError": "Failed to mark delivered.",
+        "cancelSuccess": "Order cancelled successfully.",
+        "cancelError": "Failed to cancel order.",
+        "paidSuccess": "Payment marked as paid successfully!",
+        "paidError": "Failed to mark payment as paid.",
+        "detailError": "Failed to load order details.",
+        "realtimeNew": "New order: {{publicId}}",
+        "realtimeCancelled": "Order {{publicId}} has been cancelled."
+      },
+      "detail": {
+        "header": "Order #{{code}}",
+        "customer": "Customer",
+        "phone": "Phone",
+        "address": "Address",
+        "note": "Note",
+        "payment": "Payment",
+        "paymentCod": "Cash on Delivery",
+        "paymentOnline": "Online Payment",
+        "status": "Status",
+        "createdAt": "Created At",
+        "total": "Total",
+        "items": {
+          "itemName": "Item Name",
+          "quantity": "Quantity",
+          "price": "Price",
+          "subtotal": "Subtotal"
+        },
+        "totalFooter": "Total",
+        "actions": {
+          "approve": "Approve",
+          "startDelivery": "Start Delivery",
+          "markDelivered": "Mark Delivered",
+          "cancel": "Cancel",
+          "markPaid": "Mark as Paid",
+          "close": "Close"
+        }
+      }
+    },
+    "reservations": {
+      "title": "Table Reservations",
+      "searchPlaceholder": "Search by customer or reservation code...",
+      "statusAll": "All Statuses",
+      "fromDateLabel": "From Date",
+      "toDateLabel": "To Date",
+      "table": {
+        "reservationId": "Reservation ID",
+        "customer": "Customer",
+        "tables": "Tables",
+        "time": "Time",
+        "people": "People",
+        "status": "Status",
+        "action": "Action"
+      },
+      "loading": "Loading...",
+      "noReservations": "No reservations found",
+      "reviewButton": "Review",
+      "notifications": {
+        "loadError": "Failed to load reservations",
+        "loadStatusesError": "Could not load reservation statuses",
+        "approveSuccess": "Reservation approved successfully!",
+        "completeSuccess": "Reservation completed successfully!",
+        "cancelSuccess": "Reservation cancelled successfully!"
+      },
+      "tableCount": "{{count}} tables",
+      "tableList": "{{tables}}",
+      "detail": {
+        "header": "Reservation #{{code}}",
+        "statusBadge": "{{status}}",
+        "customer": "Customer",
+        "phone": "Phone",
+        "numberOfPeople": "Number of People",
+        "reservationTime": "Reservation Time",
+        "createdAt": "Created At",
+        "status": "Status",
+        "tablesTitle": "Table List",
+        "tableName": "Table Name",
+        "actions": {
+          "approve": "Approve",
+          "complete": "Mark as Completed",
+          "cancel": "Cancel",
+          "close": "Close"
+        }
+      }
+    },
+    "users": {
+      "title": "Users Management",
+      "addButton": "Add New User",
+      "searchPlaceholder": "Search by name or email...",
+      "roleAll": "All Roles",
+      "table": {
+        "avatar": "Avatar",
+        "userInfo": "User Info",
+        "email": "Email",
+        "role": "Role",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noUsers": "No users found",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "notifications": {
+        "loadError": "Could not load users. Please try again later.",
+        "loadRolesError": "Could not load roles.",
+        "deleteSuccess": "User deleted successfully",
+        "deleteError": "Failed to delete user: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this user?"
+      },
+      "form": {
+        "headerCreate": "Create New User",
+        "headerEdit": "Edit User Information",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "John Doe",
+        "emailLabel": "Email",
+        "emailPlaceholder": "john.doe@example.com",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+84 901 234 567",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter a secure password",
+        "roleLabel": "Role",
+        "rolePlaceholder": "Select role",
+        "statusLabel": "Status",
+        "statusPlaceholder": "Select status",
+        "avatarLabel": "Avatar Image",
+        "avatarHint": "Max size: 5MB. Formats: JPG, PNG, GIF.",
+        "uploading": "Uploading avatar...",
+        "cancelButton": "Cancel",
+        "saveButton": "Save",
+        "saving": "Saving...",
+        "notifications": {
+          "fileTooLarge": "File size must be less than 5MB",
+          "invalidFileType": "Only JPG, PNG and GIF files are allowed",
+          "invalidEmail": "Please enter a valid email address",
+          "invalidPhone": "Please enter a valid phone number",
+          "passwordTooShort": "Password must be at least 6 characters",
+          "uploadFailed": "Failed to upload avatar: {{error}}",
+          "saveFailed": "Failed to save user",
+          "createSuccess": "User created successfully",
+          "updateSuccess": "User updated successfully"
+        }
+      }
+    },
+    "categories": {
+      "title": "Category Management",
+      "addButton": "Add New Category",
+      "searchPlaceholder": "Search by name or description...",
+      "parentAll": "All Categories",
+      "parentRoot": "Root Categories Only",
+      "parentUnder": "Under: {{name}}",
+      "table": {
+        "name": "Category Name",
+        "description": "Description",
+        "parent": "Parent Category",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noItems": "No categories found",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "rootBadge": "Root Category",
+      "noDescription": "No description",
+      "notifications": {
+        "loadError": "Could not load categories. Please check if backend is running.",
+        "loadParentsError": "Could not load parent categories",
+        "deleteSuccess": "Category deleted successfully",
+        "deleteError": "Failed to delete category: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this category?"
+      },
+      "form": {
+        "titleCreate": "Create New Category",
+        "titleEdit": "Edit Category",
+        "nameLabel": "Category Name *",
+        "namePlaceholder": "Enter category name",
+        "descriptionLabel": "Description *",
+        "descriptionPlaceholder": "Enter category description",
+        "parentLabel": "Parent Category (Optional)",
+        "parentPlaceholder": "-- No Parent (Root Category) --",
+        "parentHint": "Leave empty to create a root category",
+        "previewTitle": "Category Preview",
+        "previewName": "Name:",
+        "previewParent": "Parent:",
+        "previewDescription": "Description:",
+        "previewRoot": "Root Category",
+        "previewNotSpecified": "Not specified",
+        "buttonCancel": "Cancel",
+        "buttonCreate": "Create Category",
+        "buttonUpdate": "Update Category",
+        "buttonCreating": "Creating...",
+        "buttonUpdating": "Updating...",
+        "validation": {
+          "nameRequired": "Category name is required",
+          "descriptionRequired": "Description is required"
+        },
+        "notifications": {
+          "loadParentsError": "Failed to load parent categories",
+          "createSuccess": "Category created successfully!",
+          "updateSuccess": "Category updated successfully!",
+          "createError": "Failed to create category: {{error}}",
+          "updateError": "Failed to update category: {{error}}"
+        }
+      }
+    },
+    "menuItems": {
+      "title": "Menu Items Management",
+      "addButton": "Add New Menu Item",
+      "searchPlaceholder": "Search by name or description...",
+      "categoryAll": "All Categories",
+      "statusAll": "All Status",
+      "table": {
+        "image": "Image",
+        "name": "Menu Item",
+        "category": "Category",
+        "price": "Price",
+        "status": "Status",
+        "stock": "Stock",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "noItems": "No menu items found",
+      "noDescription": "No description",
+      "status": {
+        "AVAILABLE": "Available",
+        "OUT_OF_STOCK": "Out of Stock"
+      },
+      "notifications": {
+        "loadError": "Could not load menu items. Please check if backend is running.",
+        "loadRefError": "Could not load categories or statuses",
+        "deleteSuccess": "Menu item deleted successfully",
+        "deleteForeignKey": "Cannot delete this item because it's used in orders.",
+        "deleteNotFound": "Menu item not found or already deleted.",
+        "deleteForbidden": "You don't have permission to delete this item.",
+        "deleteError": "Failed to delete menu item: {{error}}"
+      },
+      "confirm": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this menu item?"
+      },
+      "form": {
+        "titleCreate": "Create New Menu Item",
+        "titleEdit": "Edit Menu Item",
+        "nameLabel": "Name *",
+        "namePlaceholder": "Enter menu item name",
+        "priceLabel": "Price (VND) *",
+        "pricePlaceholder": "Enter price",
+        "quantityLabel": "Available Quantity",
+        "quantityPlaceholder": "Enter available quantity",
+        "categoryLabel": "Category *",
+        "statusLabel": "Status *",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter menu item description",
+        "imageSection": "Image Upload",
+        "uploadLabel": "Upload Image File:",
+        "uploadHint": "Max 5MB. Formats: JPG, PNG, GIF",
+        "urlLabel": "Or enter image URL manually:",
+        "urlPlaceholder": "https://example.com/image.jpg",
+        "uploading": "Uploading image...",
+        "previewTitle": "Current image:",
+        "ingredientsSection": "Ingredients",
+        "addButton": "Add Ingredient",
+        "noIngredients": "No ingredients added yet",
+        "ingredientSelect": "Select Ingredient",
+        "quantityInput": "Quantity",
+        "buttonCancel": "Cancel",
+        "buttonCreate": "Create Menu Item",
+        "buttonUpdate": "Update Menu Item",
+        "buttonSaving": "Saving...",
+        "validation": {
+          "nameRequired": "Menu item name is required",
+          "priceRequired": "Price must be greater than 0",
+          "categoryRequired": "Category is required",
+          "statusRequired": "Status is required",
+          "statusInvalid": "Selected status is invalid",
+          "imageInvalid": "Please select a valid image file",
+          "imageSize": "Image size must be less than 5MB"
+        },
+        "notifications": {
+          "loadIngredientsError": "Could not load ingredients",
+          "uploadSuccess": "Image uploaded successfully",
+          "uploadWarning": "Upload feature requires backend restart. Please enter image URL manually for now.",
+          "uploadError": "Upload failed: {{error}}",
+          "createSuccess": "Menu item created successfully",
+          "updateSuccess": "Menu item updated successfully",
+          "saveError": "Failed to save menu item: {{error}}",
+          "inventoryError": "Inventory error. Please check if inventory table exists."
+        }
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "theme": {
+        "title": "Theme Settings",
+        "light": "Light mode",
+        "dark": "Dark mode"
+      }
+    }
+  },
+  "status": {
+    "available": "available",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "out_of_stock": "Out of Stock"
+  },
+  "pagination": {
+    "first": "First",
+    "previous": "Previous",
+    "next": "Next",
+    "last": "Last",
+    "jumpLabel": "Go to page",
+    "go": "Go"
+  },
+  "comboPage": {
+    "title": "Combo List",
+    "description": "Discover our delicious combos tailored just for you.",
+    "noItems": "No combos found in this category.",
+    "loadingMore": "Loading more...",
+    "notification": {
+      "fetchError": "Failed to load combos.",
+      "itemDeleted": "A combo has been deleted."
+    },
+    "actions": {
+      "viewAll": "View All Combos",
+      "loadMore": "Load More"
+    }
+  },
+  "comboCard": {
+    "updated": "{{name}} has been updated.",
+    "notAvailable": "Combo {{name}} is currently unavailable.",
+    "addedToCart": "{{name}} has been added to your cart!",
+    "addToCartError": "Failed to add to cart. Please try again.",
+    "noImage": "No image available",
+    "status": {
+      "available": "Available",
+      "out_of_stock": "Out of Stock",
+      "coming_soon": "Coming Soon"
+    },
+    "moreItems": "more items",
+    "view": "View",
+    "add": "Add to Cart",
+    "category": "Category",
+    "price": "Price",
+    "currency": "₫"
+  },
+  "comboDetail": {
+    "backToList": "Back to menu",
+    "itemsTitle": "Item List"
+  }
+}

@@ -1,6 +1,7 @@
 package org.example.backend.service.category;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.category.CategoryDTO;
 import org.example.backend.dto.category.CategorySearchRequest;
 import org.example.backend.entity.category.Categories;
@@ -22,13 +23,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CategoryService {
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private WebSocketNotifier webSocketNotifier;
+    private final WebSocketNotifier webSocketNotifier;
 
     // Convert Entity -> DTO
     private CategoryDTO toDTO(Categories category) {
@@ -133,11 +132,13 @@ public class CategoryService {
     }
 
     // Get children by parentId
-    public List<CategoryDTO> getChildren(Long parentId) {
-        return categoryRepository.findByParentId(parentId).stream()
+    public List<CategoryDTO> getAllChildren(Long parentId) {
+        return categoryRepository.findAllDescendants(parentId)
+                .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
 
     // Phân trang cơ bản
     public Page<CategoryDTO> getAllCategoriesWithPagination(int page, int size, String sortBy, String sortDirection) {

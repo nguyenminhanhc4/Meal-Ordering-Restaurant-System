@@ -1,5 +1,6 @@
 package org.example.backend.controller.staff;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.Response;
 import org.example.backend.dto.user.UserDTO;
 import org.example.backend.service.user.UserService;
@@ -10,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/staff")
 public class StaffController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<?> createStaff(@RequestBody UserDTO userDTO) {

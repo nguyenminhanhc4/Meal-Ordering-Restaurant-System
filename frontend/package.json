@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "i18n:extract": "i18next --config i18next-parser.config.cjs"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.2.1",
@@ -16,11 +17,15 @@
     "date-fns": "^4.1.0",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.12.9",
+    "i18next": "^25.6.0",
+    "i18next-browser-languagedetector": "^8.2.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^16.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.1",
+    "react-select": "^5.10.2",
     "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
@@ -34,6 +39,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "i18next-parser": "^9.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "3.4",
     "typescript": "~5.8.3",

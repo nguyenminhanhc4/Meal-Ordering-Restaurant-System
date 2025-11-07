@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 export interface User {
   name: string;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isChecking, setIsChecking] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const roleMap: Record<number, string> = {
     1: "CUSTOMER",
@@ -51,7 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: roleMap[userData.roleId] || "CUSTOMER",
       };
 
-      console.log("Mapped user:", mappedUser);
       setUser(mappedUser);
       return mappedUser;
     } catch {
@@ -71,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await api.post("/auth/logout", {}, { withCredentials: true });
+      navigate("/");
     } finally {
       setUser(null);
     }

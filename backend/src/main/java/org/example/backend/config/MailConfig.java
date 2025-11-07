@@ -15,8 +15,8 @@ public class MailConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("sandbox.smtp.mailtrap.io");
         mailSender.setPort(2525);
-        mailSender.setUsername("3a29e5880676d1");
-        mailSender.setPassword("c3f90d2a190fdb");
+        mailSender.setUsername("f21beb159addc8");
+        mailSender.setPassword("1054dfc0e182ac");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

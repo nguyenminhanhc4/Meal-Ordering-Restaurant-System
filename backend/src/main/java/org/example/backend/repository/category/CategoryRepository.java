@@ -12,7 +12,19 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Categories, Long> {
     List<Categories> findByParentId(Long parentId);
-    
+
+    @Query(value = """
+    WITH RECURSIVE category_tree AS (
+      SELECT * FROM categories WHERE id = :parentId
+      UNION ALL
+      SELECT c.* FROM categories c
+      INNER JOIN category_tree ct ON c.parent_id = ct.id
+    )
+    SELECT * FROM category_tree WHERE id != :parentId
+    """, nativeQuery = true)
+    List<Categories> findAllDescendants(@Param("parentId") Long parentId);
+
+
     Optional<Categories> findByName(String name);
     
     // Phân trang cơ bản

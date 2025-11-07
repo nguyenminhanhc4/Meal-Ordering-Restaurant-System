@@ -1,6 +1,7 @@
 package org.example.backend.util;
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend.dto.notification.NotificationDto;
 import org.example.backend.dto.order.OrderResponseDTO;
 import org.example.backend.entity.order.Order;
 import org.example.backend.entity.param.Param;
@@ -8,6 +9,7 @@ import org.example.backend.repository.param.ParamRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -98,12 +100,13 @@ public class WebSocketNotifier {
     /**
      * ✏️ Gửi thông báo khi cập nhật MenuItem
      */
-    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId) {
+    public void notifyUpdatedMenuItem(Long menuItemId, String name, String avatarUrl, Long categoryId,String newStatus) {
         notify("/topic/menu/update", Map.of(
                 "menuItemId", menuItemId,
                 "name", name,
                 "avatarUrl", avatarUrl,
-                "categoryId", categoryId
+                "categoryId", categoryId,
+                "status", newStatus
         ));
     }
 
@@ -124,6 +127,122 @@ public class WebSocketNotifier {
     public void notifyCategoryDeleted(Long categoryId) {
         notify("/topic/category/delete", Map.of(
                 "categoryId", categoryId
+        ));
+    }
+
+    /**
+     * 🔔 Gửi thông báo mới đến user cụ thể (qua topic riêng)
+     * Client sẽ subscribe /topic/notifications/{userPublicId}
+     */
+    public void notifyNewNotification(String userPublicId, Object notificationDto) {
+        notify("/topic/notifications/" + userPublicId, Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
+    /**
+     * 🔔 Gửi thông báo realtime cho ADMIN/STAF (ví dụ có đơn hàng hoặc đặt bàn mới)
+     * Client ADMIN sẽ subscribe /topic/notifications/admin
+     */
+    public void notifyAdminNotification(Object notificationDto) {
+        notify("/topic/notifications/admin", Map.of(
+                "type", "NEW_NOTIFICATION",
+                "data", notificationDto
+        ));
+    }
+
+    public void notifyNotificationRead(String userPublicId, NotificationDto dto) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_READ",
+                        "data", dto
+                )
+        );
+    }
+
+    /**
+     * 🗑️ Gửi thông báo realtime khi 1 hoặc nhiều notification bị xóa
+     */
+    public void notifyNotificationDeleted(String userPublicId, Long deletedId) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_DELETED",
+                        "data", deletedId
+                )
+        );
+    }
+    /**
+     * Overload cho nhiều id
+     */
+    public void notifyNotificationDeleted(String userPublicId, List<Long> deletedIds) {
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + userPublicId,
+                Map.of(
+                        "type", "NOTIFICATION_DELETED",
+                        "data", deletedIds
+                )
+        );
+    }
+
+    /**
+     * 🧾 Gửi thông báo khi tạo mới bàn (table)
+     */
+    public void notifyNewTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/new", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * ✏️ Gửi thông báo khi cập nhật bàn
+     */
+    public void notifyUpdatedTable(Long tableId, String name, int capacity, Long locationId, Long positionId, Long statusId) {
+        notify("/topic/tables/update", Map.of(
+                "tableId", tableId,
+                "name", name,
+                "capacity", capacity,
+                "locationId", locationId,
+                "positionId", positionId,
+                "statusId", statusId
+        ));
+    }
+
+    /**
+     * 🗑️ Gửi thông báo khi xóa bàn
+     */
+    public void notifyDeletedTable(Long tableId) {
+        notify("/topic/tables/delete", Map.of(
+                "tableId", tableId
+        ));
+    }
+
+    /**
+     * 🚫 Gửi thông báo khi đơn hàng bị hủy
+     * - Gửi cho admin theo topic /topic/admin/orders/cancelled
+     * - Có thể mở rộng để gửi cho user khác nếu cần
+     */
+    public void notifyOrderCancelled(OrderResponseDTO orderDto) {
+        notify("/topic/admin/orders/cancelled", Map.of(
+                "type", "ORDER_CANCELLED",
+                "data", orderDto
+        ));
+    }
+    /**
+     * 🔄 Gửi thông báo khi giỏ hàng của user thay đổi (tạo mới, cập nhật, checkout, hủy, ...)
+     * Client sẽ subscribe: /topic/cart/{userPublicId}
+     */
+    public void notifyCartUpdated(String userPublicId) {
+        notify("/topic/cart/" + userPublicId, Map.of(
+                "type", "CART_UPDATED",
+                "message", "Cart has been updated"
         ));
     }
 }

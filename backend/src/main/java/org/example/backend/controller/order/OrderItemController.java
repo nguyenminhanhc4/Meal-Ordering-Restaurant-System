@@ -1,5 +1,6 @@
 package org.example.backend.controller.order;
 
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.order.OrderItemDto;
 import org.example.backend.dto.Response;
 import org.example.backend.service.order.OrderItemService;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/order-items")
 public class OrderItemController {
 
-    @Autowired
-    private OrderItemService orderItemService;
+    private final OrderItemService orderItemService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

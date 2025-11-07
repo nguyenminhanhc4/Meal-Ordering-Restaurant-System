@@ -3,6 +3,7 @@ package org.example.backend.service.table;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.entity.param.Param;
 import org.example.backend.repository.param.ParamRepository;
+import org.example.backend.util.WebSocketNotifier;
 import org.springframework.stereotype.Service;
 import org.example.backend.dto.table.TableDto;
 import org.example.backend.entity.table.TableEntity;
@@ -18,6 +19,7 @@ public class TableService {
 
     private final TableRepository tableRepository;
     private final ParamRepository paramRepository;
+    private final WebSocketNotifier webSocketNotifier;
 
     public List<TableDto> findAll() {
         return tableRepository.findAll()
@@ -34,6 +36,14 @@ public class TableService {
     public TableDto save(TableDto dto) {
         TableEntity table = toEntity(dto);
         table = tableRepository.save(table);
+        webSocketNotifier.notifyNewTable(
+                table.getId(),
+                table.getName(),
+                table.getCapacity(),
+                table.getLocation() != null ? table.getLocation().getId() : null,
+                table.getPosition() != null ? table.getPosition().getId() : null,
+                table.getStatus() != null ? table.getStatus().getId() : null
+        );
         return new TableDto(table);
     }
 
@@ -74,6 +84,15 @@ public class TableService {
             table.setPosition(position);
         }
         table = tableRepository.save(table);
+
+        webSocketNotifier.notifyUpdatedTable(
+                table.getId(),
+                table.getName(),
+                table.getCapacity(),
+                table.getLocation() != null ? table.getLocation().getId() : null,
+                table.getPosition() != null ? table.getPosition().getId() : null,
+                table.getStatus() != null ? table.getStatus().getId() : null
+        );
         return new TableDto(table);
     }
 
@@ -81,6 +100,7 @@ public class TableService {
         TableEntity table = tableRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("TableEntity not found"));
         tableRepository.delete(table);
+        webSocketNotifier.notifyDeletedTable(id);
     }
 
     // Conversion helper

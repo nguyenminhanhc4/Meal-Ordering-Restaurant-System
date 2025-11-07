@@ -32,6 +32,23 @@ interface CartProviderProps {
   children: ReactNode;
 }
 
+const calculateTotalItems = (
+  items?: { quantity: number; status: string }[],
+  combos?: { quantity: number; status: string }[]
+): number => {
+  const itemCount = (items ?? []).reduce(
+    (sum, item) => (item.status === "AVAILABLE" ? sum + item.quantity : sum),
+    0
+  );
+
+  const comboCount = (combos ?? []).reduce(
+    (sum, combo) => (combo.status === "AVAILABLE" ? sum + combo.quantity : sum),
+    0
+  );
+
+  return itemCount + comboCount;
+};
+
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [cartItemCount, setCartItemCount] = useState(0);
@@ -45,10 +62,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setCart(currentCart);
 
       // Tính tổng số lượng
-      const totalCount =
-        currentCart.items
-          ?.filter((item) => item.status === "AVAILABLE") // chỉ tính món còn hàng
-          .reduce((total, item) => total + item.quantity, 0) || 0;
+      const totalCount = calculateTotalItems(
+        currentCart.items,
+        currentCart.combos
+      );
 
       setCartItemCount(totalCount);
     } catch (error) {

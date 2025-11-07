@@ -9,6 +9,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class OrderHistoryController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<OrderHistoryDto>> getOrderHistory(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,

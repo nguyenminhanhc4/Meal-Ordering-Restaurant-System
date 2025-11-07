@@ -2,8 +2,10 @@ package org.example.backend.controller.cart;
 
 import com.cloudinary.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.cart.CartDto;
 import org.example.backend.dto.Response;
+import org.example.backend.repository.cart.CartRepository;
 import org.example.backend.service.cart.CartService;
 import org.example.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/carts")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
+    private final CartRepository cartRepository;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -47,10 +49,12 @@ public class CartController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> create(@RequestBody CartDto dto) {
-        CartDto saved = cartService.save(dto);
+    public ResponseEntity<?> create(@CookieValue("token") String token) {
+        String publicId = jwtUtil.getPublicIdFromToken(token);
+        CartDto saved = cartService.createCartForUser(publicId);
         return ResponseEntity.ok(new Response<>("success", saved, "Cart created successfully"));
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
