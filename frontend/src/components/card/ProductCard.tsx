@@ -158,9 +158,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="flex gap-2 mb-2">
         <Badge color="warning" size="sm">
           {product.categorySlug
-            .replace("-", " ")
-            .replace(/\b\w/g, (c) => c.toUpperCase())}
+            ? product.categorySlug
+                .replace(/-/g, " ")
+                .replace(/\p{L}/gu, (c, i, str) =>
+                  i === 0 || str[i - 1] === " "
+                    ? c.toUpperCase()
+                    : c.toLowerCase()
+                )
+            : "Default"}
         </Badge>
+
         {product.tags?.map((tag) => (
           <Badge key={tag} color="info" size="sm">
             {tag}

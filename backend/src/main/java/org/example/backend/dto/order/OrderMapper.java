@@ -40,6 +40,7 @@ public class OrderMapper {
                 .menuItemId(item.getMenuItem() != null ? item.getMenuItem().getId() : null)
                 .comboId(item.getCombo() != null ? item.getCombo().getId() : null)
                 .menuItemName(item.getMenuItem() != null ? item.getMenuItem().getName() : null)
+                .comboName(item.getCombo() != null ? item.getCombo().getName() : null)
                 .quantity(item.getQuantity())
                 .price(item.getPrice())
                 .build()

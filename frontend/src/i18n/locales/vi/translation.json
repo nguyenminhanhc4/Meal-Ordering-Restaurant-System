@@ -877,8 +877,8 @@
       },
       "tabs": {
         "overview": "Tổng quan",
-        "month": "Theo tháng",
-        "year": "Theo năm"
+        "month": "Theo ngày",
+        "year": "Theo tháng"
       },
       "charts": {
         "bestSellingItems": "Món ăn bán chạy nhất",

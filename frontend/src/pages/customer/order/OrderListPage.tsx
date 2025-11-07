@@ -186,7 +186,12 @@ const OrderListPage: React.FC = () => {
               );
               const itemPreview = order.orderItems
                 ?.slice(0, 2)
-                .map((item) => `${item.menuItemName} x${item.quantity}`)
+                .map((item) => {
+                  const names = [item.menuItemName, item.comboName]
+                    .filter(Boolean)
+                    .join(" / ");
+                  return `${names} x${item.quantity}`;
+                })
                 .join(", ");
               const hasMoreItems =
                 order.orderItems && order.orderItems.length > 2;

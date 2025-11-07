@@ -118,8 +118,10 @@ const MealPage: React.FC = () => {
         <h2 className="text-4xl font-extrabold text-center text-amber-800 mb-4 border-b-2 border-stone-800 pb-2">
           {categorySlug
             ? categorySlug
-                .replace("-", " ")
-                .replace(/\b\w/g, (c) => c.toUpperCase())
+                .replace(/-/g, " ")
+                .replace(/\p{L}/gu, (c, i) =>
+                  i === 0 || categorySlug[i - 1] === "-" ? c.toUpperCase() : c
+                )
             : t("mealPage.title.default")}
         </h2>
 

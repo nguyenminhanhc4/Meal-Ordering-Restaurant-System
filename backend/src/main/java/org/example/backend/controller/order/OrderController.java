@@ -49,7 +49,7 @@ public class OrderController {
 
     @GetMapping("/admin/{publicId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    public ResponseEntity<OrderResponseDTO> getOrderDetail(@PathVariable String publicId) {
+    public ResponseEntity<?> getOrderDetail(@PathVariable String publicId) {
         OrderResponseDTO order = orderService.getOrderDetail(publicId);
         return ResponseEntity.ok(order);
     }

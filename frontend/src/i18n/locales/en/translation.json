@@ -878,8 +878,8 @@
       },
       "tabs": {
         "overview": "Overview",
-        "month": "By Month",
-        "year": "By Year"
+        "month": "By Day",
+        "year": "By Month"
       },
       "charts": {
         "bestSellingItems": "Best Selling Items",
