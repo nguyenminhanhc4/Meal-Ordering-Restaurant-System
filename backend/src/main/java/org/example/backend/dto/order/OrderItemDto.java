@@ -22,6 +22,7 @@ public class OrderItemDto {
 
     public OrderItemDto(OrderItem entity) {
         if (entity != null) {
+            this.comboId = entity.getCombo().getId();
             this.id = entity.getId();
 
             if (entity.getMenuItem() != null) {

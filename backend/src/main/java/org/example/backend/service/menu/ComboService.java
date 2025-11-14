@@ -1,5 +1,8 @@
 package org.example.backend.service.menu;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.menu.*;
 import org.example.backend.entity.menu.Combo;
@@ -34,7 +37,10 @@ public class ComboService {
     private final ComboItemRepository comboItemRepository;
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoryRepository;
+    private final MenuItemRepository menuItemRepository;
     private final ParamRepository paramRepository;
+    private final Cloudinary cloudinary;
+    private final WebSocketNotifier webSocketNotifier;
 
     @Transactional(readOnly = true)
     public Page<ComboDto> findAll(int page, int size, String search, Long categoryId, Long statusId, String sort) {

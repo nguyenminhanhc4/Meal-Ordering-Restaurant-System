@@ -160,11 +160,7 @@ public class ReservationController {
     // CUSTOMER gets their reservation by publicId
     @GetMapping("/me/{publicId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> getMyReservation(@PathVariable String publicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Long userId = userService.getUserByEmail(email).getId();
-
+    public ResponseEntity<?> getMyReservation(@PathVariable String publicId , @RequestBody Long userId) {
         ReservationDto reservation = reservationService.getReservationByPublicId(publicId);
         if (!reservation.getUserId().equals(userId)) {
             return ResponseEntity.status(403)
@@ -176,11 +172,7 @@ public class ReservationController {
     // CUSTOMER updates their own reservation
     @PutMapping("/me/{publicId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> updateMyReservation(@PathVariable String publicId, @RequestBody ReservationDto dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Long userId = userService.getUserByEmail(email).getId();
-
+    public ResponseEntity<?> updateMyReservation(@PathVariable String publicId, @RequestBody ReservationDto dto ,Long userId) {
         ReservationDto existing = reservationService.getReservationByPublicId(publicId);
         if (!existing.getUserId().equals(userId)) {
             return ResponseEntity.status(403)
@@ -194,11 +186,7 @@ public class ReservationController {
     // CUSTOMER deletes their own reservation
     @DeleteMapping("/me/{publicId}")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> deleteMyReservation(@PathVariable String publicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Long userId = userService.getUserByEmail(email).getId();
-
+    public ResponseEntity<?> deleteMyReservation(@PathVariable String publicId,@RequestBody Long userId) {
         ReservationDto existing = reservationService.getReservationByPublicId(publicId);
         if (!existing.getUserId().equals(userId)) {
             return ResponseEntity.status(403)
