@@ -3,6 +3,8 @@ import api from "../../api/axios";
 export interface OrderItem {
   menuItemId: number;
   menuItemName: string;
+  comboId: number;
+  comboName: string;
   imageUrl: string;
   status: string;
   quantity: number;

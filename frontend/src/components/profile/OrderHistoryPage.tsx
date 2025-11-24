@@ -303,7 +303,12 @@ export default function OrderHistoryPage() {
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex flex-col">
-                        <span className="font-medium">{item.menuItemName}</span>
+                        <span className="font-medium">
+                          {item.menuItemName
+                            ? item.menuItemName
+                            : item.comboName}
+                        </span>
+
                         <span className="text-sm text-gray-600">
                           {t("orderHistory.quantity")}: {item.quantity} •{" "}
                           {item.price.toLocaleString()} ₫
